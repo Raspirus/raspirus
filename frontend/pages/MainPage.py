@@ -2,7 +2,6 @@ import tkinter as tk
 from tkinter import ttk
 from Raspirus.frontend.popups.SingleButtonDialog import SingleButtonDialog
 from Raspirus.frontend.utility import *  # For colors and fonts
-import os
 
 
 class MainPage(tk.Frame):
@@ -49,12 +48,20 @@ class MainPage(tk.Frame):
                                         message=no_drive_message, mode="error")
             dialog.tkraise()
         else:
-            controller.show_frame(controller.pages[2])
+            controller.scanning_path = self.drive_selector.get()
+            controller.start_scanner()
 
     def load_drive_list(self):
         # Linux options: https://stackoverflow.com/a/8265634
         # Windows: https://stackoverflow.com/a/8110666
-        test_list = ["Test string numbero", "Some more teststs", " With some space front", "Short",
-                     " Very very very very very vfery hags hasgwqgdi iqdidnob iqbiq LONG", "      "]
+        test_list = [
+            "C:/Users/benbe/Documents/Coding/MaturaProject/Raspirus/testing/files",
+            "Some more teststs",
+            " With some space front",
+            "Short",
+            " Very very very very very vfery hags hasgwqgdi iqdidnob iqbiq LONG",
+            "      "
+        ]
         self.drive_selector["values"] = test_list
+        self.drive_selector.current(0)
 
