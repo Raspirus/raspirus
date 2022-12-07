@@ -38,19 +38,6 @@ class MainPage(tk.Frame):
         self.settings_btn.config(command=lambda: controller.show_frame(controller.pages[1]))
         self.settings_btn.place(x=670, y=15, width=110, height=40)
 
-    def start_scanner(self, controller):
-        # Checks if the given string is empty
-        if len(self.drive_selector.get()) <= 0 or len(str(self.drive_selector.get()).strip()) <= 0:
-            no_drive_message = "Before starting the scanner you need to specify which " \
-                           "harddrive or USB you want to scan by selecting " \
-                           "it from the dropdown menu"
-            dialog = SingleButtonDialog(title="No Drive", parent=self,
-                                        message=no_drive_message, mode="error")
-            dialog.tkraise()
-        else:
-            controller.scanning_path = self.drive_selector.get()
-            controller.start_scanner()
-
     def load_drive_list(self):
         # Linux options: https://stackoverflow.com/a/8265634
         # Windows: https://stackoverflow.com/a/8110666
@@ -64,4 +51,17 @@ class MainPage(tk.Frame):
         ]
         self.drive_selector["values"] = test_list
         self.drive_selector.current(0)
+
+    def start_scanner(self, controller):
+        # Checks if the given string is empty
+        if len(self.drive_selector.get()) <= 0 or len(str(self.drive_selector.get()).strip()) <= 0:
+            no_drive_message = "Before starting the scanner you need to specify which " \
+                           "harddrive or USB you want to scan by selecting " \
+                           "it from the dropdown menu"
+            dialog = SingleButtonDialog(title="No Drive", parent=self,
+                                        message=no_drive_message, mode="error")
+            dialog.tkraise()
+        else:
+            controller.scanning_path = self.drive_selector.get()
+            controller.start_scanner()
 
