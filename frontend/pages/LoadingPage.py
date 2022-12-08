@@ -36,7 +36,7 @@ class LoadingPage(tk.Frame):
         self.vfound_label.place(x=50, y=315, width=280, height=30)
 
         # TODO: Set a better Icon here, bigger!
-        self.abort_icon = tk.PhotoImage(file="images/icons/cancel_sign.png")
+        self.abort_icon = tk.PhotoImage(file="frontend/images/icons/cancel_sign.png")
         self.quit_btn = tk.Button(self, fg=BACKGROUND_COLOR, bg=FAILURE_COLOR,
                                   image=self.abort_icon)
         self.quit_btn.config(command=lambda: controller.show_frame(controller.pages[0]))

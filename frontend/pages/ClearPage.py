@@ -16,7 +16,7 @@ class ClearPage(tk.Frame):
         self.title_label.place(x=190, y=50, width=450, height=60)
 
         # WARMING! Image has the size 160x160 and unfortunately can't be resized with Tkinter
-        self.image_loader = Image.open("images/success_image.png")
+        self.image_loader = Image.open("frontend/images/success_image.png")
         self.success_image = ImageTk.PhotoImage(self.image_loader)
 
         self.image_container = tk.Canvas(self, width=160, height=160, bg=BACKGROUND_COLOR,
