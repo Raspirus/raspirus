@@ -22,7 +22,7 @@ class InfoPage(tk.Frame):
         tk.Frame.__init__(self, parent, bg=BACKGROUND_COLOR)
 
         # Button to return to the main page
-        self.arrow_icon = tk.PhotoImage(file="images/icons/back_arrow.png")
+        self.arrow_icon = tk.PhotoImage(file="frontend/images/icons/back_arrow.png")
         self.home_btn = tk.Button(self, text="HOME", font=SMALL_BUTTON_TEXT_FONT,
                                   image=self.arrow_icon, compound=tk.LEFT, padx=10,
                                   fg=BACKGROUND_COLOR, bg=GREY_COLOR)

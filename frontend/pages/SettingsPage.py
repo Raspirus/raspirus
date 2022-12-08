@@ -2,6 +2,9 @@ import tkinter as tk
 from Raspirus.frontend.utility import *  # For colors and fonts
 
 
+import os
+
+
 class SettingsPage(tk.Frame):
     home_btn: tk.Button
     title_label: tk.Label
@@ -18,7 +21,7 @@ class SettingsPage(tk.Frame):
         tk.Frame.__init__(self, parent, bg=BACKGROUND_COLOR)
 
         # Button to return to the main page
-        self.arrow_icon = tk.PhotoImage(file="images/icons/back_arrow.png")
+        self.arrow_icon = tk.PhotoImage(file="frontend/images/icons/back_arrow.png")
         self.home_btn = tk.Button(self, text="HOME", font=SMALL_BUTTON_TEXT_FONT,
                                   image=self.arrow_icon, compound=tk.LEFT, padx=10,
                                   fg=BACKGROUND_COLOR, bg=GREY_COLOR)
@@ -48,10 +51,11 @@ class SettingsPage(tk.Frame):
         self.ftp_label.place(x=30, y=380, width=460, height=25)
 
         # All icons
-        self.refresh_icon = tk.PhotoImage(file="images/icons/refresh_icon.png")
-        self.cancel_icon = tk.PhotoImage(file="images/icons/cancel_sign.png")
-        self.check_icon = tk.PhotoImage(file="images/icons/check_mark.png")
-        self.logs_icon = tk.PhotoImage(file="images/icons/logs_book.png")
+        prefix = "frontend/images/icons/"
+        self.refresh_icon = tk.PhotoImage(file=prefix+"refresh_icon.png")
+        self.cancel_icon = tk.PhotoImage(file=prefix+"cancel_sign.png")
+        self.check_icon = tk.PhotoImage(file=prefix+"check_mark.png")
+        self.logs_icon = tk.PhotoImage(file=prefix+"logs_book.png")
 
         # All Buttons
         self.hash_btn = tk.Button(self, text="Last updated 23.11.2022", font=NORMAL_TEXT_FONT,
