@@ -1,9 +1,10 @@
-"""
-A module that contains functions to control the Hash API
+""" A module that contains functions to control the Hash API.
 
-Classes:
-    HashAPI
+This module keeps the signature list up-to-date and clean.
+The update is currently triggered manually, but on each update,
+the doubles get removed from the list and the list gets sorted.
 
+References -> https://virusshare.com
 """
 
 import os
@@ -21,18 +22,14 @@ class HashAPI:
         - If needed, find more specific data on a Hash
         - Update the Hash signatures
 
-    Methods:
-        __init__(signature_path, bighash_path)
-        get_hash()
-        merge_files()
-        refactor_bighash()
-        bighash_is_updated()
-        update_bighash()
-        download_new_signatures(download_path)
-        get_hash_info(json_location, virus_hash)
-
+    Attributes:
+        api_key: The API key used to access VirusShare
+        bighash_path: Path to the file containing all signatures in hash format
+        signature_list_path: Folder containing all signature lists as individual files
+        hash_list: List of hashes extracted from the bighash_file
+        file_list: List of files, basically the files mentioned in the signature_list_path
     """
-    load_dotenv()
+    load_dotenv() # Loads environment variables
     api_key = os.getenv('VIRUS_API')
     bighash_path = ""
     signature_list_path = ""
