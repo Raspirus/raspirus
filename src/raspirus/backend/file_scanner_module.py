@@ -8,7 +8,7 @@ else we consider it to be a clean file.
 
 import os.path
 from bisect import bisect_left
-from Raspirus.backend.file_module import File
+from raspirus.backend.file_module import File
 
 
 def bi_contains(lst, item):

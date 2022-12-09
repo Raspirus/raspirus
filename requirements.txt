@@ -1,3 +1,5 @@
 Pillow==9.3.0
 python-dotenv==0.21.0
 wget==3.2
+path==16.6.0
+setuptools==65.5.0

@@ -402,10 +402,11 @@ FodyWeavers.xsd
 
 # Custom
 *.exe
-backend/SignatureLists/
-backend/BigHash.db
+src/raspirus/backend/SignatureLists/
+src/raspirus/backend/BigHash.db
 test.py
 .env
 test.json
-test.py
-tests.py
+.idea/
+Diagramme/
+School/

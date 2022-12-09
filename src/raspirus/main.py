@@ -20,17 +20,17 @@ directory = path.Path(__file__).abspath()
 sys.path.append(directory.parent.parent)
 
 # Frontend:
-from Raspirus.frontend.pages.ClearPage import ClearPage
-from Raspirus.frontend.pages.InfoPage import InfoPage
-from Raspirus.frontend.pages.LoadingPage import LoadingPage
-from Raspirus.frontend.pages.MainPage import MainPage
-from Raspirus.frontend.pages.SettingsLogPage import SettingsLogPage
-from Raspirus.frontend.pages.SettingsPage import SettingsPage
-from Raspirus.frontend.pages.VirusPage import VirusPage
+from raspirus.frontend.pages.ClearPage import ClearPage
+from raspirus.frontend.pages.InfoPage import InfoPage
+from raspirus.frontend.pages.LoadingPage import LoadingPage
+from raspirus.frontend.pages.MainPage import MainPage
+from raspirus.frontend.pages.SettingsLogPage import SettingsLogPage
+from raspirus.frontend.pages.SettingsPage import SettingsPage
+from raspirus.frontend.pages.VirusPage import VirusPage
 
 # Backend:
-from Raspirus.backend.file_scanner_module import FileScanner
-from Raspirus.backend.hash_api_module import HashAPI
+from raspirus.backend.file_scanner_module import FileScanner
+from raspirus.backend.hash_api_module import HashAPI
 
 # Sets a higher resolution on Tkinter frames
 ctypes.windll.shcore.SetProcessDpiAwareness(1)
@@ -55,11 +55,11 @@ class Windows(tk.Tk):
     # Scanner properties
     scanning_path = ""
     signature_path = "backend/BigHash.db"
-    scanner:FileScanner
+    scanner: FileScanner
 
     # HashAPi properties:
     signature_lists_path = "backend/SignatureLists/*md5"
-    hash_updater:HashAPI
+    hash_updater: HashAPI
 
     def __init__(self):
         """ Initializes the class """
