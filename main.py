@@ -105,13 +105,15 @@ class Windows(tk.Tk):
         frame.tkraise()
 
     def start_scanner(self):
-        # loading_page = self.frames[LoadingPage]
+        loading_page = self.frames[LoadingPage]
         # loading_page.print_tests()
         # TODO: Make this a thread -> Else blocks the button
-        self.show_frame(LoadingPage)
         self.scanner = FileScanner(path=self.scanning_path, signature_path=self.signature_path)
-        self.scanner.start_scanner() # Continue from here once this is done
-        self.evaluate_scanner()
+        self.scanner.initialize_scanner()
+        loading_page.set_maximum(len(self.scanner.unscanned_list))
+        self.show_frame(LoadingPage)
+        # self.scanner.start_scanner() # Continue from here once this is done
+        # self.evaluate_scanner()
 
     def evaluate_scanner(self):
         if len(self.scanner.dirty_files) > 0:

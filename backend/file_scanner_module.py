@@ -34,6 +34,14 @@ def bi_contains(lst, item):
     return (item <= lst[-1]) and (lst[bisect_left(lst, item)] == item)
 
 
+def print_star(counter):
+    if counter % 10 == 0:
+        print("*")
+        print(str(counter) + ".", end=" ")
+    else:
+        print("*", end=" ")
+
+
 class FileScanner:
     """ Defines the FileScanner object with all its functions and arguments.
 
@@ -53,6 +61,9 @@ class FileScanner:
     hash_list = []
     path = ""
     signature_db_path = ""
+
+    # Update status holders
+    scanned_progress = 0
 
     def __init__(self, path, signature_path):
         """ Initializes the class by setting the given parameters
@@ -78,7 +89,6 @@ class FileScanner:
             print("SignaturePath: " + str(os.path.isdir(signature_path)) +
                   " & " + str(os.path.exists(signature_path)))
             raise Exception("Invalid path or path not a directory")
-
 
     def get_hash_list(self):
         """ Creates a list of hashes, extracted from a file
@@ -108,7 +118,7 @@ class FileScanner:
         Finds all files in a specified path and adds them to the unscanned_list
         """
         for path, directories, file_names in os.walk(self.path):
-            print("Directories found: " + str(directories))
+            # print("Directories found: " + str(directories))
             for file_name in file_names:
                 file_path = path + "/" + file_name
                 file = File(file_path)
@@ -121,28 +131,49 @@ class FileScanner:
         If it finds something, the file is added to the dirty_files list, else
         it is added to the clean_files list
         """
+        counter = 1
         self.hash_list.sort()
         for file in self.unscanned_list:
             if bi_contains(self.hash_list, file.get_hash()):
                 self.dirty_files.append(file)
             else:
                 self.clean_files.append(file)
+            self.scanned_progress = counter
+            counter += 1
 
     ################################################################
     # These are the functions to start and initialize the scanner:
     ###############################################################
 
-    def start_scanner(self):
-        """ Starts the scanner
+    def initialize_scanner(self):
+        """ Initializes the list of files and hashes.
 
-        When initializing the scanner we fill the unscanned_list and hashes_list.
-        After successfully doing so, we can start comparing the hashes
+        This action is useful to later start the scanner. It initializes the used lists,
+        but does not start scanner! It is clumsy, but necessary for the frontend attached
+        to this application. Because after initializing, the user could modify the lists,
+        which are now filled, and then start the scanner later.
         """
+
         self.get_file_list()
         print("File list created! " + str(len(self.unscanned_list)) +
               " files found in " + self.path)
         self.get_hash_list()
         print("Hash list created! " + str(len(self.hash_list)) + " Hashes found")
+
+
+    def start_scanner(self):
+        """ Starts the scanner.
+
+        This simply starts the comparison of the file hash with the signatures list.
+        To be effective at it, it is necessary to first call the function initialize_scanner()
+        to fill the necessary list.
+
+        Raises:
+            OrderError: If the list have not been initialized first
+        """
+        if (self.unscanned_list is None) or (self.hash_list is None):
+            raise Exception("Call initialize_scanner() first!")
+
         self.compare_lists()
         print("Scanner finished! \n"
               "Scanned files: " + str(len(self.unscanned_list)) + "\n"
