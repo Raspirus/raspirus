@@ -117,6 +117,8 @@ class Windows(tk.Tk):
 
     def evaluate_scanner(self):
         if len(self.scanner.dirty_files) > 0:
+            virus_page = self.frames[VirusPage]
+            virus_page.add_viruses(self.scanner.dirty_files)
             self.show_frame(VirusPage)
         else:
             self.show_frame(ClearPage)

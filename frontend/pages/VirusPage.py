@@ -35,6 +35,7 @@ class VirusPage(tk.Frame):
         # the combobox contains possible actions
         # This component also has a red border around it
         # Then add these components to a scrollbar frame
-
+        count = 1
         for virus in virus_arr:
-            pass
+            self.virus_list.insert(count, str(virus.path))
+            count += 1
