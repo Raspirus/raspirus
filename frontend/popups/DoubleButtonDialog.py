@@ -2,7 +2,7 @@ import tkinter as tk
 from Raspirus.frontend.utility import *  # For colors and fonts
 
 
-class SingleButtonDialog(tk.Toplevel):
+class DoubleButtonDialog(tk.Toplevel):
     mode: str
     parent = None
     title_label: tk.Label

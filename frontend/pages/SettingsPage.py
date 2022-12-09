@@ -1,4 +1,5 @@
 import tkinter as tk
+from Raspirus.frontend.popups.SingleButtonDialog import SingleButtonDialog
 from Raspirus.frontend.utility import *  # For colors and fonts
 import time
 import os
@@ -116,10 +117,19 @@ class SettingsPage(tk.Frame):
         # TODO: Activate or deactivate SSH and display status
         # Set SUCCESS_COLOR (green) if active
         # Set FAILURE_COLOR (red) if shutdown
-        pass
+        dialog_message = "SSH allows you to connect to the Raspberry Pi remotely. " \
+                         "Use this feature responsibly, as it might break the Raspberry Pi!"
+        dialog = SingleButtonDialog(title="SSH maintenance", parent=self,
+                                        message=dialog_message, mode="warning")
+        dialog.tkraise()
+
 
     def set_ftp_status(self):
         # TODO: Activate or deactivate FTP and display status
         # Set SUCCESS_COLOR (green) if active
         # Set FAILURE_COLOR (red) if shutdown
-        pass
+        dialog_message = "FTP allows you to transfer files from and to the Raspberry Pi. " \
+                         "This is usually used to retrieve logs or manually update signatures."
+        dialog = SingleButtonDialog(title="FTP maintenance", parent=self,
+                                        message=dialog_message, mode="warning")
+        dialog.tkraise()

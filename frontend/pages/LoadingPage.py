@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
+from Raspirus.frontend.popups.DoubleButtonDialog import DoubleButtonDialog
 from Raspirus.frontend.utility import *  # For colors and fonts
 
 
@@ -10,12 +11,16 @@ class LoadingPage(tk.Frame):
     vfound_label: tk.Label
     quit_btn: tk.Button
 
+    controller = None
+
     max_text: int
     current_scan_text = 0
     current_virus_text = 0
 
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent, bg=BACKGROUND_COLOR)
+
+        self.controller = controller
 
         self.title_label = tk.Label(self, text="Scanning... Please wait", font=SUBTITLE_FONT,
                                     fg=SECONDARY_COLOR, bg=BACKGROUND_COLOR)
@@ -43,7 +48,7 @@ class LoadingPage(tk.Frame):
         self.abort_icon = tk.PhotoImage(file="frontend/images/icons/cancel_sign.png")
         self.quit_btn = tk.Button(self, fg=BACKGROUND_COLOR, bg=FAILURE_COLOR,
                                   image=self.abort_icon)
-        self.quit_btn.config(command=lambda: controller.show_frame(controller.pages[0]))
+        self.quit_btn.config(command=lambda: self.confirm_quit())
         self.quit_btn.place(x=375, y=375, width=50, height=50)
 
     def set_loading_status(self, status: int):
@@ -71,4 +76,17 @@ class LoadingPage(tk.Frame):
         self.current_virus_text += 1
         virus_text = "Virus found: " + str(self.current_virus_text)
         self.vfound_label.config(text=virus_text)
+
+    def confirm_quit(self):
+        dialog_message = "Warning! The scanner hasn't finished yet, are you sure you want to terminate it?"
+        dialog = DoubleButtonDialog(title="Stop scanner", parent=self, message=dialog_message)
+        dialog.tkraise()
+
+    def confirm_btn_func(self):
+        # Needed for the dialog
+        self.controller.show_frame(self.controller.pages[0])
+
+    def deny_btn_func(self):
+        # Needed for the dialog
+        pass
 
