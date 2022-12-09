@@ -60,29 +60,66 @@ class SettingsPage(tk.Frame):
         self.hash_btn = tk.Button(self, text="Last updated 23.11.2022", font=NORMAL_TEXT_FONT,
                                   image=self.refresh_icon, compound=tk.LEFT, padx=10,
                                   fg=BACKGROUND_COLOR, bg=SECONDARY_COLOR)
+        self.hash_btn.config(command=lambda: self.set_hash_status(controller))
         self.hash_btn.place(x=480, y=170, width=290, height=40)
 
+        self.log_btn = tk.Button(self, text="", font=NORMAL_TEXT_FONT,
+                                 image=self.logs_icon, compound=tk.LEFT, padx=10,
+                                 fg=BACKGROUND_COLOR, bg=SECONDARY_COLOR)
+        self.log_btn.config(command=lambda: controller.show_frame(controller.pages[6]))
+        self.log_btn.place(x=480, y=240, width=290, height=40)
+        self.set_logs_status(controller)
 
+        self.ssh_btn = tk.Button(self, text="Work in Progress", font=NORMAL_TEXT_FONT,
+                                 image=self.check_icon, compound=tk.LEFT, padx=10,
+                                 fg=BACKGROUND_COLOR, bg=WARNING_COLOR)
+        self.ssh_btn.config(command=lambda: self.set_ssh_status())
+        self.ssh_btn.place(x=480, y=310, width=290, height=40)
+
+        self.ftp_btn = tk.Button(self, text="Work in Progress", font=NORMAL_TEXT_FONT,
+                                 image=self.cancel_icon, compound=tk.LEFT, padx=10,
+                                 fg=BACKGROUND_COLOR, bg=WARNING_COLOR)
+        self.ftp_btn.config(command=lambda: self.set_ftp_status())
+        self.ftp_btn.place(x=480, y=380, width=290, height=40)
+
+
+    def set_logs_status(self, controller):
         log_file_gen_text = "No Logs"
         if os.path.exists(controller.log_file_location):
             # Retrieves the modification time of the logs file and formats it accordingly
             gen_time = time.strptime(time.ctime(os.path.getmtime(controller.log_file_location)))
             log_file_gen_time = time.strftime("%d.%m.%Y %H:%M:%S", gen_time)
-            log_file_gen_text = "Upd: " + log_file_gen_time
+            log_file_gen_text = "UP: " + log_file_gen_time
+        else:
+            self.log_btn.config(bg=FAILURE_COLOR)
 
-        self.log_btn = tk.Button(self, text=log_file_gen_text, font=NORMAL_TEXT_FONT,
-                                 image=self.logs_icon, compound=tk.LEFT, padx=10,
-                                 fg=BACKGROUND_COLOR, bg=SECONDARY_COLOR)
-        self.log_btn.config(command=lambda: controller.show_frame(controller.pages[6]))
-        self.log_btn.place(x=480, y=240, width=290, height=40)
+        self.log_btn.config(text=log_file_gen_text)
 
-        self.ssh_btn = tk.Button(self, text="Status: active", font=NORMAL_TEXT_FONT,
-                                 image=self.check_icon, compound=tk.LEFT, padx=10,
-                                 fg=BACKGROUND_COLOR, bg=SUCCESS_COLOR)
-        self.ssh_btn.place(x=480, y=310, width=290, height=40)
+    def set_hash_status(self, controller):
+        # TODO: Start an Signature update and display status
+        self.hash_btn.config(text="Loading...")
+        controller.start_hash_updates()
 
-        self.ftp_btn = tk.Button(self, text="Status: deactivated", font=NORMAL_TEXT_FONT,
-                                 image=self.cancel_icon, compound=tk.LEFT, padx=10,
-                                 fg=BACKGROUND_COLOR, bg=FAILURE_COLOR)
-        self.ftp_btn.place(x=480, y=380, width=290, height=40)
+        hash_file_gen_text = "No Signatures!"
+        if os.path.exists(controller.signature_path):
+            # Retrieves the modification time of the logs file and formats it accordingly
+            gen_time = time.strptime(time.ctime(os.path.getmtime(controller.signature_path)))
+            hash_file_gen_time = time.strftime("%d.%m.%Y %H:%M:%S", gen_time)
+            hash_file_gen_text = "UP: " + hash_file_gen_time
+        else:
+            self.hash_btn.config(bg=FAILURE_COLOR)
 
+        self.hash_btn.config(text=hash_file_gen_text)
+
+
+    def set_ssh_status(self):
+        # TODO: Activate or deactivate SSH and display status
+        # Set SUCCESS_COLOR (green) if active
+        # Set FAILURE_COLOR (red) if shutdown
+        pass
+
+    def set_ftp_status(self):
+        # TODO: Activate or deactivate FTP and display status
+        # Set SUCCESS_COLOR (green) if active
+        # Set FAILURE_COLOR (red) if shutdown
+        pass
