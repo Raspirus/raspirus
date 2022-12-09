@@ -39,10 +39,12 @@ class HashAPI:
     def __init__(self, signature_path, bighash_path):
         """ Initializes the class setting the given parameters
 
-        Arguments:
-            signature_path -> Path to the folder containing all hash signatures
-            bighash_path -> Path to the one big file containing all hashes merged together
+        It creates an object that can be used to interact with the Virusshare API
+        and the signatures list.
 
+        Args:
+            signature_path: Path to the folder containing all hash signatures
+            bighash_path: Path to the one big file containing all hashes merged together
         """
         self.signature_list_path = signature_path
         self.bighash_path = bighash_path
@@ -54,7 +56,13 @@ class HashAPI:
 
     # A function to merge all hash lists into one
     def merge_files(self):
-        """ Merges all hashes of files into one big file """
+        """ Merges all hashes of files into one big file.
+
+        When using the API, we can only download lists individually, but when searching for signatures
+        it is far more efficient and easier to have all hashes in one file. Therefore, we use
+        this small function to merge all individual signatures into one big file.
+
+        """
         print("Starting file merging")
         with open(self.bighash_path, 'wb', encoding="utf8") as wfd:
             for file in self.file_list:
@@ -62,11 +70,13 @@ class HashAPI:
                     shutil.copyfileobj(file_pointer, wfd)
 
     def refactor_bighash(self):
-        """ Removed doubles and incorrect hashes from the big file """
-        # Extract all hashes from file and put them into an array
-        # then overwrite the file with this array and put a message at the end of the file
-        # The message will then specify the last merged file
-        # This is useful to later detect which file still needs to be added
+        """ Removed doubles and incorrect hashes from the big file
+
+        Extract all hashes from file and put them into an array
+        then overwrite the file with this array and put a message at the end of the file
+        The message will then specify the last merged file
+        This is useful to later detect which file still needs to be added
+        """
 
         # Read all hashes from file
         print("Reading all hashes from file...")
@@ -89,10 +99,18 @@ class HashAPI:
             file_pointer.writelines("# Last added: " + self.file_list[len(self.file_list) - 1])
 
     def bighash_is_updated(self):
-        """ Checks the last line in the big file to determine if its updated
-        If the name of the file mentioned in the last line of bighash
-        is the same as the last item in file_list
-        we consider the file as updated
+        """ Checks the last line in the big file to determine if its updated.
+
+        Basically we keep all signatures in individual files, each with a specific name.
+        Then, when merging, we also add the name of the last merged file to the end of the file.
+        Then when checking if the file is up-to-date, we simply compare the name of the last file
+        in our directory of signature lists, and the line last written in the file.
+        If they are the same, the file is up-to-date, else it needs to be updated
+
+        Returns:
+            True - If the Signatures list is updated
+            False - If no file was found or the file is not up-to-date
+
          """
         print("Checking if file is updated")
         if os.path.exists(self.bighash_path):
@@ -124,16 +142,21 @@ class HashAPI:
 
     def download_new_signatures(self, download_path):
         """ Downloads new hash signatures from the online database
-        and puts them in a folder
 
-        Arguments:
-            download_path -> Where to save the downloaded files
+        The API doesn't really allow us to download the signatures list, so we have to scrape
+        them from the website. Each file has a specific name and a number that serves as
+        identifier and counter. We can therefore just download each file and increase the counter until
+        we get a 404 Error. Since we also keep a list of all files, we don't need to start from 0, but
+        instead can start from the last counter of the last downloaded file, increase it and see if
+        we get a 404 Error
+
+        Args:
+            download_path: Where to save the downloaded files
 
         """
-        # Downloads new hashes from Virusshare if available
         # Use the last downloaded Hash to create a URL and add +1 to it
         # If it exists we download it and add +1 again
-        # We do this until a 404 error arises and then we stop
+        # We do this until a 404 error arises, then we stop
         last_sign = self.file_list[len(self.file_list) - 1]
         last_sign = last_sign.split("VirusShare_", 1)[1]
         last_sign_int = int(last_sign[:-4])
@@ -156,10 +179,16 @@ class HashAPI:
     def get_hash_info(self, json_location, virus_hash):
         """ Creates a JSON file containing information about a given hash
 
-        Arguments:
-            json_location -> Where to save the generated JSON file
-            virus_hash -> The hash to lookup information about
+        This actually uses the API key and is a purely optional function.
+        Through an API call, we can get much more information about a hash.
+        The hash has to be detected as virus, else it won't work.
 
+        Args:
+            json_location: Where to save the generated JSON file
+            virus_hash: The hash to lookup information about
+
+        Raises:
+            APIError: The API call produced an error, for example the key used is invalid
         """
 
         # Retrieves more detailed information about a specific hash by using the Virusshare API
@@ -176,4 +205,4 @@ class HashAPI:
             elif err.code == 404:
                 print("Request not found")
             else:
-                print("Error: " + str(err))
+                raise Exception("Error: " + str(err))
