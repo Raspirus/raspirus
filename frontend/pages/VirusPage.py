@@ -1,4 +1,5 @@
 import tkinter as tk
+from Raspirus.frontend.popups.DoubleButtonDialog import DoubleButtonDialog
 from Raspirus.frontend.utility import *  # For colors and fonts
 
 
@@ -39,3 +40,17 @@ class VirusPage(tk.Frame):
         for virus in virus_arr:
             self.virus_list.insert(count, str(virus.path))
             count += 1
+
+    def confirm_actions(self):
+        dialog_message = "Your selected actions might be unrecoverable, are you sure you want to continue?"
+        dialog = DoubleButtonDialog(title="Confirm actions", parent=self, message=dialog_message)
+        dialog.tkraise()
+
+    def confirm_btn_func(self):
+        # Needed for the dialog
+        pass
+
+    def deny_btn_func(self):
+        # Needed for the dialog
+        pass
+
