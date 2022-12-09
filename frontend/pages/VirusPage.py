@@ -9,8 +9,12 @@ class VirusPage(tk.Frame):
     virus_list: tk.Listbox
     page_scroller: tk.Scrollbar
 
+    controller = None
+
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent, bg=BACKGROUND_COLOR)
+
+        self.controller = controller
 
         self.title_label = tk.Label(self, text="VIRUS FOUND", font=SUBTITLE_FONT,
                                     fg=FAILURE_COLOR, bg=BACKGROUND_COLOR)
@@ -48,7 +52,7 @@ class VirusPage(tk.Frame):
 
     def confirm_btn_func(self):
         # Needed for the dialog
-        pass
+        self.controller.show_frame(self.controller.pages[0])
 
     def deny_btn_func(self):
         # Needed for the dialog
