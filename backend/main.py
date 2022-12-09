@@ -15,6 +15,7 @@ def main():
     path_to_check = str(input("Enter path: "))
     print("")
     fs = FileScanner(path_to_check, signature_path)
+    fs.initialize_scanner()
     fs.start_scanner()
 
 
