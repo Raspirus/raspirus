@@ -1,6 +1,6 @@
 import tkinter as tk
-from Raspirus.frontend.popups.DoubleButtonDialog import DoubleButtonDialog
-from Raspirus.frontend.utility import *  # For colors and fonts
+from raspirus.frontend.popups.DoubleButtonDialog import DoubleButtonDialog
+from raspirus.frontend.utility import *  # For colors and fonts
 
 
 class VirusPage(tk.Frame):

@@ -1,5 +1,5 @@
-from Raspirus.backend.file_scanner_module import FileScanner
-from Raspirus.backend.hash_api_module import HashAPI
+from raspirus.backend.file_scanner_module import FileScanner
+from raspirus.backend.hash_api_module import HashAPI
 
 signature_path = "BigHash.db"
 signature_lists_path = "backend/SignatureLists/*md5"

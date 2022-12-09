@@ -1,6 +1,6 @@
 import tkinter as tk
-from Raspirus.frontend.popups.SingleButtonDialog import SingleButtonDialog
-from Raspirus.frontend.utility import *  # For colors and fonts
+from raspirus.frontend.popups.SingleButtonDialog import SingleButtonDialog
+from raspirus.frontend.utility import *  # For colors and fonts
 import time
 import os
 

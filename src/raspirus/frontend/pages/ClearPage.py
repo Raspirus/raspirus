@@ -1,5 +1,5 @@
 import tkinter as tk
-from Raspirus.frontend.utility import *  # For colors and fonts
+from raspirus.frontend.utility import *  # For colors and fonts
 from PIL import Image, ImageTk
 
 

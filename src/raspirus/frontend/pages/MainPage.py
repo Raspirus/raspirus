@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
-from Raspirus.frontend.popups.SingleButtonDialog import SingleButtonDialog
-from Raspirus.frontend.utility import *  # For colors and fonts
+from raspirus.frontend.popups.SingleButtonDialog import SingleButtonDialog
+from raspirus.frontend.utility import *  # For colors and fonts
 
 
 class MainPage(tk.Frame):
