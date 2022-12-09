@@ -48,6 +48,9 @@ class Windows(tk.Tk):
     # App properties: name, version, creator, license, contact
     properties = [None, None, None, None, None]
 
+    # Logs properties:
+    log_file_location = "C:/Users/benbe/Documents/Coding/MaturaProject/notes.txt"
+
     # Scanner properties
     scanning_path = ""
     signature_path = "C:/Users/benbe/Documents/Coding/MaturaProject/Raspirus/backend/BigHash.db"

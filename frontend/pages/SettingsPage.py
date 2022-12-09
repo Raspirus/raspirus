@@ -1,7 +1,6 @@
 import tkinter as tk
 from Raspirus.frontend.utility import *  # For colors and fonts
-
-
+import time
 import os
 
 
@@ -63,7 +62,15 @@ class SettingsPage(tk.Frame):
                                   fg=BACKGROUND_COLOR, bg=SECONDARY_COLOR)
         self.hash_btn.place(x=480, y=170, width=290, height=40)
 
-        self.log_btn = tk.Button(self, text="Generated on 22.11.2022", font=NORMAL_TEXT_FONT,
+
+        log_file_gen_text = "No Logs"
+        if os.path.exists(controller.log_file_location):
+            # Retrieves the modification time of the logs file and formats it accordingly
+            gen_time = time.strptime(time.ctime(os.path.getmtime(controller.log_file_location)))
+            log_file_gen_time = time.strftime("%d.%m.%Y %H:%M:%S", gen_time)
+            log_file_gen_text = "Upd: " + log_file_gen_time
+
+        self.log_btn = tk.Button(self, text=log_file_gen_text, font=NORMAL_TEXT_FONT,
                                  image=self.logs_icon, compound=tk.LEFT, padx=10,
                                  fg=BACKGROUND_COLOR, bg=SECONDARY_COLOR)
         self.log_btn.config(command=lambda: controller.show_frame(controller.pages[6]))

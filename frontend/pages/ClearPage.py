@@ -15,7 +15,7 @@ class ClearPage(tk.Frame):
                                     fg=SUCCESS_COLOR, bg=BACKGROUND_COLOR)
         self.title_label.place(x=190, y=50, width=450, height=60)
 
-        # WARMING! Image has the size 160x160 and unfortunately can't be resized with Tkinter
+        # WARNING! Image has the size 160x160 and unfortunately can't be resized with Tkinter
         self.image_loader = Image.open("frontend/images/success_image.png")
         self.success_image = ImageTk.PhotoImage(self.image_loader)
 
