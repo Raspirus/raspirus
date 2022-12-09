@@ -30,6 +30,7 @@ from Raspirus.frontend.pages.VirusPage import VirusPage
 
 # Backend:
 from Raspirus.backend.file_scanner_module import FileScanner
+from Raspirus.backend.hash_api_module import HashAPI
 
 # Sets a higher resolution on Tkinter frames
 ctypes.windll.shcore.SetProcessDpiAwareness(1)
@@ -49,12 +50,16 @@ class Windows(tk.Tk):
     properties = [None, None, None, None, None]
 
     # Logs properties:
-    log_file_location = "C:/Users/benbe/Documents/Coding/MaturaProject/notes.txt"
+    log_file_location = "../notes.txt"
 
     # Scanner properties
     scanning_path = ""
-    signature_path = "C:/Users/benbe/Documents/Coding/MaturaProject/Raspirus/backend/BigHash.db"
+    signature_path = "backend/BigHash.db"
     scanner:FileScanner
+
+    # HashAPi properties:
+    signature_lists_path = "backend/SignatureLists/*md5"
+    hash_updater:HashAPI
 
     def __init__(self):
         """ Initializes the class """
@@ -114,7 +119,9 @@ class Windows(tk.Tk):
         else:
             self.show_frame(ClearPage)
 
-
+    def start_hash_updates(self):
+        self.hash_updater = HashAPI(self.signature_lists_path, self.signature_path)
+        self.hash_updater.update_bighash()
 
 
 if __name__ == "__main__":

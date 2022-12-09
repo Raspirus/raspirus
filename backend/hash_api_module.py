@@ -114,7 +114,7 @@ class HashAPI:
          """
         print("Checking if file is updated")
         if os.path.exists(self.bighash_path):
-            with open(self.bighash_path, 'rb', encoding="utf8") as file_pointer:
+            with open(self.bighash_path, 'rb') as file_pointer:
                 try:  # catch OSError in case of a one line file
                     file_pointer.seek(-2, os.SEEK_END)
                     while file_pointer.read(1) != b'\n':
