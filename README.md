@@ -1,6 +1,6 @@
 # Raspirus - Raspberry Pi Virusscanner
-[![Python Flake8](https://github.com/Benji377/Raspirus/actions/workflows/python-flake8.yml/badge.svg)](https://github.com/Benji377/Raspirus/actions/workflows/python-flake8.yml)
-[![Pylint](https://github.com/Benji377/Raspirus/actions/workflows/pylint.yml/badge.svg)](https://github.com/Benji377/Raspirus/actions/workflows/pylint.yml)
+![Tests](https://github.com/Benji377/Raspirus/actions/workflows/tests.yml/badge.svg)
+
 
 ## Introduction
 Even to this day, there are still some devices that for whatever reason can't have an antivirus or are outside the internet. 
