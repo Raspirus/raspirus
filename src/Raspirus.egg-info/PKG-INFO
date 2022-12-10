@@ -3,7 +3,7 @@ Name: Raspirus
 Version: 0.0.0
 Summary: Scans harddrive on single board computers
 Author: Benjamin Demetz
-License: None
+License: GNU
 Platform: unix
 Platform: linux
 Platform: osx
@@ -11,8 +11,7 @@ Platform: cygwin
 Platform: win32
 Classifier: Programming Language :: Python :: 3
 Classifier: Programming Language :: Python :: 3 :: Only
-Classifier: Programming Language :: Python :: 3.8
 Classifier: Programming Language :: Python :: 3.9
-Requires-Python: >=3.7
+Requires-Python: >=3.9
 Provides-Extra: testing
 License-File: LICENSE
