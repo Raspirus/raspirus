@@ -11,3 +11,4 @@ src/Raspirus.egg-info/requires.txt
 src/Raspirus.egg-info/top_level.txt
 src/raspirus/__init__.py
 src/raspirus/main.py
+src/raspirus/py.typed
