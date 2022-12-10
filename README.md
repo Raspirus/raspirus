@@ -28,7 +28,8 @@ To test this application, we use three methods:
 - Tox: For cross-environment and automatic testing
 
 Basically, when coding locally, one should continuosly use pyflake8 and pytest to check the code and see if any errors arise. Pyflake8 doesn't need any setup, as it will just scan your code and tell you if there are any design issues. \
-Pytest on the other hand, will execute the tests specified in the tests directoty, and therefore needs to have some tests to execute
+Pytest on the other hand, will execute the tests specified in the tests directoty, and therefore needs to have some tests to execute. \
+Once you are ready to commit, you should execute the tox command and check for any errors. Tox also gets executed automatically with GitHub actions
 
 For test suppresion: [StackOverflow answer](https://stackoverflow.com/a/73582480)
 
