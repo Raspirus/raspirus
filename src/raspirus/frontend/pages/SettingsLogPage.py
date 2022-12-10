@@ -1,5 +1,6 @@
 import tkinter as tk
-from raspirus.frontend.utility import *  # For colors and fonts
+# For colors and fonts
+from raspirus.frontend.utility import BACKGROUND_COLOR, SMALL_BUTTON_TEXT_FONT, GREY_COLOR
 
 
 class SettingsLogPage(tk.Frame):
@@ -41,4 +42,3 @@ class SettingsLogPage(tk.Frame):
 
         # Then we can insert new text at position 0
         self.logs_textbox.insert('1.0', content)
-

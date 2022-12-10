@@ -1,7 +1,9 @@
 import tkinter as tk
 from tkinter import ttk
 from raspirus.frontend.popups.DoubleButtonDialog import DoubleButtonDialog
-from raspirus.frontend.utility import *  # For colors and fonts
+# For colors and fonts
+from raspirus.frontend.utility import \
+    BACKGROUND_COLOR, SECONDARY_COLOR, SUBTITLE_FONT, PRIMARY_COLOR, TEXT_COLOR, NORMAL_TEXT_FONT, FAILURE_COLOR
 
 
 class LoadingPage(tk.Frame):
@@ -64,7 +66,7 @@ class LoadingPage(tk.Frame):
         self.current_scan_text += 1
         scanned_text = "Scanned " + str(self.current_scan_text) + " files of "
 
-        if self.max_text is not None:
+        if self.max_text > 0:
             scanned_text += str(self.max_text)
         else:
             scanned_text += "Undefined"
@@ -84,9 +86,8 @@ class LoadingPage(tk.Frame):
 
     def confirm_btn_func(self):
         # Needed for the dialog
-        self.controller.show_frame(self.controller.pages[0])
+        self.controller.show_frame(self.controller.pages[0])  # type: ignore [union-attr]
 
     def deny_btn_func(self):
         # Needed for the dialog
         pass
-

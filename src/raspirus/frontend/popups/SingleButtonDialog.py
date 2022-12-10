@@ -1,7 +1,10 @@
 import tkinter as tk
 from typing import Literal
-
-from Raspirus.frontend.utility import *  # For colors and fonts
+# For colors and fonts
+from raspirus.frontend.utility import \
+    BACKGROUND_COLOR, SUCCESS_COLOR, FAILURE_COLOR, \
+    WARNING_COLOR, SUBTITLE_FONT, NORMAL_TEXT_FONT, \
+    TEXT_COLOR, BUTTON_TEXT_FONT
 
 
 class SingleButtonDialog(tk.Toplevel):

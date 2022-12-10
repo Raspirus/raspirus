@@ -1,5 +1,6 @@
 import tkinter as tk
-from raspirus.frontend.utility import *  # For colors and fonts
+from raspirus.frontend.utility import \
+    BACKGROUND_COLOR, SUBTITLE_FONT, SUCCESS_COLOR, NORMAL_TEXT_FONT  # For colors and fonts
 from PIL import Image, ImageTk
 
 
@@ -28,4 +29,3 @@ class ClearPage(tk.Frame):
                                      fg=BACKGROUND_COLOR, bg=SUCCESS_COLOR)
         self.confirm_btn.config(command=lambda: controller.show_frame(controller.pages[0]))
         self.confirm_btn.place(x=315, y=375, width=170, height=50)
-

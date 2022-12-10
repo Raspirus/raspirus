@@ -14,6 +14,7 @@ from urllib.error import HTTPError
 import wget
 from dotenv import load_dotenv
 
+
 class HashAPI:
     """
     This class will do the following tasks using the Virusshare API
@@ -29,12 +30,12 @@ class HashAPI:
         hash_list: List of hashes extracted from the bighash_file
         file_list: List of files, basically the files mentioned in the signature_list_path
     """
-    load_dotenv() # Loads environment variables
+    load_dotenv()  # Loads environment variables
     api_key = os.getenv('VIRUS_API')
     bighash_path = ""
     signature_list_path = ""
-    hash_list = []
-    file_list = []
+    hash_list: list[str] = []
+    file_list: list[str] = []
 
     def __init__(self, signature_path, bighash_path):
         """ Initializes the class setting the given parameters
@@ -126,7 +127,7 @@ class HashAPI:
                 print(last_line.split("added:", 1)[1])
                 print(self.file_list[len(self.file_list) - 1])
                 return (last_line.split("added:", 1)[1]).strip() == \
-                       (self.file_list[len(self.file_list) - 1]).strip()
+                    (self.file_list[len(self.file_list) - 1]).strip()
         return False
 
     def update_bighash(self):
@@ -176,7 +177,7 @@ class HashAPI:
                 print("ERROR: " + str(err))
                 break
 
-    def get_hash_info(self, json_location, virus_hash):
+    def get_hash_info(self, json_location, virus_hash: str):
         """ Creates a JSON file containing information about a given hash
 
         This actually uses the API key and is a purely optional function.
@@ -192,7 +193,7 @@ class HashAPI:
         """
 
         # Retrieves more detailed information about a specific hash by using the Virusshare API
-        url = "https://virusshare.com/apiv2/file?apikey=" + self.api_key + "&hash=" + virus_hash
+        url = "https://virusshare.com/apiv2/file?apikey=" + str(self.api_key) + "&hash=" + str(virus_hash)
 
         try:
             wget.download(url, json_location)

@@ -6,18 +6,6 @@ Classes: Windows
 # Importing the tkinter module
 import tkinter as tk
 import ctypes
-import path
-import sys
-
-# This is used to fix a path issue in Python 3
-# References:
-# - https://github.com/Benji377/Raspirus/issues/28
-# - https://stackoverflow.com/questions/65020257/python-modulenotfounderror-no-module-named-src/65020462#65020462
-# - https://www.geeksforgeeks.org/python-import-from-parent-directory/
-# directory reach
-directory = path.Path(__file__).abspath()
-# setting path
-sys.path.append(directory.parent.parent)
 
 # Frontend:
 from raspirus.frontend.pages.ClearPage import ClearPage

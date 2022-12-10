@@ -1,7 +1,11 @@
 import tkinter as tk
 from tkinter import ttk
 from raspirus.frontend.popups.SingleButtonDialog import SingleButtonDialog
-from raspirus.frontend.utility import *  # For colors and fonts
+# For colors and fonts
+from raspirus.frontend.utility import \
+    BACKGROUND_COLOR, TITLE_FONT, PRIMARY_COLOR, \
+    NORMAL_TEXT_FONT, BUTTON_TEXT_FONT, TEXT_COLOR, \
+    SMALL_BUTTON_TEXT_FONT, SECONDARY_COLOR
 
 
 class MainPage(tk.Frame):
@@ -64,4 +68,3 @@ class MainPage(tk.Frame):
         else:
             controller.scanning_path = self.drive_selector.get()
             controller.start_scanner()
-

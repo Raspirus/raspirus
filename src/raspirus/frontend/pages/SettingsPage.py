@@ -1,6 +1,10 @@
 import tkinter as tk
 from raspirus.frontend.popups.SingleButtonDialog import SingleButtonDialog
-from raspirus.frontend.utility import *  # For colors and fonts
+# For colors and fonts
+from raspirus.frontend.utility import \
+    BACKGROUND_COLOR, SMALL_BUTTON_TEXT_FONT, \
+    GREY_COLOR, NORMAL_TEXT_FONT, SUBTITLE_FONT, \
+    TEXT_COLOR, SECONDARY_COLOR, WARNING_COLOR, FAILURE_COLOR
 import time
 import os
 
@@ -52,10 +56,10 @@ class SettingsPage(tk.Frame):
 
         # All icons
         prefix = "frontend/images/icons/"
-        self.refresh_icon = tk.PhotoImage(file=prefix+"refresh_icon.png")
-        self.cancel_icon = tk.PhotoImage(file=prefix+"cancel_sign.png")
-        self.check_icon = tk.PhotoImage(file=prefix+"check_mark.png")
-        self.logs_icon = tk.PhotoImage(file=prefix+"logs_book.png")
+        self.refresh_icon = tk.PhotoImage(file=prefix + "refresh_icon.png")
+        self.cancel_icon = tk.PhotoImage(file=prefix + "cancel_sign.png")
+        self.check_icon = tk.PhotoImage(file=prefix + "check_mark.png")
+        self.logs_icon = tk.PhotoImage(file=prefix + "logs_book.png")
 
         # All Buttons
         self.hash_btn = tk.Button(self, text="Last updated 23.11.2022", font=NORMAL_TEXT_FONT,
@@ -82,7 +86,6 @@ class SettingsPage(tk.Frame):
                                  fg=BACKGROUND_COLOR, bg=WARNING_COLOR)
         self.ftp_btn.config(command=lambda: self.set_ftp_status())
         self.ftp_btn.place(x=480, y=380, width=290, height=40)
-
 
     def set_logs_status(self, controller):
         log_file_gen_text = "No Logs"
@@ -112,7 +115,6 @@ class SettingsPage(tk.Frame):
 
         self.hash_btn.config(text=hash_file_gen_text)
 
-
     def set_ssh_status(self):
         # TODO: Activate or deactivate SSH and display status
         # Set SUCCESS_COLOR (green) if active
@@ -120,9 +122,8 @@ class SettingsPage(tk.Frame):
         dialog_message = "SSH allows you to connect to the Raspberry Pi remotely. " \
                          "Use this feature responsibly, as it might break the Raspberry Pi!"
         dialog = SingleButtonDialog(title="SSH maintenance", parent=self,
-                                        message=dialog_message, mode="warning")
+                                    message=dialog_message, mode="warning")
         dialog.tkraise()
-
 
     def set_ftp_status(self):
         # TODO: Activate or deactivate FTP and display status
@@ -131,5 +132,5 @@ class SettingsPage(tk.Frame):
         dialog_message = "FTP allows you to transfer files from and to the Raspberry Pi. " \
                          "This is usually used to retrieve logs or manually update signatures."
         dialog = SingleButtonDialog(title="FTP maintenance", parent=self,
-                                        message=dialog_message, mode="warning")
+                                    message=dialog_message, mode="warning")
         dialog.tkraise()
