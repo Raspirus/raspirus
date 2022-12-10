@@ -2,48 +2,66 @@
 # test directory, and then in those files, executes all functions
 # starting with test
 import pytest
+from raspirus.backend.file_module import File
+from raspirus.backend.file_scanner_module import FileScanner
 
-def test_empty_slap():
-    assert slap_many(LikeState.empty, '') is LikeState.empty
-
-
-def test_single_slaps():
-    assert slap_many(LikeState.empty, 'l') is LikeState.liked
-    assert slap_many(LikeState.empty, 'd') is LikeState.disliked
+single_file_path = "C:/Users/benbe/Documents/Coding/PyProjects/MaturaProject/tests/files/subfolder/dummy1.txt"
 
 
-@pytest.mark.parametrize("test_input,expected", [
-    ('ll', LikeState.empty),
-    ('dd', LikeState.empty),
-    ('ld', LikeState.disliked),
-    ('dl', LikeState.liked),
-    ('ldd', LikeState.empty),
-    ('lldd', LikeState.empty),
-    ('ddl', LikeState.liked),
-])
-def test_multi_slaps(test_input, expected):
-    assert slap_many(LikeState.empty, test_input) is expected
+def test_file_creation_error():
+    with pytest.raises(Exception):
+        File(path="")
 
 
-@pytest.mark.skip(reason="regexes not supported yet")
-def test_regex_slaps():
-    assert slap_many(LikeState.empty, '[ld]*ddl') is LikeState.liked
+def test_file_creation_success():
+    file = File(path=single_file_path)
+    assert file.name == "dummy1.txt"
+    assert file.hash is not None
+    assert file.hash is not None
 
 
-@pytest.mark.xfail
-def test_divide_by_zero():
-    assert 1 / 0 == 1
+def test_file_scanner_creation():
+    with pytest.raises(Exception):
+        FileScanner("", "")
+    with pytest.raises(Exception):
+        FileScanner(None, None)
 
 
-def test_invalid_slap():
-    with pytest.raises(ValueError):
-        slap_many(LikeState.empty, 'x')
+def test_single_file_scan_init(file_scanner):
+    file_scanner.path = single_file_path
+    file_scanner.initialize_scanner()
+    assert len(file_scanner.unscanned_list) == 1
 
 
-@pytest.mark.xfail
-def test_db_slap(db_conn):
-    db_conn.read_slaps()
-    assert ...
+def test_folder_scan_init(file_scanner):
+    file_scanner.initialize_scanner()
+    assert len(file_scanner.unscanned_list) is not None
+
+
+def test_single_file_scan_start_error(file_scanner):
+    file_scanner.path = single_file_path
+    with pytest.raises(Exception):
+        file_scanner.start_scanner()
+
+
+def test_single_file_scan_start_success(file_scanner):
+    file_scanner.path = single_file_path
+    file_scanner.initialize_scanner()
+    file_scanner.start_scanner()
+    assert len(file_scanner.clean_files) == 1
+    assert len(file_scanner.dirty_files) == 0
+
+
+def test_folder_scan_start_error(file_scanner):
+    with pytest.raises(Exception):
+        file_scanner.start_scanner()
+
+
+def test_folder_scan_start_success(file_scanner):
+    file_scanner.initialize_scanner()
+    file_scanner.start_scanner()
+    assert len(file_scanner.clean_files) > 0
+    assert len(file_scanner.dirty_files) == 0
 
 
 def test_print(capture_stdout):

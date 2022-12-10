@@ -1,5 +1,9 @@
 import tkinter as tk
-from raspirus.frontend.utility import *  # For colors and fonts
+# For colors and fonts
+from raspirus.frontend.utility import \
+    BACKGROUND_COLOR, SMALL_BUTTON_TEXT_FONT, \
+    GREY_COLOR, SUBTITLE_FONT, SECONDARY_COLOR, \
+    NORMAL_TEXT_FONT, TEXT_COLOR
 
 
 class InfoPage(tk.Frame):
@@ -73,7 +77,7 @@ class InfoPage(tk.Frame):
                                        fg=TEXT_COLOR, bg=BACKGROUND_COLOR, anchor='w')
         self.rcontact_label.place(x=405, y=370, width=360, height=50)
 
-    def setProperties(self, properties: [4]):
+    def setProperties(self, properties: list[str]):
         """ A function to fill information about the app
         If None is given, the default value is used
 

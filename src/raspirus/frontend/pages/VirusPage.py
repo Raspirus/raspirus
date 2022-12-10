@@ -1,6 +1,9 @@
 import tkinter as tk
 from raspirus.frontend.popups.DoubleButtonDialog import DoubleButtonDialog
-from raspirus.frontend.utility import *  # For colors and fonts
+# For colors and fonts
+from raspirus.frontend.utility import \
+    BACKGROUND_COLOR, SUBTITLE_FONT, \
+    FAILURE_COLOR, NORMAL_TEXT_FONT, TEXT_COLOR
 
 
 class VirusPage(tk.Frame):
@@ -20,10 +23,8 @@ class VirusPage(tk.Frame):
                                     fg=FAILURE_COLOR, bg=BACKGROUND_COLOR)
         self.title_label.place(x=190, y=50, width=415, height=60)
 
-
         self.page_scroller = tk.Scrollbar(self, orient="vertical")
         self.page_scroller.place(x=100, y=160, width=600, height=150)
-
 
         self.virus_list = tk.Listbox(self, font=NORMAL_TEXT_FONT,
                                      fg=BACKGROUND_COLOR, bg=TEXT_COLOR)
@@ -34,7 +35,7 @@ class VirusPage(tk.Frame):
         self.confirm_btn.config(command=lambda: controller.show_frame(controller.pages[0]))
         self.confirm_btn.place(x=315, y=375, width=170, height=50)
 
-    def add_viruses(self, virus_arr:[]):
+    def add_viruses(self, virus_arr):
         # For each element in the given array, create a component:
         # Component has a label with the path to the virus file and a combobox
         # the combobox contains possible actions
@@ -52,9 +53,8 @@ class VirusPage(tk.Frame):
 
     def confirm_btn_func(self):
         # Needed for the dialog
-        self.controller.show_frame(self.controller.pages[0])
+        self.controller.show_frame(self.controller.pages[0])  # type: ignore [union-attr]
 
     def deny_btn_func(self):
         # Needed for the dialog
         pass
-

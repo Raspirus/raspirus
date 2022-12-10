@@ -3,7 +3,6 @@
 This module contains a class that can scan a file by using its hash and comparing it
 to a bigger list of hashes. If the hash gets found, we consider the file as a virus,
 else we consider it to be a clean file.
-
 """
 
 import os.path
@@ -14,14 +13,12 @@ from raspirus.backend.file_module import File
 def bi_contains(lst, item):
     """ Uses the bisec module to search for an item in the list efficiently
 
-    It uses the well-known bisect algorithm to search for a given item in a given list.
-    In our case we use it to search for the hash of the file in the signature list.
-    For this to work, the list has to be sorted first
-    Referencing -> https://stackoverflow.com/questions/2701173/most-efficient-way-for-a-lookup-search-in-a-huge-list-python
-    A short description:
-        If item is larger than the last it's not in the list, but the bisect would
-        find `len(lst)` as the index to insert, so check that first. Else, if the
-        item is in the list then it has to be at index bisect_left(lst, item)
+    It uses the well-known bisect algorithm to search for a given item in a given list. In our case we use it to
+    search for the hash of the file in the signature list. For this to work, the list has to be sorted first
+    Referencing -> https://stackoverflow.com/questions/2701173/most-efficient-way-for-a-lookup-search-in-a-huge-list
+    -python A short description: If item is larger than the last it's not in the list, but the bisect function would
+    find `len(lst)` as the index to insert, so check that first. Else, if the item is in the list then it has to be
+    at index bisect_left(lst, item)
 
     Args:
         lst: List of items where you want to search for something
@@ -55,10 +52,10 @@ class FileScanner:
         hash_list: List of all hashes from the signature list
 
     """
-    unscanned_list = []
-    clean_files = []
-    dirty_files = []
-    hash_list = []
+    unscanned_list: list[File] = []
+    clean_files: list[File] = []
+    dirty_files: list[File] = []
+    hash_list: list[str] = []
     path = ""
     signature_db_path = ""
 
@@ -160,7 +157,6 @@ class FileScanner:
         self.get_hash_list()
         print("Hash list created! " + str(len(self.hash_list)) + " Hashes found")
 
-
     def start_scanner(self):
         """ Starts the scanner.
 
@@ -175,8 +171,8 @@ class FileScanner:
             raise Exception("Call initialize_scanner() first!")
 
         self.compare_lists()
-        print("Scanner finished! \n"
-              "Scanned files: " + str(len(self.unscanned_list)) + "\n"
-              "Good files: " + str(len(self.clean_files)) + "\n"
-              "Bad files: " + str(len(self.dirty_files)) + "\n"
+        print("Scanner finished! \n" +
+              "Scanned files: " + str(len(self.unscanned_list)) + "\n" +
+              "Good files: " + str(len(self.clean_files)) + "\n" +
+              "Bad files: " + str(len(self.dirty_files)) + "\n" +
               "Scanned path: " + self.path)

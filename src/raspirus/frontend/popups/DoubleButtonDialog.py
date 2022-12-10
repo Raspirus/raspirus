@@ -1,5 +1,9 @@
 import tkinter as tk
-from Raspirus.frontend.utility import *  # For colors and fonts
+# For colors and fonts
+from raspirus.frontend.utility import \
+    BACKGROUND_COLOR, SUBTITLE_FONT, WARNING_COLOR, \
+    NORMAL_TEXT_FONT, TEXT_COLOR, BUTTON_TEXT_FONT, \
+    FAILURE_COLOR, SUCCESS_COLOR
 
 
 class DoubleButtonDialog(tk.Toplevel):
@@ -25,7 +29,7 @@ class DoubleButtonDialog(tk.Toplevel):
         # and uses the same callback function as the other buttons
         # (you can use which ever you want, BUT REMEMBER TO ENABLE
         # THE PARENT WINDOW AGAIN)
-        self.protocol("WM_DELETE_WINDOW", self.close_dialog)
+        self.protocol("WM_DELETE_WINDOW", self.close_dialog)  # type: ignore [arg-type]
 
         # Forces all interactions to go through this modal dialog:
         self.grab_set()
@@ -53,9 +57,9 @@ class DoubleButtonDialog(tk.Toplevel):
         # The confirm button tries to execute a function on the parent called confirm_btn_func()
         # This Function needs to exist for the popup to work
         if btn == "confirm":
-            self.parent.confirm_btn_func()
+            self.parent.confirm_btn_func()  # type: ignore [union-attr]
         elif btn == "deny":
-            self.parent.deny_btn_func()
+            self.parent.deny_btn_func()  # type: ignore [union-attr]
         self.destroy()
 
     def center(self):
