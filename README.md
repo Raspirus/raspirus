@@ -30,5 +30,7 @@ To test this application, we use three methods:
 Basically, when coding locally, one should continuosly use pyflake8 and pytest to check the code and see if any errors arise. Pyflake8 doesn't need any setup, as it will just scan your code and tell you if there are any design issues. \
 Pytest on the other hand, will execute the tests specified in the tests directoty, and therefore needs to have some tests to execute
 
+For test suppresion: [StackOverflow answer](https://stackoverflow.com/a/73582480)
+
 ## Instructions
 Coming soon
