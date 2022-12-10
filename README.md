@@ -26,6 +26,7 @@ To test this application, we use three methods:
 - Flake8: To lint the project
 - Mypy: For testing
 - Tox: For cross-environment and automatic testing
+
 Basically, when coding locally, one should continuosly use pyflake8 and pytest to check the code and see if any errors arise. Pyflake8 doesn't need any setup, as it will just scan your code and tell you if there are any design issues. \
 Pytest on the other hand, will execute the tests specified in the tests directoty, and therefore needs to have some tests to execute
 
