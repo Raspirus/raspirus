@@ -3,15 +3,30 @@ name: LineCounter
 on: [push]
 
 jobs:
-  build:
+  line_counter:
     runs-on: ubuntu-latest
+    name: Initialise
     steps:
-      - name: Make Code Badge
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Count The Lines
         uses: shadowmoose/GHA-LoC-Badge@1.0.0
         id: badge
         with:
           debug: true
           directory: ./
-          badge: ./badges/badge.svg
-          patterns: '*.py'  # Patterns in the format of a '.gitignore' file, separated by pipes.
-          ignore: 'node_modules'
+          badge: .github/lcounter.svg
+          patterns: '*.py' 
+          ignore: 'node_modules/|README'
+
+      - name: Print the output
+        run: |
+          echo "Scanned: ${{ steps.badge.outputs.counted_files }}";
+          echo "Line Count: ${{ steps.badge.outputs.total_lines }}";
+
+      - name: Commit Badge
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: Update Lines of Code badge - ${{ steps.badge.outputs.total_lines }}
+          push_options: '--force'
