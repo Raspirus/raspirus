@@ -17,7 +17,7 @@ jobs:
           debug: true
           directory: ./
           badge: .github/lcounter.svg
-          patterns: '*.py' 
+          patterns: '/src/*.py' 
           ignore: 'node_modules/|README'
 
       - name: Print the output
