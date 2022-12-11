@@ -1,5 +1,6 @@
 # Raspirus - Raspberry Pi Virusscanner
 ![Tests](https://github.com/Benji377/Raspirus/actions/workflows/tests.yml/badge.svg)
+![LineCounter](.github/lcounter.svg)
 
 
 ## Introduction
