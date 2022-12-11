@@ -13,5 +13,5 @@ jobs:
           debug: true
           directory: ./
           badge: ./badges/badge.svg
-          patterns: '*.js'  # Patterns in the format of a '.gitignore' file, separated by pipes.
+          patterns: '*.py'  # Patterns in the format of a '.gitignore' file, separated by pipes.
           ignore: 'node_modules'
