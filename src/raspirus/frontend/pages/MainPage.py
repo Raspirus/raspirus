@@ -46,7 +46,7 @@ class MainPage(tk.Frame):
         # Linux options: https://stackoverflow.com/a/8265634
         # Windows: https://stackoverflow.com/a/8110666
         test_list = [
-            "C:/Users/benbe/Documents/Coding/MaturaProject/Raspirus/testing/files",
+            "C:/Users/benbe/Documents/Coding/PyProjects/MaturaProject/tests/files",
             "Some more teststs",
             " With some space front",
             "Short",

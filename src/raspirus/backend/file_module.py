@@ -7,6 +7,7 @@ without needing to save the whole file somehow.
 
 import hashlib
 import os
+import mmap
 
 
 class File:
@@ -48,19 +49,20 @@ class File:
     def get_checksum(self, hash_factory=hashlib.md5, chunk_num_blocks=128):
         """ Generates the MD5 hash of the file
 
-        It opens the file and reads its content to create an md5 hash from it.
+        It opens the file and reads its content to create a md5 hash from it.
         To create the hash, the hashlib library is used.
         Referencing -> https://stackoverflow.com/questions/1131220/get-md5-hash-of-big-files-in-python
 
         Arguments:
             hash_factory: Defines what type of hash we want, in this case md5
-            chunk_num_blocks: Defines the amount chunks of the file it loads to memory at once. Especially
-            important to prevent memory issues on small devices like the Raspberry Pi
+            chunk_num_blocks: Defines the amount chunks of the file it loads to memory at once.
+                Especially important to prevent memory issues on small devices like the Raspberry Pi
         """
         hash_factory = hash_factory()
         with open(self.path, 'rb') as file_pointer:
-            while chunk := file_pointer.read(chunk_num_blocks * hash_factory.block_size):
-                hash_factory.update(chunk)
+            with mmap.mmap(file_pointer.fileno(), length=0, access=mmap.ACCESS_READ) as mmap_obj:
+                while chunk := mmap_obj.read(chunk_num_blocks * hash_factory.block_size):
+                    hash_factory.update(chunk)
         self.hash = hash_factory.digest()
 
     def get_name(self):

@@ -1,8 +1,7 @@
 from raspirus.backend.file_scanner_module import FileScanner
 from raspirus.backend.hash_api_module import HashAPI
 
-signature_path = "BigHash.db"
-signature_lists_path = "backend/SignatureLists/*md5"
+db_location = "database/signatures.db"
 
 
 # This function isn't finished yet and used for testing purposes, will then be implemented later
@@ -14,28 +13,22 @@ def main():
     print("#########################################################################")
     path_to_check = str(input("Enter path: "))
     print("")
-    fs = FileScanner(path_to_check, signature_path)
-    fs.initialize_scanner()
+    fs = FileScanner(path_to_check, db_location)
     fs.start_scanner()
 
 
 def updater():
     # Path to directory with md5 files/file extension, path to the bighash file
     # 38797306 Hashes
-    hapi = HashAPI(signature_lists_path, signature_path)
-    hapi.update_bighash()
-    h_list = hapi.get_hash()
-    print("Length: " + str(len(h_list)))
-
-
-def downloader():
-    hapi = HashAPI(signature_lists_path, signature_path)
-    hapi.download_new_signatures("backend/SignatureLists")
+    hapi = HashAPI(db_location)
+    hapi.update_db()
+    print("Hash amount: " + hapi.count_hashes())
 
 
 def more_info():
-    hapi = HashAPI(signature_lists_path, signature_path)
-    hapi.get_hash_info("backend/temp/test.json", "ecb9cf121345c404495d99c737c7d3bf")
+    hapi = HashAPI(db_location)
+    hapi.get_hash_info("temp/test.json", "ecb9cf121345c404495d99c737c7d3bf")
 
 
-main()
+#main()
+updater()

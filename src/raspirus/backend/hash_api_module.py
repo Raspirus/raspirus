@@ -8,11 +8,20 @@ References -> https://virusshare.com
 """
 
 import os
-import shutil
-import glob
+import time
+from urllib.request import urlopen
+import sqlite3
 from urllib.error import HTTPError
 import wget
 from dotenv import load_dotenv
+
+
+def print_star(counter):
+    if counter % 50 == 0:
+        print("*")
+        print(str(counter) + ".", end=" ")
+    else:
+        print("*", end=" ")
 
 
 class HashAPI:
@@ -25,157 +34,145 @@ class HashAPI:
 
     Attributes:
         api_key: The API key used to access VirusShare
-        bighash_path: Path to the file containing all signatures in hash format
-        signature_list_path: Folder containing all signature lists as individual files
-        hash_list: List of hashes extracted from the bighash_file
-        file_list: List of files, basically the files mentioned in the signature_list_path
     """
     load_dotenv()  # Loads environment variables
     api_key = os.getenv('VIRUS_API')
-    bighash_path = ""
-    signature_list_path = ""
-    hash_list: list[str] = []
-    file_list: list[str] = []
+    db_connection = None
 
-    def __init__(self, signature_path, bighash_path):
+    def __init__(self, db_location):
         """ Initializes the class setting the given parameters
 
         It creates an object that can be used to interact with the Virusshare API
-        and the signatures list.
-
-        Args:
-            signature_path: Path to the folder containing all hash signatures
-            bighash_path: Path to the one big file containing all hashes merged together
-        """
-        self.signature_list_path = signature_path
-        self.bighash_path = bighash_path
-        self.file_list = glob.glob(self.signature_list_path)
-
-    def get_hash(self):
-        """ Returns the hash list """
-        return self.hash_list
-
-    # A function to merge all hash lists into one
-    def merge_files(self):
-        """ Merges all hashes of files into one big file.
-
-        When using the API, we can only download lists individually, but when searching for signatures
-        it is far more efficient and easier to have all hashes in one file. Therefore, we use
-        this small function to merge all individual signatures into one big file.
-
-        """
-        print("Starting file merging")
-        with open(self.bighash_path, 'wb', encoding="utf8") as wfd:
-            for file in self.file_list:
-                with open(file, 'rb') as file_pointer:
-                    shutil.copyfileobj(file_pointer, wfd)
-
-    def refactor_bighash(self):
-        """ Removed doubles and incorrect hashes from the big file
-
-        Extract all hashes from file and put them into an array
-        then overwrite the file with this array and put a message at the end of the file
-        The message will then specify the last merged file
-        This is useful to later detect which file still needs to be added
+        and the signatures' database.
         """
 
-        # Read all hashes from file
-        print("Reading all hashes from file...")
-        with open(self.bighash_path, encoding="utf8") as file_pointer:
-            for line in file_pointer:
-                # Comments in the file need to be removed
-                if not line.startswith("#"):
-                    self.hash_list.append(str(line))
+        try:
+            self.db_connection = sqlite3.connect(db_location)
+            self.init_table()
+        except sqlite3.Error as e:
+            raise Exception("Connection to DB failed: " + str(e))
 
-        # Here we convert the list to a set and back, this removes duplicates
-        self.hash_list = list(set(self.hash_list))
-        self.hash_list.sort()
+    def init_table(self):
+        sql = ''' CREATE TABLE IF NOT EXISTS signatures (
+                    hash varchar(32) PRIMARY KEY,
+                    file_nr varchar(5)
+                    ); '''
+        try:
+            cur = self.db_connection.cursor()
+            cur.execute(sql)
+            self.db_connection.commit()
+        except sqlite3.Error as e:
+            print("SQL table not created: " + str(e))
 
-        # Write all hashes to file
-        print("Writing all hashes to file...")
-        with open(self.bighash_path, 'w', encoding="utf8") as file_pointer:
-            for hashes in self.hash_list:
-                file_pointer.writelines(hashes)
-            # Write last line to identify which Hash we included for last
-            file_pointer.writelines("# Last added: " + self.file_list[len(self.file_list) - 1])
+    def insert_hash(self, hash_str, file_nr):
+        sql = ''' INSERT INTO signatures(hash, file_nr)
+              VALUES (?, ?) '''
 
-    def bighash_is_updated(self):
-        """ Checks the last line in the big file to determine if its updated.
+        try:
+            cur = self.db_connection.cursor()
+            cur.execute(sql, (hash_str, file_nr))
+            self.db_connection.commit()
+        except sqlite3.Error as e:
+            print("Hash (" + hash_str + ") not inserted: " + str(e))
 
-        Basically we keep all signatures in individual files, each with a specific name.
-        Then, when merging, we also add the name of the last merged file to the end of the file.
-        Then when checking if the file is up-to-date, we simply compare the name of the last file
-        in our directory of signature lists, and the line last written in the file.
-        If they are the same, the file is up-to-date, else it needs to be updated
+    def hash_exists(self, hash_str):
+        sql = ''' SELECT hash FROM signatures
+                WHERE hash = ? '''
 
-        Returns:
-            True - If the Signatures list is updated
-            False - If no file was found or the file is not up-to-date
+        cur = self.db_connection.cursor()
+        cur.execute(sql, (hash_str,))
 
-         """
-        print("Checking if file is updated")
-        if os.path.exists(self.bighash_path):
-            with open(self.bighash_path, 'rb') as file_pointer:
-                try:  # catch OSError in case of a one line file
-                    file_pointer.seek(-2, os.SEEK_END)
-                    while file_pointer.read(1) != b'\n':
-                        file_pointer.seek(-2, os.SEEK_CUR)
-                except OSError:
-                    file_pointer.seek(0)
-                last_line = file_pointer.readline().decode()
-                print(last_line)
-                print(last_line.split("added:", 1)[1])
-                print(self.file_list[len(self.file_list) - 1])
-                return (last_line.split("added:", 1)[1]).strip() == \
-                    (self.file_list[len(self.file_list) - 1]).strip()
+        rows = cur.fetchall()
+        print("DEB: " + str(rows))
+
+        if len(rows) > 0:
+            return True
         return False
 
-    def update_bighash(self):
-        """ Updates the big file if it hasn't already"""
-        # First check if the file exists, then if the latest hash list has been added
-        if self.bighash_is_updated():
-            print("File up to date, nothing to do")
+    def get_latest_file_nr(self):
+        sql = ''' SELECT file_nr 
+                    FROM signatures
+                    ORDER BY file_nr DESC
+                    LIMIT 1; '''
+
+        cur = self.db_connection.cursor()
+        cur.execute(sql)
+
+        return ''.join(map(str, cur.fetchone()))
+
+    def count_hashes(self):
+        sql = ''' SELECT COUNT(hash)
+                    FROM signatures '''
+
+        cur = self.db_connection.cursor()
+        cur.execute(sql)
+
+        return ''.join(map(str, cur.fetchone()))
+
+    def update_db(self):
+        if not self.db_is_updated():
+            file_nr = self.get_latest_file_nr()
+            if file_nr == 'None':
+                file_nr = "0"
+
+            while True:
+                try:
+                    tic = time.perf_counter()
+                    counter = 0
+                    # Format the correct filename for the URL
+                    file_nr = int(file_nr) + 1
+                    file_nr = f'{file_nr:05d}'
+                    filename = "VirusShare_" + file_nr + ".md5"
+                    # Extract the file online
+                    url = "https://virusshare.com/hashfiles/" + filename
+                    file = urlopen(url)
+                    # Read each line and add it to the database
+                    for line in file:
+                        line_n = str(line).replace("b'", "").replace("\\n'", "")
+                        if not line_n.startswith("#"):
+                            counter += 1
+                            print_star(counter)
+                            self.insert_hash(line_n, file_nr)
+                    toc = time.perf_counter()
+                    print(f"Downloaded {filename} in {toc - tic:0.4f} seconds")
+                except HTTPError as err:
+                    if err.code == 404:
+                        print("No more files to download")
+                        break
+                    print("ERROR: " + str(err))
+                    break
         else:
-            print("File not up to date, syncing")
-            self.file_list = glob.glob(self.signature_list_path)
-            self.merge_files()
-            self.refactor_bighash()
+            print("DB already up-to-date")
 
-    def download_new_signatures(self, download_path):
-        """ Downloads new hash signatures from the online database
+    def db_is_updated(self):
+        """ Checks if the Database is up-to-date.
 
-        The API doesn't really allow us to download the signatures list, so we have to scrape
-        them from the website. Each file has a specific name and a number that serves as
-        identifier and counter. We can therefore just download each file and increase the counter until
-        we get a 404 Error. Since we also keep a list of all files, we don't need to start from 0, but
-        instead can start from the last counter of the last downloaded file, increase it and see if
-        we get a 404 Error
+        It uses another function to retrieve the latest file_nr in the database.
+        Then using that, it tries to increase it and reach the file with the new number.
+        If the request is successful, it means the database is outdated, else its updated
 
-        Args:
-            download_path: Where to save the downloaded files
+        Returns:
+            False - Database is NOT updated
+            True - Database is updated
 
         """
-        # Use the last downloaded Hash to create a URL and add +1 to it
-        # If it exists we download it and add +1 again
-        # We do this until a 404 error arises, then we stop
-        last_sign = self.file_list[len(self.file_list) - 1]
-        last_sign = last_sign.split("VirusShare_", 1)[1]
-        last_sign_int = int(last_sign[:-4])
+        file_nr = self.get_latest_file_nr()
+        if file_nr == 'None':
+            return False
 
-        # Now we increase the number and try to download the resource
-        while True:
-            try:
-                last_sign_int += 1
-                filename = "VirusShare_00" + str(last_sign_int) + ".md5"
-                url = "https://virusshare.com/hashfiles/" + filename
-                wget.download(url, download_path + "/" + filename)
-                print("New file downloaded: " + filename)
-            except HTTPError as err:
-                if err.code == 404:
-                    print("No more file to download")
-                    break
-                print("ERROR: " + str(err))
-                break
+        try:
+            file_nr = int(file_nr) + 1
+            # A method to add leading zeros
+            file_nr = f'{file_nr:05d}'
+            filename = "VirusShare_" + file_nr + ".md5"
+            url = "https://virusshare.com/hashfiles/" + filename
+            # Will generate an error if url is unreachable
+            urlopen(url)
+            return False
+        except HTTPError as err:
+            if err.code == 404:
+                return True
+            print("Error! " + str(err))
 
     def get_hash_info(self, json_location, virus_hash: str):
         """ Creates a JSON file containing information about a given hash
