@@ -35,7 +35,7 @@ class Windows(tk.Tk):
     pages = (MainPage, SettingsPage, LoadingPage, InfoPage, VirusPage, ClearPage, SettingsLogPage)
 
     # App properties: name, version, creator, license, contact
-    properties = [None, None, None, None, None]
+    properties = ["Raspirus", "v1.0.0", "Benjamin Demetz", "GPL", None]
 
     # Logs properties:
     log_file_location = "../notes.txt"
