@@ -10,7 +10,7 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
-    permissions: read-all|write-all
+    permissions: write-all
 
     steps:
     - uses: actions/checkout@v3
@@ -27,3 +27,4 @@ jobs:
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
     - name: Run script
       run: python src/raspirus/backend/main.py
+      shell: sh
