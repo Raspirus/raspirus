@@ -6,6 +6,8 @@ name: Python script
 on:
   workflow_dispatch:
 
+permissions: read-all|write-all
+
 jobs:
   build:
 
