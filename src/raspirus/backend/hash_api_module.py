@@ -17,7 +17,7 @@ from dotenv import load_dotenv
 
 
 def print_star(counter):
-    if counter % 50 == 0:
+    if counter % 100 == 0:
         print("*")
         print(str(counter) + ".", end=" ")
     else:
@@ -98,7 +98,10 @@ class HashAPI:
         cur = self.db_connection.cursor()
         cur.execute(sql)
 
-        return ''.join(map(str, cur.fetchone()))
+        try:
+            return ''.join(map(str, cur.fetchone()))
+        except Exception:
+            return 'None'
 
     def count_hashes(self):
         sql = ''' SELECT COUNT(hash)
@@ -120,8 +123,6 @@ class HashAPI:
                     tic = time.perf_counter()
                     counter = 0
                     # Format the correct filename for the URL
-                    file_nr = int(file_nr) + 1
-                    file_nr = f'{file_nr:05d}'
                     filename = "VirusShare_" + file_nr + ".md5"
                     # Extract the file online
                     url = "https://virusshare.com/hashfiles/" + filename
@@ -135,6 +136,8 @@ class HashAPI:
                             self.insert_hash(line_n, file_nr)
                     toc = time.perf_counter()
                     print(f"Downloaded {filename} in {toc - tic:0.4f} seconds")
+                    file_nr = int(file_nr) + 1
+                    file_nr = f'{file_nr:05d}'
                 except HTTPError as err:
                     if err.code == 404:
                         print("No more files to download")
