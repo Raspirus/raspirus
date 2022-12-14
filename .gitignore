@@ -410,3 +410,4 @@ test.json
 .idea/
 Diagramme/
 School/
+src/raspirus/backend/database/signatures.db
