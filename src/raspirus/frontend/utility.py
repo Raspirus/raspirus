@@ -13,8 +13,8 @@ SMALL_BUTTON_TEXT_FONT = ("Inter", 12, "normal")
 # Reference: https://materialui.co/flatuicolors/
 TEXT_COLOR = "#ECF0F1"  # white
 GREY_COLOR = "#95A5A6"
-PRIMARY_COLOR = "#1ABC9C"   # aqua
-SECONDARY_COLOR = "#3498DB"   # light-blue
+PRIMARY_COLOR = "#11e3ee"   # aqua
+SECONDARY_COLOR = "#148797"   # light-blue
 SUCCESS_COLOR = "#2ECC71"   # green
 FAILURE_COLOR = "#E74C3C"   # red
 WARNING_COLOR = "#F1C40F"   # orange/yellow

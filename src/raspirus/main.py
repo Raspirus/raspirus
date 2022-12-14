@@ -42,11 +42,8 @@ class Windows(tk.Tk):
 
     # Scanner properties
     scanning_path = ""
-    signature_path = "backend/BigHash.db"
+    database_path = "backend/database/signatures.db"
     scanner: FileScanner
-
-    # HashAPi properties:
-    signature_lists_path = "backend/SignatureLists/*md5"
     hash_updater: HashAPI
 
     def __init__(self):
@@ -79,7 +76,8 @@ class Windows(tk.Tk):
             frame.grid(row=0, column=0, sticky="nsew")
 
         # Using a method to switch frames
-        self.show_frame(MainPage)
+        # self.show_frame(MainPage)
+        self.show_frame(LoadingPage)
 
     def show_frame(self, cont):
         """This method opens a new frame by giving it the ID
@@ -96,9 +94,9 @@ class Windows(tk.Tk):
         loading_page = self.frames[LoadingPage]
         # loading_page.print_tests()
         # TODO: Make this a thread -> Else blocks the button
-        self.scanner = FileScanner(path=self.scanning_path, signature_path=self.signature_path)
-        self.scanner.initialize_scanner()
-        loading_page.set_maximum(len(self.scanner.unscanned_list))
+        self.scanner = FileScanner(path=self.scanning_path, db_location=self.database_path)
+        self.scanner.start_scanner()
+        loading_page.set_maximum(0)
         self.show_frame(LoadingPage)
         # self.scanner.start_scanner() # Continue from here once this is done
         # self.evaluate_scanner()

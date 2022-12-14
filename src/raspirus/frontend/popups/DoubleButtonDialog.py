@@ -24,12 +24,13 @@ class DoubleButtonDialog(tk.Toplevel):
         self.center()
 
         self.wm_geometry("500x250")
+        self.overrideredirect(True)
 
         # This is watching the window manager close button
         # and uses the same callback function as the other buttons
         # (you can use which ever you want, BUT REMEMBER TO ENABLE
         # THE PARENT WINDOW AGAIN)
-        self.protocol("WM_DELETE_WINDOW", self.close_dialog)  # type: ignore [arg-type]
+        self.protocol("WM_DELETE_WINDOW", lambda: self.close_dialog(btn="deny"))  # type: ignore [arg-type]
 
         # Forces all interactions to go through this modal dialog:
         self.grab_set()
