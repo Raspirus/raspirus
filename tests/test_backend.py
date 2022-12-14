@@ -7,6 +7,8 @@ from raspirus.backend.file_module import File
 from raspirus.backend.file_scanner_module import FileScanner
 
 single_file_path = "files/subfolder/dummy1.txt"
+folder_scan_path = "files"
+database_path = "../src/raspirus/backend/database/signatures.db"
 
 
 def test_file_creation_error():
@@ -28,21 +30,23 @@ def test_file_scanner_creation():
         FileScanner(None, None)
 
 
-def test_single_file_scan(file_scanner):
-    file_scanner.path = single_file_path
-    file_scanner.start_scanner()
-    print(f"RAM consumed: {tracemalloc.get_traced_memory()}")
-    assert file_scanner.amount_of_files == 1
-
-
-def test_folder_scan(file_scanner):
+def test_folder_scan():
+    tracemalloc.start()
     snapshot1 = tracemalloc.take_snapshot()
+    file_scanner = FileScanner(path=folder_scan_path, db_location=database_path)
     file_scanner.start_scanner()
     snapshot2 = tracemalloc.take_snapshot()
     top_stats = snapshot2.compare_to(snapshot1, 'lineno')
+    tracemalloc.stop()
     for stat in top_stats[:10]:
         print(stat)
     assert file_scanner.amount_of_files >= 1
+
+
+def test_single_file_scan():
+    file_scanner = FileScanner(path=single_file_path, db_location=database_path)
+    file_scanner.start_scanner()
+    assert file_scanner.amount_of_files == 1
 
 
 def test_print(capture_stdout):
