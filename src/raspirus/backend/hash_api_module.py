@@ -16,14 +16,6 @@ import wget
 from dotenv import load_dotenv
 
 
-def print_star(counter):
-    if counter % 100 == 0:
-        print("*")
-        print(str(counter) + ".", end=" ")
-    else:
-        print("*", end=" ")
-
-
 class HashAPI:
     """
     This class will do the following tasks using the Virusshare API
@@ -75,6 +67,17 @@ class HashAPI:
         except sqlite3.Error as e:
             print("Hash (" + hash_str + ") not inserted: " + str(e))
 
+    def insert_hashes(self, hashes):
+        sql = ''' INSERT INTO signatures(hash, file_nr)
+              VALUES (?, ?) '''
+
+        try:
+            cur = self.db_connection.cursor()
+            cur.executemany(sql, hashes)
+            self.db_connection.commit()
+        except sqlite3.Error as e:
+            print("Hashes not inserted: " + str(e))
+
     def hash_exists(self, hash_str):
         sql = ''' SELECT hash FROM signatures
                 WHERE hash = ? '''
@@ -113,27 +116,27 @@ class HashAPI:
         return ''.join(map(str, cur.fetchone()))
 
     def update_db(self):
+        big_tic = time.perf_counter()
         if not self.db_is_updated():
             file_nr = self.get_latest_file_nr()
             if file_nr == 'None':
-                file_nr = "0"
+                file_nr = "00000"
 
             while True:
                 try:
                     tic = time.perf_counter()
-                    counter = 0
                     # Format the correct filename for the URL
                     filename = "VirusShare_" + file_nr + ".md5"
                     # Extract the file online
                     url = "https://virusshare.com/hashfiles/" + filename
                     file = urlopen(url)
                     # Read each line and add it to the database
+                    hashes = []
                     for line in file:
                         line_n = str(line).replace("b'", "").replace("\\n'", "")
                         if not line_n.startswith("#"):
-                            counter += 1
-                            print_star(counter)
-                            self.insert_hash(line_n, file_nr)
+                            hashes.append((line_n, file_nr))
+                    self.insert_hashes(hashes)
                     toc = time.perf_counter()
                     print(f"Downloaded {filename} in {toc - tic:0.4f} seconds")
                     file_nr = int(file_nr) + 1
@@ -146,6 +149,8 @@ class HashAPI:
                     break
         else:
             print("DB already up-to-date")
+        big_toc = time.perf_counter()
+        print(f"Executed in {big_toc - big_tic:0.4f} seconds")
 
     def db_is_updated(self):
         """ Checks if the Database is up-to-date.

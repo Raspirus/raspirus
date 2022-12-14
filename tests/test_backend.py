@@ -2,6 +2,7 @@
 # test directory, and then in those files, executes all functions
 # starting with test
 import pytest
+from memory_profiler import profile
 from raspirus.backend.file_module import File
 from raspirus.backend.file_scanner_module import FileScanner
 
