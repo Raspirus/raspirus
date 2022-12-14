@@ -41,6 +41,7 @@ class HashAPI:
         try:
             self.db_connection = sqlite3.connect(db_location)
             self.init_table()
+            self.update_db()
         except sqlite3.Error as e:
             raise Exception("Connection to DB failed: " + str(e))
 
