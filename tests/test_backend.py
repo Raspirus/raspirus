@@ -2,11 +2,12 @@
 # test directory, and then in those files, executes all functions
 # starting with test
 import pytest
-from memory_profiler import profile
+import tracemalloc
 from raspirus.backend.file_module import File
 from raspirus.backend.file_scanner_module import FileScanner
 
-single_file_path = "C:/Users/benbe/Documents/Coding/PyProjects/MaturaProject/tests/files/subfolder/dummy1.txt"
+tracemalloc.start()
+single_file_path = "files/subfolder/dummy1.txt"
 
 
 def test_file_creation_error():
@@ -28,43 +29,24 @@ def test_file_scanner_creation():
         FileScanner(None, None)
 
 
-def test_single_file_scan_init(file_scanner):
+def test_single_file_scan(file_scanner):
     file_scanner.path = single_file_path
-    file_scanner.initialize_scanner()
-    assert len(file_scanner.unscanned_list) == 1
-
-
-def test_folder_scan_init(file_scanner):
-    file_scanner.initialize_scanner()
-    assert len(file_scanner.unscanned_list) is not None
-
-
-def test_single_file_scan_start_error(file_scanner):
-    file_scanner.path = single_file_path
-    with pytest.raises(Exception):
-        file_scanner.start_scanner()
-
-
-def test_single_file_scan_start_success(file_scanner):
-    file_scanner.path = single_file_path
-    file_scanner.initialize_scanner()
     file_scanner.start_scanner()
-    assert len(file_scanner.clean_files) == 1
-    assert len(file_scanner.dirty_files) == 0
+    print(f"RAM consumed: {tracemalloc.get_traced_memory()}")
+    assert file_scanner.amount_of_files == 1
 
 
-def test_folder_scan_start_error(file_scanner):
-    with pytest.raises(Exception):
-        file_scanner.start_scanner()
-
-
-def test_folder_scan_start_success(file_scanner):
-    file_scanner.initialize_scanner()
+def test_folder_scan(file_scanner):
+    snapshot1 = tracemalloc.take_snapshot()
     file_scanner.start_scanner()
-    assert len(file_scanner.clean_files) > 0
-    assert len(file_scanner.dirty_files) == 0
+    snapshot2 = tracemalloc.take_snapshot()
+    top_stats = snapshot2.compare_to(snapshot1, 'lineno')
+    for stat in top_stats[:10]:
+        print(stat)
+    assert file_scanner.amount_of_files >= 1
 
 
 def test_print(capture_stdout):
     print("hello")
+    tracemalloc.stop()
     assert capture_stdout["stdout"] == "hello\n"

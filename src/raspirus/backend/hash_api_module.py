@@ -84,11 +84,9 @@ class HashAPI:
 
         cur = self.db_connection.cursor()
         cur.execute(sql, (hash_str,))
+        rows = cur.fetchone()
 
-        rows = cur.fetchall()
-        print("DEB: " + str(rows))
-
-        if len(rows) > 0:
+        if rows:
             return True
         return False
 

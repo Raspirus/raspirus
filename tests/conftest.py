@@ -3,8 +3,8 @@ import sys
 
 from raspirus.backend.file_scanner_module import FileScanner
 
-folder_scan_path = "C:/Users/benbe/Documents/Coding/PyProjects/MaturaProject/tests/files"
-bighash_path = "C:/Users/benbe/Documents/Coding/PyProjects/MaturaProject/src/raspirus/backend/BigHash.db"
+folder_scan_path = "files"
+database_path = "../src/raspirus/backend/database/signatures.db"
 
 
 @pytest.fixture
@@ -21,4 +21,4 @@ def capture_stdout(monkeypatch):
 
 @pytest.fixture(scope="session")
 def file_scanner():
-    yield FileScanner(folder_scan_path, bighash_path)
+    yield FileScanner(folder_scan_path, database_path)
