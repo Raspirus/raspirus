@@ -43,7 +43,6 @@ class File:
             self.get_checksum()
             self.get_name()
         else:
-            print(path)
             raise Exception("File not created, path invalid")
 
     def get_checksum(self, hash_factory=hashlib.md5, chunk_num_blocks=128):
@@ -59,11 +58,14 @@ class File:
                 Especially important to prevent memory issues on small devices like the Raspberry Pi
         """
         hash_factory = hash_factory()
-        with open(self.path, 'rb') as file_pointer:
-            with mmap.mmap(file_pointer.fileno(), length=0, access=mmap.ACCESS_READ) as mmap_obj:
-                while chunk := mmap_obj.read(chunk_num_blocks * hash_factory.block_size):
-                    hash_factory.update(chunk)
-        self.hash = hash_factory.digest()
+        if os.path.getsize(self.path):
+            with open(self.path, 'rb') as file_pointer:
+                with mmap.mmap(file_pointer.fileno(), length=0, access=mmap.ACCESS_READ) as mmap_obj:
+                    while chunk := mmap_obj.read(chunk_num_blocks * hash_factory.block_size):
+                        hash_factory.update(chunk)
+            self.hash = hash_factory.digest()
+        else:
+            self.hash = bytes("0", 'utf-8')
 
     def get_name(self):
         """ Returns the name of the file as string """

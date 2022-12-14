@@ -47,16 +47,21 @@ class FileScanner:
             raise Exception("Invalid path or path not a directory")
 
     def start_scanner(self):
-        for path, directories, file_names in os.walk(self.path):
-            # print("Directories found: " + str(directories))
-            for file_name in file_names:
-                file_path = path + "/" + file_name
-                file = File(file_path)
-                self.amount_of_files += 1
-                if self.hasher.hash_exists(file.get_hash()):
-                    self.dirty_files.append(file)
+        if os.path.isdir(self.path):
+            for path, directories, file_names in os.walk(self.path):
+                for file_name in file_names:
+                    file_path = path + "/" + file_name
+                    file = File(file_path)
+                    self.amount_of_files += 1
+                    if self.hasher.hash_exists(file.get_hash()):
+                        self.dirty_files.append(file)
+        else:
+            file = File(self.path)
+            self.amount_of_files += 1
+            if self.hasher.hash_exists(file.get_hash()):
+                self.dirty_files.append(file)
 
-        print("Scanner finished! \n" +
+        print("\nScanner finished! \n" +
               "Scanned files: " + str(self.amount_of_files) + "\n" +
               "Bad files: " + str(len(self.dirty_files)) + "\n" +
               "Scanned path: " + self.path)
