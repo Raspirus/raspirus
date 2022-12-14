@@ -91,7 +91,7 @@ class HashAPI:
         return False
 
     def get_latest_file_nr(self):
-        sql = ''' SELECT file_nr 
+        sql = ''' SELECT file_nr
                     FROM signatures
                     ORDER BY file_nr DESC
                     LIMIT 1; '''

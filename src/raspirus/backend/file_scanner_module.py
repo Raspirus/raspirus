@@ -6,6 +6,7 @@ else we consider it to be a clean file.
 """
 
 import os.path
+import time
 from raspirus.backend.file_module import File
 from raspirus.backend.hash_api_module import HashAPI
 
@@ -39,7 +40,7 @@ class FileScanner:
 
          """
         # Checks if path is a directory and sets it to the class
-        if os.path.isdir(path):
+        if os.path.exists(path):
             self.path = path
             self.hasher = HashAPI(db_location)
         else:
@@ -47,6 +48,7 @@ class FileScanner:
             raise Exception("Invalid path or path not a directory")
 
     def start_scanner(self):
+        tic = time.perf_counter()
         if os.path.isdir(self.path):
             for path, directories, file_names in os.walk(self.path):
                 for file_name in file_names:
@@ -60,8 +62,9 @@ class FileScanner:
             self.amount_of_files += 1
             if self.hasher.hash_exists(file.get_hash()):
                 self.dirty_files.append(file)
-
+        toc = time.perf_counter()
         print("\nScanner finished! \n" +
-              "Scanned files: " + str(self.amount_of_files) + "\n" +
-              "Bad files: " + str(len(self.dirty_files)) + "\n" +
-              "Scanned path: " + self.path)
+              f"Scanned files: {str(self.amount_of_files)} \n" +
+              f"Bad files: {str(len(self.dirty_files))} \n" +
+              f"Scanned path: {self.path} \n" +
+              f"Execution time: {toc - tic:0.4f} seconds")

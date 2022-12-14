@@ -13,6 +13,7 @@ def main():
     print("#########################################################################")
     path_to_check = str(input("Enter path: "))
     print("")
+    updater()
     fs = FileScanner(path_to_check, db_location)
     fs.start_scanner()
 
@@ -30,5 +31,4 @@ def more_info():
     hapi.get_hash_info("temp/test.json", "ecb9cf121345c404495d99c737c7d3bf")
 
 
-#main()
-updater()
+main()
