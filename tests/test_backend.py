@@ -6,7 +6,6 @@ import tracemalloc
 from raspirus.backend.file_module import File
 from raspirus.backend.file_scanner_module import FileScanner
 
-tracemalloc.start()
 single_file_path = "files/subfolder/dummy1.txt"
 
 
@@ -48,5 +47,4 @@ def test_folder_scan(file_scanner):
 
 def test_print(capture_stdout):
     print("hello")
-    tracemalloc.stop()
     assert capture_stdout["stdout"] == "hello\n"
