@@ -22,7 +22,7 @@ class SingleButtonDialog(tk.Toplevel):
         self.mode = mode
 
         self.wm_resizable(False, False)
-        self.overrideredirect(True)
+        self.overrideredirect(True)  # Borderless
         self.center()
 
         self.wm_geometry("500x250")

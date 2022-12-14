@@ -6,6 +6,7 @@ Classes: Windows
 # Importing the tkinter module
 import tkinter as tk
 import ctypes
+import threading
 
 # Frontend:
 from raspirus.frontend.pages.ClearPage import ClearPage
@@ -43,7 +44,7 @@ class Windows(tk.Tk):
     # Scanner properties
     scanning_path = ""
     database_path = "backend/database/signatures.db"
-    scanner: FileScanner
+    file_scanner: FileScanner
     hash_updater: HashAPI
 
     def __init__(self):
@@ -76,8 +77,8 @@ class Windows(tk.Tk):
             frame.grid(row=0, column=0, sticky="nsew")
 
         # Using a method to switch frames
-        # self.show_frame(MainPage)
-        self.show_frame(LoadingPage)
+        self.show_frame(MainPage)
+        # self.show_frame(LoadingPage)
 
     def show_frame(self, cont):
         """This method opens a new frame by giving it the ID
@@ -90,28 +91,27 @@ class Windows(tk.Tk):
         # raises the current frame to the top
         frame.tkraise()
 
+    def thread_helper(self):
+        self.file_scanner = FileScanner(path=self.scanning_path, db_location=self.database_path)
+        self.file_scanner.start_scanner()
+        self.evaluate_scanner()
+
     def start_scanner(self):
-        loading_page = self.frames[LoadingPage]
-        # loading_page.print_tests()
-        # TODO: Make this a thread -> Else blocks the button
-        self.scanner = FileScanner(path=self.scanning_path, db_location=self.database_path)
-        self.scanner.start_scanner()
-        loading_page.set_maximum(0)
         self.show_frame(LoadingPage)
-        # self.scanner.start_scanner() # Continue from here once this is done
-        # self.evaluate_scanner()
+        t = threading.Thread(target=self.thread_helper)
+        t.start()
 
     def evaluate_scanner(self):
-        if len(self.scanner.dirty_files) > 0:
+        if len(self.file_scanner.dirty_files) > 0:
             virus_page = self.frames[VirusPage]
-            virus_page.add_viruses(self.scanner.dirty_files)
+            virus_page.add_viruses(self.file_scanner.dirty_files)
             self.show_frame(VirusPage)
         else:
             self.show_frame(ClearPage)
 
     def start_hash_updates(self):
-        self.hash_updater = HashAPI(self.signature_lists_path, self.signature_path)
-        self.hash_updater.update_bighash()
+        self.hash_updater = HashAPI(self.database_path)
+        self.hash_updater.update_db()
 
 
 if __name__ == "__main__":

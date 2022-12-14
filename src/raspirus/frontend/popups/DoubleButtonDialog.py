@@ -24,7 +24,7 @@ class DoubleButtonDialog(tk.Toplevel):
         self.center()
 
         self.wm_geometry("500x250")
-        self.overrideredirect(True)
+        self.overrideredirect(True)  # Borderless
 
         # This is watching the window manager close button
         # and uses the same callback function as the other buttons
