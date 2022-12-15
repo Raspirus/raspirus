@@ -45,7 +45,8 @@ class File:
         else:
             raise Exception("File not created, path invalid")
 
-    def get_checksum(self, hash_factory=hashlib.md5, chunk_num_blocks=128):
+    def get_checksum(self, hash_factory=hashlib.md5, chunk_num_blocks=1048):
+        # initial value chunk_num_blocks=128
         """ Generates the MD5 hash of the file
 
         It opens the file and reads its content to create a md5 hash from it.

@@ -13,14 +13,12 @@ def main():
     print("#########################################################################")
     path_to_check = str(input("Enter path: "))
     print("")
-    updater()
     fs = FileScanner(path_to_check, db_location)
     fs.start_scanner()
 
 
 def updater():
     # Path to directory with md5 files/file extension, path to the bighash file
-    # 38797306 Hashes
     hapi = HashAPI(db_location)
     hapi.update_db()
     print("Hash amount: " + hapi.count_hashes())
