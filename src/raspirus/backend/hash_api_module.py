@@ -80,12 +80,16 @@ class HashAPI:
             print("Hashes not inserted: " + str(e))
 
     def hash_exists(self, hash_str):
+        tic_sql = time.perf_counter()
         sql = ''' SELECT hash FROM signatures
                 WHERE hash = ? '''
 
         cur = self.db_connection.cursor()
         cur.execute(sql, (hash_str,))
         rows = cur.fetchone()
+
+        toc_sql = time.perf_counter()
+        print(f"Executed {hash_str} in {toc_sql - tic_sql:0.6f} seconds")
 
         if rows:
             return True
