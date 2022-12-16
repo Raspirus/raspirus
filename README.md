@@ -34,4 +34,8 @@ Once you are ready to commit, you should execute the tox command and check for a
 For test suppresion: [StackOverflow answer](https://stackoverflow.com/a/73582480)
 
 ## Instructions
+- Building with [Nuitka](https://nuitka.net/doc/user-manual.html#use-case-4-program-distribution):
+  ```bash
+  python -m nuitka --enable-plugin=tk-inter --onefile main.py --include-data-files=backend/database/signatures.db=backend/database/ --include-data-dir=frontend/images=frontend/images
+  ```
 Coming soon
