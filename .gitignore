@@ -411,3 +411,5 @@ test.json
 Diagramme/
 School/
 src/raspirus/backend/database/signatures.db
+/src/raspirus/main.build/
+/src/raspirus/main.dist/
