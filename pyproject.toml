@@ -1,6 +1,6 @@
 [build-system]
-requires = ["setuptools>=42.0", "wheel"]
-build-backend = "setuptools.build_meta"
+requires = ["setuptools>=42.0", "wheel", "nuitka", "toml"]
+build-backend = "nuitka.distutils.Build"
 
 [tool.pytest.ini_options]
 addopts = "--cov=raspirus"
@@ -21,3 +21,7 @@ warn_return_any = true
 warn_unreachable = true
 warn_unused_configs = true
 no_implicit_reexport = true
+
+[nuitka]
+enable-plugin = "tk-inter"
+standalone = true

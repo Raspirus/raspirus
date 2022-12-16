@@ -59,11 +59,12 @@ class File:
                 Especially important to prevent memory issues on small devices like the Raspberry Pi
         """
         hash_factory = hash_factory()
-        if os.path.getsize(self.path):
+        if file_size := os.path.getsize(self.path):
             with open(self.path, 'rb') as file_pointer:
-                with mmap.mmap(file_pointer.fileno(), length=0, access=mmap.ACCESS_READ) as mmap_obj:
-                    while chunk := mmap_obj.read(chunk_num_blocks * hash_factory.block_size):
-                        hash_factory.update(chunk)
+                m = mmap.mmap(file_pointer.fileno(), length=file_size, access=mmap.ACCESS_READ)
+                while chunk := m.read(chunk_num_blocks * hash_factory.block_size):
+                    hash_factory.update(chunk)
+                file_pointer.close()
             self.hash = hash_factory.digest()
         else:
             self.hash = bytes("0", 'utf-8')

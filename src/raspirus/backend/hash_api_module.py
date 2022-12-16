@@ -43,46 +43,42 @@ class HashAPI:
             self.init_table()
             self.update_db()
         except sqlite3.Error as e:
-            raise Exception("Connection to DB failed: " + str(e))
+            raise Exception(f"Connection to DB failed: {str(e)}") from e
 
     def init_table(self):
         sql = ''' CREATE TABLE IF NOT EXISTS signatures (
-                    hash varchar(32) PRIMARY KEY,
-                    file_nr varchar(5)
-                    ); '''
+                     hash varchar(32) PRIMARY KEY,
+                     file_nr varchar(5)
+                     ); '''
         try:
             cur = self.db_connection.cursor()
             cur.execute(sql)
             self.db_connection.commit()
         except sqlite3.Error as e:
-            print("SQL table not created: " + str(e))
+            print(f"SQL table not created: {str(e)}")
 
     def insert_hash(self, hash_str, file_nr):
         sql = ''' INSERT INTO signatures(hash, file_nr)
-              VALUES (?, ?) '''
+               VALUES (?, ?) '''
 
         try:
             cur = self.db_connection.cursor()
             cur.execute(sql, (hash_str, file_nr))
             self.db_connection.commit()
         except sqlite3.Error as e:
-            print("Hash (" + hash_str + ") not inserted: " + str(e))
+            print(f"Hash ({hash_str}) not inserted: {str(e)}")
 
     def insert_hashes(self, hashes):
-        sql = ''' INSERT INTO signatures(hash, file_nr)
-              VALUES (?, ?) '''
-
         try:
-            cur = self.db_connection.cursor()
-            cur.executemany(sql, hashes)
+            self.db_connection.executemany('INSERT INTO signatures(hash, file_nr) VALUES(?, ?)', hashes)
             self.db_connection.commit()
         except sqlite3.Error as e:
-            print("Hashes not inserted: " + str(e))
+            print(f"Hashes not inserted: {str(e)}")
 
     def hash_exists(self, hash_str):
         tic_sql = time.perf_counter()
         sql = ''' SELECT hash FROM signatures
-                WHERE hash = ? '''
+                 WHERE hash = ? '''
 
         cur = self.db_connection.cursor()
         cur.execute(sql, (hash_str,))
@@ -91,15 +87,13 @@ class HashAPI:
         toc_sql = time.perf_counter()
         print(f"Executed {hash_str} in {toc_sql - tic_sql:0.6f} seconds")
 
-        if rows:
-            return True
-        return False
+        return bool(rows)
 
     def get_latest_file_nr(self):
         sql = ''' SELECT file_nr
-                    FROM signatures
-                    ORDER BY file_nr DESC
-                    LIMIT 1; '''
+                     FROM signatures
+                     ORDER BY file_nr DESC
+                     LIMIT 1; '''
 
         cur = self.db_connection.cursor()
         cur.execute(sql)
@@ -111,7 +105,7 @@ class HashAPI:
 
     def count_hashes(self):
         sql = ''' SELECT COUNT(hash)
-                    FROM signatures '''
+                     FROM signatures '''
 
         cur = self.db_connection.cursor()
         cur.execute(sql)
@@ -128,12 +122,9 @@ class HashAPI:
             while True:
                 try:
                     tic = time.perf_counter()
-                    # Format the correct filename for the URL
-                    filename = "VirusShare_" + file_nr + ".md5"
-                    # Extract the file online
-                    url = "https://virusshare.com/hashfiles/" + filename
+                    filename = f"VirusShare_{file_nr}.md5"
+                    url = f"https://virusshare.com/hashfiles/{filename}"
                     file = urlopen(url)
-                    # Read each line and add it to the database
                     hashes = []
                     for line in file:
                         line_n = str(line).replace("b'", "").replace("\\n'", "")
@@ -148,7 +139,7 @@ class HashAPI:
                     if err.code == 404:
                         print("No more files to download")
                         break
-                    print("ERROR: " + str(err))
+                    print(f"ERROR: {str(err)}")
                     break
         else:
             print("DB already up-to-date")
@@ -172,18 +163,19 @@ class HashAPI:
             return False
 
         try:
-            file_nr = int(file_nr) + 1
-            # A method to add leading zeros
-            file_nr = f'{file_nr:05d}'
-            filename = "VirusShare_" + file_nr + ".md5"
-            url = "https://virusshare.com/hashfiles/" + filename
-            # Will generate an error if url is unreachable
-            urlopen(url)
-            return False
+            return self._check_latest_file(file_nr)
         except HTTPError as err:
             if err.code == 404:
                 return True
-            print("Error! " + str(err))
+            print(f"Error! {str(err)}")
+
+    def _check_latest_file(self, file_nr):
+        file_nr = int(file_nr) + 1
+        file_nr = f'{file_nr:05d}'
+        filename = f"VirusShare_{file_nr}.md5"
+        url = f"https://virusshare.com/hashfiles/{filename}"
+        urlopen(url)
+        return False
 
     def get_hash_info(self, json_location, virus_hash: str):
         """ Creates a JSON file containing information about a given hash
@@ -201,7 +193,7 @@ class HashAPI:
         """
 
         # Retrieves more detailed information about a specific hash by using the Virusshare API
-        url = "https://virusshare.com/apiv2/file?apikey=" + str(self.api_key) + "&hash=" + str(virus_hash)
+        url = f"https://virusshare.com/apiv2/file?apikey={str(self.api_key)}&hash={virus_hash}"
 
         try:
             wget.download(url, json_location)
@@ -214,4 +206,7 @@ class HashAPI:
             elif err.code == 404:
                 print("Request not found")
             else:
-                raise Exception("Error: " + str(err))
+                raise Exception(f"Error: {str(err)}") from err
+
+    def close_connection(self):
+        self.db_connection.close()

@@ -44,7 +44,7 @@ class FileScanner:
             self.path = path
             self.hasher = HashAPI(db_location)
         else:
-            print("Path: dir ? " + str(os.path.isdir(path)) + " & exists ?" + str(os.path.exists(path)))
+            print(f"Path: dir ? {str(os.path.isdir(path))} & exists ?{str(os.path.exists(path))}")
             raise Exception("Invalid path or path not a directory")
 
     def start_scanner(self):
@@ -52,7 +52,7 @@ class FileScanner:
         if os.path.isdir(self.path):
             for path, directories, file_names in os.walk(self.path):
                 for file_name in file_names:
-                    file_path = path + "/" + file_name
+                    file_path = f"{path}/{file_name}"
                     file = File(file_path)
                     self.amount_of_files += 1
                     if self.hasher.hash_exists(file.get_hash()):
@@ -63,8 +63,16 @@ class FileScanner:
             if self.hasher.hash_exists(file.get_hash()):
                 self.dirty_files.append(file)
         toc = time.perf_counter()
-        print("\nScanner finished! \n" +
-              f"Scanned files: {str(self.amount_of_files)} \n" +
-              f"Bad files: {str(len(self.dirty_files))} \n" +
-              f"Scanned path: {self.path} \n" +
-              f"Execution time: {toc - tic:0.4f} seconds")
+        print(
+            (
+                (
+                    (
+                        "\nScanner finished! \n"
+                        + f"Scanned files: {str(self.amount_of_files)} \n"
+                        + f"Bad files: {len(self.dirty_files)} \n"
+                    )
+                    + f"Scanned path: {self.path} \n"
+                )
+                + f"Execution time: {toc - tic:0.4f} seconds"
+            )
+        )
