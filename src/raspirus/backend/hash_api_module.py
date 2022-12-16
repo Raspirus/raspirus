@@ -169,7 +169,8 @@ class HashAPI:
                 return True
             print(f"Error! {str(err)}")
 
-    def _check_latest_file(self, file_nr):
+    @staticmethod
+    def _check_latest_file(file_nr):
         file_nr = int(file_nr) + 1
         file_nr = f'{file_nr:05d}'
         filename = f"VirusShare_{file_nr}.md5"

@@ -75,5 +75,5 @@ class SingleButtonDialog(tk.Toplevel):
         win_height = height + titlebar_height + frm_width
         x = self.winfo_screenwidth() // 2 - win_width // 2
         y = self.winfo_screenheight() // 2 - win_height // 2
-        self.geometry('{}x{}+{}+{}'.format(width, height, x, y))
+        self.geometry(f'{width}x{height}+{x}+{y}')
         self.deiconify()

@@ -56,10 +56,10 @@ class SettingsPage(tk.Frame):
 
         # All icons
         prefix = "frontend/images/icons/"
-        self.refresh_icon = tk.PhotoImage(file=prefix + "refresh_icon.png")
-        self.cancel_icon = tk.PhotoImage(file=prefix + "cancel_sign.png")
-        self.check_icon = tk.PhotoImage(file=prefix + "check_mark.png")
-        self.logs_icon = tk.PhotoImage(file=prefix + "logs_book.png")
+        self.refresh_icon = tk.PhotoImage(file=f"{prefix}refresh_icon.png")
+        self.cancel_icon = tk.PhotoImage(file=f"{prefix}cancel_sign.png")
+        self.check_icon = tk.PhotoImage(file=f"{prefix}check_mark.png")
+        self.logs_icon = tk.PhotoImage(file=f"{prefix}logs_book.png")
 
         # All Buttons
         self.hash_btn = tk.Button(self, text="Last updated 23.11.2022", font=NORMAL_TEXT_FONT,
@@ -93,7 +93,7 @@ class SettingsPage(tk.Frame):
             # Retrieves the modification time of the logs file and formats it accordingly
             gen_time = time.strptime(time.ctime(os.path.getmtime(controller.log_file_location)))
             log_file_gen_time = time.strftime("%d.%m.%Y %H:%M:%S", gen_time)
-            log_file_gen_text = "UP: " + log_file_gen_time
+            log_file_gen_text = f"UP: {log_file_gen_time}"
         else:
             self.log_btn.config(bg=FAILURE_COLOR)
 
@@ -109,7 +109,7 @@ class SettingsPage(tk.Frame):
             # Retrieves the modification time of the logs file and formats it accordingly
             gen_time = time.strptime(time.ctime(os.path.getmtime(controller.signature_path)))
             hash_file_gen_time = time.strftime("%d.%m.%Y %H:%M:%S", gen_time)
-            hash_file_gen_text = "UP: " + hash_file_gen_time
+            hash_file_gen_text = f"UP: {hash_file_gen_time}"
         else:
             self.hash_btn.config(bg=FAILURE_COLOR)
 
