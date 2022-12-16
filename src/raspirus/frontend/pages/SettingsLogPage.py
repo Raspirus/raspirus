@@ -32,13 +32,10 @@ class SettingsLogPage(tk.Frame):
         # Then we extract the text from the given logs file
         try:
             with open(controller.log_file_location) as f:
-                content = ""
                 line_content = f.readlines()
-                for line in line_content:
-                    content += line
-
+                content = "".join(line_content)
         except Exception as err:
-            print("Logs not found: " + str(err))
+            print(f"Logs not found: {str(err)}")
 
         # Then we can insert new text at position 0
         self.logs_textbox.insert('1.0', content)

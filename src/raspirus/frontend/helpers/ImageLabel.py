@@ -1,3 +1,4 @@
+import contextlib
 import tkinter as tk
 from PIL import Image, ImageTk
 from itertools import count, cycle
@@ -16,12 +17,10 @@ class ImageLabel(tk.Label):
             im = Image.open(im)
         frames = []
 
-        try:
+        with contextlib.suppress(EOFError):
             for i in count(1):
                 frames.append(ImageTk.PhotoImage(im.copy()))
                 im.seek(i)
-        except EOFError:
-            pass
         self.frames = cycle(frames)
 
         try:

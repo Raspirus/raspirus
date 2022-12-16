@@ -36,15 +36,8 @@ class VirusPage(tk.Frame):
         self.confirm_btn.place(x=315, y=375, width=170, height=50)
 
     def add_viruses(self, virus_arr):
-        # For each element in the given array, create a component:
-        # Component has a label with the path to the virus file and a combobox
-        # the combobox contains possible actions
-        # This component also has a red border around it
-        # Then add these components to a scrollbar frame
-        count = 1
-        for virus in virus_arr:
+        for count, virus in enumerate(virus_arr, start=1):
             self.virus_list.insert(count, str(virus.path))
-            count += 1
 
     def confirm_actions(self):
         dialog_message = "Your selected actions might be unrecoverable, are you sure you want to continue?"
