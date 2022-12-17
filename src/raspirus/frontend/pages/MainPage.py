@@ -1,5 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
+import os
+import platform
 from raspirus.frontend.popups.SingleButtonDialog import SingleButtonDialog
 # For colors and fonts
 from raspirus.frontend.utility import \
@@ -43,25 +45,36 @@ class MainPage(tk.Frame):
         self.settings_btn.place(x=670, y=15, width=110, height=40)
 
     def load_drive_list(self):
-        # Linux options: https://stackoverflow.com/a/8265634
-        # Windows: https://stackoverflow.com/a/8110666
-        test_list = [
-            "C:/Users/benbe/Documents/Coding/PyProjects/MaturaProject/tests/files",
-            "Some more teststs",
-            " With some space front",
-            "Short",
-            " Very very very very very vfery hags hasgwqgdi iqdidnob iqbiq LONG",
-            "      "
-        ]
-        self.drive_selector["values"] = test_list
+        # Windows
+        # Find all connected USB drives
+        drives = []
+        # Check the platform
+        if platform.system() == "Windows":
+            for letter in "ABCDEFGHIJKLMNOPQRSTUVWXYZ":
+                path = f"{letter}:\\"
+                if os.path.isdir(path):
+                    drives.append(path)
+            return drives
+        else:
+            with open("/proc/mounts", "r") as f:
+                for line in f:
+                    if line.startswith("/dev/sd"):
+                        # Extract the drive path
+                        drive = line.split()[1]
+                        drives.append(drive)
+
+        # For testing purpose only:
+        drives.append("C:/Users/benbe/Documents/Coding/PyProjects/MaturaProject/tests/files")
+
+        self.drive_selector["values"] = drives
         self.drive_selector.current(0)
 
     def start_scanner(self, controller):
         # Checks if the given string is empty
         if len(self.drive_selector.get()) <= 0 or len(str(self.drive_selector.get()).strip()) <= 0:
             no_drive_message = "Before starting the scanner you need to specify which " \
-                           "harddrive or USB you want to scan by selecting " \
-                           "it from the dropdown menu"
+                               "harddrive or USB you want to scan by selecting " \
+                               "it from the dropdown menu"
             dialog = SingleButtonDialog(title="No Drive", parent=self,
                                         message=no_drive_message, mode="error")
             dialog.tkraise()
