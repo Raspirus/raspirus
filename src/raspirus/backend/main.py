@@ -1,5 +1,9 @@
 from raspirus.backend.file_scanner_module import FileScanner
-from raspirus.backend.hash_api_module import HashAPI
+from raspirus.backend.database_api import HashAPI
+
+# Profiling imports
+import cProfile
+import pstats
 
 db_location = "database/signatures.db"
 
@@ -14,14 +18,20 @@ def main():
     path_to_check = str(input("Enter path: "))
     print("")
     fs = FileScanner(path_to_check, db_location)
-    fs.start_scanner()
+    with cProfile.Profile() as pr:
+        fs.start_scanner()
+
+    stats = pstats.Stats(pr)
+    stats.sort_stats(pstats.SortKey.TIME)
+    # stats.print_stats()
+    stats.dump_stats(filename="raspirus_profiling.prof")
 
 
 def updater():
     # Path to directory with md5 files/file extension, path to the bighash file
     hapi = HashAPI(db_location)
     hapi.update_db()
-    print("Hash amount: " + hapi.count_hashes())
+    print(f"Hash amount: {hapi.count_hashes()}")
 
 
 def more_info():

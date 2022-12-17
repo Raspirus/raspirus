@@ -19,7 +19,7 @@ from raspirus.frontend.pages.VirusPage import VirusPage
 
 # Backend:
 from raspirus.backend.file_scanner_module import FileScanner
-from raspirus.backend.hash_api_module import HashAPI
+from raspirus.backend.database_api import HashAPI
 
 # Sets a higher resolution on Tkinter frames
 ctypes.windll.shcore.SetProcessDpiAwareness(1)
