@@ -413,3 +413,4 @@ School/
 src/raspirus/backend/database/signatures.db
 /src/raspirus/main.build/
 /src/raspirus/main.dist/
+src/raspirus/backend/raspirus_profiling.prof

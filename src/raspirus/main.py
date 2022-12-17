@@ -100,6 +100,7 @@ class Windows(tk.Tk):
         self.show_frame(LoadingPage)
         t = threading.Thread(target=self.thread_helper)
         t.start()
+        print(f"Started thread: {t.getName()}")
 
     def evaluate_scanner(self):
         if len(self.file_scanner.dirty_files) > 0:
@@ -108,6 +109,8 @@ class Windows(tk.Tk):
             self.show_frame(VirusPage)
         else:
             self.show_frame(ClearPage)
+
+        print(f"Stopped thread {threading.currentThread().getName()}")
 
     def start_hash_updates(self):
         self.hash_updater = HashAPI(self.database_path)
