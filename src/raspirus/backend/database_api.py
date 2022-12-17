@@ -45,7 +45,7 @@ class HashAPI:
             self.init_table()
             self.update_db()
         except sqlite3.Error as e:
-            raise Exception(f"Connection to DB failed: {str(e)}") from e
+            raise sqlite3.Error(f"Connection to DB failed: {str(e)}") from e
 
     def init_table(self):
         print("Creating table...")
@@ -115,6 +115,14 @@ class HashAPI:
 
         return ''.join(map(str, cur.fetchone()))
 
+    def remove_hash(self, hash_str):
+        sql = ''' DELETE FROM signatures 
+                    WHERE hash = ? '''
+
+        cur = self.db_connection.cursor()
+        cur.execute(sql, (hash_str,))
+
+
     def update_db(self):
         print("Updating database...")
         big_tic = time.perf_counter()
@@ -173,7 +181,7 @@ class HashAPI:
             return self._check_latest_file(file_nr)
         except HTTPError as err:
             if err.code == 404:
-                print(f"Database is up-to-date")
+                print("Database is up-to-date")
                 return True
         except URLError:
             print("Not connected to the Internet!")
@@ -217,7 +225,7 @@ class HashAPI:
             elif err.code == 404:
                 print("Request not found")
             else:
-                raise Exception(f"Error: {str(err)}") from err
+                raise ConnectionError(f"Error: {str(err)}") from err
 
     def close_connection(self):
         self.db_connection.close()

@@ -62,9 +62,10 @@ class FileScanner:
 
     @staticmethod
     async def calculate_xxhash(file_path):
-        with open(file_path, 'rb') as f:
-            with mmap.mmap(f.fileno(), 0, access=mmap.ACCESS_READ) as m:
-                return xxhash.xxh64(m).hexdigest()
+        if os.stat(file_path).st_size != 0:
+            with open(file_path, 'rb') as f:
+                with mmap.mmap(f.fileno(), 0, access=mmap.ACCESS_READ) as m:
+                    return xxhash.xxh64(m).hexdigest()
 
     async def scan_files(self):
         if os.path.isdir(self.path):
