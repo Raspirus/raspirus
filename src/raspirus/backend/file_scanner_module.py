@@ -63,9 +63,12 @@ class FileScanner:
     @staticmethod
     async def calculate_xxhash(file_path):
         if os.stat(file_path).st_size != 0:
-            with open(file_path, 'rb') as f:
-                with mmap.mmap(f.fileno(), 0, access=mmap.ACCESS_READ) as m:
-                    return xxhash.xxh64(m).hexdigest()
+            try:
+                with open(file_path, 'rb') as f:
+                    with mmap.mmap(f.fileno(), 0, access=mmap.ACCESS_READ) as m:
+                        return xxhash.xxh64(m).hexdigest()
+            except IOError:
+                print(f"Error: Could not open {file_path}. Do you have the necessary permissions?")
 
     async def scan_files(self):
         if os.path.isdir(self.path):
@@ -77,9 +80,16 @@ class FileScanner:
                 self.dirty_files.append(self.path)
 
     def start_scanner(self):
-        print("Starting scanner...")
+        print("Starting scanner... Please wait")
         tic = time.perf_counter()
-        loop = asyncio.get_event_loop()
+
+        try:
+            loop = asyncio.get_event_loop()
+        except RuntimeError as ex:
+            print(f"Asyncio error: {ex}")
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+
         loop.run_until_complete(self.scan_files())
         toc = time.perf_counter()
         print(
