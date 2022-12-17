@@ -3,3 +3,6 @@ python-dotenv==0.21.0
 wget==3.2
 path==16.6.0
 setuptools==65.6.3
+Raspirus~=0.0.0
+xxhash~=3.1.0
+pytest~=7.2.0

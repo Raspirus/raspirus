@@ -12,6 +12,7 @@ import time
 from urllib.request import urlopen
 import sqlite3
 from urllib.error import HTTPError
+from urllib.error import URLError
 import wget
 from dotenv import load_dotenv
 
@@ -32,6 +33,7 @@ class HashAPI:
     db_connection = None
 
     def __init__(self, db_location):
+        print("Hasher initialized")
         """ Initializes the class setting the given parameters
 
         It creates an object that can be used to interact with the Virusshare API
@@ -46,6 +48,7 @@ class HashAPI:
             raise Exception(f"Connection to DB failed: {str(e)}") from e
 
     def init_table(self):
+        print("Creating table...")
         sql = ''' CREATE TABLE IF NOT EXISTS signatures (
                      hash varchar(32) PRIMARY KEY,
                      file_nr varchar(5)
@@ -100,8 +103,8 @@ class HashAPI:
 
         try:
             return ''.join(map(str, cur.fetchone()))
-        except Exception:
-            return 'None'
+        except TypeError:
+            return "00000"
 
     def count_hashes(self):
         sql = ''' SELECT COUNT(hash)
@@ -113,11 +116,17 @@ class HashAPI:
         return ''.join(map(str, cur.fetchone()))
 
     def update_db(self):
+        print("Updating database...")
         big_tic = time.perf_counter()
+        self.download_files()
+        big_toc = time.perf_counter()
+        print(f"Executed in {big_toc - big_tic:0.4f} seconds")
+        print(f"Total hashes in DB: {self.count_hashes()}")
+
+    def download_files(self):
         if not self.db_is_updated():
+            print("Database not up-to-date!")
             file_nr = self.get_latest_file_nr()
-            if file_nr == 'None':
-                file_nr = "00000"
 
             while True:
                 try:
@@ -143,8 +152,6 @@ class HashAPI:
                     break
         else:
             print("DB already up-to-date")
-        big_toc = time.perf_counter()
-        print(f"Executed in {big_toc - big_tic:0.4f} seconds")
 
     def db_is_updated(self):
         """ Checks if the Database is up-to-date.
@@ -166,8 +173,11 @@ class HashAPI:
             return self._check_latest_file(file_nr)
         except HTTPError as err:
             if err.code == 404:
+                print(f"Database is up-to-date")
                 return True
-            print(f"Error! {str(err)}")
+        except URLError:
+            print("Not connected to the Internet!")
+            return True
 
     @staticmethod
     def _check_latest_file(file_nr):
