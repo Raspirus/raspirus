@@ -2,8 +2,8 @@
 name = "app"
 version = "0.1.0"
 description = "A Tauri App"
-authors = ["you"]
-license = ""
+authors = ["Demetz Benjamin, Hell Björn Felix"]
+license = "GPL"
 repository = ""
 default-run = "app"
 edition = "2021"
