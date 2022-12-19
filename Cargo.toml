@@ -8,6 +8,3 @@ edition = "2021"
 [dependencies]
 rusqlite = "0.24.0"
 reqwest = "0.10"
-
-[lib]
-path = "src/database_sql.rs" # To be defined
