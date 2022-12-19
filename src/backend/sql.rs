@@ -32,7 +32,6 @@ impl DatabaseSQL {
         for (hash, file_nr) in hashes {
             batch.execute(&[hash, file_nr])?;
         }
-        batch.commit()?;
         Ok(())
     }
 

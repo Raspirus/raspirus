@@ -1,5 +1,11 @@
+use crate::backend::file_scanner;
+mod backend;
+
 fn main() {
     println!("Hello, world!");
-    // Create a connection to the database:
-    // let db = sql::DatabaseSQL::new().unwrap();
+    let path = String::from("./backend");
+    let fscanner = file_scanner::FileScanner::new(path).unwrap();
+
+    fscanner.search_files();
 }
+
