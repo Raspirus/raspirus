@@ -1,4 +1,3 @@
-mod database_sql;
 use std::time::Instant;
 use reqwest::Error as HTTPError;
 use std::env;

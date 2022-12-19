@@ -1,17 +1,15 @@
-use async_std::fs;
-use async_std::io::BufReader;
-use async_std::path::Path;
-use async_std::prelude::*;
-use async_std::task;
-use std::error::Error;
-use std::time::Instant;
-use xxhash::xxh64;
+/*
+* The filescanner does the following:
+* In a loop, find each file in a folder and its subfolders,
+* if a file is found, create its hash and see if the hash exists in the database.
+* If the hash exists, append it to an array, else continue to the next file.
+*/
 
 pub struct FileScanner {
-    pub amount_of_files: u64,
-    pub hash_db: DatabaseSQL,
-    pub dirty_files: Vec<String>,
-    pub path: String,
+    pub amount_of_files: u64, // Counts the amount of files 
+    pub hash_db: DatabaseSQL, // Connection to the database object
+    pub dirty_files: Vec<String>, // Contains all paths of the "infected" files (files whose hash was found in the database)
+    pub path: String, // The path to where to search for files, should be a directory
 }
 
 impl FileScanner {
@@ -32,7 +30,7 @@ impl FileScanner {
 
     async fn search_files(self, directory:str);
 
-    async fn calculate_xxhash(file_path:str);
+    async fn calculate_hash(file_path:str);
 
     async fn scan_files(self);
 
