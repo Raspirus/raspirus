@@ -1,11 +1,9 @@
-use crate::backend::file_scanner;
-mod backend;
+use crate::frontend::main_page;
+mod frontend;
+use iced::{Settings, Application};
 
 fn main() {
     println!("Hello, world!");
-    let path = String::from("./backend");
-    let fscanner = file_scanner::FileScanner::new(path).unwrap();
-
-    fscanner.search_files();
+    main_page::MainWindow::run(Settings::default());
 }
 
