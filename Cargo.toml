@@ -8,3 +8,4 @@ edition = "2021"
 [dependencies]
 rusqlite = "0.24.0"
 reqwest = "0.10"
+iced = "0.6.0"
