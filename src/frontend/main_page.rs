@@ -9,4 +9,6 @@ When the start button is clicked, the path of the selected USB drive is given to
 and the scan is started. While the scan is going, a small loading animation is shown (On a new page)
 
 The application has a fixe size of 800x480, which is equal to the size of the Raspberry touchscreen
+
+Figma: https://www.figma.com/file/pkgpwieNbhYiOi4Gz6Uyt6/Raspirus?node-id=0%3A1&t=LXB7UphT9lWoIjev-0
 */

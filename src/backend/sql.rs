@@ -4,7 +4,9 @@ use rusqlite::{Connection, Result, params};
 pub struct DatabaseSQL {
     db_connection: Connection,
 }
-
+/*
+    Is an object containing all SQL operations for the database
+*/
 impl DatabaseSQL {
     pub fn new() -> Result<DatabaseSQL> {
         let conn = Connection::open("database/signatures.db")?;
