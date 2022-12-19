@@ -7,4 +7,6 @@ It has the following components:
 
 When the start button is clicked, the path of the selected USB drive is given to the filescanner
 and the scan is started. While the scan is going, a small loading animation is shown (On a new page)
+
+The application has a fixe size of 800x480, which is equal to the size of the Raspberry touchscreen
 */

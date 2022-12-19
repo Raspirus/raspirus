@@ -9,7 +9,9 @@ pub struct DatabaseOperations {
     database_sql: DatabaseSQL,
     api_key: String,
 }
-
+/*
+    Is an object that contains functions to 
+*/
 impl DatabaseOperations {
     pub fn new() -> Result<DatabaseOperations> {
         let database_sql = database_sql::DatabaseSQL::new().unwrap();
