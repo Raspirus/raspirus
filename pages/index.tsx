@@ -1,5 +1,4 @@
 import Head from 'next/head'
-import styles from '../styles/main_page.module.css'
 import { invoke } from "@tauri-apps/api/tauri"
 
 // Note: When working with Next.js in development you have 2 execution contexts:
@@ -23,22 +22,43 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main>
-        <div className={styles.header_container}>
-          <button className={styles.settings_btn}>SETTINGS <i className="fa fa-gear"></i></button>
+        <div className=''>
+          <button type="button" className="inline-block px-6 py-2 border-2 border-blue-600 text-blue-600 
+        font-medium text-xs leading-tight uppercase rounded hover:bg-black hover:bg-opacity-5 
+        focus:outline-none focus:ring-0 transition duration-150 ease-in-out"><i className="fa fa-gear"></i> SETTINGS</button>
         </div>
-        <div className={styles.main_container}>
-          <h1 className={styles.main_title}>RASPIRUS</h1>
-          <div>
-            <select className={styles.dropdown_selector}>
-              <option value="Drive1">Drive1</option>
-              <option value="Drive2">Drive2</option>
-              <option value="Drive3">Drive3</option>
-              <option value="Drive4">Drive4</option>
-            </select>
-          </div>
-          <div>
-            <button className={styles.start_btn}>START</button>
-            <button className={styles.info_btn}>INFO</button>
+
+
+        <div className="p-12 text-center relative rounded-lg">
+          <div
+            className="absolute top-0 right-0 bottom-0 left-0 w-full h-full bg-fixed">
+            <div className="flex justify-center items-center h-full">
+              <div className="text-white">
+                <h1 className="font-medium leading-tight text-5xl mt-0 mb-2 text-blue-600">RASPIRUS</h1>
+                    <select defaultValue="0" className="form-select appearance-none
+                        block
+                        w-full
+                        px-3
+                        py-1.5
+                        text-base
+                        font-normal
+                        text-gray-700
+                        bg-white bg-clip-padding bg-no-repeat
+                        border border-solid border-gray-300
+                        rounded
+                        transition
+                        ease-in-out
+                        m-0
+                        focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none" aria-label="Default select example">
+                      <option value="0">Select your drive</option>
+                      <option value="1">Drive 1</option>
+                      <option value="2">Drive 2</option>
+                      <option value="3">Drive 3</option>
+                    </select>
+                  <button type="button" className="inline-block px-7 py-3 bg-blue-600 text-white font-medium text-sm leading-snug uppercase rounded shadow-md hover:bg-blue-700 hover:shadow-lg focus:bg-blue-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-blue-800 active:shadow-lg transition duration-150 ease-in-out">START</button>
+                  <button type="button" className="inline-block px-6 py-2 border-2 border-blue-600 text-blue-600 font-medium text-sm leading-tight uppercase rounded hover:bg-black hover:bg-opacity-5 focus:outline-none focus:ring-0 transition duration-150 ease-in-out">INFO</button>
+              </div>
+            </div>
           </div>
         </div>
       </main>
