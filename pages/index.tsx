@@ -18,7 +18,7 @@ export default function Home() {
     isClient && invoke('greet', { name: 'World' }).then(console.log).catch(console.error);
 
     // Redirect to another page
-    router.push('/clean'); // or router.push('/infected')
+    // router.push('/clean'); // or router.push('/infected')
   }
 
   const openInfo = () => {
