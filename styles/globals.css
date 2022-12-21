@@ -7,3 +7,7 @@ body {
     width: 800px;
     height: 480px;
 }
+
+#__next {
+    height: 100%;
+}
