@@ -19,9 +19,6 @@ export default function Home() {
   const startScanner = () => {
     router.push('/loading');
     console.log("Value = " + value);
-
-    // To check if we are currently executing in the client context, we can check the type of the window object;
-    const isClient = typeof window !== 'undefined';
     let dirty_array = null;
     let scanning_path = "/";
     let should_update = false;
