@@ -7,17 +7,17 @@ export default function Home() {
   const router = useRouter();
   const [value, setValue] = useState("drive_0");
   let drives_list = null;
-  invoke('list_usb_drives')
+
+  if (typeof window !== 'undefined') {
+    invoke('list_usb_drives')
     .then((message) => drives_list = message)
     .catch(console.error);
 
-  console.log("Drives: " + drives_list);
+    console.log("Drives: " + drives_list);
+  }
 
-
-  const startScanner = async () => {
-
+  const startScanner = () => {
     router.push('/loading');
-
     console.log("Value = " + value);
 
     // To check if we are currently executing in the client context, we can check the type of the window object;
@@ -27,22 +27,18 @@ export default function Home() {
     let should_update = false;
     let db_location = "";
 
-    // Now we can call our Command!
-    // Right-click on the application background and open the developer tools.
-    // You will see "Hello, World!" printed in the console.
-    if (isClient) {
-      await invoke('start_scanner', { path: scanning_path, update: should_update, dbfile: db_location })
+    if (typeof window !== 'undefined') {
+      invoke('start_scanner', { path: scanning_path, update: should_update, dbfile: db_location })
         .then((message) => dirty_array = message)
         .catch((console.error));
+        console.log(dirty_array);
+        if (dirty_array != null && dirty_array.length > 0) {
+          router.push('/infected');
+        } else {
+          router.push('/clean');
+        }
     } else {
       console.error("Nextjs not in client mode!");
-    }
-    console.log(dirty_array);
-
-    if (dirty_array != null && dirty_array.length > 0) {
-      router.push('/infected')
-    } else {
-      router.push('/clean');
     }
 
     console.log("Finished");

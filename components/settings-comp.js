@@ -32,7 +32,7 @@ export default function SettingComp({ title, short, action, color, clicked, icon
 
     return (
         <div className="flex flex-col p-4 bg-white">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between mx-4">
             <div className="flex items-center">
                 {setIcon()}
                 <div className="flex flex-col ml-3">
