@@ -16,13 +16,13 @@ export default function Infected() {
             </Head>
             <div className="align-middle">
                 <button onClick={backHome} type="button" className="inline-block align-middle px-6 py-2.5 m-2 bg-blue-600 text-white font-medium text-xs leading-tight uppercase rounded shadow-md hover:bg-blue-700 hover:shadow-lg focus:bg-blue-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-blue-800 active:shadow-lg transition duration-150 ease-in-out">
-                    <i className="fa fa-home"></i>
+                    <i className="pr-1 fa fa-home"></i>
                     Home
                 </button>
-                <h1 class="inline-block align-middle p-2 font-medium leading-tight text-5xl mt-0 mb-2 text-red-600">Virus found!</h1>
+                <h1 className="inline-block align-middle p-2 font-medium leading-tight text-5xl mt-0 mb-2 text-red-600">Virus found!</h1>
             </div>
 
-            <div class="m-8 relative">
+            <div className="m-8 relative">
                 <VirusComp
                     title="Testtextcicsicbicökcbiwöcbiwlcbiwlcblwcbwlcvwlcbhwlucbwlucbwlcbwleucbwlcblwcbwluvulavulvlwubclwuvwulvluwv"
                     value="Testvalue"

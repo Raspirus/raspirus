@@ -43,15 +43,16 @@ export default function Settings() {
             </Head>
             <div className="align-middle">
                 <button onClick={backHome} type="button" className="inline-block align-middle px-6 py-2.5 m-2 bg-blue-600 text-white font-medium text-xs leading-tight uppercase rounded shadow-md hover:bg-blue-700 hover:shadow-lg focus:bg-blue-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-blue-800 active:shadow-lg transition duration-150 ease-in-out">
-                    <i className="fa fa-home"></i>
+                    <i className="pr-1 fa fa-home"></i>
                     Home
                 </button>
-                <h1 class="inline-block align-middle p-2 font-medium leading-tight text-5xl mt-0 mb-2 text-blue-600">Settings</h1>
+                <h1 className="inline-block align-middle p-2 font-medium leading-tight text-5xl mt-0 mb-2 text-blue-600">Settings</h1>
             </div>
             <SettingComp 
                 title="Update database"
                 short="Updates the database (requires an internet connection)"
                 color="blue"
+                icon="wrench"
                 action="UPDATE"
                 clicked={updateDB}
             />
@@ -59,6 +60,7 @@ export default function Settings() {
                 title="Activate Logging"
                 short="Activates bdebugging and logging"
                 color={logColor}
+                icon="file-lines"
                 action={activeText}
                 clicked={activateLogging}
             />
@@ -66,6 +68,7 @@ export default function Settings() {
                 title="Activate FTP"
                 short="Activates the File Transfer Protocol on the Raspberry Pi"
                 color="yellow"
+                icon="file-pen"
                 action="WIP"
                 clicked={activateFTP}
             />
@@ -74,6 +77,7 @@ export default function Settings() {
                 title="Activate SSH"
                 short="Activates the SSH Protocol for remote control"
                 color="yellow"
+                icon="console"
                 action="WIP"
                 clicked={activateSSH}
             />
