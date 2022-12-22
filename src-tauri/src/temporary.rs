@@ -1,8 +1,3 @@
-#![cfg_attr(
-    all(not(debug_assertions), target_os = "windows"),
-    windows_subsystem = "windows"
-)]
-
 use std::{path::Path, process::exit, time};
 
 use backend::file_scanner;
@@ -11,14 +6,6 @@ use log::{error, info};
 mod backend;
 
 fn main() {
-    tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![start_scanner])
-        .run(tauri::generate_context!())
-        .expect("error while running tauri application");
-}
-
-#[tauri::command]
-fn start_scanner() {
     let args: Vec<String> = std::env::args().collect();
     pretty_env_logger::init();
     let mut path: Option<String> = None;
