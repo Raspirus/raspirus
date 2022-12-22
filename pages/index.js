@@ -49,7 +49,8 @@ export default function Home() {
   }
 
   const openInfo = () => {
-    router.push('/info');
+    // router.push('/info');
+    router.push('/clean');
   }
 
   const openSettings = () => {
@@ -73,11 +74,11 @@ export default function Home() {
         <div className="p-12 text-center relative rounded-lg">
           <div>
             <div className="flex justify-center items-center h-full">
-              <div className="text-white">
-                <h1 className="font-medium leading-tight text-5xl mt-0 mb-2 text-blue-600">RASPIRUS</h1>
-                <select value={value} onChange={(e) => {setValue(e.target.value);}} className="form-select appearance-none
-                        block w-full px-3 py-1.5 text-base font-normal text-gray-700 bg-white bg-clip-padding bg-no-repeat
-                        border border-solid border-gray-300 rounded transition ease-in-out m-0
+              <div className="w-full">
+                <h1 className="font-bold leading-tight text-8xl mt-0 mb-2 text-blue-600">RASPIRUS</h1>
+                <select value={value} onChange={(e) => {setValue(e.target.value);}} className="
+                        px-3 py-1.5 text-base font-normal text-gray-700 bg-white w-9/12
+                        border border-solid border-gray-300 rounded transition ease-in-out
                         focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none" aria-label="Default select example">
                   <option value="drive_0">Select your drive</option>
                   <option value="C:\Users\benbe\Documents\Coding\PyProjects\Testing">Test this</option>
