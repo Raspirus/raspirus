@@ -24,14 +24,17 @@ export default function Info() {
             <InfoComp
                 title="App Name"
                 value="Raspirus"
+                icon="r-char"
             />
             <InfoComp
                 title="Description"
                 value="Simple signatures-based antivirus for single-board computers like Raspbrry Pi"
+                icon="book"
             />
             <InfoComp
                 title="Contributors"
                 value="Demetz Benjamin, Hell Björn Felix"
+                icon="profile"
             />
             <InfoComp
                 title="Version"
@@ -40,6 +43,7 @@ export default function Info() {
             <InfoComp
                 title="License"
                 value="Created for Alperia AG"
+                icon="scale-balanced"
             />
         </>
     )
