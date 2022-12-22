@@ -1,4 +1,4 @@
-# RRaspirus (Work in Progress :construction::warning:)
+# Raspirus (Work in Progress :construction::warning:)
 
 ## Introduction
 Coming soon
