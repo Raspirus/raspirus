@@ -1,13 +1,40 @@
 import Head from "next/head"
 import SettingComp from "../components/settings-comp"
 import { useRouter } from 'next/router';
+import { useState } from 'react';
 
 export default function Settings() {
     const router = useRouter();
 
+    const [logColor, setLogColor] = useState("red");
+    const [activeText, setActive] = useState("OFF");
+
     const backHome = () => {
         router.push('/');
       }
+    
+    const updateDB = () => {
+        // Update database
+    }
+
+    const activateLogging = () => {
+        // Activate logging and change color
+        if (logColor == "green") {
+            setActive("OFF");
+            setLogColor("red");
+        } else {
+            setLogColor("green");
+            setActive("ON");
+        }
+    }
+
+    const activateSSH = () => {
+        // Activate SSH and change color
+    }
+
+    const activateFTP = () => {
+        // Activate SSH and change color
+    }
 
     return (
         <>
@@ -25,18 +52,21 @@ export default function Settings() {
                 short="Updates the database (requires an internet connection)"
                 color="blue"
                 action="UPDATE"
+                clicked={updateDB}
             />
             <SettingComp 
                 title="Activate Logging"
                 short="Activates bdebugging and logging"
-                color="green"
-                action="ACTIVE"
+                color={logColor}
+                action={activeText}
+                clicked={activateLogging}
             />
             <SettingComp 
                 title="Activate FTP"
                 short="Activates the File Transfer Protocol on the Raspberry Pi"
                 color="yellow"
                 action="WIP"
+                clicked={activateFTP}
             />
 
             <SettingComp 
@@ -44,6 +74,7 @@ export default function Settings() {
                 short="Activates the SSH Protocol for remote control"
                 color="yellow"
                 action="WIP"
+                clicked={activateSSH}
             />
         </>
     )
