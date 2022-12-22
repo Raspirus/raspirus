@@ -49,8 +49,7 @@ export default function Home() {
   }
 
   const openInfo = () => {
-    // router.push('/info');
-    router.push('/clean');
+    router.push('/info');
   }
 
   const openSettings = () => {
@@ -67,7 +66,8 @@ export default function Home() {
         <div className='flex justify-end'>
           <button onClick={openSettings} type="button" className="inline-block px-6 py-2 border-2 m-5 border-blue-600 text-blue-600 
         font-medium text-xs leading-tight uppercase rounded hover:bg-black hover:bg-opacity-5 
-        focus:outline-none focus:ring-0 transition duration-150 ease-in-out"><i className="fa fa-gear"></i> SETTINGS</button>
+        focus:outline-none focus:ring-0 transition duration-150 ease-in-out">
+          <i className="pr-1 fa fa-gear"></i> SETTINGS</button>
         </div>
 
 
