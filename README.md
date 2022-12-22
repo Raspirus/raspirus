@@ -1,4 +1,5 @@
 # Raspirus (Work in Progress :construction::warning:)
+![DALL·E 2022-12-22 17 39 15 - an angry raspberry killing bad green viruses](https://user-images.githubusercontent.com/50681275/209184400-ede538b0-ac56-41d2-aaaf-dda0fe93bc5d.png)
 
 ## Introduction
 Coming soon
