@@ -3,7 +3,7 @@
     windows_subsystem = "windows"
 )]
 
-use std::{path::Path, process::exit, time};
+use std::{path::Path, time, fs};
 
 use backend::file_scanner;
 use log::{error, info};
@@ -12,41 +12,14 @@ mod backend;
 
 fn main() {
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![start_scanner])
+        .invoke_handler(tauri::generate_handler![start_scanner, list_usb_drives])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
 
 #[tauri::command]
-fn start_scanner() {
-    let args: Vec<String> = std::env::args().collect();
+fn start_scanner(path: String, update: bool, dbfile: Option<String>) -> Result<Option<Vec<String>>, String> {
     pretty_env_logger::init();
-    let mut path: Option<String> = None;
-    let mut update: bool = true;
-    let mut dbfile: Option<String> = None;
-    let len = args.len();
-    for arg in args {
-        if arg.starts_with("--path=") {
-            let tmp: Vec<&str> = arg.split("=").collect();
-            path = Some(tmp[1].to_owned());
-        } else if arg.starts_with("--no-update") {
-            update = false;
-        } else if arg.starts_with("--help") && len == 2 || len == 1 {
-            error!("Usage: [RUST_LOG=none | info | debug] binary --help --path=/path/to/scan --no-update --db-file=/path/to/db");
-            exit(0);
-        } else if arg.starts_with("--db-file=") {
-            let tmp: Vec<&str> = arg.split("=").collect();
-            dbfile = Some(tmp[1].to_owned());
-        }
-    }
-
-    let patharg = match path {
-        Some(path) => path,
-        None => {
-            error!("Did not pass --path");
-            exit(-1);
-        }
-    };
 
     let mut use_db = "signatures.db".to_owned();
     match dbfile {
@@ -63,11 +36,11 @@ fn start_scanner() {
         }
     };
 
-    let mut fs = match file_scanner::FileScanner::new(&patharg, &use_db) {
+    let mut fs = match file_scanner::FileScanner::new(&path, &use_db) {
         Ok(fs) => fs,
         Err(err) => {
             error!("{}", err);
-            exit(-1);
+            return Err(err.to_string());
         }
     };
     if update {
@@ -83,4 +56,31 @@ fn start_scanner() {
     }
 
     fs.search_files();
+    if fs.dirty_files.is_empty() {
+        Ok(None)
+    } else {
+        Ok(Some(fs.dirty_files))
+    }
+}
+
+#[tauri::command]
+fn list_usb_drives() -> Result<Vec<String>, String> {
+    let mut usb_drives = Vec::new();
+
+    let entries = match fs::read_dir("/dev") {
+        Ok(entries) => entries,
+        Err(err) => {
+            return Err(err.to_string());
+        }
+    };
+
+    for entry in entries {
+        let entry = entry.expect("I couldn't read something inside the directory");
+        let path = entry.path();
+        if path.starts_with("/dev/sd") || path.starts_with("/dev/mmc") {
+            usb_drives.push(path.to_string_lossy().into_owned());
+        }
+    }
+
+    Ok(usb_drives)
 }
