@@ -1,22 +1,22 @@
-export default function SettingComp({ title, short, action, color}) {
+export default function SettingComp({ title, short, action, color, clicked}) {
 
     function setColor() {
         switch (color) {
             case "red":
-                return (<button className="flex-no-shrink bg-red-500 px-5 ml-4 py-2 text-sm shadow-sm hover:shadow-lg font-medium tracking-wider border-2 border-red-500 text-white rounded-full">{action}</button>)
+                return (<button onClick={clicked} className="flex-no-shrink bg-red-500 px-5 ml-4 py-2 text-sm shadow-sm hover:shadow-lg font-medium tracking-wider border-2 border-red-500 text-white rounded-full">{action}</button>)
             case "blue":
-                return (<button className="flex-no-shrink bg-blue-500 px-5 ml-4 py-2 text-sm shadow-sm hover:shadow-lg font-medium tracking-wider border-2 border-blue-500 text-white rounded-full">{action}</button>)
+                return (<button onClick={clicked} className="flex-no-shrink bg-blue-500 px-5 ml-4 py-2 text-sm shadow-sm hover:shadow-lg font-medium tracking-wider border-2 border-blue-500 text-white rounded-full">{action}</button>)
             case "green":
-                return (<button className="flex-no-shrink bg-green-500 px-5 ml-4 py-2 text-sm shadow-sm hover:shadow-lg font-medium tracking-wider border-2 border-green-500 text-white rounded-full">{action}</button>)
+                return (<button onClick={clicked} className="flex-no-shrink bg-green-500 px-5 ml-4 py-2 text-sm shadow-sm hover:shadow-lg font-medium tracking-wider border-2 border-green-500 text-white rounded-full">{action}</button>)
             case "yellow":
-                return (<button className="flex-no-shrink bg-yellow-500 px-5 ml-4 py-2 text-sm shadow-sm hover:shadow-lg font-medium tracking-wider border-2 border-yellow-500 text-white rounded-full">{action}</button>)
+                return (<button onClick={clicked} className="flex-no-shrink bg-yellow-500 px-5 ml-4 py-2 text-sm shadow-sm hover:shadow-lg font-medium tracking-wider border-2 border-yellow-500 text-white rounded-full">{action}</button>)
             default:
-                return (<button className="flex-no-shrink bg-red-500 px-5 ml-4 py-2 text-sm shadow-sm hover:shadow-lg font-medium tracking-wider border-2 border-red-500 text-white rounded-full">{action}</button>)
+                return (<button onClick={clicked} className="flex-no-shrink bg-red-500 px-5 ml-4 py-2 text-sm shadow-sm hover:shadow-lg font-medium tracking-wider border-2 border-red-500 text-white rounded-full">{action}</button>)
         }
     }
 
     return (
-        <div className="flex flex-col p-8 bg-white">
+        <div className="flex flex-col p-4 bg-white">
         <div className="flex items-center justify-between">
             <div className="flex items-center">
                 <svg xmlns="http://www.w3.org/2000/svg"

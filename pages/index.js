@@ -7,7 +7,9 @@ export default function Home() {
   const router = useRouter();
   const [value, setValue] = useState("drive_0");
   let drives_list = null;
-  invoke('list_usb_drives').then((message) => drives_list = message);
+  invoke('list_usb_drives')
+    .then((message) => drives_list = message)
+    .catch(console.error);
 
   console.log("Drives: " + drives_list);
 
