@@ -6,16 +6,18 @@ use std::{
     time,
 };
 
+use chrono::{DateTime, Local};
 use log::{debug, error, info};
 use terminal_size::terminal_size;
 use walkdir::WalkDir;
 
-use super::db_ops::DBOps;
+use super::{db_ops::DBOps, file_log::FileLog};
 
 pub struct FileScanner {
     pub db_conn: DBOps,
     pub dirty_files: Vec<String>,
     pub scanloc: String,
+    pub log: FileLog,
 }
 
 impl FileScanner {
@@ -25,14 +27,19 @@ impl FileScanner {
             let tmpconf = match DBOps::new(db_file) {
                 Ok(db_conn) => db_conn,
                 Err(err) => {
-                    error!("Müll: {err}");
+                    error!("{err}");
                     exit(-1);
                 }
             };
+
+            let now: DateTime<Local> = Local::now();
+            let now_str = now.format("%Y_%m_%d_%H_%M_%S").to_string();
+            let log_str = format!("{}.log", now_str);
             Ok(FileScanner {
                 db_conn: tmpconf,
                 dirty_files: Vec::new(),
                 scanloc: scanloc.to_owned(),
+                log: FileLog::new(log_str),
             })
         } else {
             Err(Error::new(ErrorKind::Other, "Invalid Path"))
@@ -78,6 +85,7 @@ impl FileScanner {
                         hash,
                         file.path().display().to_string()
                     );
+                    self.log.log(hash, file.path().display().to_string());
                 }
             }
         }

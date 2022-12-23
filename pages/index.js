@@ -16,7 +16,7 @@ export default function Home() {
     console.log("Drives: " + drives_list);
   }
 
-  const startScanner =async () => {
+  async function startScanner() {
     router.push('/loading');
     console.log("Value = " + value);
     let dirty_array = null;
@@ -57,7 +57,7 @@ export default function Home() {
       </Head>
       <main>
         <div className='flex justify-end'>
-          <button onClick={openSettings} type="button" className="inline-block px-6 py-2 border-2 m-5 border-blue-600 text-blue-600 
+          <button onClick={openSettings} type="button" className="inline-block px-6 py-2 border-2 m-5 border-mainred text-mainred 
         font-medium text-xs leading-tight uppercase rounded hover:bg-black hover:bg-opacity-5 
         focus:outline-none focus:ring-0 transition duration-150 ease-in-out">
           <i className="pr-1 fa fa-gear"></i> SETTINGS</button>
@@ -68,19 +68,19 @@ export default function Home() {
           <div>
             <div className="flex justify-center items-center h-full">
               <div className="w-full">
-                <h1 className="font-bold leading-tight text-8xl mt-0 mb-2 text-blue-600">RASPIRUS</h1>
-                <select value={value} onChange={(e) => {setValue(e.target.value);}} className="
+                <h1 className="font-bold leading-tight text-8xl mt-0 mb-2 text-mainred">RASPIRUS</h1>
+                <select placeholder='Select drive' value={value} onChange={(e) => {setValue(e.target.value);}} className="
                         px-3 py-1.5 text-base font-normal text-gray-700 bg-white w-9/12
-                        border border-solid border-gray-300 rounded transition ease-in-out
-                        focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none" aria-label="Default select example">
-                  <option value="drive_0">Select your drive</option>
-                  <option value="C:\Users\benbe\Documents\Coding\PyProjects\Testing">Test this</option>
-                  <option value="drive_2">Drive 2</option>
-                  <option value="drive_3">Drive 3</option>
+                        border border-solid border-maingreen-light rounded transition ease-in-out
+                        focus:text-gray-700 focus:bg-white focus:border-maingreen focus:outline-none">
+                  <option value=".">This will scna the current folder</option>
+                  <option value="/">This will scan the / folder</option>
+                  <option value="C:/Users/benbe/Documents/School/Deutsch">Windows only</option>
+                  <option value="/home/pi/FTP/">Linux PI only</option>
                 </select>
                 <div className="mt-5">
-                  <button onClick={startScanner} type="button" className="mr-2 inline-block px-7 py-3 bg-blue-600 text-white font-medium text-sm leading-snug uppercase rounded shadow-md hover:bg-blue-700 hover:shadow-lg focus:bg-blue-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-blue-800 active:shadow-lg transition duration-150 ease-in-out">START</button>
-                  <button onClick={openInfo} type="button" className="ml-2 inline-block px-7 py-3 border-2 border-blue-600 text-blue-600 font-medium text-sm leading-tight uppercase rounded hover:bg-black hover:bg-opacity-5 focus:outline-none focus:ring-0 transition duration-150 ease-in-out">INFO</button>
+                  <button onClick={startScanner} type="button" className="mr-2 inline-block px-7 py-3 bg-mainred text-white font-medium text-sm leading-snug uppercase rounded shadow-md hover:bg-mainred-dark hover:shadow-lg focus:bg-mainred-dark focus:shadow-lg focus:outline-none focus:ring-0 active:mainred-dark active:shadow-lg transition duration-150 ease-in-out">START</button>
+                  <button onClick={openInfo} type="button" className="ml-2 inline-block px-7 py-3 border-2 border-mainred text-mainred font-medium text-sm leading-tight uppercase rounded hover:bg-black hover:bg-opacity-5 focus:outline-none focus:ring-0 transition duration-150 ease-in-out">INFO</button>
                 </div>
               </div>
             </div>

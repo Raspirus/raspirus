@@ -18,7 +18,7 @@ fn main() {
 }
 
 #[tauri::command]
-fn start_scanner(path: String, update: bool, dbfile: Option<String>) -> Result<Option<Vec<String>>, String> {
+fn start_scanner(path: String, update: bool, dbfile: Option<String>) -> Result<(), String> {
     match pretty_env_logger::try_init() {
         Ok(()) => {
             info!("Logger initialized!");
@@ -63,11 +63,7 @@ fn start_scanner(path: String, update: bool, dbfile: Option<String>) -> Result<O
     }
 
     fs.search_files();
-    if fs.dirty_files.is_empty() {
-        Ok(None)
-    } else {
-        Ok(Some(fs.dirty_files))
-    }
+    Ok(())
 }
 
 #[tauri::command]

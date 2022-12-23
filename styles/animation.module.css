@@ -12,17 +12,17 @@
   0%,
   100% {
     transform: scale(0.2);
-    background-color: #30FFB7;
+    background-color: #ff33cc;
   }
 
   40% {
     transform: scale(1);
-    background-color: #07DEFF;
+    background-color: #ff3366;
   }
 
   50% {
     transform: scale(1);
-    background-color: #0761FF;
+    background-color: #ff6633;
   }
 }
 
@@ -31,7 +31,7 @@
   width: 40px;
   border-radius: 50%;
   transform: scale(0);
-  background-color: red;
+  background-color: #33ffcc;
   animation: scaling 2.5s ease-in-out infinite;
   display: inline-block;
   margin: .5rem;
