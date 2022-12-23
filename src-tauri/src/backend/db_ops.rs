@@ -12,6 +12,7 @@ pub struct DBOps {
 }
 
 impl DBOps {
+    //returns new DBOps struct
     pub fn new(db_file: &str) -> Result<Self, rusqlite::Error> {
         let conn = match Connection::open(db_file) {
             Ok(conn) => conn,
@@ -26,20 +27,20 @@ impl DBOps {
         ret.init_table()?;
         Ok(ret)
     }
-
+    //initializes table if it doesnt exist
     pub fn init_table(&self) -> Result<(), rusqlite::Error> {
         info!("Creating table if not present...");
         match self.db_conn.execute(
             "CREATE TABLE IF NOT EXISTS signatures (
                                       hash varchar(32) PRIMARY KEY,
-                                      file_nr varchar(5));",
+                                      file_nr varchar(5))",
             [],
         ) {
             Ok(_) => Ok(()),
             Err(err) => Err(err),
         }
     }
-
+    //updates the db
     pub fn update_db(&mut self) {
         info!("Updating database...");
         let web_files = self.get_diff_file();
@@ -50,7 +51,7 @@ impl DBOps {
         }
         info!("Total hashes in DB: {}", self.count_hashes().unwrap_or(0));
     }
-
+    //downloads files and inserts them into db
     pub fn download_files(&mut self, files: Vec<i32>) {
         if files.len() == 0 {
             return;
@@ -83,7 +84,7 @@ impl DBOps {
         }
         info!("Done updating DB");
     }
-
+    //downloads file and returns content and file number
     pub fn download_file(file_nr: i32) -> Result<Option<Vec<(String, String)>>, reqwest::Error> {
         let url = format!(
             "https://virusshare.com/hashfiles/VirusShare_{}.md5",
@@ -110,7 +111,7 @@ impl DBOps {
         let mut hashes: Vec<(String, String)> = Vec::new();
         for l in lines {
             if !l.starts_with("#") {
-                hashes.push((l.to_owned(), format!("{:0>5}", file_nr.clone())));
+                hashes.push((l.to_owned(), format!("{}", file_nr.clone())));
             }
         }
         let big_toc = time::Instant::now();
@@ -121,7 +122,7 @@ impl DBOps {
         );
         Ok(Some(hashes))
     }
-
+    //inserts hash and file number into db
     pub fn insert_hashes(&mut self, hashes: Vec<(String, String)>) -> Result<(), rusqlite::Error> {
         info!("Inserting File {}", hashes[0].1);
         let transact = match self.db_conn.transaction() {
@@ -159,7 +160,7 @@ impl DBOps {
         transact.commit()?;
         Ok(())
     }
-
+    //checks if hash exists in db
     pub fn hash_exists(&self, hash_str: &str) -> Result<bool, rusqlite::Error> {
         let mut stmt = self
             .db_conn
@@ -167,19 +168,19 @@ impl DBOps {
         let hash: String = stmt.query_row(params![hash_str], |row| row.get(0))?;
         Ok(!hash.is_empty())
     }
-
+    //counts hashes in db
     pub fn count_hashes(&self) -> Result<u64, rusqlite::Error> {
         let mut stmt = self.db_conn.prepare("SELECT COUNT(hash) FROM signatures")?;
         let count: i64 = stmt.query_row([], |row| row.get(0))?;
         Ok(count as u64)
     }
-
+    //removes hash from db
     pub fn _remove_hash(&self, hash_str: &str) -> Result<(), rusqlite::Error> {
         self.db_conn
             .execute("DELETE FROM signatures WHERE hash = ?", &[hash_str])?;
         Ok(())
     }
-
+    //returns array of file numbers present online
     pub fn get_file_list(&self) -> i32 {
         let mut curr_fn = 0;
         let mut err_retry = false;
@@ -229,7 +230,7 @@ impl DBOps {
 
         curr_fn
     }
-
+    //checks if file exists online
     pub fn file_exists(file_nr: i32) -> Result<bool, reqwest::Error> {
         let url = format!(
             "https://virusshare.com/hashfiles/VirusShare_{}.md5",
@@ -244,7 +245,7 @@ impl DBOps {
             Ok(true)
         }
     }
-
+    //returns array of file numbers present in db
     pub fn get_db_files(&self) -> Option<Vec<i32>> {
         let mut stmt = match self
             .db_conn
@@ -257,24 +258,22 @@ impl DBOps {
             }
         };
         let mut rows = match stmt.query(params![]) {
-            Ok(rows) => rows,
+            Ok(stmt) => stmt,
             Err(err) => {
-                warn!("Failed querying params: {err}");
+                warn!("Failed preparing statement: {err}");
                 return None;
             }
         };
 
-        let mut values: Vec<i32> = Vec::new();
+        let mut file_nr_values = Vec::new();
         loop {
-            let result = rows.next();
-            match result {
+            match rows.next() {
                 Ok(row) => {
                     let tmp = match row {
                         Some(row) => row,
                         None => break,
                     };
-
-                    let value: i32 = match tmp.get(0) {
+                    let value = match tmp.get(0) {
                         Ok(value) => {
                             let a: String = value;
                             a.parse::<i32>().unwrap_or(0)
@@ -284,7 +283,7 @@ impl DBOps {
                             break;
                         }
                     };
-                    values.push(value);
+                    file_nr_values.push(value);
                 }
                 Err(err) => {
                     warn!("Failed getting row: {err}");
@@ -292,11 +291,12 @@ impl DBOps {
                 }
             }
         }
-        Some(values)
+        Some(file_nr_values)
     }
-
+    //returns array of file numbers present online but not in db
     pub fn get_diff_file(&self) -> Vec<i32> {
         let mut web_files: Vec<i32> = (0..=self.get_file_list()).collect();
+        //let mut web_files: Vec<i32> = (0..=20).collect();
         let db_files = match self.get_db_files() {
             Some(db_files) => db_files,
             None => Vec::new(),
