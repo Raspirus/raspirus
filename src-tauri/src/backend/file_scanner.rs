@@ -25,7 +25,7 @@ impl FileScanner {
             let tmpconf = match DBOps::new(db_file) {
                 Ok(db_conn) => db_conn,
                 Err(err) => {
-                    error!("{err}");
+                    error!("Müll: {err}");
                     exit(-1);
                 }
             };
@@ -83,7 +83,7 @@ impl FileScanner {
         }
         let big_toc = time::Instant::now();
         info!(
-            "Analysed: {}, Skipped: {},  Infected: {}, Time: {} seconds",
+            "=> Analysed: {}, Skipped: {},  Infected: {}, Time: {} seconds",
             analysed,
             skipped,
             self.dirty_files.len(),

@@ -2,13 +2,13 @@ use std::time;
 
 use log::{debug, error, info, warn};
 use reqwest::StatusCode;
-use rusqlite::{params, Connection, Transaction};
+use rusqlite::{params, Connection};
 
 #[allow(unused)]
 pub struct DBOps {
     db_conn: Connection,
     db_file: String,
-    file_nr: String,
+    file_nr: i32,
 }
 
 impl DBOps {
@@ -21,7 +21,7 @@ impl DBOps {
         let ret = DBOps {
             db_conn: conn,
             db_file: db_file.to_owned(),
-            file_nr: "00000".to_owned(),
+            file_nr: 0,
         };
         ret.init_table()?;
         Ok(ret)
@@ -42,23 +42,30 @@ impl DBOps {
 
     pub fn update_db(&mut self) {
         info!("Updating database...");
-        self.download_files();
+        let web_files = self.get_diff_file();
+        if web_files.len() > 0 {
+            info!("Database not up-to-date!");
+            info!("Downloading {} file(s)", web_files.len());
+            self.download_files(web_files);
+        }
         info!("Total hashes in DB: {}", self.count_hashes().unwrap_or(0));
     }
 
-    fn download_files(&mut self) {
-        if self.db_is_updated() {
+    pub fn download_files(&mut self, files: Vec<i32>) {
+        if files.len() == 0 {
             return;
         }
 
-        info!("Database not up-to-date!");
         info!("Trying to fetch files...");
-        loop {
-            match Self::download_file(self.file_nr.as_str()) {
+        let mut _retry = false;
+        let mut i = 0;
+        while i < files.len() {
+            _retry = false;
+            match Self::download_file(files[i]) {
                 Ok(hashes) => match hashes {
                     Some(hashes) => {
                         match self.insert_hashes(hashes) {
-                            Ok(_) => {}
+                            Ok(_) => i += 1,
                             Err(err) => error!("{err}"),
                         };
                     }
@@ -70,20 +77,14 @@ impl DBOps {
                         break;
                     }
                     warn!("Retrying download despite error: {}", err);
+                    _retry = true;
                 }
             };
-            if self
-                .check_latest_file(&self.file_nr.clone())
-                .unwrap_or(true)
-            {
-                info!("Done downloading");
-                break;
-            }
-            self.increment_file_nr();
         }
+        info!("Done updating DB");
     }
 
-    fn download_file(file_nr: &str) -> Result<Option<Vec<(String, String)>>, reqwest::Error> {
+    pub fn download_file(file_nr: i32) -> Result<Option<Vec<(String, String)>>, reqwest::Error> {
         let url = format!(
             "https://virusshare.com/hashfiles/VirusShare_{}.md5",
             format!("{:0>5}", file_nr)
@@ -109,68 +110,16 @@ impl DBOps {
         let mut hashes: Vec<(String, String)> = Vec::new();
         for l in lines {
             if !l.starts_with("#") {
-                hashes.push((l.to_owned(), file_nr.clone().to_owned()));
+                hashes.push((l.to_owned(), format!("{:0>5}", file_nr.clone())));
             }
         }
         let big_toc = time::Instant::now();
         info!(
-            "Downloaded file in {} seconds, Parsing took {} seconds",
+            "=> Downloaded file in {} seconds, Parsing took {} seconds",
             big_tuc.duration_since(big_tic).as_secs_f64(),
             big_toc.duration_since(big_tuc).as_secs_f64(),
         );
         Ok(Some(hashes))
-    }
-
-    fn increment_file_nr(&mut self) {
-        self.file_nr = (match self.file_nr.parse::<i32>() {
-            Ok(file_nr) => file_nr + 1,
-            Err(_) => {
-                error!("Failed incrementing file_nr; Retrying");
-                return;
-            }
-        })
-        .to_string();
-    }
-
-    fn db_is_updated(&mut self) -> bool {
-        let file_nr = match self.get_latest_file_nr() {
-            Ok(file_nr) => file_nr,
-            Err(_) => return false,
-        };
-
-        match self.check_latest_file(&file_nr) {
-            Ok(res) => res,
-            Err(err) => {
-                error!("Encountered error {:?}", err);
-                false
-            }
-        }
-    }
-
-    fn check_latest_file(&self, file_nr: &str) -> Result<bool, reqwest::Error> {
-        let file_nr = match file_nr.parse::<i32>() {
-            Ok(file_nr) => file_nr + 1,
-            Err(_) => {
-                error!("Failed incrementing file_nr; Retrying");
-                return Ok(false);
-            }
-        };
-        let url = format!(
-            "https://virusshare.com/hashfiles/VirusShare_{}.md5",
-            format!("{:0>5}", file_nr)
-        );
-        info!("Trying to retrieve file from {url}");
-        match reqwest::blocking::get(url) {
-            Ok(resp) => {
-                if resp.status() == StatusCode::NOT_FOUND {
-                    info!("Database is up-to-date");
-                    Ok(true)
-                } else {
-                    Ok(false)
-                }
-            }
-            Err(err) => Err(err),
-        }
     }
 
     pub fn insert_hashes(&mut self, hashes: Vec<(String, String)>) -> Result<(), rusqlite::Error> {
@@ -202,31 +151,12 @@ impl DBOps {
         }
         let big_toc = time::Instant::now();
         info!(
-            "Inserted: {}, Skipped: {}, Time: {} seconds",
+            "=> Inserted: {}, Skipped: {}, Time: {} seconds",
             inserted,
             skipped,
             big_toc.duration_since(big_tic).as_secs_f64()
         );
         transact.commit()?;
-        Ok(())
-    }
-
-    pub fn _insert_hash(
-        &self,
-        transaction: &Transaction,
-        hash_str: &str,
-        file_nr: &str,
-    ) -> Result<(), rusqlite::Error> {
-        match transaction.execute(
-            "INSERT INTO signatures(hash, file_nr) VALUES (?, ?)",
-            [hash_str, file_nr],
-        ) {
-            Ok(_) => debug!("[File {file_nr}]: Inserted {}", hash_str),
-            Err(err) => warn!(
-                "Continuing after trying to insert hash and receiving: {}",
-                err
-            ),
-        };
         Ok(())
     }
 
@@ -236,19 +166,6 @@ impl DBOps {
             .prepare("SELECT hash FROM signatures WHERE hash = ?")?;
         let hash: String = stmt.query_row(params![hash_str], |row| row.get(0))?;
         Ok(!hash.is_empty())
-    }
-
-    pub fn get_latest_file_nr(&mut self) -> Result<String, rusqlite::Error> {
-        let mut stmt = self
-            .db_conn
-            .prepare("SELECT MAX(CAST(file_nr AS INTEGER)) FROM signatures;")?;
-        let row = stmt.query_row([], |row| row.get(0));
-        let file_nr: i32 = match row {
-            Ok(val) => val,
-            Err(err) => return Err(err),
-        };
-        self.file_nr = file_nr.to_string().clone();
-        Ok(file_nr.to_string())
     }
 
     pub fn count_hashes(&self) -> Result<u64, rusqlite::Error> {
@@ -261,5 +178,130 @@ impl DBOps {
         self.db_conn
             .execute("DELETE FROM signatures WHERE hash = ?", &[hash_str])?;
         Ok(())
+    }
+
+    pub fn get_file_list(&self) -> i32 {
+        let mut curr_fn = 0;
+        let mut err_retry = false;
+        //+10 loop
+        loop {
+            //if file exists
+            if match Self::file_exists(curr_fn) {
+                Ok(val) => val,
+                Err(err) => {
+                    warn!("Retrying because of error: {err}");
+                    err_retry = true;
+                    false
+                }
+            } {
+                curr_fn += 10;
+            } else {
+                //if err is true retry otherwise break
+                if err_retry {
+                    err_retry = false;
+                } else {
+                    break;
+                }
+            }
+        }
+        curr_fn -= 1;
+        //-1 loop
+        loop {
+            //if file exists
+            if !match Self::file_exists(curr_fn) {
+                Ok(val) => val,
+                Err(err) => {
+                    warn!("Retrying because of error: {err}");
+                    err_retry = true;
+                    false
+                }
+            } {
+                curr_fn -= 1;
+            } else {
+                //if err is true retry otherwise break
+                if err_retry {
+                    err_retry = false;
+                } else {
+                    break;
+                }
+            }
+        }
+
+        curr_fn
+    }
+
+    pub fn file_exists(file_nr: i32) -> Result<bool, reqwest::Error> {
+        let url = format!(
+            "https://virusshare.com/hashfiles/VirusShare_{}.md5",
+            format!("{:0>5}", file_nr)
+        );
+        let client = reqwest::blocking::Client::new();
+        info!("Checking if file {file_nr} exists...");
+        let code = client.get(url).send()?;
+        if code.status() == StatusCode::NOT_FOUND {
+            Ok(false)
+        } else {
+            Ok(true)
+        }
+    }
+
+    pub fn get_db_files(&self) -> Option<Vec<i32>> {
+        let mut stmt = match self
+            .db_conn
+            .prepare("SELECT DISTINCT file_nr FROM signatures")
+        {
+            Ok(stmt) => stmt,
+            Err(err) => {
+                warn!("Failed preparing statement: {err}");
+                return None;
+            }
+        };
+        let mut rows = match stmt.query(params![]) {
+            Ok(rows) => rows,
+            Err(err) => {
+                warn!("Failed querying params: {err}");
+                return None;
+            }
+        };
+
+        let mut values: Vec<i32> = Vec::new();
+        loop {
+            let result = rows.next();
+            match result {
+                Ok(row) => {
+                    let tmp = match row {
+                        Some(row) => row,
+                        None => break,
+                    };
+
+                    let value: i32 = match tmp.get(0) {
+                        Ok(value) => {
+                            let a: String = value;
+                            a.parse::<i32>().unwrap_or(0)
+                        }
+                        Err(err) => {
+                            warn!("Failed getting value: {err}");
+                            break;
+                        }
+                    };
+                    values.push(value);
+                }
+                Err(err) => {
+                    warn!("Failed getting row: {err}");
+                    break;
+                }
+            }
+        }
+        Some(values)
+    }
+
+    pub fn get_diff_file(&self) -> Vec<i32> {
+        let mut web_files: Vec<i32> = (0..=self.get_file_list()).collect();
+        let db_files = match self.get_db_files() {
+            Some(db_files) => db_files,
+            None => Vec::new(),
+        };
+        web_files.retain(|x| !db_files.contains(x));
+        web_files
     }
 }

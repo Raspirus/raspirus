@@ -6,7 +6,7 @@
 use std::{path::Path, time, fs};
 
 use backend::file_scanner;
-use log::{error, info};
+use log::{error, info, warn};
 
 mod backend;
 
@@ -19,7 +19,14 @@ fn main() {
 
 #[tauri::command]
 fn start_scanner(path: String, update: bool, dbfile: Option<String>) -> Result<Option<Vec<String>>, String> {
-    pretty_env_logger::init();
+    match pretty_env_logger::try_init() {
+        Ok(()) => {
+            info!("Logger initialized!");
+        }
+        Err(err) => {
+            warn!("Failed initializing logger: {err}");
+        }
+    }
 
     let mut use_db = "signatures.db".to_owned();
     match dbfile {
