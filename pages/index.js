@@ -20,7 +20,7 @@ export default function Home() {
     router.push('/loading');
     console.log("Value = " + value);
     let dirty_array = null;
-    let scanning_path = "C:/Users/benbe/Documents/Coding/RustProjects/raspirus/src-tauri/target/.rustc_info.json";
+    let scanning_path = value;
     let should_update = false;
     let db_location = "";
 
@@ -73,7 +73,7 @@ export default function Home() {
                         px-3 py-1.5 text-base font-normal text-gray-700 bg-white w-9/12
                         border border-solid border-maingreen-light rounded transition ease-in-out
                         focus:text-gray-700 focus:bg-white focus:border-maingreen focus:outline-none">
-                  <option value=".">This will scna the current folder</option>
+                  <option value=".">This will scan the current folder</option>
                   <option value="/">This will scan the / folder</option>
                   <option value="C:/Users/benbe/Documents/School/Deutsch">Windows only</option>
                   <option value="/home/pi/FTP/">Linux PI only</option>

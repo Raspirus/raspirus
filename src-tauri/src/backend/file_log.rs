@@ -35,7 +35,7 @@ impl FileLog {
     }
 
     pub fn create_file(&mut self, fname: String) {
-        match fs::create_dir_all("logs") {
+        match fs::create_dir_all("../../../../logs") {
             Ok(_) => {
                 self.file = match File::create(format!("logs/{}", fname.clone())) {
                     Ok(file) => {
