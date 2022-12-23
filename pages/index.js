@@ -16,16 +16,16 @@ export default function Home() {
     console.log("Drives: " + drives_list);
   }
 
-  const startScanner = () => {
+  const startScanner =async () => {
     router.push('/loading');
     console.log("Value = " + value);
     let dirty_array = null;
-    let scanning_path = "/";
+    let scanning_path = "C:/Users/benbe/Documents/Coding/RustProjects/raspirus/src-tauri/target/.rustc_info.json";
     let should_update = false;
     let db_location = "";
 
     if (typeof window !== 'undefined') {
-      invoke('start_scanner', { path: scanning_path, update: should_update, dbfile: db_location })
+      await invoke('start_scanner', { path: scanning_path, update: should_update, dbfile: db_location })
         .then((message) => dirty_array = message)
         .catch((console.error));
         console.log(dirty_array);
