@@ -9,6 +9,11 @@ on:
 env:
   CARGO_TERM_COLOR: always
 
+defaults:
+  run:
+    shell: bash
+    working-directory: src-tauri
+
 jobs:
   build:
 
