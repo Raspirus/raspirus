@@ -9,7 +9,7 @@ Coming soon
 Coming soon
 
 ### Compilation instructions:
-For the Raspberry Pi [RASPBERRY_INSTALLATION](RASPBERRY_INSTALLATION.md)
+For the Raspberry Pi [RASPBERRY_INSTALLATION](RASPBERRY_INSTALLATION.md) else:\
 Prerequisites:
 - Install [Rust](https://www.rust-lang.org/tools/install)
 - Install [Tauri](https://tauri.app/v1/guides/getting-started/prerequisites/)
