@@ -65,7 +65,7 @@ How to compile for Raspberry Pi on x86_64 linux hosts
 4. Enable armhf in the package manager: \
   `sudo dpkg --add-architecture armhf`
 
-5. Add deb sources by opening the file /etc/apt/sources-list and adding (Not all might be necessary and some will generate errors that can safely be ignored):
+5. Add deb sources by opening the file /etc/apt/sources-list and adding (Not all might be necessary and some will generate errors that can safely be ignored). By the way, this step can be ignored in Debian:
   ```
   deb [arch=armhf] http://ports.ubuntu.com/ubuntu-ports jammy main restricted
   deb [arch=armhf] http://ports.ubuntu.com/ubuntu-ports jammy-updates main restricted
