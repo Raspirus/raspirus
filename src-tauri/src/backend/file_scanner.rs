@@ -13,14 +13,34 @@ use walkdir::WalkDir;
 
 use super::{db_ops::DBOps, file_log::FileLog};
 
+/// Struct representing a file scanner that is capable of searching through a specified directory and its subdirectories for malicious files.
 pub struct FileScanner {
+    /// A reference to a `DBOps` object that allows the `FileScanner` to access and manipulate the database.
     pub db_conn: DBOps,
+    /// A vector of file paths for files that have been identified as malicious.
     pub dirty_files: Vec<String>,
+    /// The file path of the directory that the `FileScanner` should search through.
     pub scanloc: String,
+    /// A `FileLog` object that the `FileScanner` can use to log information about the search process.
     pub log: FileLog,
 }
 
 impl FileScanner {
+
+    /// Creates a new `FileScanner` object.
+    ///
+    /// # Arguments
+    ///
+    /// * `scanloc` - The file path of the directory that the `FileScanner` should search through.
+    /// * `db_file` - The file path of the database that the `FileScanner` should use to store information about the files it has scanned.
+    ///
+    /// # Returns
+    ///
+    /// A `Result` object containing a new `FileScanner` object on success or an `Error` on failure.
+    ///
+    /// # Errors
+    ///
+    /// This function will return an `Error` with an `ErrorKind` of `Other` if the `scanloc` file path does not exist.
     pub fn new(scanloc: &str, db_file: &str) -> Result<Self, Error> {
         //check path
         if Path::new(&scanloc).exists() {
@@ -46,6 +66,18 @@ impl FileScanner {
         }
     }
 
+    /// Searches the given file location for infected files.
+    ///
+    /// # Arguments
+    ///
+    /// * `&mut self` - the `FileScanner` instance
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let mut scanner = FileScanner::new("/path/to/scan", "database.db").unwrap();
+    /// scanner.search_files();
+    /// ```
     pub fn search_files(&mut self) {
         let mut analysed: i128 = 0;
         let mut skipped: i128 = 0;
@@ -99,6 +131,19 @@ impl FileScanner {
         );
     }
 
+    /// Creates the MD5 hash of a file.
+    ///
+    /// # Arguments
+    ///
+    /// * `&mut self` - the `FileScanner` instance
+    /// * `path` - the path to the file to create the hash for
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let mut scanner = FileScanner::new("/path/to/scan", "database.db").unwrap();
+    /// let hash = scanner.create_hash("/path/to/file.exe");
+    /// ```
     pub fn create_hash(&mut self, path: &str) -> Option<String> {
         let mut context = md5::Context::new();
         let mut buffer = [0; 1024];

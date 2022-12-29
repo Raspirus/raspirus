@@ -12,7 +12,22 @@ pub struct DBOps {
 }
 
 impl DBOps {
-    //returns new DBOps struct
+    
+    /// Returns a new `DBOps` struct with a connection to the specified database file
+    /// and initializes the table if it does not exist.
+    ///
+    /// # Arguments
+    ///
+    /// * `db_file` - The path to the database file.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use rusqlite::Connection;
+    /// use virus_scanner::backend::db_ops::DBOps;
+    /// let db_ops = DBOps::new("signatures.db").unwrap();
+    /// assert_eq!(db_ops.db_conn, Connection::open("signatures.db").unwrap());
+    /// ```
     pub fn new(db_file: &str) -> Result<Self, rusqlite::Error> {
         let conn = match Connection::open(db_file) {
             Ok(conn) => conn,
@@ -27,7 +42,17 @@ impl DBOps {
         ret.init_table()?;
         Ok(ret)
     }
-    //initializes table if it doesnt exist
+
+    /// Initializes the `signatures` table if it does not exist.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use rusqlite::Connection;
+    /// use virus_scanner::backend::db_ops::DBOps;
+    /// let db_ops = DBOps::new("signatures.db").unwrap();
+    /// assert!(db_ops.init_table().is_ok());
+    /// ```
     pub fn init_table(&self) -> Result<(), rusqlite::Error> {
         info!("Creating table if not present...");
         match self.db_conn.execute(
@@ -40,7 +65,17 @@ impl DBOps {
             Err(err) => Err(err),
         }
     }
-    //updates the db
+    
+    /// Updates the database by downloading any missing files and inserting their hashes into the `signatures` table.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use rusqlite::Connection;
+    /// use virus_scanner::backend::db_ops::DBOps;
+    /// let mut db_ops = DBOps::new("signatures.db").unwrap();
+    /// db_ops.update_db();
+    /// ```
     pub fn update_db(&mut self) {
         info!("Updating database...");
         let web_files = self.get_diff_file();
@@ -51,7 +86,17 @@ impl DBOps {
         }
         info!("Total hashes in DB: {}", self.count_hashes().unwrap_or(0));
     }
-    //downloads files and inserts them into db
+    
+    /// Downloads the specified files and inserts their hashes into the signatures table.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use rusqlite::Connection; 
+    /// use virus_scanner::backend::db_ops::DBOps; 
+    /// let mut db_ops = DBOps::new("signatures.db").unwrap(); 
+    /// db_ops.download_files(vec![1, 2, 3]); 
+    /// ```
     pub fn download_files(&mut self, files: Vec<i32>) {
         if files.len() == 0 {
             return;
@@ -84,7 +129,18 @@ impl DBOps {
         }
         info!("Done updating DB");
     }
-    //downloads file and returns content and file number
+    
+    /// Downloads the specified file and returns its content and file number as a tuple in the form of (file_nr, content).
+    /// Returns None if the file does not exist or if there was an error creating a String from the file's bytes.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use rusqlite::Connection; 
+    /// use virus_scanner::backend::db_ops::DBOps;
+    /// let file = DBOps::download_file(1).unwrap(); 
+    /// assert!(file.is_some()); 
+    /// ```
     pub fn download_file(file_nr: i32) -> Result<Option<Vec<(String, String)>>, reqwest::Error> {
         let url = format!(
             "https://virusshare.com/hashfiles/VirusShare_{}.md5",
@@ -122,7 +178,17 @@ impl DBOps {
         );
         Ok(Some(hashes))
     }
-    //inserts hash and file number into db
+    
+    /// Inserts the given hashes into the signatures table.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use rusqlite::Connection; 
+    /// use virus_scanner::backend::db_ops::DBOps; 
+    /// let mut db_ops = DBOps::new("signatures.db").unwrap(); 
+    /// db_ops.insert_hashes(vec![("abcdef".to_owned(), "1".to_owned())]).unwrap(); 
+    /// ```
     pub fn insert_hashes(&mut self, hashes: Vec<(String, String)>) -> Result<(), rusqlite::Error> {
         info!("Inserting File {}", hashes[0].1);
         let transact = match self.db_conn.transaction() {
@@ -160,7 +226,17 @@ impl DBOps {
         transact.commit()?;
         Ok(())
     }
-    //checks if hash exists in db
+   
+    /// Returns true or false depending on if the given hash gets found in the database
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use rusqlite::Connection;
+    /// use virus_scanner::backend::db_ops::DBOps;
+    /// let db_ops = DBOps::new("signatures.db").unwrap();
+    /// assert_eq!(db_ops.hash_exists("abcd1234").unwrap(), false);
+    /// ```
     pub fn hash_exists(&self, hash_str: &str) -> Result<bool, rusqlite::Error> {
         let mut stmt = self
             .db_conn
@@ -168,25 +244,55 @@ impl DBOps {
         let hash: String = stmt.query_row(params![hash_str], |row| row.get(0))?;
         Ok(!hash.is_empty())
     }
-    //counts hashes in db
+    
+    /// Returns the number of hashes in the `signatures` table.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use rusqlite::Connection;
+    /// use virus_scanner::backend::db_ops::DBOps;
+    /// let db_ops = DBOps::new("signatures.db").unwrap();
+    /// assert_eq!(db_ops.count_hashes().unwrap(), 0);
+    /// ```
     pub fn count_hashes(&self) -> Result<u64, rusqlite::Error> {
         let mut stmt = self.db_conn.prepare("SELECT COUNT(hash) FROM signatures")?;
         let count: i64 = stmt.query_row([], |row| row.get(0))?;
         Ok(count as u64)
     }
-    //removes hash from db
+    
+    /// Removes the specified hash from the `signatures` table.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use rusqlite::Connection;
+    /// use virus_scanner::backend::db_ops::DBOps;
+    /// let db_ops = DBOps::new("signatures.db").unwrap();
+    /// assert!(db_ops._remove_hash("abcd1234").is_ok());
+    /// ```
     pub fn _remove_hash(&self, hash_str: &str) -> Result<(), rusqlite::Error> {
         self.db_conn
             .execute("DELETE FROM signatures WHERE hash = ?", &[hash_str])?;
         Ok(())
     }
-    //returns array of file numbers present online
+
+    /// Returns the file numbers of the files that are present online.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use rusqlite::Connection;
+    /// use virus_scanner::backend::db_ops::DBOps;
+    /// let db_ops = DBOps::new("signatures.db").unwrap();
+    /// assert!(db_ops.get_file_list() > 0);
+    /// ```
     pub fn get_file_list(&self) -> i32 {
         let mut curr_fn = 0;
         let mut err_retry = false;
-        //+10 loop
+        // Loops in steps of +10
         loop {
-            //if file exists
+            // If file exists
             if match Self::file_exists(curr_fn) {
                 Ok(val) => val,
                 Err(err) => {
@@ -230,7 +336,17 @@ impl DBOps {
 
         curr_fn
     }
-    //checks if file exists online
+    
+    /// Returns whether the file with the specified file number exists online.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use rusqlite::Connection;
+    /// use virus_scanner::backend::db_ops::DBOps;
+    /// let db_ops = DBOps::new("signatures.db").unwrap();
+    /// assert!(db_ops.file_exists(123).unwrap_or(false));
+    /// ```
     pub fn file_exists(file_nr: i32) -> Result<bool, reqwest::Error> {
         let url = format!(
             "https://virusshare.com/hashfiles/VirusShare_{}.md5",
@@ -245,7 +361,17 @@ impl DBOps {
             Ok(true)
         }
     }
-    //returns array of file numbers present in db
+
+    /// Returns a vector of the file numbers of the files that are present in the `signatures` table.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use rusqlite::Connection;
+    /// use virus_scanner::backend::db_ops::DBOps;
+    /// let db_ops = DBOps::new("signatures.db").unwrap();
+    /// assert!(db_ops.get_db_files().is_some());
+    /// ```
     pub fn get_db_files(&self) -> Option<Vec<i32>> {
         let mut stmt = match self
             .db_conn
@@ -293,7 +419,17 @@ impl DBOps {
         }
         Some(file_nr_values)
     }
-    //returns array of file numbers present online but not in db
+    
+    /// Returns a list of file numbers for which there are no corresponding hashes in the signatures table.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use rusqlite::Connection; 
+    /// use virus_scanner::backend::db_ops::DBOps; 
+    /// let db_ops = DBOps::new("signatures.db").unwrap(); 
+    /// assert!(db_ops.get_diff_file().len() >= 0); 
+    /// ```
     pub fn get_diff_file(&self) -> Vec<i32> {
         let mut web_files: Vec<i32> = (0..=self.get_file_list()).collect();
         //let mut web_files: Vec<i32> = (0..=20).collect();

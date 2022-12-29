@@ -17,6 +17,17 @@ fn main() {
         .expect("error while running tauri application");
 }
 
+/// Starts the scanner for the given path and updates the database if update is true.
+///
+/// # Arguments
+///
+/// * `path` - The path to scan.
+/// * `update` - Whether to update the database before scanning.
+/// * `dbfile` - An optional path to a specific database file.
+///
+/// # Returns
+///
+/// An empty `Result` object if the scanner was successfully started, or an `Err` with an error message if an error occurred.
 #[tauri::command]
 fn start_scanner(path: String, update: bool, dbfile: Option<String>) -> Result<(), String> {
     match pretty_env_logger::try_init() {
@@ -66,6 +77,11 @@ fn start_scanner(path: String, update: bool, dbfile: Option<String>) -> Result<(
     Ok(())
 }
 
+/// Lists the USB drives attached to the system.
+///
+/// # Returns
+///
+/// A `Result` object containing a vector of strings representing the paths to the USB drives, or an `Err` with an error message if an error occurred.
 #[tauri::command]
 fn list_usb_drives() -> Result<Vec<String>, String> {
     let mut usb_drives = Vec::new();
