@@ -7,3 +7,5 @@ RASPBERRY_INSTALLATION.md
 .next
 .git
 .github
+src-tauri/.gitignore
+src-tauri/target/
