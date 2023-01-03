@@ -8,6 +8,8 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
+  // For Docker support:
+  output: 'standalone'
 }
 
 module.exports = nextConfig
