@@ -1,57 +1,48 @@
-# Install dependencies only when needed
-FROM node:16-alpine AS deps
-# Check https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec926ef50a31506c3#nodealpine to understand why libc6-compat might be needed.
-RUN apk add --no-cache libc6-compat
-WORKDIR /app
+FROM rust:latest as build
 
-# Install dependencies based on the preferred package manager
-COPY package.json yarn.lock* package-lock.json* pnpm-lock.yaml* ./
-RUN \
-  if [ -f yarn.lock ]; then yarn --frozen-lockfile; \
-  elif [ -f package-lock.json ]; then npm ci; \
-  elif [ -f pnpm-lock.yaml ]; then yarn global add pnpm && pnpm i --frozen-lockfile; \
-  else echo "Lockfile not found." && exit 1; \
-  fi
+ENV USER=app
+ENV APP_HOME=/home/$USER/app
 
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    pkg-config \
+    libssl-dev \
+    cmake \
+    git \
+    curl \
+    wget \
+    libssl-dev \
+    libgtk-3-dev \
+    libayatana-appindicator3-dev \
+    librsvg2-dev \
+    libwebkit2gtk-4.0-dev \
+    && rm -rf /var/lib/apt/lists/*
 
-# Rebuild the source code only when needed
-FROM node:16-alpine AS builder
-WORKDIR /app
-COPY --from=deps /app/node_modules ./node_modules
-COPY . .
+RUN useradd --create-home $USER
+WORKDIR $APP_HOME
 
-# Next.js collects completely anonymous telemetry data about general usage.
-# Learn more here: https://nextjs.org/telemetry
-# Uncomment the following line in case you want to disable telemetry during the build.
-ENV NEXT_TELEMETRY_DISABLED 1
+COPY --chown=$USER:$USER src-tauri src-tauri
 
-# RUN yarn build
+RUN mkdir -p ../out
 
-# If using npm comment out above and use below instead
-RUN npm run build
+RUN cargo install --path src-tauri
 
-# Production image, copy all the files and run next
-FROM node:16-alpine AS runner
-WORKDIR /app
+FROM node:alpine
 
-ENV NODE_ENV production
-# Uncomment the following line in case you want to disable telemetry during runtime.
-ENV NEXT_TELEMETRY_DISABLED 1
+ENV USER=app
+ENV APP_HOME=/home/$USER/app
 
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nextjs
+RUN adduser -D $USER
+WORKDIR $APP_HOME
 
-COPY --from=builder /app/public ./public
+COPY --from=build --chown=$USER:$USER $APP_HOME/target/release/tauri-bundler .
+COPY --from=build --chown=$USER:$USER $APP_HOME/package*.json .
+COPY --from=build --chown=$USER:$USER $APP_HOME/public public
+COPY --from=build --chown=$USER:$USER $APP_HOME/src src
+COPY --from=build --chown=$USER:$USER $APP_HOME/src-tauri src-tauri
 
-# Automatically leverage output traces to reduce image size
-# https://nextjs.org/docs/advanced-features/output-file-tracing
-COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+USER $USER
 
-USER nextjs
+RUN npm ci
 
-EXPOSE 3000
-
-ENV PORT 3000
-
-CMD ["node", "server.js"]
+CMD ["npm", "run", "tauri:build"]
