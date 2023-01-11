@@ -18,7 +18,7 @@
     "@tauri-apps/api": "^1.2.0",
     "@types/node": "18.11.18",
     "@types/react": "18.0.26",
-    "@types/react-dom": "18.0.9",
+    "@types/react-dom": "18.0.10",
     "eslint": "8.31.0",
     "eslint-config-next": "13.0.7",
     "next": "13.0.7",
