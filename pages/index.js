@@ -1,7 +1,8 @@
 import Head from 'next/head'
 import { useRouter } from 'next/router';
 import { useState } from 'react';
-import { invoke } from "@tauri-apps/api/tauri"
+import { invoke } from "@tauri-apps/api/tauri";
+import { alertService } from '../services/alert.service';
 
 export default function Home() {
   const router = useRouter();
@@ -18,31 +19,11 @@ export default function Home() {
   }
 
   async function startScanner() {
-    router.push('/loading');
-    console.log("Value = " + value);
-    let dirty_array = null;
-    if (value == "") {
-      return;
-    }
-    let scanning_path = value;
-    let should_update = false;
-    let db_location = "";
-
-    if (typeof window !== 'undefined') {
-      await invoke('start_scanner', { path: scanning_path, update: should_update, dbfile: db_location })
-        .then((message) => dirty_array = message)
-        .catch((console.error));
-      console.log(dirty_array);
-      if (dirty_array != null && dirty_array.length > 0) {
-        router.push('/infected');
-      } else {
-        router.push('/clean');
-      }
+    if (value.length <= 0) {
+      alertService.warn("Please select a driver first!");
     } else {
-      console.error("Nextjs not in client mode!");
+      router.push('/permission');
     }
-
-    console.log("Finished");
   }
 
   const openInfo = () => {
@@ -59,7 +40,7 @@ export default function Home() {
       <Head>
         <title>Raspirus</title>
       </Head>
-      <main>
+      <main className='overflow-y-hidden'>
         <div className='flex justify-end'>
           <button onClick={openSettings} type="button" className="inline-block px-6 py-2 border-2 m-5 border-mainred text-mainred 
         font-medium text-xs leading-tight uppercase rounded hover:bg-black hover:bg-opacity-5 
@@ -78,7 +59,6 @@ export default function Home() {
                         px-3 py-1.5 text-base font-normal text-gray-700 bg-white w-9/12
                         border border-solid border-maingreen-light rounded transition ease-in-out
                         focus:text-gray-700 focus:bg-white focus:border-maingreen focus:outline-none">
-                      <option value="" disabled>Select drive</option>
                   {drives && drives.map((drive) => (
                     <option value={drive}>{drive}</option>
                   ))}
