@@ -34,10 +34,17 @@ ENV APP_HOME=/home/$USER/app
 RUN adduser -D $USER
 WORKDIR $APP_HOME
 
-COPY --from=build --chown=$USER:$USER $APP_HOME/target/release/tauri-bundler .
+COPY --from=build --chown=$USER:$USER $APP_HOME/src-tauri/target/release/tauri-bundler .
 COPY --from=build --chown=$USER:$USER $APP_HOME/package*.json .
 COPY --from=build --chown=$USER:$USER $APP_HOME/public public
-COPY --from=build --chown=$USER:$USER $APP_HOME/src src
+COPY --from=build --chown=$USER:$USER $APP_HOME/components components
+COPY --from=build --chown=$USER:$USER $APP_HOME/pages pages
+COPY --from=build --chown=$USER:$USER $APP_HOME/out out
+COPY --from=build --chown=$USER:$USER $APP_HOME/services services
+COPY --from=build --chown=$USER:$USER $APP_HOME/styles styles
+COPY --from=build --chown=$USER:$USER $APP_HOME/next.config.json .
+COPY --from=build --chown=$USER:$USER $APP_HOME/postcss.config.json .
+COPY --from=build --chown=$USER:$USER $APP_HOME/tailwind.config.json .
 COPY --from=build --chown=$USER:$USER $APP_HOME/src-tauri src-tauri
 
 USER $USER
