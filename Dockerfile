@@ -21,10 +21,10 @@ RUN apt-get update && apt-get install -y \
 RUN useradd --create-home $USER
 WORKDIR $APP_HOME
 
-COPY --chown=$USER:$USER src-tauri src-tauri
-COPY --chown=$USER:$USER out out
+COPY src-tauri src-tauri
+COPY out out
 
-RUN cargo install --path src-tauri
+RUN cargo install --path src-tauri && mv /home/app/app/target/release/app.exe /home/app/app/target/release/tauri-bundler
 
 FROM node:alpine
 
@@ -34,21 +34,21 @@ ENV APP_HOME=/home/$USER/app
 RUN adduser -D $USER
 WORKDIR $APP_HOME
 
-COPY --from=build --chown=$USER:$USER $APP_HOME/src-tauri/target/release/tauri-bundler .
-COPY --from=build --chown=$USER:$USER $APP_HOME/package*.json .
-COPY --from=build --chown=$USER:$USER $APP_HOME/public public
-COPY --from=build --chown=$USER:$USER $APP_HOME/components components
-COPY --from=build --chown=$USER:$USER $APP_HOME/pages pages
-COPY --from=build --chown=$USER:$USER $APP_HOME/out out
-COPY --from=build --chown=$USER:$USER $APP_HOME/services services
-COPY --from=build --chown=$USER:$USER $APP_HOME/styles styles
-COPY --from=build --chown=$USER:$USER $APP_HOME/next.config.json .
-COPY --from=build --chown=$USER:$USER $APP_HOME/postcss.config.json .
-COPY --from=build --chown=$USER:$USER $APP_HOME/tailwind.config.json .
-COPY --from=build --chown=$USER:$USER $APP_HOME/src-tauri src-tauri
+COPY --from=build $APP_HOME/target/release/tauri-bundler .
+COPY package*.json .
+COPY public public
+COPY components components
+COPY pages pages
+COPY out out
+COPY services services
+COPY styles styles
+COPY next.config.js .
+COPY postcss.config.js .
+COPY tailwind.config.js .
 
+RUN chown -R $USER:$USER $APP_HOME
 USER $USER
 
-RUN npm ci
+RUN npm install
 
 CMD ["npm", "run", "tauri:build"]
