@@ -1,6 +1,7 @@
 import Head from "next/head"
 import { useRouter } from "next/router";
-import InfoComp from "../components/info-comp"
+import InfoComp from "../components/info-comp";
+import { faR, faBook, faUser, faInfoCircle, faScaleBalanced } from '@fortawesome/free-solid-svg-icons';
 
 export default function Info() {
     const router = useRouter();
@@ -24,26 +25,27 @@ export default function Info() {
             <InfoComp
                 title="App Name"
                 value="Raspirus"
-                icon="r-char"
+                icon={faR}
             />
             <InfoComp
                 title="Description"
                 value="Simple signatures-based antivirus for single-board computers like Raspbrry Pi"
-                icon="book"
+                icon={faBook}
             />
             <InfoComp
                 title="Contributors"
                 value="Demetz Benjamin, Hell Björn Felix"
-                icon="profile"
+                icon={faUser}
             />
             <InfoComp
                 title="Version"
                 value="v1.1"
+                icon={faInfoCircle}
             />
             <InfoComp
                 title="License"
-                value="Created for Alperia AG"
-                icon="scale-balanced"
+                value="Private"
+                icon={faScaleBalanced}
             />
         </>
     )

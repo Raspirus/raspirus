@@ -22,8 +22,7 @@ RUN useradd --create-home $USER
 WORKDIR $APP_HOME
 
 COPY --chown=$USER:$USER src-tauri src-tauri
-
-RUN mkdir -p ../out
+COPY --chown=$USER:$USER out out
 
 RUN cargo install --path src-tauri
 

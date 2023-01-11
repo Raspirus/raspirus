@@ -23,7 +23,9 @@
     "eslint-config-next": "13.0.7",
     "next": "13.0.7",
     "react": "18.2.0",
-    "react-dom": "18.2.0"
+    "react-dom": "18.2.0",
+    "prop-types": "^15.7.2",
+    "rxjs": "^7.3.0"
   },
   "devDependencies": {
     "autoprefixer": "^10.4.13",
