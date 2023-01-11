@@ -45,10 +45,11 @@ COPY styles styles
 COPY next.config.js .
 COPY postcss.config.js .
 COPY tailwind.config.js .
+COPY src-tauri/tauri.conf.json src-tauri/tauri.conf.json
 
 RUN chown -R $USER:$USER $APP_HOME
 USER $USER
 
 RUN npm install
 
-CMD ["cargo", "tauri", "build"]
+CMD ["npx", "tauri", "build"]
