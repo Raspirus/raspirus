@@ -24,7 +24,7 @@ WORKDIR $APP_HOME
 COPY src-tauri src-tauri
 COPY out out
 
-RUN cargo install --path src-tauri && mv /home/app/app/target/release/app.exe /home/app/app/target/release/tauri-bundler
+RUN cargo install --path src-tauri
 
 FROM node:alpine
 
@@ -34,7 +34,7 @@ ENV APP_HOME=/home/$USER/app
 RUN adduser -D $USER
 WORKDIR $APP_HOME
 
-COPY --from=build $APP_HOME/target/release/tauri-bundler .
+COPY --from=build $APP_HOME/src-tauri/target/release/app .
 COPY package*.json .
 COPY public public
 COPY components components
@@ -51,4 +51,4 @@ USER $USER
 
 RUN npm install
 
-CMD ["npm", "run", "tauri:build"]
+CMD ["cargo", "tauri", "build"]
