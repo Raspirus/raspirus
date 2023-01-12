@@ -52,4 +52,12 @@ USER $USER
 
 RUN npm install
 
-CMD ["npx", "tauri", "build"]
+# need to build the Next.js app before we build the tauri app
+RUN npm run build && npm run export
+
+RUN npm install --save-dev @tauri-apps/cli
+
+ENV PATH=$PATH:/usr/local/bin
+
+# build the tauri app
+CMD ["sh", "-c", "npm run build && npm run export", "ls -l"]
