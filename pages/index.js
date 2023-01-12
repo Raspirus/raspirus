@@ -68,7 +68,7 @@ export default function Home() {
                   m-auto px-3 py-1.5 text-base font-normal text-gray-700 bg-white w-9/12
                   border border-solid border-maingreen-light rounded transition ease-in-out
                   focus:text-gray-700 focus:bg-white focus:border-maingreen focus:outline-none">
-                    No drives found. Try refreshing this page later</div>
+                    No drives found. Insert a drive and refresh this page</div>
                 )}
                 <div className="mt-5">
                   <button onClick={startScanner} type="button" className="mr-2 inline-block px-7 py-3 bg-mainred text-white font-medium text-sm leading-snug uppercase rounded shadow-md hover:bg-mainred-dark hover:shadow-lg focus:bg-mainred-dark focus:shadow-lg focus:outline-none focus:ring-0 active:mainred-dark active:shadow-lg transition duration-150 ease-in-out">START</button>
