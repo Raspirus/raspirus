@@ -4,7 +4,7 @@
 )]
 
 use backend::file_scanner;
-use log::{error, info, warn, debug};
+use log::{error, info, warn };
 use serde::{Deserialize, Serialize};
 use std::ffi::{OsString, OsStr};
 use std::iter::once;
