@@ -3,9 +3,10 @@
     windows_subsystem = "windows"
 )]
 
-use std::{path::Path, time, thread};
+use std::{path::Path, time, fs, thread, env};
 use backend::file_scanner;
 use log::{error, info, warn};
+use serde::{Deserialize, Serialize};
 
 mod backend;
 
@@ -75,10 +76,52 @@ fn start_scanner(path: String, update: bool, dbfile: Option<String>) -> Result<(
     Ok(())
 }
 
+#[derive(Serialize, Deserialize, Debug)]
+struct UsbDevice {
+    name: String,
+    path: String,
+}
+
 /// Lists the USB drives attached to the system.
 ///
 /// # Returns
 ///
 /// A `Result` object containing a vector of strings representing the paths to the USB drives, or an `Err` with an error message if an error occurred.
 #[tauri::command]
-fn list_usb_drives(){}
+fn list_usb_drives() -> Result<String, String> {
+
+    match pretty_env_logger::try_init() {
+        Ok(()) => {
+            info!("Logger initialized!");
+        }
+        Err(err) => {
+            warn!("Failed initializing logger: {err}");
+        }
+    }
+
+    let mut usb_drives = Vec::new();
+
+    if cfg!(target_os = "linux") {
+        info!("Trying to retrieve USB drives from Linux OS");
+        // WARNING! Username pi is hardcoded here!
+        let entries = match fs::read_dir("/media/pi") {
+            Ok(entries) => entries,
+            Err(err) => {
+                return Err(err.to_string());
+            }
+        };
+
+        for entry in entries {
+            let entry = entry.expect("I couldn't read something inside the directory");
+            let path = entry.path();
+
+            usb_drives.push(UsbDevice {
+                name: entry.file_name().into_string().expect("File name is strange"), 
+                path: path.as_path().to_str().expect("Path is strange").to_string()
+            });
+        }
+    } else {
+        warn!("Not retrieving USBs -> Wrong OS");
+    }
+    Ok(serde_json::to_string(&usb_drives).unwrap())
+}

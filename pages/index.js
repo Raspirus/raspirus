@@ -1,21 +1,26 @@
 import Head from 'next/head'
 import { useRouter } from 'next/router';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { invoke } from "@tauri-apps/api/tauri";
 import { alertService } from '../services/alert.service';
 
 export default function Home() {
   const router = useRouter();
   const [value, setValue] = useState("");
-  let drives = null;
+  const [dictionary, setDictionary] = useState([]);
 
   if (typeof window !== 'undefined') {
-    invoke('list_usb_drives')
-      .then(console.log)
-      .then((message) => drives = message)
-      .catch(console.error);
 
-    console.log("Drives: " + drives);
+    useEffect(() => {
+      invoke('list_usb_drives', {})
+      .then(output => {
+        console.log(output);
+        setDictionary(output);
+      })
+      .catch(console.error);
+    }, []);
+
+    console.log("Drives: " + dictionary);
   }
 
   async function startScanner() {
@@ -54,13 +59,13 @@ export default function Home() {
             <div className="flex justify-center items-center h-full">
               <div className="w-full">
                 <h1 className="font-bold leading-tight text-8xl mt-0 mb-2 text-mainred">RASPIRUS</h1>
-                {drives && drives.length > 0 ? (
+                {Array.isArray(dictionary) && dictionary.length > 0 ? (
                 <select placeholder='Select drive' value={value} onChange={(e) => { setValue(e.target.value); }} className="
                         px-3 py-1.5 text-base font-normal text-gray-700 bg-white w-9/12
                         border border-solid border-maingreen-light rounded transition ease-in-out
                         focus:text-gray-700 focus:bg-white focus:border-maingreen focus:outline-none">
-                  {drives && drives.map((drive) => (
-                    <option value={drive}>{drive}</option>
+                  {dictionary.map((item, i) => (
+                    <option key={i} value={item.value}>{item.key}</option>
                   ))}
                 </select>
                 ) : (

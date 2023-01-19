@@ -60,4 +60,4 @@ RUN npm install --save-dev @tauri-apps/cli
 ENV PATH=$PATH:/usr/local/bin
 
 # build the tauri app
-CMD ["sh", "-c", "npm run build && npm run export", "ls -l"]
+CMD ["sh", "-c", "npm run build && npm run export && npm run tauri build"]
