@@ -60,8 +60,15 @@ impl FileScanner {
             let log_str = format!("{}.log", now_str);
 
             let s = System::new_all();
-            let maximum_bytes:usize = (s.available_memory() as f64).mul(0.5) as usize;
-            info!("{} GB of available memory", s.available_memory() / 1073741824);
+            // maximum usize is 4294967295, roughly 4000000000
+            let maximum_bytes:usize;
+            let ram_percentage = 0.6;
+            if (s.available_memory() as f64 * ram_percentage ) > usize::MAX as f64 {
+                maximum_bytes = usize::MAX - 100;
+            } else {
+                maximum_bytes = (s.available_memory() as f64).mul(ram_percentage) as usize;
+            }
+            info!("Using {} GB of memory", maximum_bytes as f64 / 1073741824.0);
 
             Ok(FileScanner {
                 db_conn: tmpconf,
