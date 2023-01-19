@@ -6,8 +6,9 @@ import { alertService } from '../services/alert.service';
 
 export default function Home() {
   const router = useRouter();
-  const [value, setValue] = useState("G://");
+  const [value, setValue] = useState("None");
   const [dictionary, setDictionary] = useState([]);
+
 
   let { query: { data }, } = router;
   if (data != null && data != "") {
@@ -29,7 +30,7 @@ export default function Home() {
 
   const openAgreement = () => {
     console.log("Value selected = ", value);
-    if (value.length <= 0) {
+    if (value.length <= 0 || value == "None") {
       alertService.warn("Please select a driver first!");
     } else {
       router.push({
@@ -68,10 +69,13 @@ export default function Home() {
               <div className="w-full">
                 <h1 className="font-bold leading-tight text-8xl mt-0 mb-2 text-mainred">RASPIRUS</h1>
                 {Array.isArray(dictionary) && dictionary.length > 0 ? (
-                <select placeholder='Select drive' value={value} onChange={(e) => { setValue(e.target.value); }} className="
+                <select placeholder='Select drive' value={value} 
+                  onChange={(e) => { console.log("Changed drive: " + e.target.value); setValue(e.target.value); }} 
+                  className="
                         px-3 py-1.5 text-base font-normal text-gray-700 bg-white w-9/12
                         border border-solid border-maingreen-light rounded transition ease-in-out
                         focus:text-gray-700 focus:bg-white focus:border-maingreen focus:outline-none">
+                    <option value="None">Select your driver</option>
                   {dictionary.map((item, i) => (
                     <option key={i} value={item.path}>{item.name}</option>
                   ))}

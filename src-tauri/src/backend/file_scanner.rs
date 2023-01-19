@@ -61,10 +61,11 @@ impl FileScanner {
 
             let s = System::new_all();
             // maximum usize is 4294967295, roughly 4000000000
+            info!("Maximum = {}", usize::MAX);
             let maximum_bytes:usize;
             let ram_percentage = 0.6;
-            if (s.available_memory() as f64 * ram_percentage ) > usize::MAX as f64 {
-                maximum_bytes = usize::MAX - 100;
+            if (s.available_memory() as f64 * ram_percentage ) >= usize::MAX as f64 {
+                maximum_bytes = usize::MAX / 2;
             } else {
                 maximum_bytes = (s.available_memory() as f64).mul(ram_percentage) as usize;
             }

@@ -35,7 +35,7 @@ fn main() {
 ///
 /// An empty `Result` object if the scanner was successfully started, or an `Err` with an error message if an error occurred.
 #[tauri::command]
-fn start_scanner(path: String, update: bool, dbfile: Option<String>) -> Result<(), String> {
+async fn start_scanner(path: String, update: bool, dbfile: Option<String>) -> Result<(), String> {
     match pretty_env_logger::try_init() {
         Ok(()) => {
             info!("Logger initialized!");
@@ -94,7 +94,7 @@ struct UsbDevice {
 ///
 /// A `Result` object containing a vector of strings representing the paths to the USB drives, or an `Err` with an error message if an error occurred.
 #[tauri::command]
-fn list_usb_drives() -> Result<String, String> {
+async fn list_usb_drives() -> Result<String, String> {
     match pretty_env_logger::try_init() {
         Ok(()) => {
             info!("Logger initialized!");
@@ -106,6 +106,7 @@ fn list_usb_drives() -> Result<String, String> {
 
     let s = System::new_all();
     info!("{} GB of available memory", (s.available_memory() as f32) / 1073741824.0);
+    warn!("Maximum = {}", usize::MAX);
 
     let mut usb_drives = Vec::new();
 
