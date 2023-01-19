@@ -3,10 +3,16 @@
     windows_subsystem = "windows"
 )]
 
-use std::{path::Path, time, fs, thread, env};
 use backend::file_scanner;
-use log::{error, info, warn};
+use log::{error, info, warn, debug};
 use serde::{Deserialize, Serialize};
+use std::ffi::{OsString, OsStr};
+use std::iter::once;
+use std::os::windows::prelude::OsStrExt;
+use std::{env, fs, path::Path, thread, time};
+use winapi::um::fileapi::GetDriveTypeW;
+use winapi::um::winbase::DRIVE_REMOVABLE;
+use sysinfo::{System, SystemExt};
 
 mod backend;
 
@@ -89,7 +95,6 @@ struct UsbDevice {
 /// A `Result` object containing a vector of strings representing the paths to the USB drives, or an `Err` with an error message if an error occurred.
 #[tauri::command]
 fn list_usb_drives() -> Result<String, String> {
-
     match pretty_env_logger::try_init() {
         Ok(()) => {
             info!("Logger initialized!");
@@ -99,11 +104,13 @@ fn list_usb_drives() -> Result<String, String> {
         }
     }
 
+    let s = System::new_all();
+    info!("{} GB of available memory", (s.available_memory() as f32) / 1073741824.0);
+
     let mut usb_drives = Vec::new();
 
     if cfg!(target_os = "linux") {
         info!("Trying to retrieve USB drives from Linux OS");
-        // WARNING! Username pi is hardcoded here!
         let entries = match fs::read_dir("/media/pi") {
             Ok(entries) => entries,
             Err(err) => {
@@ -116,9 +123,68 @@ fn list_usb_drives() -> Result<String, String> {
             let path = entry.path();
 
             usb_drives.push(UsbDevice {
-                name: entry.file_name().into_string().expect("File name is strange"), 
-                path: path.as_path().to_str().expect("Path is strange").to_string()
+                name: entry
+                    .file_name()
+                    .into_string()
+                    .expect("File name is strange"),
+                path: path
+                    .as_path()
+                    .to_str()
+                    .expect("Path is strange")
+                    .to_string(),
             });
+        }
+    } else if cfg!(target_os = "windows") {
+        info!("Trying to retrieve USB drives from Windows OS");
+        let drive_letters: Vec<OsString> = vec![
+            OsString::from("A"),
+            OsString::from("B"),
+            OsString::from("C"),
+            OsString::from("D"),
+            OsString::from("E"),
+            OsString::from("F"),
+            OsString::from("G"),
+            OsString::from("H"),
+            OsString::from("I"),
+            OsString::from("J"),
+            OsString::from("K"),
+            OsString::from("L"),
+            OsString::from("M"),
+            OsString::from("N"),
+            OsString::from("O"),
+            OsString::from("P"),
+            OsString::from("Q"),
+            OsString::from("R"),
+            OsString::from("S"),
+            OsString::from("T"),
+            OsString::from("U"),
+            OsString::from("V"),
+            OsString::from("W"),
+            OsString::from("X"),
+            OsString::from("Y"),
+            OsString::from("Z"),
+        ];
+        for letter in drive_letters {
+            let drive_path = letter.clone().into_string().unwrap() + ":\\";
+            let drive_path = Path::new(&drive_path);
+            let drive_name = drive_path.file_name().unwrap_or_default();
+            let drive_path = drive_path.to_str().unwrap();
+
+            let wide_path = OsStr::new(&drive_path).encode_wide().chain(once(0)).collect::<Vec<_>>();
+            let drive_type = unsafe { GetDriveTypeW(wide_path.as_ptr()) };
+
+            match fs::metadata(drive_path) {
+                Ok(metadata) => {
+                    if metadata.is_dir() && drive_type == DRIVE_REMOVABLE {
+                        info!("Found Drive: {}", drive_path);
+                        usb_drives.push(UsbDevice {
+                            name: drive_path.to_string() + " " + &drive_name.to_string_lossy(),
+                            path: drive_path.to_string(),
+                        });
+                    }
+                }
+                Err(_) => {}
+            }
         }
     } else {
         warn!("Not retrieving USBs -> Wrong OS");

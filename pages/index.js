@@ -6,28 +6,36 @@ import { alertService } from '../services/alert.service';
 
 export default function Home() {
   const router = useRouter();
-  const [value, setValue] = useState("");
+  const [value, setValue] = useState("G://");
   const [dictionary, setDictionary] = useState([]);
 
-  if (typeof window !== 'undefined') {
+  let { query: { data }, } = router;
+  if (data != null && data != "") {
+    console.error("Home error", data);
+    alertService.error("Scanning failed: " + data);
+  }
 
+  if (typeof window !== 'undefined') {
+  
     useEffect(() => {
       invoke('list_usb_drives', {})
       .then(output => {
-        console.log(output);
-        setDictionary(output);
+        console.log(JSON.parse(output));
+        setDictionary(JSON.parse(output));
       })
       .catch(console.error);
     }, []);
-
-    console.log("Drives: " + dictionary);
   }
 
-  async function startScanner() {
+  const openAgreement = () => {
+    console.log("Value selected = ", value);
     if (value.length <= 0) {
       alertService.warn("Please select a driver first!");
     } else {
-      router.push('/permission');
+      router.push({
+        pathname: '/permission',
+        query: { scan_path: value }
+      })
     }
   }
 
@@ -65,7 +73,7 @@ export default function Home() {
                         border border-solid border-maingreen-light rounded transition ease-in-out
                         focus:text-gray-700 focus:bg-white focus:border-maingreen focus:outline-none">
                   {dictionary.map((item, i) => (
-                    <option key={i} value={item.value}>{item.key}</option>
+                    <option key={i} value={item.path}>{item.name}</option>
                   ))}
                 </select>
                 ) : (
@@ -76,7 +84,7 @@ export default function Home() {
                     No drives found. Insert a drive and refresh this page</div>
                 )}
                 <div className="mt-5">
-                  <button onClick={startScanner} type="button" className="mr-2 inline-block px-7 py-3 bg-mainred text-white font-medium text-sm leading-snug uppercase rounded shadow-md hover:bg-mainred-dark hover:shadow-lg focus:bg-mainred-dark focus:shadow-lg focus:outline-none focus:ring-0 active:mainred-dark active:shadow-lg transition duration-150 ease-in-out">START</button>
+                  <button onClick={openAgreement} type="button" className="mr-2 inline-block px-7 py-3 bg-mainred text-white font-medium text-sm leading-snug uppercase rounded shadow-md hover:bg-mainred-dark hover:shadow-lg focus:bg-mainred-dark focus:shadow-lg focus:outline-none focus:ring-0 active:mainred-dark active:shadow-lg transition duration-150 ease-in-out">START</button>
                   <button onClick={openInfo} type="button" className="ml-2 inline-block px-7 py-3 border-2 border-mainred text-mainred font-medium text-sm leading-tight uppercase rounded hover:bg-black hover:bg-opacity-5 focus:outline-none focus:ring-0 transition duration-150 ease-in-out">INFO</button>
                 </div>
               </div>

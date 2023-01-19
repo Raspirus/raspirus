@@ -3,13 +3,14 @@ use std::{
     io::{BufReader, Error, ErrorKind, Read},
     path::Path,
     process::exit,
-    time,
+    time, ops::Mul,
 };
 
 use chrono::{DateTime, Local};
 use log::{debug, error, info};
 use terminal_size::terminal_size;
 use walkdir::WalkDir;
+use sysinfo::{System, SystemExt};
 
 use super::{db_ops::DBOps, file_log::FileLog};
 
@@ -23,6 +24,8 @@ pub struct FileScanner {
     pub scanloc: String,
     /// A `FileLog` object that the `FileScanner` can use to log information about the search process.
     pub log: FileLog,
+    /// Sets the amount of RAM the program is allowed to use.
+    pub max_ram: usize,
 }
 
 impl FileScanner {
@@ -55,11 +58,17 @@ impl FileScanner {
             let now: DateTime<Local> = Local::now();
             let now_str = now.format("%Y_%m_%d_%H_%M_%S").to_string();
             let log_str = format!("{}.log", now_str);
+
+            let s = System::new_all();
+            let maximum_bytes:usize = (s.available_memory() as f64).mul(0.5) as usize;
+            info!("{} GB of available memory", s.available_memory() / 1073741824);
+
             Ok(FileScanner {
                 db_conn: tmpconf,
                 dirty_files: Vec::new(),
                 scanloc: scanloc.to_owned(),
                 log: FileLog::new(log_str),
+                max_ram: maximum_bytes,
             })
         } else {
             Err(Error::new(ErrorKind::Other, "Invalid Path"))
@@ -146,7 +155,9 @@ impl FileScanner {
     /// ```
     pub fn create_hash(&mut self, path: &str) -> Option<String> {
         let mut context = md5::Context::new();
-        let mut buffer = [0; 1024];
+        // 1,073,741,824 Byte = 1 GB
+        //let mut buffer = [0; 1024];
+        let mut buffer = vec![0; self.max_ram];
 
         let file = match File::open(path) {
             Ok(file) => file,
