@@ -1,6 +1,5 @@
 import Head from "next/head";
 import { useRouter } from "next/router";
-import { invoke } from "@tauri-apps/api/tauri";
 import { faCheck, faXmark } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
@@ -8,39 +7,11 @@ export default function Permission() {
   const router = useRouter();
 
   function startScanner() {
-    router.push("/loading");
-    let dirty_array = null;
     let { query: { scan_path }, } = router;
-    let scanning_path = scan_path;
-    console.log("Value = " + scanning_path);
-    let should_update = false;
-    let db_location = "";
-
-    if (typeof window !== "undefined") {
-      invoke("start_scanner", {
-        path: scanning_path,
-        update: should_update,
-        dbfile: db_location,
-      })
-        .then((message) => {
-          dirty_array = message;
-          if (dirty_array != null && dirty_array.length > 0) {
-            router.push("/infected");
-          } else {
-            router.push("/clean");
-          }
-        })
-        .catch((error) => {
-          console.error(error);
-          router.push({
-            pathname: '/',
-            query: { scanner_error: error }
-          })
-        });
-    } else {
-      console.error("Nextjs not in client mode!");
-    }
-    console.log("Finished scanning");
+    router.push({
+      pathname: '/loading',
+      query: { scan_path: scan_path }
+    })
   }
 
   const backHome = () => {

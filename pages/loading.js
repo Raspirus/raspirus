@@ -1,7 +1,49 @@
 import Head from "next/head";
 import styles from '../styles/animation.module.css';
+import { useRouter } from "next/router";
+import { useEffect } from 'react';
+import { invoke } from "@tauri-apps/api/tauri";
 
 export default function Loading() {
+    const router = useRouter();
+    let { query: { scan_path }, } = router;
+    let progress = 0;
+    let should_update = false;
+    let db_location = "";
+
+    function scanning() {
+        if (typeof window !== "undefined") {
+            invoke("start_scanner", {
+              path: scan_path,
+              update: should_update,
+              dbfile: db_location,
+            })
+              .then((message) => {
+                console.log("Message: ", message);
+
+                if (message != "None") {
+                  router.push("/infected");
+                } else {
+                  router.push("/clean");
+                }
+              })
+              .catch((error) => {
+                console.error(error);
+                router.push({
+                  pathname: '/',
+                  query: { scanner_error: error }
+                })
+              });
+        } else {
+            console.error("Nextjs not in client mode!");
+        }
+        console.log("Finished scanning");
+    }
+
+    useEffect(() => {
+        setTimeout(scanning, 0);
+    }, []);
+
     return (
         <>
         <Head>
