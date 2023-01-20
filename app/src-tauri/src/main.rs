@@ -8,11 +8,15 @@ use log::{error, info, warn };
 use serde::{Deserialize, Serialize};
 use std::ffi::{OsString, OsStr};
 use std::iter::once;
-use std::os::windows::prelude::OsStrExt;
 use std::{env, fs, path::Path, thread, time};
-use winapi::um::fileapi::GetDriveTypeW;
-use winapi::um::winbase::DRIVE_REMOVABLE;
 use sysinfo::{System, SystemExt};
+
+#[cfg(windows)]
+use std::os::windows::prelude::OsStrExt;
+#[cfg(windows)]
+use winapi::um::fileapi::GetDriveTypeW;
+#[cfg(windows)]
+use winapi::um::winbase::DRIVE_REMOVABLE;
 
 mod backend;
 
@@ -171,11 +175,14 @@ async fn list_usb_drives() -> Result<String, String> {
             let drive_name = drive_path.file_name().unwrap_or_default();
             let drive_path = drive_path.to_str().unwrap();
 
+            #[cfg(windows)]
             let wide_path = OsStr::new(&drive_path).encode_wide().chain(once(0)).collect::<Vec<_>>();
+            #[cfg(windows)]
             let drive_type = unsafe { GetDriveTypeW(wide_path.as_ptr()) };
 
             match fs::metadata(drive_path) {
                 Ok(metadata) => {
+                    #[cfg(windows)]
                     if metadata.is_dir() && drive_type == DRIVE_REMOVABLE {
                         info!("Found Drive: {}", drive_path);
                         usb_drives.push(UsbDevice {
