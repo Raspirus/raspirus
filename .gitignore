@@ -14,6 +14,7 @@
 
 # production
 /app/build
+/docs/generated/release/
 
 # misc
 .DS_Store
