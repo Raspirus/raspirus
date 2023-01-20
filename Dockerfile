@@ -35,7 +35,7 @@ RUN adduser -D $USER
 WORKDIR $APP_HOME
 
 COPY --from=build $APP_HOME/src-tauri/target/release/app .
-COPY package*.json .
+COPY package*.json ./
 COPY public public
 COPY components components
 COPY pages pages
