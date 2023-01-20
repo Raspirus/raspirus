@@ -21,11 +21,14 @@ export default function Loading() {
               .then((message) => {
                 console.log("Message: ", message);
 
+                router.push("/clean");
+/*
                 if (message != "None") {
                   router.push("/infected");
                 } else {
                   router.push("/clean");
                 }
+                */
               })
               .catch((error) => {
                 console.error(error);
