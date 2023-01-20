@@ -19,7 +19,7 @@ jobs:
 
       # Build the documentation
       - run: cargo doc --no-deps --document-private-items --all-features
-        working-directory: src-tauri
+        working-directory: app/src-tauri
 
       # Deploy the documentation to GitHub Pages
       - uses: peaceiris/actions-gh-pages@v3
