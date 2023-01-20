@@ -1,0 +1,12 @@
+C:\Users\benbe\Documents\Coding\RustProjects\raspirus\app\src-tauri\../../docs/generated/release\deps\ignore-33d705ad41dd22a6.rmeta: C:\Users\benbe\.cargo\registry\src\github.com-1ecc6299db9ec823\ignore-0.4.19\src\lib.rs C:\Users\benbe\.cargo\registry\src\github.com-1ecc6299db9ec823\ignore-0.4.19\src\default_types.rs C:\Users\benbe\.cargo\registry\src\github.com-1ecc6299db9ec823\ignore-0.4.19\src\dir.rs C:\Users\benbe\.cargo\registry\src\github.com-1ecc6299db9ec823\ignore-0.4.19\src\gitignore.rs C:\Users\benbe\.cargo\registry\src\github.com-1ecc6299db9ec823\ignore-0.4.19\src\overrides.rs C:\Users\benbe\.cargo\registry\src\github.com-1ecc6299db9ec823\ignore-0.4.19\src\pathutil.rs C:\Users\benbe\.cargo\registry\src\github.com-1ecc6299db9ec823\ignore-0.4.19\src\types.rs C:\Users\benbe\.cargo\registry\src\github.com-1ecc6299db9ec823\ignore-0.4.19\src\walk.rs
+
+C:\Users\benbe\Documents\Coding\RustProjects\raspirus\app\src-tauri\../../docs/generated/release\deps\ignore-33d705ad41dd22a6.d: C:\Users\benbe\.cargo\registry\src\github.com-1ecc6299db9ec823\ignore-0.4.19\src\lib.rs C:\Users\benbe\.cargo\registry\src\github.com-1ecc6299db9ec823\ignore-0.4.19\src\default_types.rs C:\Users\benbe\.cargo\registry\src\github.com-1ecc6299db9ec823\ignore-0.4.19\src\dir.rs C:\Users\benbe\.cargo\registry\src\github.com-1ecc6299db9ec823\ignore-0.4.19\src\gitignore.rs C:\Users\benbe\.cargo\registry\src\github.com-1ecc6299db9ec823\ignore-0.4.19\src\overrides.rs C:\Users\benbe\.cargo\registry\src\github.com-1ecc6299db9ec823\ignore-0.4.19\src\pathutil.rs C:\Users\benbe\.cargo\registry\src\github.com-1ecc6299db9ec823\ignore-0.4.19\src\types.rs C:\Users\benbe\.cargo\registry\src\github.com-1ecc6299db9ec823\ignore-0.4.19\src\walk.rs
+
+C:\Users\benbe\.cargo\registry\src\github.com-1ecc6299db9ec823\ignore-0.4.19\src\lib.rs:
+C:\Users\benbe\.cargo\registry\src\github.com-1ecc6299db9ec823\ignore-0.4.19\src\default_types.rs:
+C:\Users\benbe\.cargo\registry\src\github.com-1ecc6299db9ec823\ignore-0.4.19\src\dir.rs:
+C:\Users\benbe\.cargo\registry\src\github.com-1ecc6299db9ec823\ignore-0.4.19\src\gitignore.rs:
+C:\Users\benbe\.cargo\registry\src\github.com-1ecc6299db9ec823\ignore-0.4.19\src\overrides.rs:
+C:\Users\benbe\.cargo\registry\src\github.com-1ecc6299db9ec823\ignore-0.4.19\src\pathutil.rs:
+C:\Users\benbe\.cargo\registry\src\github.com-1ecc6299db9ec823\ignore-0.4.19\src\types.rs:
+C:\Users\benbe\.cargo\registry\src\github.com-1ecc6299db9ec823\ignore-0.4.19\src\walk.rs:

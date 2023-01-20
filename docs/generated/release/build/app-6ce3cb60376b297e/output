@@ -1,0 +1,17 @@
+cargo:rerun-if-env-changed=TAURI_CONFIG
+cargo:rerun-if-changed=tauri.conf.json
+cargo:rustc-cfg=desktop
+package.metadata does not exist
+"C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.22000.0\\x64\\rc.exe"
+Selected RC path: 'C:\Program Files (x86)\Windows Kits\10\bin\10.0.22000.0\x64\rc.exe'
+RC Output:
+Microsoft (R) Windows (R) Resource Compiler Version 10.0.10011.16384
+Copyright (C) Microsoft Corporation.  All rights reserved.
+
+
+------
+RC Error:
+
+------
+cargo:rustc-link-search=native=C:\Users\benbe\Documents\Coding\RustProjects\raspirus\app\src-tauri\../../docs/generated/release\build\app-6ce3cb60376b297e\out
+cargo:rustc-link-lib=dylib=resource

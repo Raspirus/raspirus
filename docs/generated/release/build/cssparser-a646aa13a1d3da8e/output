@@ -1,0 +1,2 @@
+cargo:rustc-cfg=rustc_has_pr45225
+cargo:rerun-if-changed=C:\Users\benbe\.cargo\registry\src\github.com-1ecc6299db9ec823\cssparser-0.27.2\src/tokenizer.rs

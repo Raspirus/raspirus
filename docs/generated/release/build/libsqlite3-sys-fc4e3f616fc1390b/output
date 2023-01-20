@@ -1,0 +1,44 @@
+cargo:rerun-if-changed=sqlite3/sqlite3.c
+cargo:rerun-if-changed=sqlite3/wasm32-wasi-vfs.c
+cargo:rerun-if-env-changed=SQLITE_MAX_VARIABLE_NUMBER
+cargo:rerun-if-env-changed=SQLITE_MAX_EXPR_DEPTH
+cargo:rerun-if-env-changed=LIBSQLITE3_FLAGS
+TARGET = Some("x86_64-pc-windows-msvc")
+OPT_LEVEL = Some("3")
+HOST = Some("x86_64-pc-windows-msvc")
+cargo:rerun-if-env-changed=CC_x86_64-pc-windows-msvc
+CC_x86_64-pc-windows-msvc = None
+cargo:rerun-if-env-changed=CC_x86_64_pc_windows_msvc
+CC_x86_64_pc_windows_msvc = None
+cargo:rerun-if-env-changed=HOST_CC
+HOST_CC = None
+cargo:rerun-if-env-changed=CC
+CC = None
+cargo:rerun-if-env-changed=CFLAGS_x86_64-pc-windows-msvc
+CFLAGS_x86_64-pc-windows-msvc = None
+cargo:rerun-if-env-changed=CFLAGS_x86_64_pc_windows_msvc
+CFLAGS_x86_64_pc_windows_msvc = None
+cargo:rerun-if-env-changed=HOST_CFLAGS
+HOST_CFLAGS = None
+cargo:rerun-if-env-changed=CFLAGS
+CFLAGS = None
+cargo:rerun-if-env-changed=CRATE_CC_NO_DEFAULTS
+CRATE_CC_NO_DEFAULTS = None
+CARGO_CFG_TARGET_FEATURE = Some("fxsr,sse,sse2")
+DEBUG = Some("false")
+running: "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\VC\\Tools\\MSVC\\14.34.31933\\bin\\HostX64\\x64\\cl.exe" "-nologo" "-MD" "-O2" "-Brepro" "-DSQLITE_CORE" "-DSQLITE_DEFAULT_FOREIGN_KEYS=1" "-DSQLITE_ENABLE_API_ARMOR" "-DSQLITE_ENABLE_COLUMN_METADATA" "-DSQLITE_ENABLE_DBSTAT_VTAB" "-DSQLITE_ENABLE_FTS3" "-DSQLITE_ENABLE_FTS3_PARENTHESIS" "-DSQLITE_ENABLE_FTS5" "-DSQLITE_ENABLE_JSON1" "-DSQLITE_ENABLE_LOAD_EXTENSION=1" "-DSQLITE_ENABLE_MEMORY_MANAGEMENT" "-DSQLITE_ENABLE_RTREE" "-DSQLITE_ENABLE_STAT2" "-DSQLITE_ENABLE_STAT4" "-DSQLITE_SOUNDEX" "-DSQLITE_THREADSAFE=1" "-DSQLITE_USE_URI" "-DHAVE_USLEEP=1" "-D_POSIX_THREAD_SAFE_FUNCTIONS" "-DHAVE_ISNAN" "-FoC:\\Users\\benbe\\Documents\\Coding\\RustProjects\\raspirus\\app\\src-tauri\\../../docs/generated/release\\build\\libsqlite3-sys-fc4e3f616fc1390b\\out\\sqlite3/sqlite3.o" "-c" "sqlite3/sqlite3.c"
+sqlite3.c
+exit code: 0
+cargo:rerun-if-env-changed=AR_x86_64-pc-windows-msvc
+AR_x86_64-pc-windows-msvc = None
+cargo:rerun-if-env-changed=AR_x86_64_pc_windows_msvc
+AR_x86_64_pc_windows_msvc = None
+cargo:rerun-if-env-changed=HOST_AR
+HOST_AR = None
+cargo:rerun-if-env-changed=AR
+AR = None
+running: "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\VC\\Tools\\MSVC\\14.34.31933\\bin\\HostX64\\x64\\lib.exe" "-out:C:\\Users\\benbe\\Documents\\Coding\\RustProjects\\raspirus\\app\\src-tauri\\../../docs/generated/release\\build\\libsqlite3-sys-fc4e3f616fc1390b\\out\\libsqlite3.a" "-nologo" "C:\\Users\\benbe\\Documents\\Coding\\RustProjects\\raspirus\\app\\src-tauri\\../../docs/generated/release\\build\\libsqlite3-sys-fc4e3f616fc1390b\\out\\sqlite3/sqlite3.o"
+exit code: 0
+cargo:rustc-link-lib=static=sqlite3
+cargo:rustc-link-search=native=C:\Users\benbe\Documents\Coding\RustProjects\raspirus\app\src-tauri\../../docs/generated/release\build\libsqlite3-sys-fc4e3f616fc1390b\out
+cargo:lib_dir=C:\Users\benbe\Documents\Coding\RustProjects\raspirus\app\src-tauri\../../docs/generated/release\build\libsqlite3-sys-fc4e3f616fc1390b\out

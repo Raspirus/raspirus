@@ -1,0 +1,12 @@
+C:\Users\benbe\Documents\Coding\RustProjects\raspirus\app\src-tauri\../../docs/generated/release\deps\uuid-56ed2edaa0a9783f.rmeta: C:\Users\benbe\.cargo\registry\src\github.com-1ecc6299db9ec823\uuid-0.8.2\src\lib.rs C:\Users\benbe\.cargo\registry\src\github.com-1ecc6299db9ec823\uuid-0.8.2\src\builder\mod.rs C:\Users\benbe\.cargo\registry\src\github.com-1ecc6299db9ec823\uuid-0.8.2\src\builder\error.rs C:\Users\benbe\.cargo\registry\src\github.com-1ecc6299db9ec823\uuid-0.8.2\src\error.rs C:\Users\benbe\.cargo\registry\src\github.com-1ecc6299db9ec823\uuid-0.8.2\src\parser\mod.rs C:\Users\benbe\.cargo\registry\src\github.com-1ecc6299db9ec823\uuid-0.8.2\src\parser\error.rs C:\Users\benbe\.cargo\registry\src\github.com-1ecc6299db9ec823\uuid-0.8.2\src\prelude.rs C:\Users\benbe\.cargo\registry\src\github.com-1ecc6299db9ec823\uuid-0.8.2\src\adapter\mod.rs
+
+C:\Users\benbe\Documents\Coding\RustProjects\raspirus\app\src-tauri\../../docs/generated/release\deps\uuid-56ed2edaa0a9783f.d: C:\Users\benbe\.cargo\registry\src\github.com-1ecc6299db9ec823\uuid-0.8.2\src\lib.rs C:\Users\benbe\.cargo\registry\src\github.com-1ecc6299db9ec823\uuid-0.8.2\src\builder\mod.rs C:\Users\benbe\.cargo\registry\src\github.com-1ecc6299db9ec823\uuid-0.8.2\src\builder\error.rs C:\Users\benbe\.cargo\registry\src\github.com-1ecc6299db9ec823\uuid-0.8.2\src\error.rs C:\Users\benbe\.cargo\registry\src\github.com-1ecc6299db9ec823\uuid-0.8.2\src\parser\mod.rs C:\Users\benbe\.cargo\registry\src\github.com-1ecc6299db9ec823\uuid-0.8.2\src\parser\error.rs C:\Users\benbe\.cargo\registry\src\github.com-1ecc6299db9ec823\uuid-0.8.2\src\prelude.rs C:\Users\benbe\.cargo\registry\src\github.com-1ecc6299db9ec823\uuid-0.8.2\src\adapter\mod.rs
+
+C:\Users\benbe\.cargo\registry\src\github.com-1ecc6299db9ec823\uuid-0.8.2\src\lib.rs:
+C:\Users\benbe\.cargo\registry\src\github.com-1ecc6299db9ec823\uuid-0.8.2\src\builder\mod.rs:
+C:\Users\benbe\.cargo\registry\src\github.com-1ecc6299db9ec823\uuid-0.8.2\src\builder\error.rs:
+C:\Users\benbe\.cargo\registry\src\github.com-1ecc6299db9ec823\uuid-0.8.2\src\error.rs:
+C:\Users\benbe\.cargo\registry\src\github.com-1ecc6299db9ec823\uuid-0.8.2\src\parser\mod.rs:
+C:\Users\benbe\.cargo\registry\src\github.com-1ecc6299db9ec823\uuid-0.8.2\src\parser\error.rs:
+C:\Users\benbe\.cargo\registry\src\github.com-1ecc6299db9ec823\uuid-0.8.2\src\prelude.rs:
+C:\Users\benbe\.cargo\registry\src\github.com-1ecc6299db9ec823\uuid-0.8.2\src\adapter\mod.rs:

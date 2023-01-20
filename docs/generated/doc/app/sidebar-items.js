@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":[["list_usb_drives","Lists the USB drives attached to the system."],["main",""],["start_scanner","Starts the scanner for the given path and updates the database if update is true."]],"mod":[["backend",""]],"struct":[["UsbDevice",""]]};

@@ -1,0 +1,10 @@
+C:\Users\benbe\Documents\Coding\RustProjects\raspirus\app\src-tauri\../../docs/generated/release\deps\windows_tokens-64eae46dba11126e.rmeta: C:\Users\benbe\.cargo\registry\src\github.com-1ecc6299db9ec823\windows-tokens-0.39.0\src\lib.rs C:\Users\benbe\.cargo\registry\src\github.com-1ecc6299db9ec823\windows-tokens-0.39.0\src\to_tokens.rs C:\Users\benbe\.cargo\registry\src\github.com-1ecc6299db9ec823\windows-tokens-0.39.0\src\token_stream.rs C:\Users\benbe\.cargo\registry\src\github.com-1ecc6299db9ec823\windows-tokens-0.39.0\src\runtime.rs
+
+C:\Users\benbe\Documents\Coding\RustProjects\raspirus\app\src-tauri\../../docs/generated/release\deps\libwindows_tokens-64eae46dba11126e.rlib: C:\Users\benbe\.cargo\registry\src\github.com-1ecc6299db9ec823\windows-tokens-0.39.0\src\lib.rs C:\Users\benbe\.cargo\registry\src\github.com-1ecc6299db9ec823\windows-tokens-0.39.0\src\to_tokens.rs C:\Users\benbe\.cargo\registry\src\github.com-1ecc6299db9ec823\windows-tokens-0.39.0\src\token_stream.rs C:\Users\benbe\.cargo\registry\src\github.com-1ecc6299db9ec823\windows-tokens-0.39.0\src\runtime.rs
+
+C:\Users\benbe\Documents\Coding\RustProjects\raspirus\app\src-tauri\../../docs/generated/release\deps\windows_tokens-64eae46dba11126e.d: C:\Users\benbe\.cargo\registry\src\github.com-1ecc6299db9ec823\windows-tokens-0.39.0\src\lib.rs C:\Users\benbe\.cargo\registry\src\github.com-1ecc6299db9ec823\windows-tokens-0.39.0\src\to_tokens.rs C:\Users\benbe\.cargo\registry\src\github.com-1ecc6299db9ec823\windows-tokens-0.39.0\src\token_stream.rs C:\Users\benbe\.cargo\registry\src\github.com-1ecc6299db9ec823\windows-tokens-0.39.0\src\runtime.rs
+
+C:\Users\benbe\.cargo\registry\src\github.com-1ecc6299db9ec823\windows-tokens-0.39.0\src\lib.rs:
+C:\Users\benbe\.cargo\registry\src\github.com-1ecc6299db9ec823\windows-tokens-0.39.0\src\to_tokens.rs:
+C:\Users\benbe\.cargo\registry\src\github.com-1ecc6299db9ec823\windows-tokens-0.39.0\src\token_stream.rs:
+C:\Users\benbe\.cargo\registry\src\github.com-1ecc6299db9ec823\windows-tokens-0.39.0\src\runtime.rs:
