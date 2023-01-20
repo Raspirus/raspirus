@@ -8,7 +8,7 @@ updates:
 
   # Maintain dependencies for GitHub Actions
   - package-ecosystem: "github-actions"
-    directory: "/"
+    directory: "/.github/workflows/"
     schedule:
       interval: "weekly"
     # Include a list of updated dependencies
@@ -23,7 +23,7 @@ updates:
 
   # Maintain dependencies for npm
   - package-ecosystem: "npm"
-    directory: "/"
+    directory: "/app/"
     schedule:
       interval: "weekly"
     # Include a list of updated dependencies
@@ -39,7 +39,7 @@ updates:
 
   # Maintain dependencies for Composer
   - package-ecosystem: "cargo"
-    directory: "/src-tauri"
+    directory: "/app/src-tauri/"
     schedule:
       interval: "weekly"
     # Include a list of updated dependencies
