@@ -1,10 +1,16 @@
-import { useState } from 'react';
+import { useState, useContext, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { SettingsContext } from '../state/context';
 
 
 export default function SettingComp({ title, short, icon, isOn: initialIsOn }) {
-    // Declare a new state variable, which we'll call "isOn"
-    const [isOn, setIsOn] = useState(initialIsOn);
+    const titleWithoutSpaces = title.replace(/ /g, "");
+    const {settings, setSettings} = useContext(SettingsContext);
+    const [isOn, setIsOn] = useState(initialIsOn || settings[titleWithoutSpaces]);
+
+    useEffect(() => {
+        setSettings((prev) => ({ ...prev, [titleWithoutSpaces]: isOn }));
+    }, [isOn, titleWithoutSpaces, setSettings])
 
     return (
         <div className="flex flex-col p-4 bg-white">
