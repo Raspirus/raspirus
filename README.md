@@ -9,6 +9,9 @@ Sometimes you have a computer that is not connected to the internet and has no a
 ## Installation
 Please follow [this guide](https://github.com/Benji377/Raspirus/blob/main/docs/INSTALLATION.md) to build the app on your own machine. Or if you are on Windows, Ubuntu or MacOS, you can try to use the pre-built installers in the [Releases page](github.com/Benji377/Raspirus/releases/latest). If you encounter nay difficulties while following the instructions, please open an issue and we will be happy to help you out.
 
+## Questions
+For any questions, check out the [FAQ docs](https://github.com/Benji377/Raspirus/blob/main/docs/FAQ.md) and see if you can find an answer to your problem. If not, please open an Issue on this repository.
+
 ## Frameworks and Tools used:
 - NPM: https://www.npmjs.com
 - NextJS: https://nextjs.org
