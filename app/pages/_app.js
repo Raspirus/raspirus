@@ -2,7 +2,7 @@ import '../styles/globals.css';
 import Head from 'next/head';
 import { Alert } from '../components/alert';
 import "@fortawesome/fontawesome-svg-core/styles.css";
-import { config } from "@fortawesome/fontawesome-svg-core"; 
+import { config } from "@fortawesome/fontawesome-svg-core";
 config.autoAddCss = false;
 
 export default function App({ Component, pageProps }) {
