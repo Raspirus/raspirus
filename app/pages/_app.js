@@ -1,11 +1,15 @@
 import '../styles/globals.css';
 import Head from 'next/head';
+import { useState } from 'react';
 import { Alert } from '../components/alert';
 import "@fortawesome/fontawesome-svg-core/styles.css";
 import { config } from "@fortawesome/fontawesome-svg-core";
+import { SettingsContext } from '../state/context';
 config.autoAddCss = false;
 
 export default function App({ Component, pageProps }) {
+  const [settings, setSettings] = useState({});
+
   return (
     <>
     <Head>
@@ -14,7 +18,9 @@ export default function App({ Component, pageProps }) {
       <link rel="icon" href="/favicon.ico" />
     </Head>
     <Alert />
-    <Component {...pageProps} />
+    <SettingsContext.Provider value={{ settings, setSettings }}>
+      <Component {...pageProps} />
+    </SettingsContext.Provider>
   </>
   )
 }
