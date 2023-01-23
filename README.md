@@ -17,3 +17,4 @@ For any questions, check out the [FAQ docs](https://github.com/Benji377/Raspirus
 - NextJS: https://nextjs.org
 - Rust: https://www.rust-lang.org
 - TAURI: https://tauri.app/v1/guides/getting-started/setup/next-js
+- AlpineJS: https://alpinejs.dev
