@@ -30,7 +30,7 @@ export default function Settings() {
       </div>
 
       <SettingComp
-        title="Update database"
+        title="Update Database"
         short="Updates the database (requires an internet connection)"
         icon={faWrench}
         isOn={false}
@@ -38,20 +38,20 @@ export default function Settings() {
       
       <SettingComp
         title="Activate Logging"
-        short="Activates debugging and logging"
+        short="Activates the writing of logs"
         icon={faFileLines}
         isOn={false}
       />
       <SettingComp
-        title="Activate FTP"
-        short="Activates the File Transfer Protocol on the Raspberry Pi"
+        title="Obfuscated Mode"
+        short="When ON, it will not display the Path of possible found viruses"
         icon={faFilePen}
         isOn={false}
       />
 
       <SettingComp
-        title="Activate SSH"
-        short="Activates the SSH Protocol for remote control"
+        title="Work in Progress!"
+        short="Allows users to set the percentage of RAM"
         icon={faTerminal}
         isOn={false}
       />

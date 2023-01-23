@@ -1,14 +1,24 @@
 import Head from 'next/head'
 import { useRouter } from 'next/router';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { invoke } from "@tauri-apps/api/tauri";
 import { alertService } from '../services/alert.service';
+import { SettingsContext } from '../state/context';
 
 export default function Home() {
   const router = useRouter();
   const [value, setValue] = useState("None");
   const [dictionary, setDictionary] = useState([]);
 
+  const { settings } = useContext(SettingsContext);
+
+  // const updateDatabase = settings.hasOwnProperty("Update database") ? settings["Update database"] : false;
+
+  console.log("Settings = ", settings);
+  console.log("Update DB = ", settings["UpdateDatabase"]);
+  console.log("Activate Logs = ", settings["ActivateLogging"]);
+
+  // Settings =  {Update database: true, Activate Logging: undefined, Activate FTP: undefined, Activate SSH: undefined}
 
   let { query: { data }, } = router;
   if (data != null && data != "") {
