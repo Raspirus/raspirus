@@ -1,5 +1,5 @@
 use std::{
-    fs::File,
+    fs::{File},
     io::{BufReader, Error, ErrorKind, Read},
     path::Path,
     process::exit,
@@ -7,7 +7,7 @@ use std::{
 };
 
 use chrono::{DateTime, Local};
-use log::{debug, error, info};
+use log::{debug, error, info, warn};
 use terminal_size::terminal_size;
 use walkdir::WalkDir;
 use sysinfo::{System, SystemExt};
@@ -60,23 +60,24 @@ impl FileScanner {
             let log_str = format!("{}.log", now_str);
 
             let s = System::new_all();
-            // maximum usize is 4294967295, roughly 4000000000
-            info!("Maximum = {}", usize::MAX);
-            let maximum_bytes:usize;
-            let ram_percentage = 0.6;
+            let max_ram:usize;
+            let ram_percentage = 0.5;
+            
             if (s.available_memory() as f64 * ram_percentage ) >= usize::MAX as f64 {
-                maximum_bytes = usize::MAX / 2;
+                max_ram = usize::MAX / 2;
             } else {
-                maximum_bytes = (s.available_memory() as f64).mul(ram_percentage) as usize;
+                max_ram = (s.available_memory() as f64).mul(ram_percentage) as usize;
             }
-            info!("Using {} GB of memory", maximum_bytes as f64 / 1073741824.0);
+            
+            let buffer_size:usize = max_ram;
+            info!("Using {:.3} GB of memory", buffer_size as f64 / 1073741824.0);
 
             Ok(FileScanner {
                 db_conn: tmpconf,
                 dirty_files: Vec::new(),
                 scanloc: scanloc.to_owned(),
                 log: FileLog::new(log_str),
-                max_ram: maximum_bytes,
+                max_ram,
             })
         } else {
             Err(Error::new(ErrorKind::Other, "Invalid Path"))
@@ -95,7 +96,7 @@ impl FileScanner {
     /// let mut scanner = FileScanner::new("/path/to/scan", "database.db").unwrap();
     /// scanner.search_files();
     /// ```
-    pub fn search_files(&mut self) {
+    pub fn search_files(&mut self, stop_early:bool) -> Result<Vec<String>, String> {
         let mut analysed: i128 = 0;
         let mut skipped: i128 = 0;
         let big_tic = time::Instant::now();
@@ -107,7 +108,7 @@ impl FileScanner {
                 Ok(md) => md,
                 Err(err) => {
                     error!("Failed getting file metadata: {}", err);
-                    return;
+                    return Err("Failed getting file metadata.".to_owned());
                 }
             })
             .is_file()
@@ -125,6 +126,10 @@ impl FileScanner {
                 if match self.db_conn.hash_exists(hash.as_str()) {
                     Ok(exists) => {
                         self.dirty_files.push(file.path().display().to_string());
+                        if stop_early {
+                            warn!("Stopping early");
+                            break;
+                        }
                         exists
                     }
                     Err(_) => false,
@@ -146,6 +151,7 @@ impl FileScanner {
             self.dirty_files.len(),
             big_toc.duration_since(big_tic).as_secs_f64()
         );
+        Ok(self.dirty_files.clone())
     }
 
     /// Creates the MD5 hash of a file.
@@ -189,6 +195,20 @@ impl FileScanner {
                 break;
             }
             context.consume(&buffer[..count]);
+
+            // check the available memory every 100 iterations
+            if it % 100 == 0 {
+                let s = System::new_all();
+                let ram_percentage = 0.5;
+                let available_memory = s.available_memory() as f64;
+                let maximum_bytes = if available_memory * ram_percentage >= usize::MAX as f64 {
+                usize::MAX / 2
+                } else {
+                (available_memory * ram_percentage) as usize
+                };
+                buffer = vec![0; maximum_bytes];
+                info!("Using {:.3} GB of memory", maximum_bytes / 1_073_741_824);
+            }
             it += 1;
         }
         let ret = format!("{:?}", context.compute());

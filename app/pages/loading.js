@@ -7,20 +7,29 @@ import { SettingsContext } from '../state/context';
 
 export default function Loading() {
   const { settings } = useContext(SettingsContext);
-  const updateDatabase = settings.hasOwnProperty("UpdateDatabase") ? settings["UpdateDatabase"] : false;
-  const activateLogging = settings.hasOwnProperty("ActivateLogging") ? settings["ActivateLogging"] : false;
-  const obfuscatedMode = settings.hasOwnProperty("ObfuscatedMode") ? settings["Obfuscated;ode"] : false;
+  const updateDatabase = settings["UpdateDatabase"] != undefined ? settings["UpdateDatabase"] : false;
+  const activateLogging = settings["ActivateLogging"] != undefined ? settings["ActivateLogging"] : false;
+  const obfuscatedMode = settings["ObfuscatedMode"] != undefined ? settings["ObfuscatedMode"] : false;
   const router = useRouter();
   let { query: { scan_path }, } = router;
   let progress = 0;
   let db_location = "";
 
+  console.log(settings);
+
   function scanning() {
+    if (activateLogging) {
+      process.env.RUST_LOG = "info"; // Optionally Debug
+    } else {
+      process.env.RUST_LOG = "warn";
+    }
+    console.log("Update is: ", updateDatabase);
     if (typeof window !== "undefined") {
       invoke("start_scanner", {
         path: scan_path,
         update: updateDatabase,
         dbfile: db_location,
+        obfuscated: obfuscatedMode,
       })
         .then((message) => {
           console.log("Message: ", message);
