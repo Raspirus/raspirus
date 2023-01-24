@@ -34,18 +34,19 @@ ENV APP_HOME=/home/$USER/app
 RUN adduser -D $USER
 WORKDIR $APP_HOME
 
-COPY --from=build $APP_HOME/src-tauri/target/release/app .
-COPY package*.json ./
-COPY public public
-COPY components components
-COPY pages pages
-COPY out out
-COPY services services
-COPY styles styles
-COPY next.config.js .
-COPY postcss.config.js .
-COPY tailwind.config.js .
-COPY src-tauri/tauri.conf.json src-tauri/tauri.conf.json
+COPY --from=build $APP_HOME/app/src-tauri/target/release/app .
+COPY app/package*.json ./
+COPY app/public public
+COPY app/components components
+COPY app/pages pages
+COPY app/out out
+COPY app/services services
+COPY app/styles styles
+COPY app/state state
+COPY app/next.config.js .
+COPY app/postcss.config.js .
+COPY app/tailwind.config.js .
+COPY app/src-tauri/tauri.conf.json src-tauri/tauri.conf.json
 
 RUN chown -R $USER:$USER $APP_HOME
 USER $USER
