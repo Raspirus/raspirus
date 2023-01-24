@@ -14,7 +14,7 @@ jobs:
     runs-on: ${{ matrix.platform }}
     defaults:
       run:
-        working-directory: app
+        working-directory: ./app
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
