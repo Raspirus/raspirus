@@ -8,8 +8,7 @@ use log::{error, info, warn };
 use serde::{Deserialize, Serialize};
 use std::ffi::{OsString, OsStr};
 use std::iter::once;
-use std::{env, fs, path::Path, thread, time};
-use sysinfo::{System, SystemExt};
+use std::{env, fs, path::Path, time};
 
 #[cfg(windows)]
 use std::os::windows::prelude::OsStrExt;
@@ -39,7 +38,7 @@ fn main() {
 ///
 /// An empty `Result` object if the scanner was successfully started, or an `Err` with an error message if an error occurred.
 #[tauri::command]
-async fn start_scanner(path: String, update: bool, dbfile: Option<String>) -> Result<(), String> {
+async fn start_scanner(path: String, update: bool, dbfile: Option<String>, obfuscated: bool) -> Result<String, String> {
     match pretty_env_logger::try_init() {
         Ok(()) => {
             info!("Logger initialized!");
@@ -82,8 +81,15 @@ async fn start_scanner(path: String, update: bool, dbfile: Option<String>) -> Re
     } else {
         info!("Skipped update");
     }
-    thread::spawn(move || fs.search_files()).join().unwrap();
-    Ok(())
+    let dirty_files = match fs.search_files(obfuscated) {
+        Ok(files) => files,
+        Err(e) => {
+            error!("{}", e);
+            return Err(e);
+        }
+    };
+    Ok(serde_json::to_string(&dirty_files).unwrap())
+
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -107,10 +113,6 @@ async fn list_usb_drives() -> Result<String, String> {
             warn!("Failed initializing logger: {err}");
         }
     }
-
-    let s = System::new_all();
-    info!("{} GB of available memory", (s.available_memory() as f32) / 1073741824.0);
-    warn!("Maximum = {}", usize::MAX);
 
     let mut usb_drives = Vec::new();
 
