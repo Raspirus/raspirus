@@ -21,8 +21,8 @@ RUN apt-get update && apt-get install -y \
 RUN useradd --create-home $USER
 WORKDIR $APP_HOME
 
-COPY src-tauri src-tauri
-COPY out out
+COPY app/src-tauri src-tauri
+COPY app/out out
 
 RUN cargo install --path src-tauri
 
