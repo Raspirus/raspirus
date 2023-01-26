@@ -1,11 +1,11 @@
 Dockerfile
 .dockerignore
-node_modules
-npm-debug.log
+app/node_modules
+app/npm-debug.log
 README.md
-RASPBERRY_INSTALLATION.md
-.next
+/docs
+app/.next
 .git
 .github
-src-tauri/.gitignore
-src-tauri/target/
+app/src-tauri/.gitignore
+app/src-tauri/target/
