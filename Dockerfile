@@ -34,7 +34,7 @@ ENV APP_HOME=/home/$USER/app
 RUN adduser -D $USER
 WORKDIR $APP_HOME
 
-COPY --from=build $APP_HOME/app/src-tauri/target/release/app .
+COPY --from=build $APP_HOME/src-tauri/target/release/app .
 COPY app/package*.json ./
 COPY app/public public
 COPY app/components components
