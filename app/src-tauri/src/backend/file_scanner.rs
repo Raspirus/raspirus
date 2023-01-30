@@ -1,16 +1,15 @@
 use std::{
-    fs::{File},
+    fs::File,
     io::{BufReader, Error, ErrorKind, Read},
     path::Path,
     process::exit,
-    time, ops::Mul,
+    time,
 };
 
 use chrono::{DateTime, Local};
 use log::{debug, error, info, warn};
 use terminal_size::terminal_size;
 use walkdir::WalkDir;
-use sysinfo::{System, SystemExt};
 
 use super::{db_ops::DBOps, file_log::FileLog};
 
@@ -24,8 +23,6 @@ pub struct FileScanner {
     pub scanloc: String,
     /// A `FileLog` object that the `FileScanner` can use to log information about the search process.
     pub log: FileLog,
-    /// Sets the amount of RAM the program is allowed to use.
-    pub max_ram: usize,
 }
 
 impl FileScanner {
@@ -58,26 +55,11 @@ impl FileScanner {
             let now: DateTime<Local> = Local::now();
             let now_str = now.format("%Y_%m_%d_%H_%M_%S").to_string();
             let log_str = format!("{}.log", now_str);
-
-            let s = System::new_all();
-            let max_ram:usize;
-            let ram_percentage = 0.5;
-            
-            if (s.available_memory() as f64 * ram_percentage ) >= usize::MAX as f64 {
-                max_ram = usize::MAX / 2;
-            } else {
-                max_ram = (s.available_memory() as f64).mul(ram_percentage) as usize;
-            }
-            
-            let buffer_size:usize = max_ram;
-            info!("Using {:.3} GB of memory", buffer_size as f64 / 1073741824.0);
-
             Ok(FileScanner {
                 db_conn: tmpconf,
                 dirty_files: Vec::new(),
                 scanloc: scanloc.to_owned(),
                 log: FileLog::new(log_str),
-                max_ram,
             })
         } else {
             Err(Error::new(ErrorKind::Other, "Invalid Path"))
@@ -131,6 +113,7 @@ impl FileScanner {
                             break;
                         }
                         exists
+                        
                     }
                     Err(_) => false,
                 } {
@@ -169,9 +152,7 @@ impl FileScanner {
     /// ```
     pub fn create_hash(&mut self, path: &str) -> Option<String> {
         let mut context = md5::Context::new();
-        // 1,073,741,824 Byte = 1 GB
-        //let mut buffer = [0; 1024];
-        let mut buffer = vec![0; self.max_ram];
+        let mut buffer = [0; 1024];
 
         let file = match File::open(path) {
             Ok(file) => file,
@@ -195,20 +176,6 @@ impl FileScanner {
                 break;
             }
             context.consume(&buffer[..count]);
-
-            // check the available memory every 100 iterations
-            if it % 100 == 0 {
-                let s = System::new_all();
-                let ram_percentage = 0.5;
-                let available_memory = s.available_memory() as f64;
-                let maximum_bytes = if available_memory * ram_percentage >= usize::MAX as f64 {
-                usize::MAX / 2
-                } else {
-                (available_memory * ram_percentage) as usize
-                };
-                buffer = vec![0; maximum_bytes];
-                info!("Using {:.3} GB of memory", maximum_bytes / 1_073_741_824);
-            }
             it += 1;
         }
         let ret = format!("{:?}", context.compute());

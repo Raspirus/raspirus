@@ -32,16 +32,14 @@ export default function Loading() {
         obfuscated: obfuscatedMode,
       })
         .then((message) => {
-          console.log("Message: ", message);
-
-          router.push("/clean");
-          /*
-                          if (message != "None") {
-                            router.push("/infected");
-                          } else {
-                            router.push("/clean");
-                          }
-                          */
+          if (message && message.length > 0) {
+            router.push({
+              pathname: '/infected',
+              query: { virus_list: message }
+            });
+          } else {
+            router.push("/clean");
+          }
         })
         .catch((error) => {
           console.error(error);
