@@ -1,6 +1,6 @@
 import Head from 'next/head'
-import { useRouter } from 'next/router';
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/router';
 import { invoke } from "@tauri-apps/api/tauri";
 import { alertService } from '../services/alert.service';
 
@@ -9,21 +9,21 @@ export default function Home() {
   const [value, setValue] = useState("None");
   const [dictionary, setDictionary] = useState([]);
 
-  let { query: { data }, } = router;
-  if (data != null && data != "") {
-    console.error("Home error", data);
-    alertService.error("Scanning failed: " + data);
+  let { query: { scanner_error }, } = router;
+  if (scanner_error != null && scanner_error != "") {
+    console.error("Home error", scanner_error);
+    alertService.error("Scanning failed: " + scanner_error);
   }
 
   if (typeof window !== 'undefined') {
-  
+
     useEffect(() => {
       invoke('list_usb_drives', {})
-      .then(output => {
-        console.log(JSON.parse(output));
-        setDictionary(JSON.parse(output));
-      })
-      .catch(console.error);
+        .then(output => {
+          console.log(JSON.parse(output));
+          setDictionary(JSON.parse(output));
+        })
+        .catch(console.error);
     }, []);
   }
 
@@ -68,17 +68,17 @@ export default function Home() {
               <div className="w-full">
                 <h1 className="font-bold leading-tight text-8xl mt-0 mb-2 text-mainred">RASPIRUS</h1>
                 {Array.isArray(dictionary) && dictionary.length > 0 ? (
-                <select placeholder='Select drive' value={value} 
-                  onChange={(e) => { console.log("Changed drive: " + e.target.value); setValue(e.target.value); }} 
-                  className="
+                  <select placeholder='Select drive' value={value}
+                    onChange={(e) => { console.log("Changed drive: " + e.target.value); setValue(e.target.value); }}
+                    className="
                         px-3 py-1.5 text-base font-normal text-gray-700 bg-white w-9/12
                         border border-solid border-maingreen-light rounded transition ease-in-out
                         focus:text-gray-700 focus:bg-white focus:border-maingreen focus:outline-none">
                     <option value="None">Select your driver</option>
-                  {dictionary.map((item, i) => (
-                    <option key={i} value={item.path}>{item.name}</option>
-                  ))}
-                </select>
+                    {dictionary.map((item, i) => (
+                      <option key={i} value={item.path}>{item.name}</option>
+                    ))}
+                  </select>
                 ) : (
                   <div className="
                   m-auto px-3 py-1.5 text-base font-normal text-gray-700 bg-white w-9/12
