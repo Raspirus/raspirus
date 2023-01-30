@@ -29,7 +29,7 @@
         "icons/icon.ico"
       ],
       "identifier": "com.raspirus.dev",
-      "longDescription": "",
+      "longDescription": "Hash based Antivirus to scan USB drives",
       "macOS": {
         "entitlements": null,
         "exceptionDomain": "",
@@ -38,7 +38,7 @@
         "signingIdentity": null
       },
       "resources": [],
-      "shortDescription": "",
+      "shortDescription": "Small Antivirus",
       "targets": "all",
       "windows": {
         "certificateThumbprint": null,
@@ -58,7 +58,8 @@
         "height": 480,
         "resizable": false,
         "title": "Raspirus",
-        "width": 800
+        "width": 800,
+        "decorations": true
       }
     ]
   }
