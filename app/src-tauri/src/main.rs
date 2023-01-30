@@ -118,7 +118,13 @@ async fn list_usb_drives() -> Result<String, String> {
 
     if cfg!(target_os = "linux") {
         info!("Trying to retrieve USB drives from Linux OS");
-        let entries = match fs::read_dir("/media/pi") {
+        let username = match env::var("USER") {
+            Ok(val) => val,
+            Err(_) => panic!("Could not get current username"),
+        };
+    
+        let dir_path = format!("/media/{}", username);
+        let entries = match fs::read_dir(dir_path) {
             Ok(entries) => entries,
             Err(err) => {
                 return Err(err.to_string());
