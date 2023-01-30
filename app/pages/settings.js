@@ -1,7 +1,7 @@
 import Head from 'next/head';
 import SettingComp from '../components/settings-comp';
 import { useRouter } from 'next/router';
-import { faFileLines, faFilePen, faTerminal, faWrench } from '@fortawesome/free-solid-svg-icons';
+import { faFileLines, faUserNinja, faTerminal, faWrench } from '@fortawesome/free-solid-svg-icons';
 
 export default function Settings() {
   const router = useRouter();
@@ -45,15 +45,8 @@ export default function Settings() {
       <SettingComp
         title="Obfuscated Mode"
         short="When ON, it will not display the Path of possible found viruses"
-        icon={faFilePen}
-        isOn={false}
-      />
-
-      <SettingComp
-        title="Work in Progress!"
-        short="Allows users to set the percentage of RAM"
-        icon={faTerminal}
-        isOn={false}
+        icon={faUserNinja}
+        isOn={true}
       />
     </>
   );
