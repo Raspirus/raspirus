@@ -152,7 +152,7 @@ impl FileScanner {
     /// ```
     pub fn create_hash(&mut self, path: &str) -> Option<String> {
         let mut context = md5::Context::new();
-        let mut buffer = [0; 1024];
+        let mut buffer = [0; 4096]; // TODO: Test these settings
 
         let file = match File::open(path) {
             Ok(file) => file,

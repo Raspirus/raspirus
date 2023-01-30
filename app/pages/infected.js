@@ -7,7 +7,7 @@ import { SettingsContext } from '../state/context';
 export default function Infected() {
     const router = useRouter();
     const { settings } = useContext(SettingsContext);
-    const obfuscatedMode = settings["ObfuscatedMode"] != undefined ? settings["ObfuscatedMode"] : false;
+    const obfuscatedMode = settings["ObfuscatedMode"] != undefined ? settings["ObfuscatedMode"] : true;
     let { query: { virus_list }, } = router;
     console.log(virus_list);
 
