@@ -9,21 +9,23 @@ export default function Loading() {
   const { settings } = useContext(SettingsContext);
   const updateDatabase = settings["UpdateDatabase"] != undefined ? settings["UpdateDatabase"] : false;
   const activateLogging = settings["ActivateLogging"] != undefined ? settings["ActivateLogging"] : false;
-  const obfuscatedMode = settings["ObfuscatedMode"] != undefined ? settings["ObfuscatedMode"] : false;
+  const obfuscatedMode = settings["ObfuscatedMode"] != undefined ? settings["ObfuscatedMode"] : true;
   const router = useRouter();
   let { query: { scan_path }, } = router;
-  let progress = 0;
   let db_location = "";
 
-  console.log(settings);
+  useEffect(() => {
+    setTimeout(scanning, 0);
+  }, []);
 
-  function scanning() {
+  const scanning = () => {
+    console.log("Before setting: ", process.env.RUST_LOG)
     if (activateLogging) {
       process.env.RUST_LOG = "info"; // Optionally Debug
     } else {
       process.env.RUST_LOG = "warn";
     }
-    console.log("Update is: ", updateDatabase);
+    console.log("After setting: ", process.env.RUST_LOG)
     if (typeof window !== "undefined") {
       invoke("start_scanner", {
         path: scan_path,
@@ -32,7 +34,11 @@ export default function Loading() {
         obfuscated: obfuscatedMode,
       })
         .then((message) => {
-          if (message && message.length > 0) {
+          console.log(message.length);
+          console.log(typeof message);
+          console.log(message);
+          if (message && message.length > 0 && message != "[]") {
+            console.log(message);
             router.push({
               pathname: '/infected',
               query: { virus_list: message }
@@ -51,12 +57,7 @@ export default function Loading() {
     } else {
       console.error("Nextjs not in client mode!");
     }
-    console.log("Finished scanning");
   }
-
-  useEffect(() => {
-    setTimeout(scanning, 0);
-  }, []);
 
   return (
     <>
