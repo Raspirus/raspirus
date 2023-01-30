@@ -23,6 +23,8 @@ pub struct FileScanner {
     pub scanloc: String,
     /// A `FileLog` object that the `FileScanner` can use to log information about the search process.
     pub log: FileLog,
+    /// An array containing false positives MD5 Hashes
+    pub false_positive: Vec<String>
 }
 
 impl FileScanner {
@@ -55,11 +57,16 @@ impl FileScanner {
             let now: DateTime<Local> = Local::now();
             let now_str = now.format("%Y_%m_%d_%H_%M_%S").to_string();
             let log_str = format!("{}.log", now_str);
+
+            // Add all false positives here
+            let false_pos: Vec<String> = vec!["7dea362b3fac8e00956a4952a3d4f474".to_owned()];
+
             Ok(FileScanner {
                 db_conn: tmpconf,
                 dirty_files: Vec::new(),
                 scanloc: scanloc.to_owned(),
                 log: FileLog::new(log_str),
+                false_positive: false_pos
             })
         } else {
             Err(Error::new(ErrorKind::Other, "Invalid Path"))
@@ -179,6 +186,10 @@ impl FileScanner {
             it += 1;
         }
         let ret = format!("{:?}", context.compute());
+
+        if self.false_positive.contains(&ret) {
+            return None;
+        }
 
         match terminal_size() {
             Some((width, _)) => {
