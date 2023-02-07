@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"mod":[["db_ops",""],["file_log",""],["file_scanner",""]]};

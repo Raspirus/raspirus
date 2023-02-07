@@ -1,3 +1,0 @@
-(function() {var implementors = {
-"app":[["impl&lt;'de&gt; <a class=\"trait\" href=\"https://docs.rs/serde/1.0.152/serde/de/trait.Deserialize.html\" title=\"trait serde::de::Deserialize\">Deserialize</a>&lt;'de&gt; for <a class=\"struct\" href=\"app/struct.UsbDevice.html\" title=\"struct app::UsbDevice\">UsbDevice</a>"]]
-};if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

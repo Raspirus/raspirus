@@ -1,2 +1,0 @@
-cargo:rustc-cfg=custom_protocol
-cargo:rustc-cfg=desktop

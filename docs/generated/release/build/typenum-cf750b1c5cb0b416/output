@@ -1,3 +1,0 @@
-cargo:rerun-if-changed=build/main.rs
-cargo:rustc-env=TYPENUM_BUILD_CONSTS=C:\Users\benbe\Documents\Coding\RustProjects\raspirus\app\src-tauri\../../docs/generated/release\build\typenum-cf750b1c5cb0b416\out\consts.rs
-cargo:rustc-env=TYPENUM_BUILD_OP=C:\Users\benbe\Documents\Coding\RustProjects\raspirus\app\src-tauri\../../docs/generated/release\build\typenum-cf750b1c5cb0b416\out\op.rs
