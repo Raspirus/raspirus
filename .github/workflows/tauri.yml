@@ -4,10 +4,6 @@ on:
     tags:
       - 'v*'
   workflow_dispatch:
-  
-defaults:
-  run:
-    working-directory: app
 
 jobs:
   release:
@@ -40,7 +36,7 @@ jobs:
         with:
           node-version: 'lts/*'
           cache: 'npm' # Set this to npm, yarn or pnpm.
-          cache-dependency-path: app/package-lock.json
+          cache-dependency-path: package-lock.json
 
       - name: Install app dependencies and build web
         # Remove `&& yarn build` if you build your frontend in `beforeBuildCommand`
