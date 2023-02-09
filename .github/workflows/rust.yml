@@ -12,7 +12,7 @@ env:
 defaults:
   run:
     shell: bash
-    working-directory: app/src-tauri
+    working-directory: src-tauri
 
 jobs:
   build:
