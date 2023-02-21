@@ -2,15 +2,9 @@
 @import 'tailwindcss/components';
 @import 'tailwindcss/utilities';
 
-html,
-body {
-    width: 800px;
-    height: 480px;
-    overflow-x: hidden;
-}
-
 #__next {
     height: 100%;
+    width: 100%;
 }
 
 .alert-warning {

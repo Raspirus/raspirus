@@ -35,7 +35,6 @@ export default function Settings() {
         icon={faWrench}
         isOn={false}
       />
-      
       <SettingComp
         title="Activate Logging"
         short="Activates the writing of logs"
@@ -48,6 +47,7 @@ export default function Settings() {
         icon={faUserNinja}
         isOn={true}
       />
+
     </>
   );
 }
