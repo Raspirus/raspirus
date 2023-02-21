@@ -13,7 +13,7 @@ export default function SettingComp({ title, short, icon, isOn: initialIsOn }) {
     }, [isOn, titleWithoutSpaces, setSettings])
 
     return (
-        <div className="flex flex-col p-4 bg-white">
+        <div className="flex flex-col m-6 p-2 bg-white rounded-2xl shadow-md">
             <div className="flex items-center justify-between mx-4">
                 <div className="flex items-center">
                     <FontAwesomeIcon
