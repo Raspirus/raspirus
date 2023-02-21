@@ -40,7 +40,8 @@ export default function Home() {
   }
 
   const openInfo = () => {
-    router.push('/info');
+    // router.push('/info');
+    router.push('/infected');
   }
 
   const openSettings = () => {
@@ -55,15 +56,14 @@ export default function Home() {
       </Head>
       <main className='overflow-y-hidden'>
         <div className='flex justify-end'>
-          <button onClick={openSettings} type="button" className="inline-block px-6 py-2 border-2 m-5 border-mainred text-mainred 
+          <button onClick={openSettings} type="button" className="absolute top-0 right-0 px-6 py-2 border-2 m-5 border-mainred text-mainred 
         font-medium text-xs leading-tight uppercase rounded hover:bg-black hover:bg-opacity-5 
         focus:outline-none focus:ring-0 transition duration-150 ease-in-out">
             <i className="pr-1 fa fa-gear"></i> SETTINGS</button>
         </div>
 
 
-        <div className="p-12 text-center relative rounded-lg">
-          <div>
+          <div className="flex h-screen justify-center p-12 text-center">
             <div className="flex justify-center items-center h-full">
               <div className="w-full">
                 <h1 className="font-bold leading-tight text-8xl mt-0 mb-2 text-mainred">RASPIRUS</h1>
@@ -71,7 +71,7 @@ export default function Home() {
                   <select placeholder='Select drive' value={value}
                     onChange={(e) => { console.log("Changed drive: " + e.target.value); setValue(e.target.value); }}
                     className="
-                        px-3 py-1.5 text-base font-normal text-gray-700 bg-white w-9/12
+                        px-3 py-1.5 text-base font-normal text-gray-700 bg-white w-full
                         border border-solid border-maingreen-light rounded transition ease-in-out
                         focus:text-gray-700 focus:bg-white focus:border-maingreen focus:outline-none">
                     <option value="None">Select your driver</option>
@@ -81,7 +81,7 @@ export default function Home() {
                   </select>
                 ) : (
                   <div className="
-                  m-auto px-3 py-1.5 text-base font-normal text-gray-700 bg-white w-9/12
+                  m-auto px-3 py-1.5 text-base font-normal text-gray-700 bg-white w-full
                   border border-solid border-maingreen-light rounded transition ease-in-out
                   focus:text-gray-700 focus:bg-white focus:border-maingreen focus:outline-none">
                     No drives found. Insert a drive and refresh this page</div>
@@ -93,7 +93,6 @@ export default function Home() {
               </div>
             </div>
           </div>
-        </div>
       </main>
     </>
   )
