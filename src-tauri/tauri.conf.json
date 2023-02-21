@@ -56,7 +56,7 @@
       {
         "fullscreen": false,
         "height": 480,
-        "resizable": false,
+        "resizable": true,
         "title": "Raspirus",
         "width": 800,
         "decorations": true
