@@ -46,27 +46,15 @@ export default function Infected() {
             </div>
 
             <div className="m-8 relative">
-                <VirusComp
-                    title="Testtextcicsicbicökcbiwöcbiwlcbiwlcblwcbwlcvwlcbhwlucbwlucbwlcbwleucbwlcblwcbwluvulavulvlwubclwuvwulvluwv"
-                    value="Testvalue"
-                />
-                <VirusComp
-                    title="Testtextcicsicbicökcbiwöcbiwlcbiwlcblwcbwlcvwlcbhwlucbwlucbwlcbwleucbwlcblwcbwluvulavulvlwubclwuvwulvluwv"
-                    value="Testvalue"
-                />
-                <VirusComp
-                    title="Testtext"
-                    value="Testvalue"
-                />
-                <VirusComp
-                    title="Testtextcicsicbicökcbiwöcbiwlcbiwlcblwcbwlcvwlcbhwlucbwlucbwlcbwleucbwlcblwcbwluvulavulvlwubclwuvwulvluwv"
-                    value="Testvalue"
-                />
-                <VirusComp
-                    title="Testtext"
-                    value="Testvalue"
-                />
-
+                {Array.isArray(virus_list) 
+                    && virus_list.length > 0 
+                    && virus_list.map(
+                        entry => 
+                            <VirusComp 
+                                title={(entry.split('\\').pop().split('/').pop().split('.'))[0]} 
+                                text={entry}/>
+                    )
+                }
             </div>
         </>
     )
