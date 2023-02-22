@@ -1,7 +1,7 @@
 import Head from 'next/head';
 import SettingComp from '../components/settings-comp';
 import { useRouter } from 'next/router';
-import { faFileLines, faUserNinja, faTerminal, faWrench } from '@fortawesome/free-solid-svg-icons';
+import { faFileLines, faUserNinja, faWrench } from '@fortawesome/free-solid-svg-icons';
 
 export default function Settings() {
   const router = useRouter();
