@@ -41,8 +41,7 @@ export default function Home() {
   };
 
   const openInfo = () => {
-    // router.push('/info');
-    router.push("/infected");
+    router.push('/info');
   };
 
   const openSettings = () => {
