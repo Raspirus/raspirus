@@ -19,13 +19,12 @@ export default function Loading() {
   }, []);
 
   const scanning = () => {
-    console.log("Before setting: ", process.env.RUST_LOG)
     if (activateLogging) {
       process.env.RUST_LOG = "info"; // Optionally Debug
     } else {
       process.env.RUST_LOG = "warn";
     }
-    console.log("After setting: ", process.env.RUST_LOG)
+    console.log("ENV is set on: ", process.env.RUST_LOG)
     if (typeof window !== "undefined") {
       invoke("start_scanner", {
         path: scan_path,
@@ -64,7 +63,7 @@ export default function Loading() {
       <Head>
         <title>Loading...</title>
       </Head>
-      <main className="flex flex-col items-center justify-center h-full">
+      <main className="flex flex-col items-center justify-center h-screen">
         <h1 className="text-2xl font-bold text-center">Loading... Please wait</h1>
         <div className="flex flex-row m-10">
           <div className={[styles.main_div, styles.zero_div].join(" ")}></div>
