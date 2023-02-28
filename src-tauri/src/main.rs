@@ -85,7 +85,7 @@ async fn start_scanner(path: String, dbfile: Option<String>, obfuscated: bool) -
 }
 
 #[tauri::command]
-fn update_database(db_file: Option<String>) {
+async fn update_database(db_file: Option<String>) {
     let mut use_db = "signatures.db".to_owned();
     match db_file {
         Some(fpath) => {
@@ -110,7 +110,9 @@ fn update_database(db_file: Option<String>) {
     };
 
     let big_tic = time::Instant::now();
-    db_connection.update_db();
+    tokio::task::spawn_blocking(move || {
+        db_connection.update_db();
+    }).await.unwrap();
     let big_toc = time::Instant::now();
     info!(
         "Updated DB in {} seconds",
