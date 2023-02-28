@@ -1,14 +1,38 @@
 import Head from 'next/head';
 import SettingComp from '../components/settings-comp';
 import { useRouter } from 'next/router';
+import { useEffect } from 'react';
+import { invoke } from "@tauri-apps/api/tauri";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faFileLines, faUserNinja, faWrench } from '@fortawesome/free-solid-svg-icons';
 
 export default function Settings() {
   const router = useRouter();
+  let db_location = "";
 
   const backHome = () => {
     router.push('/');
   };
+
+  const updating = () => {
+    if (typeof window !== "undefined") {
+      invoke("update_database", {
+        dbfile: db_location,
+      })
+        .then((message) => {
+          console.log(message);
+        })
+        .catch((error) => {
+          console.error(error);
+          router.push({
+            pathname: '/',
+            query: { update_error: error }
+          })
+        });
+    } else {
+      console.error("Nextjs not in client mode!");
+    }
+  }
 
   return (
     <>
@@ -29,12 +53,27 @@ export default function Settings() {
         </h1>
       </div>
 
-      <SettingComp
-        title="Update Database"
-        short="Updates the database (requires an internet connection)"
-        icon={faWrench}
-        isOn={false}
-      />
+      <div className="flex flex-col m-6 p-2 bg-white rounded-2xl shadow-md">
+            <div className="flex items-center justify-between mx-4">
+                <div className="flex items-center">
+                    <FontAwesomeIcon
+                        icon={faWrench}
+                        size="2x"
+                        className="w-16 h-16 rounded-2xl p-3 border border-red-100 text-red-400 bg-red-50"
+                    />
+                    <div className="flex flex-col ml-3">
+                        <div className="font-medium leading-none">Update Database</div>
+                        <p className="text-sm text-gray-600 leading-none mt-1">Updates the database (requires an internet connection)</p>
+                    </div>
+                </div>
+                <button
+                    onClick={updating}
+                    className={`flex-no-shrink px-5 ml-4 py-2 text-sm shadow-sm hover:shadow-lg font-medium tracking-wider border-2 text-white rounded-full bg-blue-500 border-blue-500`}>
+                    UPDATE
+                </button>
+            </div>
+        </div>
+
       <SettingComp
         title="Activate Logging"
         short="Activates the writing of logs"
