@@ -7,7 +7,6 @@ import { SettingsContext } from '../state/context';
 
 export default function Loading() {
   const { settings } = useContext(SettingsContext);
-  const updateDatabase = settings["UpdateDatabase"] != undefined ? settings["UpdateDatabase"] : false;
   const activateLogging = settings["ActivateLogging"] != undefined ? settings["ActivateLogging"] : false;
   const obfuscatedMode = settings["ObfuscatedMode"] != undefined ? settings["ObfuscatedMode"] : true;
   const router = useRouter();
@@ -28,7 +27,6 @@ export default function Loading() {
     if (typeof window !== "undefined") {
       invoke("start_scanner", {
         path: scan_path,
-        update: updateDatabase,
         dbfile: db_location,
         obfuscated: obfuscatedMode,
       })

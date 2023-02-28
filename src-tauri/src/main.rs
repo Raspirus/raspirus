@@ -3,11 +3,13 @@
     windows_subsystem = "windows"
 )]
 
+use backend::db_ops::DBOps;
 use backend::file_scanner;
 use log::{error, info, warn };
 use serde::{Deserialize, Serialize};
 use std::ffi::{OsString, OsStr};
 use std::iter::once;
+use std::process::exit;
 use std::{env, fs, path::Path, time};
 
 #[cfg(windows)]
@@ -21,7 +23,7 @@ mod backend;
 
 fn main() {
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![start_scanner, list_usb_drives])
+        .invoke_handler(tauri::generate_handler![start_scanner, list_usb_drives, update_database])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
@@ -38,7 +40,7 @@ fn main() {
 ///
 /// An empty `Result` object if the scanner was successfully started, or an `Err` with an error message if an error occurred.
 #[tauri::command]
-async fn start_scanner(path: String, update: bool, dbfile: Option<String>, obfuscated: bool) -> Result<String, String> {
+async fn start_scanner(path: String, dbfile: Option<String>, obfuscated: bool) -> Result<String, String> {
     match pretty_env_logger::try_init() {
         Ok(()) => {
             info!("Logger initialized!");
@@ -70,17 +72,7 @@ async fn start_scanner(path: String, update: bool, dbfile: Option<String>, obfus
             return Err(err.to_string());
         }
     };
-    if update {
-        let big_tic = time::Instant::now();
-        fs.db_conn.update_db();
-        let big_toc = time::Instant::now();
-        info!(
-            "Updated DB in {} seconds",
-            big_toc.duration_since(big_tic).as_secs_f64()
-        );
-    } else {
-        info!("Skipped update");
-    }
+
     let dirty_files = match fs.search_files(obfuscated) {
         Ok(files) => files,
         Err(e) => {
@@ -90,6 +82,40 @@ async fn start_scanner(path: String, update: bool, dbfile: Option<String>, obfus
     };
     Ok(serde_json::to_string(&dirty_files).unwrap())
 
+}
+
+#[tauri::command]
+fn update_database(db_file: Option<String>) {
+    let mut use_db = "signatures.db".to_owned();
+    match db_file {
+        Some(fpath) => {
+            if Path::new(&fpath).to_owned().exists() && Path::new(&fpath).to_owned().is_file() {
+                info!("Using specific DB path {}", fpath);
+                use_db = fpath.to_owned();
+            } else {
+                info!("Falling back to default DB file (signatures.db)");
+            }
+        }
+        None => {
+            info!("Path is None; Falling back to default DB file (signatures.db)");
+        }
+    };
+
+    let mut db_connection = match DBOps::new(&use_db) {
+        Ok(db_conn) => db_conn,
+        Err(err) => {
+            error!("{err}");
+            exit(-1);
+        }
+    };
+
+    let big_tic = time::Instant::now();
+    db_connection.update_db();
+    let big_toc = time::Instant::now();
+    info!(
+        "Updated DB in {} seconds",
+        big_toc.duration_since(big_tic).as_secs_f64()
+    );
 }
 
 #[derive(Serialize, Deserialize, Debug)]
