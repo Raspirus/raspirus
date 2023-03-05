@@ -5,6 +5,7 @@ import { useEffect } from 'react';
 import { invoke } from "@tauri-apps/api/tauri";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faFileLines, faUserNinja, faWrench } from '@fortawesome/free-solid-svg-icons';
+import swal from 'sweetalert';
 
 export default function Settings() {
   const router = useRouter();
@@ -24,10 +25,7 @@ export default function Settings() {
         })
         .catch((error) => {
           console.error(error);
-          router.push({
-            pathname: '/',
-            query: { update_error: error }
-          })
+          swal("Update error", "Couldn't start the update", "error");
         });
     } else {
       console.error("Nextjs not in client mode!");

@@ -37,22 +37,26 @@ export default function Permission() {
         </h1>
       </div>
       <div className="flex items-center justify-center flex-col">
-        <p className="m-5 p-2 font-small leading-tight bg-gray-300 shadow-inner">
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec at
-          condimentum eros. Mauris lobortis dui et ex lobortis, a vulputate nisl
-          maximus. Lorem ipsum dolor sit amet, consectetur adipiscing elit. In
-          hac habitasse platea dictumst. Aliquam enim est, dignissim
-          pellentesque lorem in, finibus rutrum risus. Donec imperdiet, felis
-          vitae suscipit bibendum, erat dolor volutpat tortor, sed sagittis
-          massa lorem quis ligula. Vestibulum porta sed dui vitae vehicula. Sed
-          eleifend diam sit amet turpis gravida rhoncus. Aliquam congue nibh in
-          mi auctor mollis. Donec pharetra cursus erat, in rhoncus sapien cursus
-          vitae. Etiam maximus tortor sit amet elementum consectetur. Proin ut
-          lorem lacus. Sed sodales, metus id tincidunt condimentum, erat est
-          finibus lectus, ac consequat dolor felis in nulla. Sed mollis accumsan
-          ipsum nec venenatis. Praesent quis nisl nisi. Proin accumsan
-          pellentesque feugiat.
-        </p>
+        <div className="m-5 overflow-y-scroll">
+          <p className="p-2 font-small leading-tight bg-gray-300 shadow-inner h-64">
+            This program is designed to scan for malicious software on USB drives that are inserted into your computer.
+            By using this program, you acknowledge that you are responsible for the content of the USB drive and
+            any potential damage it may cause to your computer system. You also acknowledge that the program is
+            not guaranteed to detect all malware and cannot be held responsible for any malware that may go undetected.
+            By inserting a USB drive into your computer and running the program,
+            you are giving your consent to have the drive scanned for malware.
+            If you do not consent to this, do not insert the USB drive or run the program.
+            The results of the scan are for informational purposes only and should be carefully reviewed by the user.
+            The program does not make any guarantees regarding the accuracy or completeness of the scan results.
+            It is the user's responsibility to ensure that they are aware of any potential risks associated with using a USB drive,
+            including the risk of malware infection. Users should only use USB drives from trusted sources and
+            exercise caution when inserting unknown drives into their computer.
+            The Raspirus program is provided on an "as-is" basis and cannot be held liable for any damages,
+            including but not limited to, data loss, system crashes, or any other damages resulting from the use of the program.
+            By using the Raspirus program, you agree to these terms and conditions.
+            If you do not agree to these terms and conditions, do not use the program.
+          </p>
+        </div>
 
         <div className="align-middle">
           <button
