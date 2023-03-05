@@ -1,9 +1,9 @@
 import Head from "next/head";
-import styles from '../styles/refresh.module.css';
+import styles from "../styles/refresh.module.css";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import { invoke } from "@tauri-apps/api/tauri";
-import swal from 'sweetalert';
+import Swal from "sweetalert2";
 
 export default function Home() {
   const router = useRouter();
@@ -16,7 +16,7 @@ export default function Home() {
   } = router;
   if (scanner_error != null && scanner_error != "" && errors_shown < 1) {
     console.error("Home error", scanner_error);
-    swal("Scanning errors", scanner_error, "error");
+    Swal.fire("Scanning errors", scanner_error, "error");
     errors_shown++;
   }
 
@@ -29,7 +29,11 @@ export default function Home() {
         })
         .catch((error) => {
           console.error(error);
-          swal("USB list error", "Couldn't search for USBs on this device", "error");
+          Swal.fire(
+            "USB list error",
+            "Couldn't search for USBs on this device",
+            "error"
+          );
         });
     }, []);
   }
@@ -37,7 +41,7 @@ export default function Home() {
   const openAgreement = () => {
     console.log("Value selected = ", value);
     if (value.length <= 0 || value == "None") {
-      swal("No Selection", "Please select a driver first!", "info");
+      Swal.fire("No Selection", "Please select a driver first!", "warning");
     } else {
       router.push({
         pathname: "/permission",
@@ -47,7 +51,7 @@ export default function Home() {
   };
 
   const openInfo = () => {
-    router.push('/info');
+    router.push("/info");
   };
 
   const openSettings = () => {
@@ -59,20 +63,23 @@ export default function Home() {
     refreshButton.classList.add(styles.refreshStart);
 
     if (typeof window !== "undefined") {
-        invoke("list_usb_drives", {})
-          .then((output) => {
-            console.log(JSON.parse(output));
-            setDictionary(JSON.parse(output));
-            setTimeout(() => {
-              refreshButton.classList.remove(styles.refreshStart);
-              swal("Refresh completed", "Finished searching for USBs", "success");
-            }, 3000);
-          })
-          .catch((error) => {
-            console.error(error);
+      invoke("list_usb_drives", {})
+        .then((output) => {
+          console.log(JSON.parse(output));
+          setDictionary(JSON.parse(output));
+          setTimeout(() => {
             refreshButton.classList.remove(styles.refreshStart);
-            swal("USB list error", "Couldn't search for USBs on this device", "error");
-          });
+          }, 3000);
+        })
+        .catch((error) => {
+          console.error(error);
+          refreshButton.classList.remove(styles.refreshStart);
+          Swal.fire(
+            "USB list error",
+            "Couldn't search for USBs on this device",
+            "error"
+          );
+        });
     }
   }
 
@@ -102,7 +109,6 @@ export default function Home() {
               </h1>
 
               <div className="flex justify-center">
-
                 {Array.isArray(dictionary) && dictionary.length > 0 ? (
                   <select
                     placeholder="Select drive"
@@ -137,23 +143,28 @@ export default function Home() {
                 <button
                   onClick={refreshContent}
                   className="inline-block p-3 bg-mainred rounded shadow-md hover:bg-mainred-dark hover:shadow-lg focus:bg-mainred-dark focus:shadow-lg focus:outline-none focus:ring-0 active:mainred-dark active:shadow-lg transition duration-150 ease-in-out"
-                ><img id="refresh-icon" className="h-full w-4" src="images/refresh.svg" /></button>
-
+                >
+                  <img
+                    id="refresh-icon"
+                    className="h-full w-4"
+                    src="images/refresh.svg"
+                  />
+                </button>
               </div>
               <div className="mt-5">
                 <button
-                  onClick={openAgreement}
-                  type="button"
-                  className="mr-2 inline-block px-7 py-3 bg-mainred text-white font-medium text-sm leading-snug uppercase rounded shadow-md hover:bg-mainred-dark hover:shadow-lg focus:bg-mainred-dark focus:shadow-lg focus:outline-none focus:ring-0 active:mainred-dark active:shadow-lg transition duration-150 ease-in-out"
-                >
-                  START
-                </button>
-                <button
                   onClick={openInfo}
                   type="button"
-                  className="ml-2 inline-block px-7 py-3 border-2 border-mainred text-mainred bg-white font-medium text-sm leading-tight uppercase rounded hover:bg-black hover:bg-opacity-5 focus:outline-none focus:ring-0 transition duration-150 ease-in-out"
+                  className="mr-2 inline-block px-7 py-3 border-2 border-mainred text-mainred bg-white font-medium text-sm leading-tight uppercase rounded hover:bg-black hover:bg-opacity-5 focus:outline-none focus:ring-0 transition duration-150 ease-in-out"
                 >
                   INFO
+                </button>
+                <button
+                  onClick={openAgreement}
+                  type="button"
+                  className="ml-2 inline-block px-7 py-3 bg-mainred text-white font-medium text-sm leading-snug uppercase rounded shadow-md hover:bg-mainred-dark hover:shadow-lg focus:bg-mainred-dark focus:shadow-lg focus:outline-none focus:ring-0 active:mainred-dark active:shadow-lg transition duration-150 ease-in-out"
+                >
+                  START
                 </button>
               </div>
             </div>
