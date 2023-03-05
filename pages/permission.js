@@ -37,8 +37,8 @@ export default function Permission() {
         </h1>
       </div>
       <div className="flex items-center justify-center flex-col">
-        <div className="m-5 overflow-y-scroll">
-          <p className="p-2 font-small leading-tight bg-gray-300 shadow-inner h-64">
+        <div className="m-5 overflow-y-scroll h-64">
+          <p className="p-2 font-small leading-tight bg-gray-300 shadow-inner">
             This program is designed to scan for malicious software on USB drives that are inserted into your computer.
             By using this program, you acknowledge that you are responsible for the content of the USB drive and
             any potential damage it may cause to your computer system. You also acknowledge that the program is
