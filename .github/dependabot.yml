@@ -23,7 +23,7 @@ updates:
 
   # Maintain dependencies for npm
   - package-ecosystem: "npm"
-    directory: "/app/"
+    directory: "/"
     schedule:
       interval: "weekly"
     # Include a list of updated dependencies
@@ -39,7 +39,7 @@ updates:
 
   # Maintain dependencies for Composer
   - package-ecosystem: "cargo"
-    directory: "/app/src-tauri/"
+    directory: "/src-tauri/"
     schedule:
       interval: "weekly"
     # Include a list of updated dependencies
