@@ -1,11 +1,10 @@
 import Head from 'next/head';
 import SettingComp from '../components/settings-comp';
 import { useRouter } from 'next/router';
-import { useEffect } from 'react';
 import { invoke } from "@tauri-apps/api/tauri";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faFileLines, faUserNinja, faWrench } from '@fortawesome/free-solid-svg-icons';
-import swal from 'sweetalert';
+import Swal from 'sweetalert2';
 
 export default function Settings() {
   const router = useRouter();
@@ -17,18 +16,29 @@ export default function Settings() {
 
   const updating = () => {
     if (typeof window !== "undefined") {
+      Swal.fire({
+        title: 'Updating database...',
+        text: 'Please be patient, this can take some time',
+        iconHtml: '<img src=images/loading-anim.gif>',
+        allowOutsideClick: false,
+        showConfirmButton: false,
+        allowEscapeKey: false,
+        allowEnterKey: false
+      })
       invoke("update_database", {
         dbfile: db_location,
       })
         .then((message) => {
           console.log(message);
+          Swal.fire("Update completed", "Database is up-to-date", "success");
         })
         .catch((error) => {
           console.error(error);
-          swal("Update error", "Couldn't start the update", "error");
+          Swal.fire("Update error", "Couldn't start the update", "error");
         });
     } else {
       console.error("Nextjs not in client mode!");
+      Swal.fire("Window error", "Nextjs is not in client mode", "error");
     }
   }
 
