@@ -3,19 +3,21 @@ import styles from '../styles/refresh.module.css';
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import { invoke } from "@tauri-apps/api/tauri";
-import { alertService } from "../services/alert.service";
+import swal from 'sweetalert';
 
 export default function Home() {
   const router = useRouter();
   const [value, setValue] = useState("None");
   const [dictionary, setDictionary] = useState([]);
+  let errors_shown = 0;
 
   let {
     query: { scanner_error },
   } = router;
-  if (scanner_error != null && scanner_error != "") {
+  if (scanner_error != null && scanner_error != "" && errors_shown < 1) {
     console.error("Home error", scanner_error);
-    alertService.error("Scanning failed: " + scanner_error);
+    swal("Scanning errors", scanner_error, "error");
+    errors_shown++;
   }
 
   if (typeof window !== "undefined") {
@@ -25,14 +27,17 @@ export default function Home() {
           console.log(JSON.parse(output));
           setDictionary(JSON.parse(output));
         })
-        .catch(console.error);
+        .catch((error) => {
+          console.error(error);
+          swal("USB list error", "Couldn't search for USBs on this device", "error");
+        });
     }, []);
   }
 
   const openAgreement = () => {
     console.log("Value selected = ", value);
     if (value.length <= 0 || value == "None") {
-      alertService.warn("Please select a driver first!");
+      swal("No Selection", "Please select a driver first!", "info");
     } else {
       router.push({
         pathname: "/permission",
@@ -60,9 +65,14 @@ export default function Home() {
             setDictionary(JSON.parse(output));
             setTimeout(() => {
               refreshButton.classList.remove(styles.refreshStart);
+              swal("Refresh completed", "Finished searching for USBs", "success");
             }, 3000);
           })
-          .catch((error) => {console.error(error); refreshButton.classList.remove(styles.refreshStart);});
+          .catch((error) => {
+            console.error(error);
+            refreshButton.classList.remove(styles.refreshStart);
+            swal("USB list error", "Couldn't search for USBs on this device", "error");
+          });
     }
   }
 
