@@ -21,7 +21,10 @@ export default function Clean() {
                 <Image 
                     src="/images/success_image.png" 
                     alt="Success" 
-                    className="max-w-[30%]" />
+                    className="max-w-[30%]" 
+                    width={500}
+                    height={500}
+                    />
                 <button onClick={backHome} type="button" className="inline-block px-6 py-2.5 m-10 bg-mainred text-white font-medium text-xs leading-tight uppercase rounded shadow-md hover:bg-mainred-dark hover:shadow-lg focus:bg-mainred-dark focus:shadow-lg focus:outline-none focus:ring-0 active:bg-mainred-dark active:shadow-lg transition duration-150 ease-in-out">
                     <FontAwesomeIcon
                         icon={faHome}
