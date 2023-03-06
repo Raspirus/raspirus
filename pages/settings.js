@@ -3,7 +3,7 @@ import SettingComp from '../components/settings-comp';
 import { useRouter } from 'next/router';
 import { invoke } from "@tauri-apps/api/tauri";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faFileLines, faUserNinja, faWrench } from '@fortawesome/free-solid-svg-icons';
+import { faFileLines, faUserNinja, faWrench, faHome } from '@fortawesome/free-solid-svg-icons';
 import Swal from 'sweetalert2';
 
 export default function Settings() {
@@ -53,7 +53,11 @@ export default function Settings() {
           type="button"
           className="inline-block align-middle px-6 py-2.5 m-2 bg-mainred text-white font-medium text-xs leading-tight uppercase rounded shadow-md hover:bg-mainred-dark hover:shadow-lg focus:bg-mainred-dark focus:shadow-lg focus:outline-none focus:ring-0 active:bg-mainred-dark active:shadow-lg transition duration-150 ease-in-out"
         >
-          <i className="pr-1 fa fa-home"></i>
+          <FontAwesomeIcon
+              icon={faHome}
+              size="1x"
+              className="pr-1"
+            /> 
           Home
         </button>
         <h1 className="inline-block align-middle p-2 font-medium leading-tight text-5xl mt-0 mb-2 text-mainred">
@@ -67,7 +71,7 @@ export default function Settings() {
                     <FontAwesomeIcon
                         icon={faWrench}
                         size="2x"
-                        className="w-16 h-16 rounded-2xl p-3 border border-red-100 text-red-400 bg-red-50"
+                        className="w-16 h-16 rounded-2xl p-3 border border-maingreen-light text-maingreen-light bg-green-50"
                     />
                     <div className="flex flex-col ml-3">
                         <div className="font-medium leading-none">Update Database</div>
