@@ -12,6 +12,7 @@ import { useLocalStorage } from "../services/useLocalStorage";
 export default function Home() {
   const router = useRouter();
   const [value, setValue] = useState("None");
+  const [initialized, setInitialized] = useState(false)
   const [dictionary, setDictionary] = useState([]);
 
   let {
@@ -90,6 +91,15 @@ export default function Home() {
     }
   }
 
+  function handleSelectChange(e) {
+    console.log("Changed drive: " + e.target.value);
+    setValue(e.target.value);
+
+    if (!initialized) {
+      setInitialized(true);
+    }
+  }
+
   return (
     <>
       <Head>
@@ -124,11 +134,8 @@ export default function Home() {
                 {Array.isArray(dictionary) && dictionary.length > 0 ? (
                   <select
                     placeholder="Select drive"
-                    value={value}
-                    onChange={(e) => {
-                      console.log("Changed drive: " + e.target.value);
-                      setValue(e.target.value);
-                    }}
+                    value={initialized ? value : dictionary[0].path}
+                    onChange={handleSelectChange}
                     className="
                         px-3 py-1.5 text-base font-normal text-gray-700 bg-white inline-block mr-2 w-full
                         border border-solid border-maingreen-light rounded transition ease-in-out
