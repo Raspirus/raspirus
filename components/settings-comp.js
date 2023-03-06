@@ -19,7 +19,7 @@ export default function SettingComp({ title, short, icon, isOn: initialIsOn }) {
                     <FontAwesomeIcon
                         icon={icon}
                         size="2x"
-                        className="w-16 h-16 rounded-2xl p-3 border border-red-100 text-red-400 bg-red-50"
+                        className="w-16 h-16 rounded-2xl p-3 border border-maingreen-light text-maingreen-light bg-green-50"
                     />
                     <div className="flex flex-col ml-3">
                         <div className="font-medium leading-none">{title}</div>
