@@ -15,7 +15,7 @@ export default function Loading() {
 
   useEffect(() => {
     setTimeout(scanning, 0);
-  }, []);
+  });
 
   const scanning = () => {
     if (activateLogging) {
