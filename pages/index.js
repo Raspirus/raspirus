@@ -6,6 +6,7 @@ import { invoke } from "@tauri-apps/api/tauri";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faGear } from '@fortawesome/free-solid-svg-icons';
 import Swal from "sweetalert2";
+import Image from "next/image";
 
 let errors_shown = 0;
 
@@ -25,9 +26,8 @@ export default function Home() {
   } else {
     errors_shown--;
   }
-
-  if (typeof window !== "undefined") {
-    useEffect(() => {
+  useEffect(() => {
+    if (typeof window !== "undefined") {
       invoke("list_usb_drives", {})
         .then((output) => {
           console.log(JSON.parse(output));
@@ -41,8 +41,8 @@ export default function Home() {
             "error"
           );
         });
-    }, []);
-  }
+    }
+  }, []);
 
   const openAgreement = () => {
     console.log("Value selected = ", value);
@@ -107,7 +107,7 @@ export default function Home() {
               icon={faGear}
               size="1x"
               className="pr-1"
-            /> 
+            />
             SETTINGS
           </button>
         </div>
@@ -155,10 +155,11 @@ export default function Home() {
                   onClick={refreshContent}
                   className="inline-block p-3 bg-maingreen rounded shadow-md hover:bg-maingreen-dark hover:shadow-lg focus:bg-maingreen-dark focus:shadow-lg focus:outline-none focus:ring-0 active:maingreen-dark active:shadow-lg transition duration-150 ease-in-out"
                 >
-                  <img
+                  <Image
                     id="refresh-icon"
                     className="h-full w-4"
                     src="images/refresh.svg"
+                    alt="Refresh"
                   />
                 </button>
               </div>

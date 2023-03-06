@@ -5,6 +5,7 @@ import { useContext } from 'react';
 import { SettingsContext } from '../state/context';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faHome } from "@fortawesome/free-solid-svg-icons";
+import Image from "next/image";
 
 export default function Infected() {
     const router = useRouter();
@@ -25,7 +26,7 @@ export default function Infected() {
                 </Head>
                 <div className="flex items-center justify-center h-screen flex-col">
                     <h1 className="text-center mb-10 pt-4 font-medium leading-tight text-5xl mt-0 text-mainred">Virus found!</h1>
-                    <img src="/images/failure_image.png" alt="Failure" className="max-w-[30%]" />
+                    <Image src="/images/failure_image.png" alt="Failure" className="max-w-[30%]" />
                     <button onClick={backHome} type="button" className="inline-block px-6 py-2.5 m-10 bg-mainred text-white font-medium text-xs leading-tight uppercase rounded shadow-md hover:bg-mainred-dark hover:shadow-lg focus:bg-mainred-dark focus:shadow-lg focus:outline-none focus:ring-0 active:bg-mainred-dark active:shadow-lg transition duration-150 ease-in-out">
                         <FontAwesomeIcon
                             icon={faHome}
@@ -60,7 +61,7 @@ export default function Infected() {
                     && virus_list.length > 0
                     && virus_list.map(
                         entry =>
-                            <VirusComp
+                            <VirusComp key={entry}
                                 title={(entry.split('\\').pop().split('/').pop().split('.'))[0]}
                                 text={entry} />
                     )
