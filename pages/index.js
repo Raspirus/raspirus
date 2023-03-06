@@ -7,19 +7,23 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faGear } from '@fortawesome/free-solid-svg-icons';
 import Swal from "sweetalert2";
 
+let errors_shown = 0;
+
 export default function Home() {
   const router = useRouter();
   const [value, setValue] = useState("None");
   const [dictionary, setDictionary] = useState([]);
-  let errors_shown = 0;
 
   let {
     query: { scanner_error },
   } = router;
   if (scanner_error != null && scanner_error != "" && errors_shown < 1) {
+    console.log("ErrCount: ", errors_shown);
     console.error("Home error", scanner_error);
     Swal.fire("Scanning errors", scanner_error, "error");
     errors_shown++;
+  } else {
+    errors_shown--;
   }
 
   if (typeof window !== "undefined") {
