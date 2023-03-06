@@ -7,8 +7,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faGear } from '@fortawesome/free-solid-svg-icons';
 import Swal from "sweetalert2";
 import Image from "next/image";
-
-let errors_shown = 0;
+import { useLocalStorage } from "../services/useLocalStorage";
 
 export default function Home() {
   const router = useRouter();
@@ -18,13 +17,15 @@ export default function Home() {
   let {
     query: { scanner_error },
   } = router;
-  if (scanner_error != null && scanner_error != "" && errors_shown < 1) {
-    console.log("ErrCount: ", errors_shown);
+
+  const [errorOccurred, setError] = useLocalStorage("errorOccurred", 'false');
+  console.log("Err: ", errorOccurred);
+  if (scanner_error != null && scanner_error != "" && errorOccurred == 'true') {
     console.error("Home error", scanner_error);
     Swal.fire("Scanning errors", scanner_error, "error");
-    errors_shown++;
-  } else {
-    errors_shown--;
+    console.log("LS = ", localStorage);
+    setError('false');
+    localStorage.removeItem("errorOccurred");
   }
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -160,6 +161,8 @@ export default function Home() {
                     className="h-full w-4"
                     src="images/refresh.svg"
                     alt="Refresh"
+                    width={500}
+                    height={500}
                   />
                 </button>
               </div>

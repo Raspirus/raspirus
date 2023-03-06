@@ -46,6 +46,7 @@ export default function Loading() {
         })
         .catch((error) => {
           console.error(error);
+          localStorage.setItem("errorOccurred", 'true');
           router.push({
             pathname: '/',
             query: { scanner_error: error }
