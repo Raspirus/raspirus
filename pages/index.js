@@ -3,6 +3,8 @@ import styles from "../styles/refresh.module.css";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import { invoke } from "@tauri-apps/api/tauri";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faGear } from '@fortawesome/free-solid-svg-icons';
 import Swal from "sweetalert2";
 
 export default function Home() {
@@ -93,11 +95,16 @@ export default function Home() {
           <button
             onClick={openSettings}
             type="button"
-            className="absolute top-0 right-0 px-6 py-2 border-2 m-5 border-mainred text-mainred bg-white 
+            className="absolute top-0 right-0 px-6 py-2 border-2 m-5 border-maingreen text-maingreen bg-white 
         font-medium text-xs leading-tight uppercase rounded hover:bg-black hover:bg-opacity-5 
         focus:outline-none focus:ring-0 transition duration-150 ease-in-out"
           >
-            <i className="pr-1 fa fa-gear"></i> SETTINGS
+            <FontAwesomeIcon
+              icon={faGear}
+              size="1x"
+              className="pr-1"
+            /> 
+            SETTINGS
           </button>
         </div>
 
@@ -142,7 +149,7 @@ export default function Home() {
 
                 <button
                   onClick={refreshContent}
-                  className="inline-block p-3 bg-mainred rounded shadow-md hover:bg-mainred-dark hover:shadow-lg focus:bg-mainred-dark focus:shadow-lg focus:outline-none focus:ring-0 active:mainred-dark active:shadow-lg transition duration-150 ease-in-out"
+                  className="inline-block p-3 bg-maingreen rounded shadow-md hover:bg-maingreen-dark hover:shadow-lg focus:bg-maingreen-dark focus:shadow-lg focus:outline-none focus:ring-0 active:maingreen-dark active:shadow-lg transition duration-150 ease-in-out"
                 >
                   <img
                     id="refresh-icon"
@@ -155,7 +162,7 @@ export default function Home() {
                 <button
                   onClick={openInfo}
                   type="button"
-                  className="mr-2 inline-block px-7 py-3 border-2 border-mainred text-mainred bg-white font-medium text-sm leading-tight uppercase rounded hover:bg-black hover:bg-opacity-5 focus:outline-none focus:ring-0 transition duration-150 ease-in-out"
+                  className="mr-2 inline-block px-7 py-3 border-2 border-maingreen text-maingreen bg-white font-medium text-sm leading-tight uppercase rounded hover:bg-black hover:bg-opacity-5 focus:outline-none focus:ring-0 transition duration-150 ease-in-out"
                 >
                   INFO
                 </button>

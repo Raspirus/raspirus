@@ -1,7 +1,8 @@
 import Head from "next/head"
 import { useRouter } from "next/router";
 import InfoComp from "../components/info-comp";
-import { faR, faBook, faUser, faInfoCircle, faScaleBalanced } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faR, faBook, faUser, faInfoCircle, faScaleBalanced, faHome } from '@fortawesome/free-solid-svg-icons';
 
 export default function Info() {
     const router = useRouter();
@@ -17,7 +18,11 @@ export default function Info() {
             </Head>
             <div className="align-middle">
                 <button onClick={backHome} type="button" className="inline-block align-middle px-6 py-2.5 m-2 bg-mainred text-white font-medium text-xs leading-tight uppercase rounded shadow-md hover:bg-mainred-dark hover:shadow-lg focus:bg-mainred-dark focus:shadow-lg focus:outline-none focus:ring-0 active:bg-mainred-dark active:shadow-lg transition duration-150 ease-in-out">
-                    <i className="pr-1 fa fa-home"></i>
+                    <FontAwesomeIcon
+                        icon={faHome}
+                        size="1x"
+                        className="pr-1"
+                    />
                     Home
                 </button>
                 <h1 className="inline-block align-middle p-2 font-medium leading-tight text-5xl mt-0 mb-2 text-mainred">Information</h1>
