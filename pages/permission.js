@@ -52,10 +52,10 @@ export default function Permission() {
             If you do not consent to this, do not insert the USB drive or run the program.
             The results of the scan are for informational purposes only and should be carefully reviewed by the user.
             The program does not make any guarantees regarding the accuracy or completeness of the scan results.
-            It is the user's responsibility to ensure that they are aware of any potential risks associated with using a USB drive,
+            It is the user&apos;s responsibility to ensure that they are aware of any potential risks associated with using a USB drive,
             including the risk of malware infection. Users should only use USB drives from trusted sources and
             exercise caution when inserting unknown drives into their computer.
-            The Raspirus program is provided on an "as-is" basis and cannot be held liable for any damages,
+            The Raspirus program is provided on an &quot;as-is&quot; basis and cannot be held liable for any damages,
             including but not limited to, data loss, system crashes, or any other damages resulting from the use of the program.
             By using the Raspirus program, you agree to these terms and conditions.
             If you do not agree to these terms and conditions, do not use the program.
