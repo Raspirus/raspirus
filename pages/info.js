@@ -3,6 +3,7 @@ import { useRouter } from "next/router";
 import InfoComp from "../components/info-comp";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faR, faBook, faUser, faInfoCircle, faScaleBalanced, faHome } from '@fortawesome/free-solid-svg-icons';
+import Image from "next/image";
 
 export default function Info() {
     const router = useRouter();
@@ -27,6 +28,15 @@ export default function Info() {
                 </button>
                 <h1 className="inline-block align-middle p-2 font-medium leading-tight text-5xl mt-0 mb-2 text-mainred">Information</h1>
             </div>
+
+            <Image 
+                src="images/banner.png" 
+                alt="Banner image"
+                className="max-w-[90%] mx-auto"
+                width={1856}
+                height={1024}
+                />
+
             <InfoComp
                 title="App Name"
                 value="Raspirus"
