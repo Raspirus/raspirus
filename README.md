@@ -1,6 +1,6 @@
 [![Rust Build & Test](https://github.com/Benji377/Raspirus/actions/workflows/rust.yml/badge.svg)](https://github.com/Benji377/Raspirus/actions/workflows/rust.yml)
 # :rocket: Raspirus
-![DALL·E 2022-12-22 17 39 15 - an angry raspberry killing bad green viruses](https://user-images.githubusercontent.com/50681275/209184400-ede538b0-ac56-41d2-aaaf-dda0fe93bc5d.png)
+![banner_logo](https://user-images.githubusercontent.com/50681275/223684389-ed0f104f-c183-4223-9723-c268e7cc5268.png)
 
 ## Introduction
 Sometimes you have a computer that is not connected to the internet and has no antivirus on it. The computer gets used by a lot of people that upload and download files using their personal USB stick. This bothers you, and it bothered me too. That's where Raspirus comes into play, its an application amde to be used on the Raspberry Pi, but it works on Windows and other Linux systems too. Raspirus will scan all files on your USB key and tell you if it finds anything suspicious. Its not a full-fletched antivirus, as that would consume too much RAM for a normal Raspberry Pi 3 for example. The app simply builds the hash of each file and checks if it finds that hash in a signatures database.
