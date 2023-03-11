@@ -5,6 +5,7 @@ import { useEffect, useContext } from 'react';
 import { invoke } from "@tauri-apps/api/tauri";
 import { SettingsContext } from '../state/context';
 
+
 export default function Loading() {
   const { settings } = useContext(SettingsContext);
   const activateLogging = settings["ActivateLogging"] != undefined ? settings["ActivateLogging"] : false;
@@ -19,7 +20,7 @@ export default function Loading() {
 
   const scanning = () => {
     if (activateLogging) {
-      process.env.RUST_LOG = "info"; // Optionally Debug
+      process.env.RUST_LOG = "info";
     } else {
       process.env.RUST_LOG = "warn";
     }
