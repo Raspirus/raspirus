@@ -7,6 +7,7 @@ import Image from "next/image";
 
 export default function Info() {
     const router = useRouter();
+    const appVersion = require('../package.json').version;
 
     const backHome = () => {
         router.push('/');
@@ -32,7 +33,7 @@ export default function Info() {
             <Image 
                 src="images/banner.png" 
                 alt="Banner image"
-                className="max-w-[90%] mx-auto"
+                className="max-w-[90%] mx-auto rounded-xl shadow-md"
                 width={1856}
                 height={1024}
                 />
@@ -54,7 +55,7 @@ export default function Info() {
             />
             <InfoComp
                 title="Version"
-                value="v1.1"
+                value={appVersion}
                 icon={faInfoCircle}
             />
             <InfoComp
