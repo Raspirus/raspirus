@@ -1,5 +1,5 @@
 use std::{
-    fs::File,
+    fs::{File, self},
     io::{BufReader, Error, ErrorKind, Read},
     path::Path,
     process::exit,
@@ -13,6 +13,12 @@ use walkdir::WalkDir;
 
 use super::{db_ops::DBOps, file_log::FileLog};
 
+#[derive(Clone, serde::Serialize)]
+struct TauriEvent {
+    message: String,
+}
+
+
 /// Struct representing a file scanner that is capable of searching through a specified directory and its subdirectories for malicious files.
 pub struct FileScanner {
     /// A reference to a `DBOps` object that allows the `FileScanner` to access and manipulate the database.
@@ -24,7 +30,11 @@ pub struct FileScanner {
     /// A `FileLog` object that the `FileScanner` can use to log information about the search process.
     pub log: FileLog,
     /// An array containing false positives MD5 Hashes
-    pub false_positive: Vec<String>
+    pub false_positive: Vec<String>,
+    /// Defines the scanning size in bytes
+    folder_size: u64,
+    /// Amount scanned in bytes
+    scanned_size: u64
 }
 
 impl FileScanner {
@@ -66,7 +76,9 @@ impl FileScanner {
                 dirty_files: Vec::new(),
                 scanloc: scanloc.to_owned(),
                 log: FileLog::new(log_str),
-                false_positive: false_pos
+                false_positive: false_pos,
+                folder_size: Self::get_folder_size(Path::new(scanloc)).unwrap_or_default(),
+                scanned_size: 0,
             })
         } else {
             Err(Error::new(ErrorKind::Other, "Invalid Path"))
@@ -88,6 +100,7 @@ impl FileScanner {
     pub fn search_files(&mut self, stop_early:bool) -> Result<Vec<String>, String> {
         let mut analysed: i128 = 0;
         let mut skipped: i128 = 0;
+        let last_percentage: &mut f64 = &mut -1.0;
         let big_tic = time::Instant::now();
         for file in WalkDir::new(&self.scanloc)
             .into_iter()
@@ -112,6 +125,7 @@ impl FileScanner {
                         "".to_owned()
                     }
                 };
+                Self::calculate_progress(self, last_percentage, file.metadata().unwrap().len());
                 if match self.db_conn.hash_exists(hash.as_str()) {
                     Ok(exists) => {
                         self.dirty_files.push(file.path().display().to_string());
@@ -203,5 +217,32 @@ impl FileScanner {
             None => {}
         };
         Some(ret)
+    }
+
+    fn get_folder_size(path: &Path) -> Result<u64, std::io::Error> {
+        let metadata = fs::metadata(path)?;
+        if metadata.is_file() {
+            Ok(metadata.len())
+        } else {
+            let mut size: u64 = 0;
+            for entry in fs::read_dir(path)? {
+                let entry = entry?;
+                let entry_path = entry.path();
+                size += Self::get_folder_size(&entry_path)?;
+            }
+            Ok(size)
+        }
+    }
+
+    fn calculate_progress(&mut self, last_percentage: &mut f64, file_size: u64) {
+        self.scanned_size = self.scanned_size + file_size;
+        let scanned_percentage = (self.scanned_size as f64 / self.folder_size as f64 * 100.0).round();
+        if scanned_percentage != *last_percentage {
+            debug!("Scanned: {}%", scanned_percentage);
+
+            
+
+            *last_percentage = scanned_percentage;
+        }
     }
 }
