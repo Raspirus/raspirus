@@ -12,7 +12,11 @@ export default function Infected() {
     const { settings } = useContext(SettingsContext);
     const obfuscatedMode = settings["ObfuscatedMode"] != undefined ? settings["ObfuscatedMode"] : true;
     let { query: { virus_list }, } = router;
-    virus_list = JSON.parse(virus_list);
+
+    if (typeof virus_list == String) {
+        virus_list = JSON.parse(virus_list);
+    }
+
 
     const backHome = () => {
         router.push('/');
