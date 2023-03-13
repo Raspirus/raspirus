@@ -19,11 +19,9 @@ export default function Home() {
   } = router;
 
   const [errorOccurred, setError] = useLocalStorage("errorOccurred", 'false');
-  console.log("Err: ", errorOccurred);
   if (scanner_error != null && scanner_error != "" && errorOccurred == 'true') {
     console.error("Home error", scanner_error);
     Swal.fire("Scanning errors", scanner_error, "error");
-    console.log("LS = ", localStorage);
     setError('false');
     localStorage.removeItem("errorOccurred");
   }
@@ -31,7 +29,6 @@ export default function Home() {
     if (typeof window !== "undefined") {
       invoke("list_usb_drives", {})
         .then((output) => {
-          console.log(JSON.parse(output));
           setDictionary(JSON.parse(output));
         })
         .catch((error) => {
@@ -46,7 +43,6 @@ export default function Home() {
   }, []);
 
   const openAgreement = () => {
-    console.log("Value selected = ", value);
     if (value.length <= 0 || value == "None") {
       Swal.fire("No Selection", "Please select a driver first!", "warning");
     } else {
@@ -72,7 +68,6 @@ export default function Home() {
     if (typeof window !== "undefined") {
       invoke("list_usb_drives", {})
         .then((output) => {
-          console.log(JSON.parse(output));
           setDictionary(JSON.parse(output));
           setTimeout(() => {
             refreshButton.classList.remove(styles.refreshStart);
