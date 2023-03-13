@@ -5,7 +5,6 @@ import { invoke } from "@tauri-apps/api/tauri";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faFileLines, faUserNinja, faWrench, faHome } from '@fortawesome/free-solid-svg-icons';
 import Swal from 'sweetalert2';
-import { listen } from '@tauri-apps/api/event';
 
 export default function Settings() {
   const router = useRouter();

@@ -40,7 +40,7 @@ fn main() {
 ///
 /// An empty `Result` object if the scanner was successfully started, or an `Err` with an error message if an error occurred.
 #[tauri::command]
-async fn start_scanner(path: String, dbfile: Option<String>, obfuscated: bool, window: tauri::Window) -> Result<String, String> {
+async fn start_scanner(window: tauri::Window, path: String, dbfile: Option<String>, obfuscated: bool) -> Result<String, String> {
     match pretty_env_logger::try_init() {
         Ok(()) => {
             info!("Logger initialized!");

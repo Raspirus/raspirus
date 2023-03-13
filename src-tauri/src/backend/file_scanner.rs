@@ -138,7 +138,6 @@ impl FileScanner {
                             break;
                         }
                         exists
-                        
                     }
                     Err(_) => false,
                 } {
@@ -177,7 +176,7 @@ impl FileScanner {
     /// ```
     pub fn create_hash(&mut self, path: &str) -> Option<String> {
         let mut context = md5::Context::new();
-        let mut buffer = [0; 4096]; // TODO: Test these settings
+        let mut buffer = [0; 4096];
 
         let file = match File::open(path) {
             Ok(file) => file,
@@ -241,12 +240,9 @@ impl FileScanner {
     fn calculate_progress(&mut self, last_percentage: &mut f64, file_size: u64) {
         self.scanned_size = self.scanned_size + file_size;
         let scanned_percentage = (self.scanned_size as f64 / self.folder_size as f64 * 100.0).round();
+        info!("Scanned: {}%", scanned_percentage);
         if scanned_percentage != *last_percentage {
-            debug!("Scanned: {}%", scanned_percentage);
-            match self.tauri_window.emit_all("progress", TauriEvent {message: scanned_percentage.to_string()}) {
-                Ok(result) => {debug!("Event sent: {:?}", result)}
-                Err(error) => {error!("Event error: {}", error)}
-            }
+            self.tauri_window.emit_all("progress", TauriEvent {message: scanned_percentage.to_string()}).unwrap();
             *last_percentage = scanned_percentage;
         }
     }
