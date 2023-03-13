@@ -243,7 +243,10 @@ impl FileScanner {
         let scanned_percentage = (self.scanned_size as f64 / self.folder_size as f64 * 100.0).round();
         if scanned_percentage != *last_percentage {
             debug!("Scanned: {}%", scanned_percentage);
-            self.tauri_window.emit_all("progress", TauriEvent {message: scanned_percentage.to_string()}).unwrap();
+            match self.tauri_window.emit_all("progress", TauriEvent {message: scanned_percentage.to_string()}) {
+                Ok(result) => {debug!("Event sent: {:?}", result)}
+                Err(error) => {error!("Event error: {}", error)}
+            }
             *last_percentage = scanned_percentage;
         }
     }
