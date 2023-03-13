@@ -8,6 +8,7 @@ use std::{
 
 use chrono::{DateTime, Local};
 use log::{debug, error, info, warn};
+use tauri::Manager;
 use terminal_size::terminal_size;
 use walkdir::WalkDir;
 
@@ -34,7 +35,9 @@ pub struct FileScanner {
     /// Defines the scanning size in bytes
     folder_size: u64,
     /// Amount scanned in bytes
-    scanned_size: u64
+    scanned_size: u64,
+    /// Tauri window for events
+    tauri_window: tauri::Window
 }
 
 impl FileScanner {
@@ -53,7 +56,7 @@ impl FileScanner {
     /// # Errors
     ///
     /// This function will return an `Error` with an `ErrorKind` of `Other` if the `scanloc` file path does not exist.
-    pub fn new(scanloc: &str, db_file: &str) -> Result<Self, Error> {
+    pub fn new(scanloc: &str, db_file: &str, t_win: tauri::Window) -> Result<Self, Error> {
         //check path
         if Path::new(&scanloc).exists() {
             let tmpconf = match DBOps::new(db_file) {
@@ -79,6 +82,7 @@ impl FileScanner {
                 false_positive: false_pos,
                 folder_size: Self::get_folder_size(Path::new(scanloc)).unwrap_or_default(),
                 scanned_size: 0,
+                tauri_window: t_win,
             })
         } else {
             Err(Error::new(ErrorKind::Other, "Invalid Path"))
@@ -239,9 +243,7 @@ impl FileScanner {
         let scanned_percentage = (self.scanned_size as f64 / self.folder_size as f64 * 100.0).round();
         if scanned_percentage != *last_percentage {
             debug!("Scanned: {}%", scanned_percentage);
-
-            
-
+            self.tauri_window.emit_all("progress", TauriEvent {message: scanned_percentage.to_string()}).unwrap();
             *last_percentage = scanned_percentage;
         }
     }

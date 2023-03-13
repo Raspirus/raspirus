@@ -40,7 +40,7 @@ fn main() {
 ///
 /// An empty `Result` object if the scanner was successfully started, or an `Err` with an error message if an error occurred.
 #[tauri::command]
-async fn start_scanner(path: String, dbfile: Option<String>, obfuscated: bool) -> Result<String, String> {
+async fn start_scanner(path: String, dbfile: Option<String>, obfuscated: bool, window: tauri::Window) -> Result<String, String> {
     match pretty_env_logger::try_init() {
         Ok(()) => {
             info!("Logger initialized!");
@@ -49,7 +49,6 @@ async fn start_scanner(path: String, dbfile: Option<String>, obfuscated: bool) -
             warn!("Failed initializing logger: {err}");
         }
     }
-
     let mut use_db = "signatures.db".to_owned();
     match dbfile {
         Some(fpath) => {
@@ -65,7 +64,7 @@ async fn start_scanner(path: String, dbfile: Option<String>, obfuscated: bool) -
         }
     };
 
-    let mut fs = match file_scanner::FileScanner::new(&path, &use_db) {
+    let mut fs = match file_scanner::FileScanner::new(&path, &use_db, window) {
         Ok(fs) => fs,
         Err(err) => {
             error!("{}", err);
