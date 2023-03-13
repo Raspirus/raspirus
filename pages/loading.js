@@ -4,6 +4,7 @@ import { useRouter } from "next/router";
 import { useEffect, useContext } from 'react';
 import { invoke } from "@tauri-apps/api/tauri";
 import { SettingsContext } from '../state/context';
+import { listen } from '@tauri-apps/api/event'
 
 
 export default function Loading() {
@@ -13,6 +14,12 @@ export default function Loading() {
   const router = useRouter();
   let { query: { scan_path }, } = router;
   let db_location = "";
+
+  const listening = async () => await listen('progress', (event) => {
+    console.log("Event: ", event.payload)
+    // event.event is the event name (useful if you want to use a single callback fn for multiple event types)
+    // event.payload is the payload object
+  })
 
   useEffect(() => {
     setTimeout(scanning, 0);
@@ -26,6 +33,7 @@ export default function Loading() {
     }
     console.log("ENV is set on: ", process.env.RUST_LOG)
     if (typeof window !== "undefined") {
+      listening();
       invoke("start_scanner", {
         path: scan_path,
         dbfile: db_location,
