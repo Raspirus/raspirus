@@ -8,11 +8,22 @@ import { faGear } from '@fortawesome/free-solid-svg-icons';
 import Swal from "sweetalert2";
 import Image from "next/image";
 import { useLocalStorage } from "../services/useLocalStorage";
+import DirectoryPickerButton from "../components/dir-picker";
+import Dropdown from "../components/dropdown-comp";
+import DirectoryInput from "../components/dir-input";
 
 export default function Home() {
   const router = useRouter();
   const [value, setValue] = useState("None");
   const [dictionary, setDictionary] = useState([]);
+  const [isRaspberryPi, setIsRaspberryPi] = useState(false);
+  const [selectedDirectory, setSelectedDirectory] = useState(false);
+
+  const handleSelectDirectory = (directory) => {
+    console.log("Incoming dir: ", directory);
+    setValue(directory);
+    setSelectedDirectory(true)
+  }
 
   let {
     query: { scanner_error },
@@ -25,8 +36,12 @@ export default function Home() {
     setError('false');
     localStorage.removeItem("errorOccurred");
   }
+
   useEffect(() => {
     if (typeof window !== "undefined") {
+      const userAgent = window.navigator.userAgent;
+      setIsRaspberryPi(userAgent.includes('arm') && userAgent.includes('Linux'));
+
       invoke("list_usb_drives", {})
         .then((output) => {
           setDictionary(JSON.parse(output));
@@ -116,40 +131,15 @@ export default function Home() {
               </h1>
 
               <div className="flex justify-center">
-                {Array.isArray(dictionary) && dictionary.length > 0 ? (
-                  <select
-                    placeholder="Select drive"
-                    value={value}
-                    onChange={(e) => {
-                      console.log("Changed drive: " + e.target.value);
-                      setValue(e.target.value);
-                    }}
-                    className="
-                        px-3 py-1.5 text-base font-normal text-gray-700 bg-white inline-block mr-2 w-full
-                        border border-solid border-maingreen-light rounded transition ease-in-out
-                        focus:text-gray-700 focus:bg-white focus:border-maingreen focus:outline-none"
-                  >
-                    <option value="None">Select your driver</option>
-                    {dictionary.map((item, i) => (
-                      <option key={i} value={item.path}>
-                        {item.name}
-                      </option>
-                    ))}
-                  </select>
-                ) : (
-                  <div
-                    className="
-                  m-auto px-3 py-1.5 text-base font-normal text-gray-700 bg-white inline-block w-full
-                  border border-solid border-maingreen-light rounded transition ease-in-out mr-2
-                  focus:text-gray-700 focus:bg-white focus:border-maingreen focus:outline-none"
-                  >
-                    No drives found. Insert a drive and refresh this page
-                  </div>
-                )}
+                {selectedDirectory ?
+                  <DirectoryInput value={value} />
+                  : <Dropdown dictionary={dictionary} value={value} setValue={setValue} />
+                }
+                {!isRaspberryPi && <DirectoryPickerButton onSelectDirectory={handleSelectDirectory} />}
 
                 <button
                   onClick={refreshContent}
-                  className="inline-block p-3 bg-maingreen rounded shadow-md hover:bg-maingreen-dark hover:shadow-lg focus:bg-maingreen-dark focus:shadow-lg focus:outline-none focus:ring-0 active:maingreen-dark active:shadow-lg transition duration-150 ease-in-out"
+                  className="inline-block p-3 ml-1 bg-maingreen rounded shadow-md hover:bg-maingreen-dark hover:shadow-lg focus:bg-maingreen-dark focus:shadow-lg focus:outline-none focus:ring-0 active:maingreen-dark active:shadow-lg transition duration-150 ease-in-out"
                 >
                   <Image
                     id="refresh-icon"

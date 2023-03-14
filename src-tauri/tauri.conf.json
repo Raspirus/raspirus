@@ -11,7 +11,10 @@
   },
   "tauri": {
     "allowlist": {
-      "all": false
+      "all": false,
+      "dialog": {
+        "open": true
+      }
     },
     "bundle": {
       "active": true,
@@ -29,7 +32,7 @@
         "icons/icon.ico"
       ],
       "identifier": "com.raspirus.dev",
-      "longDescription": "Hash based Antivirus to scan USB drives",
+      "longDescription": "Hash based Virusscanner to scan USB drives",
       "macOS": {
         "entitlements": null,
         "exceptionDomain": "",
@@ -38,7 +41,7 @@
         "signingIdentity": null
       },
       "resources": [],
-      "shortDescription": "Small Antivirus",
+      "shortDescription": "Small Virusscanner",
       "targets": "all",
       "windows": {
         "certificateThumbprint": null,
