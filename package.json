@@ -26,7 +26,7 @@
     "react-circular-progressbar": "^2.1.0",
     "react-dom": "18.2.0",
     "rxjs": "^7.3.0",
-    "sweetalert2": "^11.7.3"
+    "sweetalert2": "^11.4.8"
   },
   "devDependencies": {
     "@tauri-apps/cli": "^1.2.3",
