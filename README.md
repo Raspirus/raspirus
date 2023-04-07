@@ -3,13 +3,13 @@
 ![banner_logo](https://user-images.githubusercontent.com/50681275/223684389-ed0f104f-c183-4223-9723-c268e7cc5268.png)
 
 ## Introduction
-Sometimes you have a computer that is not connected to the internet and has no antivirus on it. The computer gets used by a lot of people that upload and download files using their personal USB stick. This bothers you, and it bothered me too. That's where Raspirus comes into play, its an application amde to be used on the Raspberry Pi, but it works on Windows and other Linux systems too. Raspirus will scan all files on your USB key and tell you if it finds anything suspicious. Its not a full-fletched antivirus, as that would consume too much RAM for a normal Raspberry Pi 3 for example. The app simply builds the hash of each file and checks if it finds that hash in a signatures database.
+Sometimes you work on a computer that is not connected to the internet. It even has no antivirus installed and you guess you are safe. But it could be used by a lot of people that upload and download files using their personal USB sticks. This bothers you, and it bothered me too. That's where Raspirus enters the game, an application to be used on the Raspberry Pi, but also for Windows and other Linux systems. Raspirus will scan all files on your USB key and warn you in case of possible threats. It's far from being a fully-fledged antivirus, as that would consume way too much RAM on a normal Raspberry Pi 3. It just computes the hash of each file and checks for a match in a signature database.
 
 ## Installation
-Please follow [this guide](https://github.com/Raspirus/docs) to build the app on your own machine. Or if you are on Windows, Ubuntu or MacOS, you can try to use the pre-built installers in the [Releases page](https://github.com/Raspirus/Raspirus/releases/latest). If you encounter nay difficulties while following the instructions, please open an issue and we will be happy to help you out.
+Please follow [this guide](https://github.com/Raspirus/docs) to build the app on your own machine. Or if you run Windows, Ubuntu or MacOS, you can try to use the pre-built installers on the [Releases page](https://github.com/Raspirus/Raspirus/releases/latest). If you encounter any difficulties following the instructions, please open an issue and we will be happy to get back to you.
 
 ## Questions
-For any questions, check out the [FAQ docs](https://github.com/Raspirus/docs) and see if you can find an answer to your problem. If not, please open an Issue on this repository.
+For any questions, please first check out the [FAQ docs](https://github.com/Raspirus/docs) and see if you can find an answer to your problem. If not, please open an issue on this repository.
 
 ## Frameworks and Tools used:
 - NPM: https://www.npmjs.com
