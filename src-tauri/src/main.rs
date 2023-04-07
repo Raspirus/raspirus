@@ -79,12 +79,12 @@ async fn start_scanner(window: tauri::Window, path: String, dbfile: Option<Strin
             return Err(e);
         }
     };
-    Ok(serde_json::to_string(&dirty_files).unwrap())
+    Ok(serde_json::to_string(&dirty_files).unwrap_or_default())
 
 }
 
 #[tauri::command]
-async fn update_database(db_file: Option<String>) {
+async fn update_database(db_file: Option<String>) -> Result<String, String> {
     let mut use_db = "signatures.db".to_owned();
     match db_file {
         Some(fpath) => {
@@ -109,14 +109,30 @@ async fn update_database(db_file: Option<String>) {
     };
 
     let big_tic = time::Instant::now();
-    tokio::task::spawn_blocking(move || {
-        db_connection.update_db();
-    }).await.unwrap();
-    let big_toc = time::Instant::now();
-    info!(
-        "Updated DB in {} seconds",
-        big_toc.duration_since(big_tic).as_secs_f64()
-    );
+    match tokio::task::spawn_blocking(move || {
+        let hash_count;
+        match db_connection.update_db() {
+            Ok(res) => {hash_count = res;}
+            Err(err) => {
+                error!("{err}");
+                exit(-1);
+            }
+        }
+        hash_count
+    }).await {
+        Ok(res) => {
+            let big_toc = time::Instant::now();
+            info!(
+                "Updated DB in {} seconds",
+                big_toc.duration_since(big_tic).as_secs_f64()
+            );
+            Ok(serde_json::to_string(&res).unwrap_or_default())
+        }
+        Err(err) => {
+            error!("{err}");
+            exit(-1);
+        }
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug)]

@@ -76,7 +76,7 @@ impl DBOps {
     /// let mut db_ops = DBOps::new("signatures.db").unwrap();
     /// db_ops.update_db();
     /// ```
-    pub fn update_db(&mut self) {
+    pub fn update_db(&mut self) -> Result<u64, rusqlite::Error> {
         info!("Updating database...");
         let web_files = self.get_diff_file();
         if web_files.len() > 0 {
@@ -85,6 +85,7 @@ impl DBOps {
             self.download_files(web_files);
         }
         info!("Total hashes in DB: {}", self.count_hashes().unwrap_or(0));
+        Ok(self.count_hashes().unwrap_or(0))
     }
     
     /// Downloads the specified files and inserts their hashes into the signatures table.
