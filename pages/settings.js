@@ -4,10 +4,14 @@ import { useRouter } from 'next/router';
 import { invoke } from "@tauri-apps/api/tauri";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faFileLines, faUserNinja, faWrench, faHome } from '@fortawesome/free-solid-svg-icons';
+import { useState } from 'react';
 import Swal from 'sweetalert2';
+import moment from "moment";
 
 export default function Settings() {
   const router = useRouter();
+  const [hash_count, setCount] = useState(0);
+  const [updated_date, setDate] = useState("Never");
   let db_location = "";
 
   const backHome = () => {
@@ -30,10 +34,13 @@ export default function Settings() {
       })
         .then((message) => {
           console.log(message);
+          setCount((JSON.parse(message)).toLocaleString('en'));
+          setDate(moment().format("DD/MM/YYYY hh:mm:ss"));
           Swal.fire("Update completed", "Database is up-to-date", "success");
         })
         .catch((error) => {
           console.error(error);
+          setDate("Failed");
           Swal.fire("Update error", "Couldn't start the update", "error");
         });
     } else {
@@ -76,6 +83,7 @@ export default function Settings() {
                     <div className="flex flex-col ml-3">
                         <div className="font-medium leading-none">Update Database</div>
                         <p className="text-sm text-gray-600 leading-none mt-1">Updates the database (requires an internet connection)</p>
+                        <p className="text-sm text-gray-600 leading-none mt-1"><b>Hashes in DB:</b> {hash_count} | <b>Last updated:</b> {updated_date}</p>
                     </div>
                 </div>
                 <button
