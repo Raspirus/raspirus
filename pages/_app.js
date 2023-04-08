@@ -1,8 +1,9 @@
-import '../styles/globals.css';
 import Head from 'next/head';
 import { useState } from 'react';
 import "@fortawesome/fontawesome-svg-core/styles.css";
 import "/node_modules/flag-icons/css/flag-icons.min.css";
+import 'bootstrap/dist/css/bootstrap.min.css';
+import '../styles/globals.css';
 import { config } from "@fortawesome/fontawesome-svg-core";
 import { Suspense } from 'react';
 import { SettingsContext } from '../state/context';
