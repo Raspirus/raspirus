@@ -11,6 +11,7 @@ import { useLocalStorage } from "../services/useLocalStorage";
 import DirectoryPickerButton from "../components/dir-picker";
 import Dropdown from "../components/dropdown-comp";
 import DirectoryInput from "../components/dir-input";
+import SwitchLanguage from "../components/lang-picker";
 
 export default function Home() {
   const router = useRouter();
@@ -107,6 +108,7 @@ export default function Home() {
       </Head>
       <main className="overflow-y-hidden">
         <div className="flex justify-end">
+        <SwitchLanguage />
           <button
             onClick={openSettings}
             type="button"
