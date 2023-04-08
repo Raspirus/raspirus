@@ -19,7 +19,7 @@ export default function DirectoryPickerButton({ onSelectDirectory }) {
   return (
     <button
       onClick={handleButtonClick}
-      className="inline-block p-3 bg-orange-400 rounded shadow-md hover:bg-orange-500 hover:shadow-lg focus:bg-orange-500 focus:shadow-lg focus:outline-none focus:ring-0 active:orange-500 active:shadow-lg transition duration-150 ease-in-out"
+      className="ml-1 inline-block p-3 bg-orange-400 rounded shadow-md hover:bg-orange-500 hover:shadow-lg focus:bg-orange-500 focus:shadow-lg focus:outline-none focus:ring-0 active:orange-500 active:shadow-lg transition duration-150 ease-in-out"
     >
       <Image
         id="folder-icon"
