@@ -106,13 +106,13 @@ export default function Home() {
       <Head>
         <title>Raspirus</title>
       </Head>
-      <main className="overflow-y-hidden">
-        <div className="flex justify-end">
+      <main className="h-screen">
+        <div className="flex justify-start">
         <SwitchLanguage />
           <button
             onClick={openSettings}
             type="button"
-            className="absolute top-0 right-0 px-6 py-2 border-2 m-5 border-maingreen text-maingreen bg-white 
+            className="absolute top-0 right-0 px-6 py-2 border-2 m-2 border-maingreen text-maingreen bg-white 
         font-medium text-xs leading-tight uppercase rounded hover:bg-black hover:bg-opacity-5 
         focus:outline-none focus:ring-0 transition duration-150 ease-in-out"
           >
@@ -125,7 +125,7 @@ export default function Home() {
           </button>
         </div>
 
-        <div className="flex h-screen justify-center p-12 text-center">
+        <div className="flex h-full justify-center p-12 text-center">
           <div className="flex justify-center items-center h-full">
             <div className="w-full">
               <h1 className="font-bold leading-tight text-8xl mt-0 mb-2 text-mainred">
@@ -153,7 +153,7 @@ export default function Home() {
                   />
                 </button>
               </div>
-              <div className="mt-5">
+              <div className="mt-2">
                 <button
                   onClick={openInfo}
                   type="button"

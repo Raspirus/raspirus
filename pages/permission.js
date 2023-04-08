@@ -41,7 +41,7 @@ export default function Permission() {
         </h1>
       </div>
       <div className="flex items-center justify-center flex-col">
-        <div className="m-5 overflow-y-scroll h-64">
+        <div className="m-2 overflow-y-scroll h-64">
           <p className="p-2 font-small leading-tight bg-gray-300 shadow-inner">
             This program is designed to scan for malicious software on USB drives that are inserted into your computer.
             By using this program, you acknowledge that you are responsible for the content of the USB drive and
@@ -66,7 +66,7 @@ export default function Permission() {
           <button
             onClick={backHome}
             type="button"
-            className="inline-block px-6 py-2.5 m-5 bg-mainred text-white font-medium text-xs leading-tight uppercase rounded shadow-md hover:bg-mainred-dark hover:shadow-lg focus:bg-mainred-dark focus:shadow-lg focus:outline-none focus:ring-0 active:bg-mainred-dark active:shadow-lg transition duration-150 ease-in-out"
+            className="inline-block px-6 py-2.5 bg-mainred text-white font-medium text-xs leading-tight uppercase rounded shadow-md hover:bg-mainred-dark hover:shadow-lg focus:bg-mainred-dark focus:shadow-lg focus:outline-none focus:ring-0 active:bg-mainred-dark active:shadow-lg transition duration-150 ease-in-out"
           >
             <FontAwesomeIcon
               icon={faXmark}
@@ -78,7 +78,7 @@ export default function Permission() {
           <button
             onClick={startScanner}
             type="button"
-            className="inline-block px-6 py-2.5 m-5 bg-maingreen text-white font-medium text-xs leading-tight uppercase rounded shadow-md hover:bg-maingreen-dark hover:shadow-lg focus:bg-maingreen-dark focus:shadow-lg focus:outline-none focus:ring-0 active:bg-maingreen-dark active:shadow-lg transition duration-150 ease-in-out"
+            className="inline-block px-6 py-2.5 m-3 bg-maingreen text-white font-medium text-xs leading-tight uppercase rounded shadow-md hover:bg-maingreen-dark hover:shadow-lg focus:bg-maingreen-dark focus:shadow-lg focus:outline-none focus:ring-0 active:bg-maingreen-dark active:shadow-lg transition duration-150 ease-in-out"
           >
             <FontAwesomeIcon
               icon={faCheck}

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Dropdown, DropdownButton } from 'react-bootstrap';
+import Dropdown from 'react-bootstrap/Dropdown';
 import i18nConfig from '../i18n.json';
 import useTranslation from 'next-translate/useTranslation';
 import styles from '../styles/langpicker.module.css';
@@ -11,9 +11,7 @@ function FlagIcon({ countryCode = "" }) {
   }
 
   return (
-    <span
-      className={`fi fis ${styles.fiCircle} inline-block mr-2 fi-${countryCode}`}
-    />
+    <span className={`fi fis ${styles.fiCircle} inline-block mr-2 fi-${countryCode}`} />
   )
 }
 
@@ -22,20 +20,27 @@ export default function LanguageSelector() {
   const { t, lang } = useTranslation('common');
 
   return (
-    <div>
-      <DropdownButton id="dropdown-basic-button" title="Switch Lang">
-        {locales.map(lng => {
-          if (lng === lang) return null;
-          return (
-            <Dropdown.Item key={lng}>
-              <Link href="/" locale={lng} key={lng}>
-                <FlagIcon countryCode={lng} />
-                {t(`common:language-name-${lng}`)}
-              </Link>
-            </Dropdown.Item>
-          );
-        })}
-      </DropdownButton>
+    <div className='absolute top-0 left-0 m-2'>
+      <Dropdown id="dropdown-basic-button" className='uppercase bg-white w-fit'>
+
+        <Dropdown.Toggle id="dropdown-autoclose-true" className='text-black w-fit min-w-0'>
+          <FlagIcon countryCode={lang} /> {lang.toUpperCase()}
+        </Dropdown.Toggle>
+
+        <Dropdown.Menu>
+          {locales.map(lng => {
+            return (
+              <Dropdown.Item key={lng} as={'div'} className='h-10 w-fit'>
+                <Link href="/" locale={lng} key={lng} className='flex justify-center items-center'>
+                  <FlagIcon countryCode={lng} />
+                  <span>{lng}</span>
+                </Link>
+                <br />
+              </Dropdown.Item>
+            );
+          })}
+        </Dropdown.Menu>
+      </Dropdown>
     </div>
   );
 }
