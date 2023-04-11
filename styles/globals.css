@@ -53,3 +53,7 @@ html, body {
     opacity: .5;
     cursor: pointer;
 }
+
+.dropdown-menu {
+    min-width: 0 !important;
+}

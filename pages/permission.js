@@ -36,10 +36,10 @@ export default function Permission() {
               size="1x"
               className="pr-1"
             /> 
-          Back
+          {t('back_btn')}
         </button>
         <h1 className="inline-block align-middle p-2 font-medium leading-tight text-5xl mt-0 mb-2 text-mainred">
-          User Agreement
+        {t('permissions_title')}
         </h1>
       </div>
       <div className="flex items-center justify-center flex-col">
