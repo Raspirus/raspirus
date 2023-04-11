@@ -21,7 +21,7 @@ export default function Permission() {
   return (
     <>
       <Head>
-        <title>No Virus found</title>
+        <title>User Agreement</title>
       </Head>
       <div className="align-middle">
         <button
