@@ -4,10 +4,13 @@ import InfoComp from "../components/info-comp";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faR, faBook, faUser, faInfoCircle, faScaleBalanced, faHome } from '@fortawesome/free-solid-svg-icons';
 import Image from "next/image";
+import useTranslation from 'next-translate/useTranslation';
+
 
 export default function Info() {
     const router = useRouter();
     const appVersion = require('../package.json').version;
+    const t = useTranslation('common').t;
 
     const backHome = () => {
         router.push('/');
@@ -16,7 +19,7 @@ export default function Info() {
     return (
         <>
             <Head>
-                <title>Information</title>
+                <title>{t('info_title')}</title>
             </Head>
             <div className="align-middle">
                 <button onClick={backHome} type="button" className="inline-block align-middle px-6 py-2.5 m-2 bg-mainred text-white font-medium text-xs leading-tight uppercase rounded shadow-md hover:bg-mainred-dark hover:shadow-lg focus:bg-mainred-dark focus:shadow-lg focus:outline-none focus:ring-0 active:bg-mainred-dark active:shadow-lg transition duration-150 ease-in-out">
@@ -25,9 +28,9 @@ export default function Info() {
                         size="1x"
                         className="pr-1"
                     />
-                    Home
+                    {t('back_btn')}
                 </button>
-                <h1 className="inline-block align-middle p-2 font-medium leading-tight text-5xl mt-0 mb-2 text-mainred">Information</h1>
+                <h1 className="inline-block align-middle p-2 font-medium leading-tight text-5xl mt-0 mb-2 text-mainred">{t('info_title')}</h1>
             </div>
 
             <Image 
@@ -39,28 +42,28 @@ export default function Info() {
                 />
 
             <InfoComp
-                title="App Name"
-                value="Raspirus"
+                title={t('app_name')}
+                value={t('title')}
                 icon={faR}
             />
             <InfoComp
-                title="Description"
-                value="Simple signatures-based antivirus for single-board computers like Raspbrry Pi"
+                title={t('description')}
+                value={t('description_val')}
                 icon={faBook}
             />
             <InfoComp
-                title="Contributors"
-                value="Demetz Benjamin, Hell Björn Felix"
+                title={t('maintainers')}
+                value={t('maintainers_val')}
                 icon={faUser}
             />
             <InfoComp
-                title="Version"
+                title={t('version')}
                 value={appVersion}
                 icon={faInfoCircle}
             />
             <InfoComp
-                title="License"
-                value="Private"
+                title={t('license')}
+                value={t('license_val')}
                 icon={faScaleBalanced}
             />
         </>

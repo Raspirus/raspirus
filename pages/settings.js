@@ -7,11 +7,13 @@ import { faFileLines, faUserNinja, faWrench, faHome } from '@fortawesome/free-so
 import { useState } from 'react';
 import Swal from 'sweetalert2';
 import moment from "moment";
+import useTranslation from 'next-translate/useTranslation';
 
 export default function Settings() {
   const router = useRouter();
+  const t = useTranslation('common').t;
   const [hash_count, setCount] = useState(0);
-  const [updated_date, setDate] = useState("Never");
+  const [updated_date, setDate] = useState(t('update_db_status_1'));
   let db_location = "";
 
   const backHome = () => {
@@ -21,8 +23,8 @@ export default function Settings() {
   const updating = () => {
     if (typeof window !== "undefined") {
       Swal.fire({
-        title: 'Updating database...',
-        text: 'Please be patient, this can take some time',
+        title: t('update_db_loading'),
+        text: t('update_db_loading_val'),
         iconHtml: '<img src=images/loading-anim.gif>',
         allowOutsideClick: false,
         showConfirmButton: false,
@@ -36,23 +38,23 @@ export default function Settings() {
           console.log(message);
           setCount((JSON.parse(message)).toLocaleString('en'));
           setDate(moment().format("DD/MM/YYYY hh:mm:ss"));
-          Swal.fire("Update completed", "Database is up-to-date", "success");
+          Swal.fire(t('update_db_completed'), t('update_db_completed_val'), "success");
         })
         .catch((error) => {
           console.error(error);
-          setDate("Failed");
-          Swal.fire("Update error", "Couldn't start the update", "error");
+          setDate(t('update_db_status_2'));
+          Swal.fire(t('update_db_failed'), t('update_db_failed_val'), "error");
         });
     } else {
       console.error("Nextjs not in client mode!");
-      Swal.fire("Window error", "Nextjs is not in client mode", "error");
+      Swal.fire(t('client_mode_error'), t('client_mode_error_val'), "error");
     }
   }
 
   return (
     <>
       <Head>
-        <title>Settings</title>
+        <title>{t('settings_title')}</title>
       </Head>
       <div className="align-middle">
         <button
@@ -65,10 +67,10 @@ export default function Settings() {
               size="1x"
               className="pr-1"
             /> 
-          Home
+          {t('back_btn')}
         </button>
         <h1 className="inline-block align-middle p-2 font-medium leading-tight text-5xl mt-0 mb-2 text-mainred">
-          Settings
+        {t('settings_title')}
         </h1>
       </div>
 
@@ -81,28 +83,28 @@ export default function Settings() {
                         className="w-16 h-16 rounded-2xl p-3 border border-maingreen-light text-maingreen-light bg-green-50"
                     />
                     <div className="flex flex-col ml-3">
-                        <div className="font-medium leading-none">Update Database</div>
-                        <p className="text-sm text-gray-600 leading-none mt-1">Updates the database (requires an internet connection)</p>
-                        <p className="text-sm text-gray-600 leading-none mt-1"><b>Hashes in DB:</b> {hash_count} | <b>Last updated:</b> {updated_date}</p>
+                        <div className="font-medium leading-none">{t('update_db')}</div>
+                        <p className="text-sm text-gray-600 leading-none mt-1">{t('update_db_val')}</p>
+                        <p className="text-sm text-gray-600 leading-none mt-1"><b>{t('update_db_1')}:</b> {hash_count} | <b>{t('update_db_2')}:</b> {updated_date}</p>
                     </div>
                 </div>
                 <button
                     onClick={updating}
                     className={`flex-no-shrink px-5 ml-4 py-2 text-sm shadow-sm hover:shadow-lg font-medium tracking-wider border-2 text-white rounded-full bg-blue-500 border-blue-500`}>
-                    UPDATE
+                    {t('update_db_btn')}
                 </button>
             </div>
         </div>
 
       <SettingComp
-        title="Activate Logging"
-        short="Activates the writing of logs"
+        title= {t('activate_logs')}
+        short={t('activate_logs_val')}
         icon={faFileLines}
         isOn={false}
       />
       <SettingComp
-        title="Obfuscated Mode"
-        short="When ON, it will not display the Path of possible found viruses"
+        title={t('obfuscated_mode')}
+        short={t('obfuscated_mode_val')}
         icon={faUserNinja}
         isOn={true}
       />
