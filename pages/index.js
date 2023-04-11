@@ -12,6 +12,7 @@ import DirectoryPickerButton from "../components/dir-picker";
 import Dropdown from "../components/dropdown-comp";
 import DirectoryInput from "../components/dir-input";
 import SwitchLanguage from "../components/lang-picker";
+import useTranslation from 'next-translate/useTranslation';
 
 export default function Home() {
   const router = useRouter();
@@ -19,6 +20,7 @@ export default function Home() {
   const [dictionary, setDictionary] = useState([]);
   const [isRaspberryPi, setIsRaspberryPi] = useState(false);
   const [selectedDirectory, setSelectedDirectory] = useState(false);
+  const t = useTranslation('common').t;
 
   const handleSelectDirectory = (directory) => {
     console.log("Incoming dir: ", directory);
@@ -33,7 +35,7 @@ export default function Home() {
   const [errorOccurred, setError] = useLocalStorage("errorOccurred", 'false');
   if (scanner_error != null && scanner_error != "" && errorOccurred == 'true') {
     console.error("Home error", scanner_error);
-    Swal.fire("Scanning errors", scanner_error, "error");
+    Swal.fire(t('scanning_error'), scanner_error, "error");
     setError('false');
     localStorage.removeItem("errorOccurred");
   }
@@ -50,17 +52,17 @@ export default function Home() {
         .catch((error) => {
           console.error(error);
           Swal.fire(
-            "USB list error",
-            "Couldn't search for USBs on this device",
+            t('usb_list_error'),
+            t('usb_list_error_msg'),
             "error"
           );
         });
     }
-  }, []);
+  }, [t]);
 
   const openAgreement = () => {
     if (value.length <= 0 || value == "None") {
-      Swal.fire("No Selection", "Please select a driver first!", "warning");
+      Swal.fire(t('selection_warn'), t('selection_warn_msg'), "warning");
     } else {
       router.push({
         pathname: "/permission",
@@ -93,8 +95,8 @@ export default function Home() {
           console.error(error);
           refreshButton.classList.remove(styles.refreshStart);
           Swal.fire(
-            "USB list error",
-            "Couldn't search for USBs on this device",
+            t('usb_list_error'),
+            t('usb_list_error_msg'),
             "error"
           );
         });
@@ -104,7 +106,7 @@ export default function Home() {
   return (
     <>
       <Head>
-        <title>Raspirus</title>
+        <title>{t('title')}</title>
       </Head>
       <main className="h-screen">
         <div className="flex justify-start">
@@ -121,15 +123,15 @@ export default function Home() {
               size="1x"
               className="pr-1"
             />
-            SETTINGS
+            {t('settings')}
           </button>
         </div>
 
         <div className="flex h-full justify-center p-12 text-center">
           <div className="flex justify-center items-center h-full">
             <div className="w-full">
-              <h1 className="font-bold leading-tight text-8xl mt-0 mb-2 text-mainred">
-                RASPIRUS
+              <h1 className="font-bold leading-tight text-8xl mt-0 mb-2 text-mainred uppercase">
+                {t('title')}
               </h1>
 
               <div className="flex justify-center">
@@ -159,14 +161,14 @@ export default function Home() {
                   type="button"
                   className="mr-2 inline-block px-7 py-3 border-2 border-maingreen text-maingreen bg-white font-medium text-sm leading-tight uppercase rounded hover:bg-black hover:bg-opacity-5 focus:outline-none focus:ring-0 transition duration-150 ease-in-out"
                 >
-                  INFO
+                  {t('info')}
                 </button>
                 <button
                   onClick={openAgreement}
                   type="button"
                   className="ml-2 inline-block px-7 py-3 bg-mainred text-white font-medium text-sm leading-snug uppercase rounded shadow-md hover:bg-mainred-dark hover:shadow-lg focus:bg-mainred-dark focus:shadow-lg focus:outline-none focus:ring-0 active:mainred-dark active:shadow-lg transition duration-150 ease-in-out"
                 >
-                  START
+                  {t('start')}
                 </button>
               </div>
             </div>
