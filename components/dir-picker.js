@@ -24,7 +24,7 @@ export default function DirectoryPickerButton({ onSelectDirectory }) {
       <Image
         id="folder-icon"
         className="h-full w-4"
-        src="images/folder.svg"
+        src="/images/folder.svg"
         alt="Folder"
         width={500}
         height={500}

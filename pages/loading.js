@@ -6,6 +6,7 @@ import { SettingsContext } from '../state/context';
 import { listen } from '@tauri-apps/api/event';
 import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
+import useTranslation from 'next-translate/useTranslation';
 
 
 export default function Loading() {
@@ -16,6 +17,7 @@ export default function Loading() {
   const router = useRouter();
   let { query: { scan_path }, } = router;
   let db_location = "";
+  const t = useTranslation('common').t;
 
   useEffect(() => {
     const handleProgress = (event) => {
@@ -75,10 +77,10 @@ export default function Loading() {
   return (
     <>
       <Head>
-        <title>Loading...</title>
+        <title>{t('loading_title')}</title>
       </Head>
       <main className="flex flex-col items-center justify-center h-screen">
-        <h1 className="text-2xl font-bold text-center">Loading... Please wait</h1>
+        <h1 className="text-2xl font-bold text-center">{t('loading_text')}</h1>
         <div className="flex flex-row m-10">
         <CircularProgressbar
           value={progress}

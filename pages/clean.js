@@ -3,9 +3,11 @@ import { useRouter } from 'next/router';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faHome } from "@fortawesome/free-solid-svg-icons";
 import Image from "next/image";
+import useTranslation from 'next-translate/useTranslation';
 
 export default function Clean() {
     const router = useRouter();
+    const t = useTranslation('common').t;
 
     const backHome = () => {
         router.push('/');
@@ -14,10 +16,10 @@ export default function Clean() {
     return (
         <>
             <Head>
-                <title>No Virus found</title>
+                <title>{t('clean_title')}</title>
             </Head>
             <div className="flex items-center justify-center h-screen flex-col">
-                <h1 className="text-center mb-10 pt-4 font-medium leading-tight text-5xl mt-0 text-maingreen">No virus found</h1>
+                <h1 className="text-center mb-10 pt-4 font-medium leading-tight text-5xl mt-0 text-maingreen">{t('clean_title')}</h1>
                 <Image 
                     src="/images/success_image.png" 
                     alt="Success" 
@@ -31,7 +33,7 @@ export default function Clean() {
                         size="1x"
                         className="pr-1"
                     />
-                    Home
+                    {t('back_btn')}
                 </button>
             </div>
         </>
