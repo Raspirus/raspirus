@@ -2,9 +2,11 @@ import Head from "next/head";
 import { useRouter } from "next/router";
 import { faCheck, faXmark, faHome } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import useTranslation from 'next-translate/useTranslation';
 
 export default function Permission() {
   const router = useRouter();
+  const t = useTranslation('common').t;
 
   function startScanner() {
     let { query: { scan_path }, } = router;
@@ -21,7 +23,7 @@ export default function Permission() {
   return (
     <>
       <Head>
-        <title>User Agreement</title>
+        <title>{t('permissions_title')}</title>
       </Head>
       <div className="align-middle">
         <button
@@ -43,22 +45,7 @@ export default function Permission() {
       <div className="flex items-center justify-center flex-col">
         <div className="m-2 overflow-y-scroll h-64">
           <p className="p-2 font-small leading-tight bg-gray-300 shadow-inner">
-            This program is designed to scan for malicious software on USB drives that are inserted into your computer.
-            By using this program, you acknowledge that you are responsible for the content of the USB drive and
-            any potential damage it may cause to your computer system. You also acknowledge that the program is
-            not guaranteed to detect all malware and cannot be held responsible for any malware that may go undetected.
-            By inserting a USB drive into your computer and running the program,
-            you are giving your consent to have the drive scanned for malware.
-            If you do not consent to this, do not insert the USB drive or run the program.
-            The results of the scan are for informational purposes only and should be carefully reviewed by the user.
-            The program does not make any guarantees regarding the accuracy or completeness of the scan results.
-            It is the user&apos;s responsibility to ensure that they are aware of any potential risks associated with using a USB drive,
-            including the risk of malware infection. Users should only use USB drives from trusted sources and
-            exercise caution when inserting unknown drives into their computer.
-            The Raspirus program is provided on an &quot;as-is&quot; basis and cannot be held liable for any damages,
-            including but not limited to, data loss, system crashes, or any other damages resulting from the use of the program.
-            By using the Raspirus program, you agree to these terms and conditions.
-            If you do not agree to these terms and conditions, do not use the program.
+          {t('permissions_text')}
           </p>
         </div>
 
@@ -73,7 +60,7 @@ export default function Permission() {
               style={{ fontSize: "1.3em" }}
               className="pr-1"
             />
-            Decline
+            {t('perms_decline')}
           </button>
           <button
             onClick={startScanner}
@@ -85,7 +72,7 @@ export default function Permission() {
               style={{ fontSize: "1.3em" }}
               className="pr-1"
             />
-            Accept
+            {t('perms_accept')}
           </button>
         </div>
       </div>
