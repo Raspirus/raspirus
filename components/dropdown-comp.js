@@ -1,10 +1,13 @@
+import useTranslation from 'next-translate/useTranslation';
+
 export default function Dropdown({dictionary, value, setValue}) {
+    const t = useTranslation('common').t;
 
     return (
         <>
             {Array.isArray(dictionary) && dictionary.length > 0 ? (
                 <select
-                    placeholder="Select drive"
+                    placeholder={t('selection_placeholder')}
                     value={value}
                     onChange={(e) => {
                         console.log("Changed drive: " + e.target.value);
@@ -15,7 +18,7 @@ export default function Dropdown({dictionary, value, setValue}) {
                         border border-solid border-maingreen-light rounded transition ease-in-out
                         focus:text-gray-700 focus:bg-white focus:border-maingreen focus:outline-none"
                 >
-                    <option value="None">Select your driver</option>
+                    <option value="None">{t('selection_placeholder')}</option>
                     {dictionary.map((item, i) => (
                         <option key={i} value={item.path}>
                             {item.name}
@@ -29,7 +32,7 @@ export default function Dropdown({dictionary, value, setValue}) {
                   border border-solid border-maingreen-light rounded transition ease-in-out mr-2
                   focus:text-gray-700 focus:bg-white focus:border-maingreen focus:outline-none"
                 >
-                    No drives found. Insert a drive and refresh this page
+                    {t('selection_empty_placeholder')}
                 </div>
             )}
         </>

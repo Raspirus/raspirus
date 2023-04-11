@@ -16,8 +16,8 @@ function FlagIcon({ countryCode = "" }) {
 }
 
 export default function LanguageSelector() {
-  const { locales, defaultLocale } = i18nConfig;
-  const { t, lang } = useTranslation('common');
+  const locales = i18nConfig.locales;
+  const lang = useTranslation('common').lang;
 
   return (
     <div className='absolute top-0 left-0 m-2'>

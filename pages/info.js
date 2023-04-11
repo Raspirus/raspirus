@@ -34,7 +34,7 @@ export default function Info() {
             </div>
 
             <Image 
-                src="images/banner.png" 
+                src="/images/banner.png" 
                 alt="Banner image"
                 className="max-w-[90%] mx-auto rounded-xl shadow-md"
                 width={1856}
