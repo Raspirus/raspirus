@@ -1,7 +1,7 @@
 import { useState, useContext, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { SettingsContext } from '../state/context';
-import useTranslation from 'next-translate/useTranslation';
+import { useTranslation } from 'next-i18next';
 
 export default function SettingComp({ title, short, icon, isOn: initialIsOn }) {
     const titleWithoutSpaces = title.replace(/ /g, "");

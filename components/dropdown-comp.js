@@ -1,4 +1,4 @@
-import useTranslation from 'next-translate/useTranslation';
+import { useTranslation } from 'next-i18next'
 
 export default function Dropdown({dictionary, value, setValue}) {
     const t = useTranslation('common').t;
