@@ -1,0 +1,4 @@
+# This is needed to fix codecoverage workflow errors
+
+[workspace]
+members = ["src-tauri"]
