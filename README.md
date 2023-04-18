@@ -18,6 +18,7 @@ For any questions, please first check out the [FAQ docs](https://github.com/Rasp
 - TAURI: https://tauri.app/v1/guides/getting-started/setup/next-js
 - SweetAlertv2: https://sweetalert2.github.io
 - Localizing: https://github.com/aralroca/next-translate
+- Tests: https://tauri.app/v1/guides/testing/webdriver/introduction
 
 ## More stuff:
 - Tests: https://jonaskruckenberg.github.io/tauri-docs-wip/development/testing.html
