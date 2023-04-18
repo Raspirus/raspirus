@@ -6,10 +6,11 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import '../styles/globals.css';
 import { config } from "@fortawesome/fontawesome-svg-core";
 import { Suspense } from 'react';
+import { appWithTranslation } from 'next-i18next'
 import { SettingsContext } from '../state/context';
 config.autoAddCss = false;
 
-export default function App({ Component, pageProps }) {
+const App = ({ Component, pageProps }) => {
   const [settings, setSettings] = useState({});
 
   return (
@@ -27,3 +28,5 @@ export default function App({ Component, pageProps }) {
     </>
   )
 }
+
+export default appWithTranslation(App)
