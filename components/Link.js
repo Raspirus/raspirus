@@ -10,13 +10,13 @@ const LinkComponent = ({ children, skipLocaleHandling, ...rest }) => {
   if (href.indexOf('http') === 0) skipLocaleHandling = true
   if (locale && !skipLocaleHandling) {
     href = href
-      ? `/${locale}${href}`
+      ? `/${locale}${encodeURI(href)}`
       : router.pathname.replace('[locale]', locale)
   }
 
   return (
     <>
-      <Link href={href}>
+      <Link href={encodeURI(href)}>
         <a {...rest}>{children}</a>
       </Link>
     </>
