@@ -33,7 +33,7 @@ const LanguageSwitchLink = ({ locale, ...rest }) => {
   console.log("pName: ", pName);
 
   return (
-    <Link href={href} onClick={() => languageDetector.cache(locale)} className='flex justify-center items-center'>
+    <Link href={encodeURI(href)} onClick={() => languageDetector.cache(locale)} className='flex justify-center items-center'>
       <FlagIcon countryCode={locale} />
       <span>{locale}</span>
     </Link>
