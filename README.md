@@ -13,10 +13,6 @@ Please follow [this guide](https://github.com/Raspirus/docs) to build the app on
 ## Questions
 For any questions, please first check out the [FAQ docs](https://github.com/Raspirus/docs) and see if you can find an answer to your problem. If not, please open an issue on this repository.
 
-## Frameworks and Tools used:
-- NPM: https://www.npmjs.com
-- NextJS: https://nextjs.org
-- Rust: https://www.rust-lang.org
-- TAURI: https://tauri.app/v1/guides/getting-started/setup/next-js
-- SweetAlertv2: https://sweetalert2.github.io
-- Localizing: https://dev.to/adrai/static-html-export-with-i18n-compatibility-in-nextjs-8cd
+## Future enhancements:
+- Add webpage that explains each type of possible malware to user
+- Ship with OS directly for Raspberry Pi installation
