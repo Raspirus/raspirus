@@ -19,6 +19,7 @@
     "@types/react": "18.2.0",
     "@types/react-dom": "18.2.1",
     "bootstrap": "^5.2.3",
+    "date-fns": "^2.29.3",
     "eslint": "8.39.0",
     "eslint-config-next": "13.3.1",
     "flag-icons": "^6.6.6",
@@ -32,9 +33,9 @@
     "react": "18.2.0",
     "react-bootstrap": "^2.7.2",
     "react-circular-progressbar": "^2.1.0",
-    "react-datetime-picker": "^5.0.3",
     "react-dom": "18.2.0",
     "react-i18next": "^12.2.0",
+    "react-time-picker": "^6.0.4",
     "rxjs": "^7.3.0",
     "sweetalert2": "^11.4.8"
   },
