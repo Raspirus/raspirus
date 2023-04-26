@@ -8,10 +8,10 @@ import { faGear } from '@fortawesome/free-solid-svg-icons';
 import Swal from "sweetalert2";
 import Image from "next/image";
 import { useLocalStorage } from "../../services/useLocalStorage";
-import DirectoryPickerButton from "../../components/dir-picker";
-import Dropdown from "../../components/dropdown-comp";
-import DirectoryInput from "../../components/dir-input";
-import SwitchLanguage from "../../components/lang-picker";
+import DirectoryPickerButton from "../../components/DirectoryPickerButton";
+import Dropdown from "../../components/DriverDropdown";
+import DirectoryInput from "../../components/DirectoryInput";
+import SwitchLanguage from "../../components/LanguagePicker";
 import { useTranslation } from 'next-i18next'
 import { getStaticPaths, makeStaticProps } from '../../lib/getStatic'
 

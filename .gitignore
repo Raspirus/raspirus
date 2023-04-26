@@ -40,3 +40,4 @@ next-env.d.ts
 src-tauri/signatures.db
 target/
 .bash.example
+src-tauri/signatures.db-journal
