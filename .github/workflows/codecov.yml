@@ -36,7 +36,7 @@ jobs:
     - name: rust-grcov
       # You may pin to the exact commit or the version.
       # uses: actions-rs/grcov@bb47b1ed7883a1502fa6875d562727ace2511248
-      uses: actions-rs/grcov@v0.1.5
+      uses: actions-rs/grcov@v0.1.6
     - name: Codecov
       # You may pin to the exact commit or the version.
       # uses: codecov/codecov-action@81cd2dc8148241f03f5839d295e000b8f761e378
