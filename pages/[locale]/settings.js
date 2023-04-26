@@ -1,14 +1,17 @@
 import Head from 'next/head';
-import SettingComp from '../../components/settings-comp';
+import SettingComp from '../../components/SettingsCard';
 import { useRouter } from 'next/router';
 import { invoke } from "@tauri-apps/api/tauri";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faFileLines, faUserNinja, faWrench, faHome } from '@fortawesome/free-solid-svg-icons';
+import { faFileLines, faUserNinja, faWrench, faHome, faClock } from '@fortawesome/free-solid-svg-icons';
 import React, { useState } from 'react';
 import Swal from 'sweetalert2';
 import moment from "moment";
 import { useTranslation } from 'next-i18next';
 import { getStaticPaths, makeStaticProps } from '../../lib/getStatic';
+import DateTimeSelector from '../../components/TimePicker';
+import WeekdaySelector from '../../components/WeekdaySelector';
+import schedule from 'node-schedule';
 
 const getStaticProps = makeStaticProps('common')
 export { getStaticPaths, getStaticProps }
@@ -18,6 +21,9 @@ export default function Settings() {
   const { t } = useTranslation('common');
   const [hash_count, setCount] = useState(0);
   const [updated_date, setDate] = useState(t('update_db_status_1'));
+  const [auto_time, setAutotime] = useState('22:00');
+  const [selectedWeekday, setSelectedWeekday] = useState(-1);
+  const [cronjob, setcronjob] = useState(null);
   let db_location = "";
 
   const backHome = () => {
@@ -29,7 +35,7 @@ export default function Settings() {
       Swal.fire({
         title: t('update_db_loading'),
         text: t('update_db_loading_val'),
-        iconHtml: '<img src=images/loading-anim.gif>',
+        iconHtml: '<img src=../images/loading-anim.gif>',
         allowOutsideClick: false,
         showConfirmButton: false,
         allowEscapeKey: false,
@@ -52,6 +58,24 @@ export default function Settings() {
     } else {
       console.error("Nextjs not in client mode!");
       Swal.fire(t('client_mode_error'), t('client_mode_error_val'), "error");
+    }
+  }
+
+  const updateSchedule = () => {
+    const [hours, minutes] = auto_time.split(':');
+    const weekday = selectedWeekday;
+
+    if (cronjob == null) {
+      const job = schedule.scheduleJob('DataUpdater', {minute: minutes, hour: hours, dayOfWeek: weekday > 0 ? weekday : null}, () => {updating})
+      setcronjob(job);
+    } else {
+      cronjob.cancel;
+      schedule.gracefulShutdown()
+        .then(_ => {
+          const job = schedule.scheduleJob('DataUpdater', {minute: minutes, hour: hours, dayOfWeek: weekday > 0 ? weekday : null}, () => {updating})
+          setcronjob(job);
+        })
+        .catch(err => console.error("Cronjob not canceled: ", err))
     }
   }
 
@@ -78,27 +102,15 @@ export default function Settings() {
         </h1>
       </div>
 
-      <div className="flex flex-col m-6 p-2 bg-white rounded-2xl shadow-md">
-        <div className="flex items-center justify-between mx-4">
-          <div className="flex items-center">
-            <FontAwesomeIcon
-              icon={faWrench}
-              size="2x"
-              className="w-16 h-16 rounded-2xl p-3 border border-maingreen-light text-maingreen-light bg-green-50"
-            />
-            <div className="flex flex-col ml-3">
-              <div className="font-medium leading-none">{t('update_db')}</div>
-              <p className="text-sm text-gray-600 leading-none mt-1">{t('update_db_val')}</p>
-              <p className="text-sm text-gray-600 leading-none mt-1"><b>{t('update_db_1')}:</b> {hash_count} | <b>{t('update_db_2')}:</b> {updated_date}</p>
-            </div>
-          </div>
-          <button
-            onClick={updating}
-            className={`flex-no-shrink px-5 ml-4 py-2 text-sm shadow-sm hover:shadow-lg font-medium tracking-wider border-2 text-white rounded-full bg-blue-500 border-blue-500`}>
-            {t('update_db_btn')}
-          </button>
-        </div>
-      </div>
+      <SettingComp
+        title={t('update_db')}
+        short={t('activate_logs_val')}
+        short2={`${t('update_db_1')}: ${hash_count} | ${t('update_db_2')}: ${updated_date}`}
+        icon={faWrench}
+        action={updating}
+        action_val={t('update_db_btn')}
+        isOn={false}
+      />
 
       <SettingComp
         title={t('activate_logs')}
@@ -113,6 +125,15 @@ export default function Settings() {
         isOn={true}
       />
 
+      <SettingComp
+        title={'Automatic update'}
+        short={'Automatically starts db updates on set time and day'}
+        short2={<><WeekdaySelector selectedWeekday={selectedWeekday} setSelectedWeekday={setSelectedWeekday} /><DateTimeSelector time={auto_time} setTime={setAutotime} /></>}
+        icon={faClock}
+        isOn={true}
+        action={updateSchedule}
+        action_val={'Submit'}
+      />
     </>
   );
 }
