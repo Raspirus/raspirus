@@ -1,5 +1,5 @@
 import Head from "next/head"
-import VirusComp from "../../components/virus-comp"
+import VirusComp from "../../components/VirusCard"
 import { useRouter } from "next/router";
 import { useContext } from 'react';
 import { SettingsContext } from '../../state/context';

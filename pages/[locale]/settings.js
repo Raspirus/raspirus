@@ -126,13 +126,13 @@ export default function Settings() {
       />
 
       <SettingComp
-        title={'Automatic update'}
-        short={'Automatically starts db updates on set time and day'}
+        title={t('auto_db')}
+        short={t('auto_db_val')}
         short2={<><WeekdaySelector selectedWeekday={selectedWeekday} setSelectedWeekday={setSelectedWeekday} /><DateTimeSelector time={auto_time} setTime={setAutotime} /></>}
         icon={faClock}
         isOn={true}
         action={updateSchedule}
-        action_val={'Submit'}
+        action_val={t('auto_db_btn')}
       />
     </>
   );
