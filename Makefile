@@ -14,9 +14,10 @@ install:
 	sudo apt install curl
 	@echo "Installing Rust for Linux"
 	curl https://sh.rustup.rs -sSf | sh
+	source "$HOME/.cargo/env"
 	@echo "Installing Nodejs"
-	curl -fsSL https://deb.nodesource.com/setup_lts.x | bash - &&\
-	sudo apt-get install -y nodejs
+	curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash
+	sudo apt install -y nodejs
 	@echo "Installing Nextjs and EsLint"
 	npm install next@latest react@latest react-dom@latest eslint-config-next@latest
 	@echo "Installing Tauri deps"
