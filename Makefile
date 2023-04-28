@@ -1,12 +1,4 @@
-# ifeq ($(OS),Windows_NT) 
-#    detected_OS := Windows
-#else
-#    detected_OS := $(shell sh -c 'uname 2>/dev/null || echo Unknown')
-#endif
-
-# THIS Makefile IS PROBABLY NOT WORKING. 
-# IT HAS NOT BEEN TESTED YET. 
-# ITS ONLY PURPOSE IS TO GROUP TOGETHER THE INSTALL COMMANDS FOR DEBIAN SYSTEMS
+# Tested on WSL: Debian GNU/Linux 11 (bullseye) on Windows 10 x86_64
 
 install:
 	@echo ">>>> Updating system and installing curl"
@@ -26,6 +18,14 @@ install:
 	cargo install tauri-cli
 	@echo ">>>> Installing npm deps"
 	npm install
+	@echo ">>>> Done!"
+
+build:
 	@echo ">>>>  Building release"
 	cargo tauri build
 	@echo ">>>> Done!"
+
+test:
+	@echo ">>>>  Executing cargo tests"
+	cd /src-tauri/ && \
+	cargo test
