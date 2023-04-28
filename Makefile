@@ -20,12 +20,12 @@ install:
 	npm install
 	@echo ">>>> Done!"
 
-build:
+build: install
 	@echo ">>>>  Building release"
 	cargo tauri build
 	@echo ">>>> Done!"
 
-test:
+test: install
 	@echo ">>>>  Executing cargo tests"
 	cd /src-tauri/ && \
 	cargo test
