@@ -5,7 +5,7 @@ install:
 	sudo apt update && sudo apt upgrade -y 
 	sudo apt install curl
 	@echo ">>>> Installing Rust for Linux"
-	curl https://sh.rustup.rs -sSf | sh
+	curl https://sh.rustup.rs -sSf | sh -s -- -y
 	export PATH="$HOME/.cargo/bin:$PATH"
 	@echo ">>>> Installing Nodejs"
 	curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash
