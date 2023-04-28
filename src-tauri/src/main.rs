@@ -20,6 +20,7 @@ use winapi::um::fileapi::GetDriveTypeW;
 use winapi::um::winbase::DRIVE_REMOVABLE;
 
 mod backend;
+mod tests;
 
 fn main() {
     tauri::Builder::default()
