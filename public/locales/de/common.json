@@ -57,5 +57,15 @@
     "infected_error": "Virensuche fehlgeschlagen: Kann Viren nicht anzeigen, Fehler im System",
 
     "client_mode_error": "Window error",
-    "client_mode_error_val": "Nextjs is not in client mode"
+    "client_mode_error_val": "Nextjs is not in client mode",
+
+    "weekday": "Wochentag",
+    "daily": "Täglich",
+    "monday": "Montag",
+    "tuesday": "Dienstag",
+    "wednesday": "Mittwoch",
+    "thursday": "Donnerstag",
+    "friday": "Freitag",
+    "saturday": "Samstag",
+    "sunday": "Sonntag"
 }
