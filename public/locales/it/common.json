@@ -57,5 +57,15 @@
     "infected_error": "Ricerca virus fallita: Non è possibile elencare virus, error di sistema",
 
     "client_mode_error": "Window error",
-    "client_mode_error_val": "Nextjs is not in client mode"
+    "client_mode_error_val": "Nextjs is not in client mode",
+
+    "weekday": "Settimanale",
+    "daily": "Giornalmente",
+    "monday": "Lunedì",
+    "tuesday": "Martedì",
+    "wednesday": "Mercoledì",
+    "thursday": "Giovedì",
+    "friday": "Venerdì",
+    "saturday": "Sabato",
+    "sunday": "Domenica"
 }
