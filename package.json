@@ -1,6 +1,6 @@
 {
   "name": "raspirus",
-  "version": "0.1.18",
+  "version": "0.1.8",
   "private": true,
   "scripts": {
     "dev": "next dev",
