@@ -15,7 +15,7 @@
     "@fortawesome/free-solid-svg-icons": "^6.2.1",
     "@fortawesome/react-fontawesome": "^0.2.0",
     "@tauri-apps/api": "^1.2.0",
-    "@types/node": "18.16.7",
+    "@types/node": "18.16.8",
     "@types/react": "18.2.6",
     "@types/react-dom": "18.2.4",
     "bootstrap": "^5.2.3",
