@@ -1,3 +1,4 @@
+SHELL := /bin/bash
 .PHONY: install build test
 
 COLOR := \033[38;2;255;51;102m
