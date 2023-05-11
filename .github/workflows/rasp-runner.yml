@@ -14,5 +14,5 @@ jobs:
         cpu: cortex-a53
         commands: |
             apt-get update -y --allow-releaseinfo-change
-            apt-get install -y build-essential make
+            apt-get install -y make
             make install
