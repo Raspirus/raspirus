@@ -12,4 +12,5 @@ jobs:
         base_image: https://dietpi.com/downloads/images/DietPi_RPi-ARMv8-Bullseye.7z
         cpu: cortex-a53
         commands: |
+            sudo apt install -y build-essential make
             make install
