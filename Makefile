@@ -1,6 +1,4 @@
-SHELL := /bin/bash
 .PHONY: install build test
-# Tested on WSL: Debian GNU/Linux 11 (bullseye) on Windows 10 x86_64
 
 COLOR := \033[38;2;255;51;102m
 TEXT  := \033[38;2;53;192;145m
