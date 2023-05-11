@@ -12,17 +12,17 @@ jobs:
           image_additional_mb: 10240
           base_image: https://dietpi.com/downloads/images/DietPi_RPi-ARMv8-Bullseye.7z
           cpu: cortex-a53
-          commands: >
-            - apt-get update -y --allow-releaseinfo-change
-            - apt update && sudo apt upgrade -y
-            - apt autoremove -y
-            - apt-get install curl
-            - curl https://sh.rustup.rs -sSf | sh -s -- -y
-            - source "$HOME/.cargo/env"
-            - curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash
-            - apt-get install -y nodejs
-            - npm install next@latest react@latest react-dom@latest eslint-config-next@latest
-            - apt-get install -y libwebkit2gtk-4.0-dev build-essential wget libssl-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev
-            - cargo install tauri-cli
-            - npm install
-            - cargo tauri build
+          commands: |
+            apt-get update -y --allow-releaseinfo-change
+            apt update && sudo apt upgrade -y
+            apt autoremove -y
+            apt-get install curl
+            curl https://sh.rustup.rs -sSf | sh -s -- -y
+            source "$HOME/.cargo/env"
+            curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash
+            apt-get install -y nodejs
+            npm install next@latest react@latest react-dom@latest eslint-config-next@latest
+            apt-get install -y libwebkit2gtk-4.0-dev build-essential wget libssl-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev
+            cargo install tauri-cli
+            npm install
+            cargo tauri build
