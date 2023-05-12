@@ -8,18 +8,9 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-
-      - name: Restore Rust and Node.js cache
-        uses: actions/cache@v2
-        with:
-          path: |
-            ${{ env.HOME }}/.cargo
-            ${{ env.HOME }}/.npm
-          key: ${{ runner.os }}-rust-node-${{ hashFiles('**/Cargo.lock') }}-${{ hashFiles('**/package-lock.json') }}
-
       - uses: pguyot/arm-runner-action@v2.5.2
         with:
-          image_additional_mb: 10240
+          image_additional_mb: 4096
           base_image: https://dietpi.com/downloads/images/DietPi_RPi-ARMv8-Bullseye.7z
           cpu: cortex-a53
           commands: |
