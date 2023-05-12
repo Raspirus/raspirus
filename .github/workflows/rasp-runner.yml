@@ -16,6 +16,7 @@ jobs:
             apt-get update -y --allow-releaseinfo-change
             apt-get upgrade -y
             apt-get autoremove -y
+            free -m
             apt-get install curl
             curl https://sh.rustup.rs -sSf | sh -s -- -y
             . "$HOME/.cargo/env"
