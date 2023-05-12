@@ -16,7 +16,6 @@ jobs:
             apt-get update -y --allow-releaseinfo-change
             apt-get upgrade -y
             apt-get autoremove -y
-            free -m
             apt-get install curl
             curl https://sh.rustup.rs -sSf | sh -s -- -y
             . "$HOME/.cargo/env"
@@ -24,6 +23,7 @@ jobs:
             apt-get install -y nodejs
             npm install next@latest react@latest react-dom@latest eslint-config-next@latest
             apt-get install -y libwebkit2gtk-4.0-dev build-essential wget libssl-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev
+            free -m
             cargo install tauri-cli
             npm install
             cargo tauri build
