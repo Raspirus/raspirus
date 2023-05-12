@@ -17,6 +17,7 @@ jobs:
             apt-get upgrade -y
             apt-get autoremove -y
             apt-get install curl
+            df -h
             curl https://sh.rustup.rs -sSf | sh -s -- -y
             . "$HOME/.cargo/env"
             curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash
