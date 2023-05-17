@@ -72,7 +72,7 @@ impl FileScanner {
             let log_str = format!("{}.log", now_str);
 
             // Add all false positives here
-            let false_pos: Vec<String> = vec!["7dea362b3fac8e00956a4952a3d4f474".to_owned()];
+            let false_pos: Vec<String> = vec!["7dea362b3fac8e00956a4952a3d4f474".to_owned(), "81051bcc2cf1bedf378224b0a93e2877".to_owned()];
 
             Ok(FileScanner {
                 db_conn: tmpconf,
@@ -80,7 +80,7 @@ impl FileScanner {
                 scanloc: scanloc.to_owned(),
                 log: FileLog::new(log_str),
                 false_positive: false_pos,
-                folder_size: Self::get_folder_size(Path::new(scanloc)).unwrap_or_default(),
+                folder_size: 0,
                 scanned_size: 0,
                 tauri_window: t_win,
             })
@@ -106,6 +106,9 @@ impl FileScanner {
         let mut skipped: i128 = 0;
         let last_percentage: &mut f64 = &mut -1.0;
         let big_tic = time::Instant::now();
+        if self.get_folder_size(Path::new(self.scanloc.as_str()).to_owned().as_ref()).is_err() {
+            return Err("Can't get folder size".to_string());
+        }
         for file in WalkDir::new(&self.scanloc)
             .into_iter()
             .filter_map(|file| file.ok())
@@ -129,7 +132,10 @@ impl FileScanner {
                         "".to_owned()
                     }
                 };
-                Self::calculate_progress(self, last_percentage, file.metadata().unwrap().len());
+                if Self::calculate_progress(self, last_percentage, file.metadata().unwrap().len()).is_err() {
+                    error!("Progress calculation is broken");
+                    break;
+                }
                 if match self.db_conn.hash_exists(hash.as_str()) {
                     Ok(exists) => {
                         self.dirty_files.push(file.path().display().to_string());
@@ -222,28 +228,52 @@ impl FileScanner {
         Some(ret)
     }
 
-    fn get_folder_size(path: &Path) -> Result<u64, std::io::Error> {
+    
+    fn get_folder_size(&mut self, path: &Path) -> Result<u64, std::io::Error> {
         let metadata = fs::metadata(path)?;
         if metadata.is_file() {
-            Ok(metadata.len())
-        } else {
-            let mut size: u64 = 0;
-            for entry in fs::read_dir(path)? {
-                let entry = entry?;
-                let entry_path = entry.path();
-                size += Self::get_folder_size(&entry_path)?;
-            }
-            Ok(size)
+            debug!("Added file: {} with size: {}", path.to_str().unwrap(), metadata.len());
+            return Ok(metadata.len());
         }
+    
+        let mut size: u64 = 0;
+    
+        for entry in WalkDir::new(path).follow_links(true) {
+            let entry = entry?;
+            let entry_path = entry.path();
+            let entry_metadata = entry.metadata()?;
+            if entry_metadata.is_file() {
+                debug!("Added file: {} with size: {}", entry_path.to_str().unwrap(), entry_metadata.len());
+                size += entry_metadata.len();
+            }
+        }
+    
+        debug!("Calculated size for folder {}: {}", path.to_str().unwrap(), size);
+        self.folder_size = size;
+        Ok(size)
     }
+    
 
-    fn calculate_progress(&mut self, last_percentage: &mut f64, file_size: u64) {
+    fn calculate_progress(&mut self, last_percentage: &mut f64, file_size: u64) -> Result<f64, String> {
         self.scanned_size = self.scanned_size + file_size;
         let scanned_percentage = (self.scanned_size as f64 / self.folder_size as f64 * 100.0).round();
+        warn!("Scanned size: {}", self.scanned_size);
+        warn!("Folder size: {}", self.folder_size);
+        warn!("Scanned percentage: {}", scanned_percentage);
+        // Check if folder is empty, because that would return infinity percentage
+        if self.folder_size <= 0 {
+            if self.tauri_window.emit_all("progerror", TauriEvent {message: "Calculated foldersize is 0".to_string()}).is_err() {
+                return Err("Couldn't send progress update to frontend".to_string());
+            }
+            return Err("Calculated foldersize is 0".to_string());
+        }
         info!("Scanned: {}%", scanned_percentage);
         if scanned_percentage != *last_percentage {
-            self.tauri_window.emit_all("progress", TauriEvent {message: scanned_percentage.to_string()}).unwrap();
+            if self.tauri_window.emit_all("progress", TauriEvent {message: scanned_percentage.to_string()}).is_err() {
+                return Err("Couldn't send progress update to frontend".to_string());
+            };
             *last_percentage = scanned_percentage;
         }
+        Ok(scanned_percentage)
     }
 }
