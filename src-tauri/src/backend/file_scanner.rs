@@ -182,7 +182,7 @@ impl FileScanner {
     /// ```
     pub fn create_hash(&mut self, path: &str) -> Option<String> {
         let mut context = md5::Context::new();
-        let mut buffer = [0; 4096];
+        let mut buffer = [0; 65536]; // 64KB
 
         let file = match File::open(path) {
             Ok(file) => file,
@@ -240,15 +240,11 @@ impl FileScanner {
     
         for entry in WalkDir::new(path).follow_links(true) {
             let entry = entry?;
-            let entry_path = entry.path();
             let entry_metadata = entry.metadata()?;
             if entry_metadata.is_file() {
-                debug!("Added file: {} with size: {}", entry_path.to_str().unwrap(), entry_metadata.len());
                 size += entry_metadata.len();
             }
         }
-    
-        debug!("Calculated size for folder {}: {}", path.to_str().unwrap(), size);
         self.folder_size = size;
         Ok(size)
     }
@@ -257,9 +253,6 @@ impl FileScanner {
     fn calculate_progress(&mut self, last_percentage: &mut f64, file_size: u64) -> Result<f64, String> {
         self.scanned_size = self.scanned_size + file_size;
         let scanned_percentage = (self.scanned_size as f64 / self.folder_size as f64 * 100.0).round();
-        warn!("Scanned size: {}", self.scanned_size);
-        warn!("Folder size: {}", self.folder_size);
-        warn!("Scanned percentage: {}", scanned_percentage);
         // Check if folder is empty, because that would return infinity percentage
         if self.folder_size <= 0 {
             if self.tauri_window.emit_all("progerror", TauriEvent {message: "Calculated foldersize is 0".to_string()}).is_err() {
