@@ -46,8 +46,9 @@ export default function Home() {
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const userAgent = window.navigator.userAgent;
-      setIsRaspberryPi(userAgent.includes('arm') && userAgent.includes('Linux'));
+
+      invoke("check_raspberry", {})
+        .then((output) => setIsRaspberryPi(output))
 
       invoke("list_usb_drives", {})
         .then((output) => {

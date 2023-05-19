@@ -25,7 +25,7 @@ mod tests;
 
 fn main() {
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![start_scanner, list_usb_drives, update_database])
+        .invoke_handler(tauri::generate_handler![start_scanner, list_usb_drives, update_database, check_raspberry])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
@@ -89,6 +89,17 @@ async fn start_scanner(window: tauri::Window, path: String, dbfile: Option<Strin
     };
     Ok(serde_json::to_string(&dirty_files).unwrap_or_default())
 
+}
+
+#[tauri::command]
+async fn check_raspberry() -> Result<bool, String> {
+    let arch = std::env::consts::ARCH;
+
+    if arch == "arm" {
+        Ok(true)
+    } else {
+        Ok(false)
+    }
 }
 
 #[tauri::command]
