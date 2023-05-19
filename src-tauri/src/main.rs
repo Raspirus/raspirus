@@ -11,6 +11,7 @@ use std::ffi::{OsString, OsStr};
 use std::iter::once;
 use std::process::exit;
 use std::{env, fs, path::Path, time};
+use directories_next::ProjectDirs;
 
 #[cfg(windows)]
 use std::os::windows::prelude::OsStrExt;
@@ -65,7 +66,13 @@ async fn start_scanner(window: tauri::Window, path: String, dbfile: Option<Strin
         }
     };
 
-    let mut fs = match file_scanner::FileScanner::new(&path, &use_db, window) {
+    let project_dirs = ProjectDirs::from("com", "Raspirus", "Data").expect("Failed to get project directories.");
+    let program_dir = project_dirs.data_dir();
+    fs::create_dir_all(&program_dir).expect("Failed to create program directory.");
+    let db_file_path = program_dir.join(&use_db);
+    let db_file_str: &str = db_file_path.to_str().expect("Failed to get database path");
+
+    let mut fs = match file_scanner::FileScanner::new(&path, db_file_str, window) {
         Ok(fs) => fs,
         Err(err) => {
             error!("{}", err);

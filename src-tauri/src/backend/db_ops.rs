@@ -33,6 +33,7 @@ impl DBOps {
             Ok(conn) => conn,
             Err(err) => return Err(err),
         };
+        info!("New database connection at: {}", db_file);
 
         let ret = DBOps {
             db_conn: conn,
