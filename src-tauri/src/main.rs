@@ -118,8 +118,13 @@ async fn update_database(db_file: Option<String>) -> Result<String, String> {
             info!("Path is None; Falling back to default DB file (signatures.db)");
         }
     };
+    let project_dirs = ProjectDirs::from("com", "Raspirus", "Data").expect("Failed to get project directories.");
+    let program_dir = project_dirs.data_dir();
+    fs::create_dir_all(&program_dir).expect("Failed to create program directory.");
+    let db_file_path = program_dir.join(&use_db);
+    let db_file_str: &str = db_file_path.to_str().expect("Failed to get database path");
 
-    let mut db_connection = match DBOps::new(&use_db) {
+    let mut db_connection = match DBOps::new(db_file_str) {
         Ok(db_conn) => db_conn,
         Err(err) => {
             error!("{err}");
