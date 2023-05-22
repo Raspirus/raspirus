@@ -34,3 +34,12 @@ jobs:
             cargo install tauri-cli
             npm install
             cargo tauri build
+            cd target
+            ls -ll
+            cd ..
+      - name: Upload release image
+        uses: actions/upload-artifact@v2
+        if: github.ref == 'refs/heads/releng' || startsWith(github.ref, 'refs/tags/')
+        with:
+          name: Release image
+          path: target/release/bundle/deb/raspirus_0.1.8.deb
