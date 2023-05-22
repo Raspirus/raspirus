@@ -21,6 +21,7 @@ jobs:
           export CARGO_BUILD_TARGET=aarch64-unknown-linux-gnu
           export CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER=aarch64-linux-gnu-gcc
           cargo install --features native-tls-vendored tauri-cli
+          echo "::add-path::$(cargo_home)/bin"
       - uses: pguyot/arm-runner-action@v2.5.2
         with:
           base_image: https://dietpi.com/downloads/images/DietPi_RPi-ARMv8-Bullseye.7z
@@ -39,6 +40,7 @@ jobs:
             apt-get install curl
             curl https://sh.rustup.rs -sSf | sh -s -- -y
             . "$HOME/.cargo/env"
+            cargo tauri help
             curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash
             apt-get install -y nodejs
             npm install next@latest react@latest react-dom@latest eslint-config-next@latest
