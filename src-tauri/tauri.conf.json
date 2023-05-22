@@ -42,7 +42,7 @@
       },
       "resources": [],
       "shortDescription": "Small Virusscanner",
-      "targets": "all",
+      "targets": ["deb", "msi", "app", "updater"],
       "windows": {
         "certificateThumbprint": null,
         "digestAlgorithm": "sha256",
