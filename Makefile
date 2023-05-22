@@ -1,9 +1,9 @@
 SHELL := /bin/bash
-.PHONY: install build test
-
 COLOR := \033[38;2;255;51;102m
 TEXT  := \033[38;2;53;192;145m
 RESET := \033[0;39m\n
+
+.PHONY: install build test
 
 install:
 	@clear
@@ -15,25 +15,25 @@ install:
 	@printf "$(COLOR)╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝╚═╝     ╚═╝╚═╝  ╚═╝ ╚═════╝ ╚══════╝$(RESET)"
 	@printf "$(TEXT)🚀 Starting installation...$(RESET)"
 	@sleep 3
-	@printf "$(TEXT)1️⃣ >>>> Updating system and removing temps$(RESET)"
+	@printf "$(TEXT)🌑 >>>> Updating system and removing temps$(RESET)"
 	apt update && apt upgrade -y
 	apt autoremove -y
-	@printf "$(TEXT)2️⃣>>>> Installing curl$(RESET)"
-	apt install curl -y
-	@printf "$(TEXT)3️⃣ >>>> Installing Rust for Linux$(RESET)"
+	@printf "$(TEXT)🌒 >>>> Installing curl$(RESET)"
+	apt install curl
+	@printf "$(TEXT)🌓 >>>> Installing Rust for Linux$(RESET)"
 	curl https://sh.rustup.rs -sSf | sh -s -- -y
 	export PATH="$HOME/.cargo/bin:$PATH"
 	-source "$HOME/.cargo/env"
-	@printf "$(TEXT)4️⃣ >>>> Installing Nodejs$(RESET)"
+	@printf "$(TEXT)🌔 >>>> Installing Nodejs$(RESET)"
 	curl -fsSL https://deb.nodesource.com/setup_lts.x | bash
 	apt install -y nodejs
-	@printf "$(TEXT)5️⃣ >>>> Installing Nextjs and EsLint$(RESET)"
+	@printf "$(TEXT)🌕 >>>> Installing Nextjs and EsLint$(RESET)"
 	npm install next@latest react@latest react-dom@latest eslint-config-next@latest
-	@printf "$(TEXT)6️⃣ >>>> Installing Tauri deps$(RESET)"
+	@printf "$(TEXT)🌖 >>>> Installing Tauri deps$(RESET)"
 	apt install -y libwebkit2gtk-4.0-dev build-essential wget libssl-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev
-	@printf "$(TEXT)7️⃣ >>>> Installing Tauri$(RESET)"
+	@printf "$(TEXT)🌗 >>>> Installing Tauri$(RESET)"
 	cargo install tauri-cli
-	@printf "$(TEXT)8️⃣ >>>> Installing npm deps$(RESET)"
+	@printf "$(TEXT)🌘 >>>> Installing npm deps$(RESET)"
 	npm install
 	@printf "$(TEXT)🎉 >>>> Done!$(RESET)"
 

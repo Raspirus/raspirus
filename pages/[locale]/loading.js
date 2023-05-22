@@ -28,9 +28,19 @@ export default function Loading() {
       console.log("Progress: ", event.payload.message);
       setProgress(event.payload.message);
     };
+
+    const handleProgressErr = (event) => {
+      console.error(error);
+      localStorage.setItem("errorOccurred", 'true');
+      router.push({
+        pathname: '/',
+        query: { scanner_error: event.payload.message }
+      })
+    }
   
     const startListening = async () => {
       await listen('progress', handleProgress);
+      await listen('progerror', handleProgressErr);
     };
   
     startListening();
@@ -38,6 +48,7 @@ export default function Loading() {
     // Clean up function to remove the event listener when the component unmounts
     return () => {
       removeEventListener('progress', handleProgress);
+      removeEventListener('progerror', handleProgressErr);
     };
   }, []);
 
