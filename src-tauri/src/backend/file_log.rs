@@ -4,6 +4,7 @@ use std::{
 };
 
 use log::{debug, error, info, warn};
+use directories_next::ProjectDirs;
 
 pub struct FileLog {
     file: Option<File>,
@@ -72,11 +73,14 @@ impl FileLog {
     /// log.create_file("new_log.txt".to_owned());
     /// ```
     pub fn create_file(&mut self, fname: String) {
-        match fs::create_dir_all("/logs") {
+        let project_dirs = ProjectDirs::from("com", "Raspirus", "Logs").expect("Failed to get project directories.");
+        let log_dir = project_dirs.data_local_dir().join("logs"); // Create a "logs" subdirectory
+
+        match fs::create_dir_all(&log_dir) {
             Ok(_) => {
-                self.file = match File::create(format!("/logs/{}", fname.clone())) {
+                self.file = match File::create(log_dir.join(fname.clone())) {
                     Ok(file) => {
-                        info!("Created logfile {}", fname);
+                        info!("Created logfile at DIR: {} NAME: {}", log_dir.display(), fname);
                         Some(file)
                     }
                     Err(err) => {
