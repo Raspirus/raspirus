@@ -7,20 +7,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Get Raspberry Pi Bullseye aarch64 toolchain
-        run: |
-          wget -q https://sourceforge.net/projects/raspberry-pi-cross-compilers/files/Bonus%20Raspberry%20Pi%20GCC%2064-Bit%20Toolchains/Raspberry%20Pi%20GCC%2064-Bit%20Cross-Compiler%20Toolchains/Bullseye/GCC%2010.3.0/cross-gcc-10.3.0-pi_64.tar.gz
-          sudo tar xfz cross-gcc-10.3.0-pi_64.tar.gz -C /opt
-      - name: Install and configure rust-cross
-        run: |
-          rustup target add aarch64-unknown-linux-gnu
-        shell: bash
-      - name: Install tauri
-        run: |
-          export PATH=/opt/cross-pi-gcc-10.3.0-64/bin:${PATH}
-          export CARGO_BUILD_TARGET=aarch64-unknown-linux-gnu
-          export CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER=aarch64-linux-gnu-gcc
-          cargo install --features native-tls-vendored tauri-cli
       - uses: pguyot/arm-runner-action@v2.5.2
         with:
           base_image: https://dietpi.com/downloads/images/DietPi_RPi-ARMv8-Bullseye.7z
@@ -31,7 +17,6 @@ jobs:
           commands: |
             # Rust complains (rightly) that $HOME doesn't match eid home
             export HOME=/root
-            export PATH=${HOME}/.cargo/bin:${PATH}
             # Workaround to CI worker being stuck on Updating crates.io index
             export CARGO_REGISTRIES_CRATES_IO_PROTOCOL=sparse
             apt-get update -y --allow-releaseinfo-change
@@ -40,11 +25,11 @@ jobs:
             apt-get install curl
             curl https://sh.rustup.rs -sSf | sh -s -- -y
             . "$HOME/.cargo/env"
-            cargo tauri help
             curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash
             apt-get install -y nodejs
             npm install next@latest react@latest react-dom@latest eslint-config-next@latest
             apt-get install -y libwebkit2gtk-4.0-dev build-essential wget libssl-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev
+            cargo install tauri-cli
             npm install
             cargo tauri build
       - name: Upload deb bundle
