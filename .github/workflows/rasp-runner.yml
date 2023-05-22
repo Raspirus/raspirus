@@ -31,7 +31,7 @@ jobs:
           commands: |
             # Rust complains (rightly) that $HOME doesn't match eid home
             export HOME=/root
-            export PATH="$HOME/.cargo/bin:$PATH"
+            export PATH=${HOME}/.cargo/bin:${PATH}
             # Workaround to CI worker being stuck on Updating crates.io index
             export CARGO_REGISTRIES_CRATES_IO_PROTOCOL=sparse
             apt-get update -y --allow-releaseinfo-change
