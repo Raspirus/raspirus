@@ -1,17 +1,9 @@
 import { useState, useContext, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { SettingsContext } from '../state/context';
 import { useTranslation } from 'next-i18next';
 
-export default function SettingComp({ title, short, short2 = null, icon, isOn: initialIsOn, action = null, action_val = null }) {
-    const titleWithoutSpaces = title.replace(/ /g, "");
-    const { settings, setSettings } = useContext(SettingsContext);
-    const [isOn, setIsOn] = useState(initialIsOn || settings[titleWithoutSpaces]);
+export default function SettingComp({ title, short, short2 = null, icon, isOn = false, setIsOn = null, action = null, action_val = null }) {
     const t = useTranslation('common').t;
-
-    useEffect(() => {
-        setSettings((prev) => ({ ...prev, [titleWithoutSpaces]: isOn }));
-    }, [isOn, titleWithoutSpaces, setSettings])
 
     return (
         <div className="flex flex-col m-6 p-2 bg-white rounded-2xl shadow-md">
@@ -25,7 +17,7 @@ export default function SettingComp({ title, short, short2 = null, icon, isOn: i
                     <div className="flex flex-col ml-3">
                         <div className="font-medium leading-none">{title}</div>
                         <p className="text-sm text-gray-600 leading-none mt-1">{short}</p>
-                        {short2 && <p className="text-sm text-gray-600 leading-none mt-1">{short2}</p>}
+                        {short2 && <div className="text-sm text-gray-600 leading-none mt-1">{short2}</div>}
                     </div>
                 </div>
                 {action == null && 
