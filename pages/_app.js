@@ -7,10 +7,17 @@ import '../styles/globals.css';
 import { config } from "@fortawesome/fontawesome-svg-core";
 import { Suspense } from 'react';
 import { appWithTranslation } from 'next-i18next'
-import { SettingsContext } from '../state/context';
+// Needs to be the first line to load included CSS
 config.autoAddCss = false;
 
+/**
+ * This is a special file defined by Next.js that wraps each component for context or state.
+ * It also provides a Head with metadata and a fallback loading screen if loading takes too much.
+ * @param {*} param0 
+ * @returns 
+ */
 const App = ({ Component, pageProps }) => {
+  // Saves the context of the settings page
   const [settings, setSettings] = useState({});
 
   return (
@@ -21,9 +28,7 @@ const App = ({ Component, pageProps }) => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <Suspense fallback={<div>Loading...</div>}>
-        <SettingsContext.Provider value={{ settings, setSettings }}>
           <Component {...pageProps} />
-        </SettingsContext.Provider>
       </Suspense>
     </>
   )

@@ -4,7 +4,7 @@ import { useRouter } from 'next/router';
 import { invoke } from "@tauri-apps/api/tauri";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faFileLines, faUserNinja, faWrench, faHome, faClock } from '@fortawesome/free-solid-svg-icons';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Swal from 'sweetalert2';
 import moment from "moment";
 import { useTranslation } from 'next-i18next';
@@ -24,11 +24,59 @@ export default function Settings() {
   const [auto_time, setAutotime] = useState('22:00');
   const [selectedWeekday, setSelectedWeekday] = useState(-1);
   const [cronjob, setcronjob] = useState(null);
+  const [logging, setLogging] = useState(false);
+  const [obfuscated, setObfuscated] = useState(false);
   let db_location = "";
 
   const backHome = () => {
+    if (updated_date == t('update_db_status_1')) {
+      setDate("Never");
+    }
+    saveSettings();
     router.push('/');
   };
+
+  const saveSettings = () => {
+    const jsonData = {
+      hashes_in_db: hash_count,
+      last_db_update: updated_date,
+      logging_is_active: logging,
+      obfuscated_is_active: obfuscated,
+      db_update_weekday: selectedWeekday,
+      db_update_time: auto_time
+    }
+    const jsonString = JSON.stringify(jsonData);
+    console.log("Client sends: ", jsonData);
+
+    if (typeof window !== "undefined") {
+
+      invoke("create_config", {contents: jsonString})
+        .then((output) => {
+          const parsedData = JSON.parse(output);
+          console.log("Server answer: ", parsedData);
+        })
+        .catch((err) => console.error(err))
+    }
+  }
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+
+      invoke("create_config", {})
+        .then((output) => {
+          const parsedData = JSON.parse(output);
+          setCount(parsedData.hashes_in_db);
+          if (parsedData.last_db_update != "Never") {
+            setDate(parsedData.last_db_update);
+          }
+          setLogging(parsedData.logging_is_active);
+          setObfuscated(parsedData.obfuscated_is_active);
+          setSelectedWeekday(parsedData.db_update_weekday);
+          setAutotime(parsedData.db_update_time);
+        })
+        .catch((err) => console.error(err))
+    }
+  }, []);
 
   const updating = () => {
     if (typeof window !== "undefined") {
@@ -46,7 +94,7 @@ export default function Settings() {
       })
         .then((message) => {
           console.log(message);
-          setCount((JSON.parse(message)).toLocaleString('en'));
+          setCount(Number(message));
           setDate(moment().format("DD/MM/YYYY hh:mm:ss"));
           Swal.fire(t('update_db_completed'), t('update_db_completed_val'), "success");
         })
@@ -66,16 +114,16 @@ export default function Settings() {
     const weekday = selectedWeekday;
 
     if (cronjob == null) {
-      const job = schedule.scheduleJob('DataUpdater', {minute: minutes, hour: hours, dayOfWeek: weekday > 0 ? weekday : null}, () => {updating})
+      const job = schedule.scheduleJob('DataUpdater', { minute: minutes, hour: hours, dayOfWeek: weekday > 0 ? weekday : null }, () => { updating })
       setcronjob(job);
     } else {
       cronjob.cancel;
       schedule.gracefulShutdown()
         .then(_ => {
-          const job = schedule.scheduleJob('DataUpdater', {minute: minutes, hour: hours, dayOfWeek: weekday > 0 ? weekday : null}, () => {updating})
+          const job = schedule.scheduleJob('DataUpdater', { minute: minutes, hour: hours, dayOfWeek: weekday > 0 ? weekday : null }, () => { updating })
           setcronjob(job);
         })
-        .catch(err => console.error("Cronjob not canceled: ", err))
+        .catch(err => console.error("Cronjob got canceled: ", err))
     }
   }
 
@@ -116,13 +164,15 @@ export default function Settings() {
         title={t('activate_logs')}
         short={t('activate_logs_val')}
         icon={faFileLines}
-        isOn={false}
+        isOn={logging}
+        setIsOn={setLogging}
       />
       <SettingComp
         title={t('obfuscated_mode')}
         short={t('obfuscated_mode_val')}
         icon={faUserNinja}
-        isOn={true}
+        isOn={obfuscated}
+        setIsOn={setObfuscated}
       />
 
       <SettingComp

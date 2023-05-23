@@ -1,21 +1,20 @@
-import Head from "next/head"
-import VirusComp from "../../components/VirusCard"
+import Head from "next/head";
+import VirusComp from "../../components/VirusCard";
+import { invoke } from "@tauri-apps/api/tauri";
 import { useRouter } from "next/router";
-import { useContext } from 'react';
-import { SettingsContext } from '../../state/context';
+import { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faHome } from "@fortawesome/free-solid-svg-icons";
 import Image from "next/image";
-import { useTranslation } from 'next-i18next'
-import { getStaticPaths, makeStaticProps } from '../../lib/getStatic'
+import { useTranslation } from 'next-i18next';
+import { getStaticPaths, makeStaticProps } from '../../lib/getStatic';
 
 const getStaticProps = makeStaticProps('common')
 export { getStaticPaths, getStaticProps }
 
 export default function Infected() {
     const router = useRouter();
-    const { settings } = useContext(SettingsContext);
-    const obfuscatedMode = settings["ObfuscatedMode"] != undefined ? settings["ObfuscatedMode"] : true;
+    const [obfuscated, setObfuscated] = useState(false);
     let { query: { virus_list }, } = router;
     const {t} = useTranslation('common');
 
@@ -23,12 +22,23 @@ export default function Infected() {
         virus_list = JSON.parse(virus_list);
     }
 
-
     const backHome = () => {
         router.push('/');
     }
 
-    if (obfuscatedMode) {
+    useEffect(() => {
+        if (typeof window !== "undefined") {
+    
+          invoke("create_config", {})
+            .then((output) => {
+              const parsedData = JSON.parse(output);
+              setObfuscated(parsedData.obfuscated_is_active);
+            })
+            .catch((err) => console.error(err))
+        }
+      }, []);
+
+    if (obfuscated) {
         return (
             <>
                 <Head>
