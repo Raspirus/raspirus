@@ -5,6 +5,7 @@
 
 use backend::db_ops::DBOps;
 use backend::file_scanner;
+use backend::config_file::Config;
 use log::{error, info, warn };
 use serde::{Deserialize, Serialize};
 use std::ffi::{OsString, OsStr};
@@ -25,7 +26,7 @@ mod tests;
 
 fn main() {
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![start_scanner, list_usb_drives, update_database, check_raspberry])
+        .invoke_handler(tauri::generate_handler![start_scanner, list_usb_drives, update_database, check_raspberry, create_config])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
@@ -42,7 +43,7 @@ fn main() {
 ///
 /// An empty `Result` object if the scanner was successfully started, or an `Err` with an error message if an error occurred.
 #[tauri::command]
-async fn start_scanner(window: tauri::Window, path: String, dbfile: Option<String>, obfuscated: bool) -> Result<String, String> {
+async fn start_scanner(window: tauri::Window, path: String, dbfile: Option<String>) -> Result<String, String> {
     match pretty_env_logger::try_init() {
         Ok(()) => {
             info!("Logger initialized!");
@@ -65,7 +66,6 @@ async fn start_scanner(window: tauri::Window, path: String, dbfile: Option<Strin
             info!("Path is None; Falling back to default DB file (signatures.db)");
         }
     };
-
     let project_dirs = ProjectDirs::from("com", "Raspirus", "Data").expect("Failed to get project directories.");
     let program_dir = project_dirs.data_dir();
     fs::create_dir_all(&program_dir).expect("Failed to create program directory.");
@@ -79,7 +79,8 @@ async fn start_scanner(window: tauri::Window, path: String, dbfile: Option<Strin
             return Err(err.to_string());
         }
     };
-
+    let config = Config::new();
+    let obfuscated = config.obfuscated_is_active;
     let dirty_files = match fs.search_files(obfuscated) {
         Ok(files) => files,
         Err(e) => {
@@ -273,4 +274,18 @@ async fn list_usb_drives() -> Result<String, String> {
         warn!("Not retrieving USBs -> Wrong OS");
     }
     Ok(serde_json::to_string(&usb_drives).unwrap())
+}
+
+#[tauri::command]
+async fn create_config(contents: Option<String>) -> Result<String, String> {
+    let config = if let Some(contents) = contents {
+        serde_json::from_str(&contents).map_err(|err| err.to_string())?
+    } else {
+        Config::new().load().map_err(|err| err.to_string())?
+    };
+
+    config.save().map_err(|err| err.to_string())?;
+    let config_str = serde_json::to_string(&config).unwrap();
+
+    Ok(config_str)
 }

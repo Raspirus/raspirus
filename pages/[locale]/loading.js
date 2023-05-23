@@ -2,7 +2,6 @@ import Head from "next/head";
 import { useRouter } from "next/router";
 import React, { useEffect, useContext, useState } from 'react';
 import { invoke } from "@tauri-apps/api/tauri";
-import { SettingsContext } from '../../state/context';
 import { listen } from '@tauri-apps/api/event';
 import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
@@ -14,9 +13,6 @@ export { getStaticPaths, getStaticProps }
 
 
 export default function Loading() {
-  const { settings } = useContext(SettingsContext);
-  const activateLogging = settings["ActivateLogging"] != undefined ? settings["ActivateLogging"] : false;
-  const obfuscatedMode = settings["ObfuscatedMode"] != undefined ? settings["ObfuscatedMode"] : true;
   const [progress, setProgress] = useState(0);
   const router = useRouter();
   let { query: { scan_path }, } = router;
@@ -57,17 +53,10 @@ export default function Loading() {
   }, []);
 
   const scanning = async () => {
-    if (activateLogging) {
-      process.env.RUST_LOG = "info";
-    } else {
-      process.env.RUST_LOG = "warn";
-    }
-
     try {
       const message = await invoke("start_scanner", {
         path: scan_path,
         dbfile: db_location,
-        obfuscated: obfuscatedMode,
       });
 
       if (message && message.length > 0 && message != "[]") {
