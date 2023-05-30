@@ -32,6 +32,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
   <tbody>
     <tr>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/mwallnoefer"><img src="https://avatars.githubusercontent.com/u/7541399?v=4?s=100" width="100px;" alt="Matthias Dieter Wallnöfer"/><br /><sub><b>Matthias Dieter Wallnöfer</b></sub></a><br /><a href="#mentoring-mwallnoefer" title="Mentoring">🧑‍🏫</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="http://zacktech.xyz"><img src="https://avatars.githubusercontent.com/u/38058764?v=4?s=100" width="100px;" alt="Zack Amoroso"/><br /><sub><b>Zack Amoroso</b></sub></a><br /><a href="#platform-zja203" title="Packaging/porting to new platform">📦</a></td>
     </tr>
   </tbody>
 </table>
