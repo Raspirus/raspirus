@@ -3,7 +3,7 @@
     "README.md"
   ],
   "imageSize": 100,
-  "commit": true,
+  "commit": false,
   "commitType": "docs",
   "commitConvention": "angular",
   "contributors": [
@@ -49,5 +49,6 @@
   "repoType": "github",
   "repoHost": "https://github.com",
   "projectName": "Raspirus",
-  "projectOwner": "Raspirus"
+  "projectOwner": "Raspirus",
+  "badgeTemplate": "[![All Contributors](https://img.shields.io/github/all-contributors/Raspirus/Raspirus?color=ee8449)](#contributors)",
 }
