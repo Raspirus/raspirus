@@ -15,7 +15,7 @@
     "info_title": "Information",
     "app_name": "App Name",
     "description": "Description",
-    "description_val": "Simple signatures-based antivirus for single-board computers like Raspbrry Pi",
+    "description_val": "Simple signatures-based antivirus for single-board computers like Raspberry Pi",
     "maintainers": "Maintainers",
     "maintainers_val": "Demetz Benjamin, Hell Björn Felix",
     "version": "Version",
