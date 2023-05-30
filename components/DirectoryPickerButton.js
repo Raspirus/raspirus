@@ -1,9 +1,17 @@
 import Image from 'next/image';
 
+/**
+ * A button that once pressed opens an os-specific window that lets the user select a folder from the file-system.
+ * The button uses the Tauri API to choose how to open the file-system window.
+ * @param {Function} onSelectDirectory Function to trigger when a directory has been selected
+ * @returns A <button> tag with a folder-icon Image
+ */
 export default function DirectoryPickerButton({ onSelectDirectory }) {
 
+  /** Handles the button click */
   const handleButtonClick = async () => {
     const { open } = await import('@tauri-apps/api/dialog');
+    // Set user selection restrictions
     const selected = await open({
       directory: true,
       multiple: false,
@@ -19,7 +27,7 @@ export default function DirectoryPickerButton({ onSelectDirectory }) {
   return (
     <button
       onClick={handleButtonClick}
-      className="ml-1 inline-block p-3 bg-orange-400 rounded shadow-md hover:bg-orange-500 hover:shadow-lg focus:bg-orange-500 focus:shadow-lg focus:outline-none focus:ring-0 active:orange-500 active:shadow-lg transition duration-150 ease-in-out"
+      className="ml-1 inline-block p-3 bg-orange-400 rounded shadow-md"
     >
       <Image
         id="folder-icon"
