@@ -3,7 +3,7 @@
     "README.md"
   ],
   "imageSize": 100,
-  "commit": false,
+  "commit": true,
   "commitType": "docs",
   "commitConvention": "angular",
   "contributors": [
@@ -14,7 +14,9 @@
       "profile": "https://github.com/mwallnoefer",
       "contributions": [
         "mentoring"
-]},
+      ]
+    },
+    {
       "login": "zja203",
       "name": "Zack Amoroso",
       "avatar_url": "https://avatars.githubusercontent.com/u/38058764?v=4",
