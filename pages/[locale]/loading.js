@@ -46,7 +46,7 @@ export default function Loading() {
       removeEventListener('progress', handleProgress);
       removeEventListener('progerror', handleProgressErr);
     };
-  }, []);
+  }, [router]);
 
   useEffect(() => {
     scanning();
