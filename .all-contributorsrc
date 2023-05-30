@@ -1,0 +1,26 @@
+{
+  "files": [
+    "README.md"
+  ],
+  "imageSize": 100,
+  "commit": false,
+  "commitType": "docs",
+  "commitConvention": "angular",
+  "contributors": [
+    {
+      "login": "zja203",
+      "name": "Zack Amoroso",
+      "avatar_url": "https://avatars.githubusercontent.com/u/38058764?v=4",
+      "profile": "http://zacktech.xyz",
+      "contributions": [
+        "platform"
+      ]
+    }
+  ],
+  "contributorsPerLine": 7,
+  "skipCi": true,
+  "repoType": "github",
+  "repoHost": "https://github.com",
+  "projectName": "Raspirus",
+  "projectOwner": "Raspirus"
+}
