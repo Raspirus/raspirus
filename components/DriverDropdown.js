@@ -6,7 +6,7 @@ import { useTranslation } from 'next-i18next';
  * @param {Array} dictionary List of found USB storage units on the device
  * @param {String} value Value ID for the USB storage unit
  * @param {Function} setValue A function from the parent to set the selected USB storage unit
- * @returns If USB storage units were found, it returns a list of them, else a <div>-tag with some helpful message.
+ * @returns If USB storage units were found, it returns a list of them, else a div-tag with some helpful message.
  */
 export default function Dropdown({dictionary, value, setValue}) {
     const t = useTranslation('common').t;

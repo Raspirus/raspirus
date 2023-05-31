@@ -1,7 +1,7 @@
 /**
  * A simple component that shows the path of the selected directory if one has been selected
  * @param {String} value Path of the directory as string
- * @returns A <div> tag containing the path of the directory beautified
+ * @returns A div tag containing the path of the directory beautified
  */
 export default function DirectoryInput({value}) {
 
