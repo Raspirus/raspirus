@@ -5,7 +5,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
  * @param {String} title The title of the Information being displayed
  * @param {String} value A short description of the information
  * @param {FontawesomeObject} icon An appropriate icon
- * @returns A <div> tag containing an FontawesomeIcon, a div for the title for custom HTML and a p for the value (desc)
+ * @returns A div tag containing an FontawesomeIcon, a div for the title for custom HTML and a p for the value (description)
  */
 export default function InfoComp({ title, value, icon }) {
 

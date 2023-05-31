@@ -3,23 +3,19 @@ import Dropdown from 'react-bootstrap/Dropdown';
 import { useRouter } from 'next/router';
 import LanguageSwitchLink from './LanguageSwitchLink'
 import i18nextConfig from '../next-i18next.config'
-import styles from '../styles/langpicker.module.css';
+import FlagIcon from './FlagIcon';
 
-function FlagIcon({ countryCode = "" }) {
-  if (countryCode === "en") {
-    countryCode = "gb"
-  }
-
-  return (
-    <span className={`fi fis ${styles.fiCircle} inline-block mr-2 fi-${countryCode}`} />
-  )
-}
-
+/**
+ * This components serves as a Dropdown where users can select a language. Using the Rooter we set the language as a URL query
+ * @returns a React Dropdown that allows users to select the language
+ */
 export default function LanguageSelector() {
+  // We use the Router to determine from the URL what language was selected
   const router = useRouter()
+  // Either use the language (locale) from the URL, or use the default one set in the config file (next-i18next.config.js)
   const currentLocale = router.query.locale || i18nextConfig.i18n.defaultLocale;
+  // Loads all defined locales from the config file
   const locales = i18nextConfig.i18n.locales;
-
 
   return (
     <div className='absolute top-0 left-0 m-2'>
