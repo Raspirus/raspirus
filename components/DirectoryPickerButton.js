@@ -4,7 +4,7 @@ import Image from 'next/image';
  * A button that once pressed opens an os-specific window that lets the user select a folder from the file-system.
  * The button uses the Tauri API to choose how to open the file-system window.
  * @param {Function} onSelectDirectory Function to trigger when a directory has been selected
- * @returns A <button> tag with a folder-icon Image
+ * @returns A button tag with a folder-icon Image
  */
 export default function DirectoryPickerButton({ onSelectDirectory }) {
 
