@@ -1,6 +1,6 @@
-import languageDetector from '../lib/languageDetector'
-import { useRouter } from 'next/router'
-import Link from 'next/link'
+import languageDetector from '../lib/languageDetector';
+import { useRouter } from 'next/router';
+import Link from 'next/link';
 import FlagIcon from './FlagIcon';
 
 /**
