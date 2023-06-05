@@ -26,6 +26,7 @@ mod tests {
         let mut output = Vec::new();
         writeln!(&mut output, "{:?}", file).unwrap();
         let output_str = String::from_utf8_lossy(&output);
+        println!("String is: {}", output_str);
         
         let re = Regex::new(r#"\\\\\?\\(.+)"#).unwrap();
         let captures = re.captures(&output_str).unwrap();
