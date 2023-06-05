@@ -1,8 +1,16 @@
-import { useTranslation } from 'next-i18next'
+import { useTranslation } from 'next-i18next';
 
+/**
+ * A custom selector to allow users to select a weekday in multiple languages
+ * @param {Number} selectedWeekday Sets the selected weekday by number, -1 beeing daily, 0 being sunday and 6 being saturday
+ * @param {Function} setSelectedWeekday A function to pass the selected weekday to the parent
+ * @returns A div containing a selector with fixed options
+ */
 function WeekdaySelector({selectedWeekday, setSelectedWeekday}) {
+    // Uses the translations module
     const {t} = useTranslation('common');
 
+    // Updates the selected week on the parent on change detected
     const handleWeekdayChange = (event) => {
         setSelectedWeekday(parseInt(event.target.value));
     };

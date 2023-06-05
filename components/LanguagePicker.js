@@ -1,8 +1,8 @@
 import React from 'react';
 import Dropdown from 'react-bootstrap/Dropdown';
 import { useRouter } from 'next/router';
-import LanguageSwitchLink from './LanguageSwitchLink'
-import i18nextConfig from '../next-i18next.config'
+import LanguageSwitchLink from './LanguageSwitchLink';
+import i18nextConfig from '../next-i18next.config';
 import FlagIcon from './FlagIcon';
 
 /**
