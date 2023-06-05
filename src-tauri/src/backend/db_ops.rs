@@ -243,9 +243,13 @@ impl DBOps {
         let mut stmt = self
             .db_conn
             .prepare("SELECT hash FROM signatures WHERE hash = ?")?;
-        let hash: String = stmt.query_row(params![hash_str], |row| row.get(0))?;
-        Ok(!hash.is_empty())
+        
+        match stmt.query_row(params![hash_str], |row| row.get::<_, String>(0)) {
+            Ok(_) => Ok(true),
+            Err(_) => Ok(false),
+        }
     }
+    
     
     /// Returns the number of hashes in the `signatures` table.
     ///

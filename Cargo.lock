@@ -498,6 +498,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "ctor"
+version = "0.2.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1586fa608b1dab41f667475b4a41faec5ba680aee428bfa5de4ea520fdc6e901"
+dependencies = [
+ "quote",
+ "syn 2.0.18",
+]
+
+[[package]]
 name = "cty"
 version = "0.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2346,10 +2356,12 @@ name = "raspirus"
 version = "0.1.8"
 dependencies = [
  "chrono",
+ "ctor 0.2.2",
  "directories-next",
  "log",
  "md5",
  "pretty_env_logger",
+ "regex",
  "reqwest",
  "rusqlite",
  "serde",
@@ -2425,9 +2437,9 @@ dependencies = [
 
 [[package]]
 name = "regex"
-version = "1.8.3"
+version = "1.8.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "81ca098a9821bd52d6b24fd8b10bd081f47d39c22778cafaa75a2857a62c6390"
+checksum = "d0ab3ca65655bb1e41f2a8c8cd662eb4fb035e67c3f78da1d61dffe89d07300f"
 dependencies = [
  "aho-corasick 1.0.2",
  "memchr",
@@ -3197,7 +3209,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5a6f9c2dafef5cbcf52926af57ce9561bd33bb41d7394f8bb849c0330260d864"
 dependencies = [
  "brotli",
- "ctor",
+ "ctor 0.1.26",
  "glob",
  "heck 0.4.1",
  "html5ever",
