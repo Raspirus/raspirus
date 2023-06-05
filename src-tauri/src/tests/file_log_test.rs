@@ -26,7 +26,6 @@ mod tests {
         let mut output = Vec::new();
         writeln!(&mut output, "{:?}", file).unwrap();
         let output_str = String::from_utf8_lossy(&output);
-        println!("String is: {}", output_str);
 
         let file_path = if cfg!(windows) {
             let re = Regex::new(r#"\\\\\?\\\\(.+)""#).unwrap();
@@ -41,8 +40,6 @@ mod tests {
     
             path.to_string()
         };
-
-        println!("Returned path: {}", file_path);
     
         let contents = std::fs::read_to_string(file_path).expect("Failed to read file");
     
@@ -60,14 +57,21 @@ mod tests {
         writeln!(&mut output, "{:?}", file).unwrap();
         let output_str = String::from_utf8_lossy(&output);
         
-        let re = Regex::new(r#"\\\\\?\\(.+)"#).unwrap();
-        let captures = re.captures(&output_str).unwrap();
-        let file_path = &captures[1];
+        let file_path = if cfg!(windows) {
+            let re = Regex::new(r#"\\\\\?\\\\(.+)""#).unwrap();
+            let captures = re.captures(&output_str).unwrap();
+            let path = &captures[1];
+    
+            path.to_string()
+        } else {
+            let re = Regex::new(r#"path: "(.+)""#).unwrap();
+            let captures = re.captures(&output_str).unwrap();
+            let path = &captures[1];
+    
+            path.to_string()
+        };
 
-        let file_path = file_path.trim_start_matches('\\');
-        let file_path = &file_path[..file_path.len() - 3];
-
-        if std::path::Path::new(file_path).exists() {
+        if std::path::Path::new(&file_path).exists() {
             if let Err(err) = std::fs::remove_file(file_path) {
                 eprintln!("Failed to delete the log file: {}", err);
             } else {
