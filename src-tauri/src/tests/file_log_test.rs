@@ -27,13 +27,23 @@ mod tests {
         writeln!(&mut output, "{:?}", file).unwrap();
         let output_str = String::from_utf8_lossy(&output);
         println!("String is: {}", output_str);
-        
-        let re = Regex::new(r#"\\\\\?\\(.+)"#).unwrap();
-        let captures = re.captures(&output_str).unwrap();
-        let file_path = &captures[1];
 
-        let file_path = file_path.trim_start_matches('\\');
-        let file_path = &file_path[..file_path.len() - 3];
+        let file_path = if cfg!(windows) {
+            let re = Regex::new(r#"\\\\\?\\(.+)"#).unwrap();
+            let captures = re.captures(&output_str).unwrap();
+            let mut path = &captures[1];
+    
+            path = path.trim_start_matches('\\');
+            path = &path[..path.len() - 3];
+    
+            path.to_string()
+        } else {
+            let re = Regex::new(r#"path: "(.+)"\s}"#).unwrap();
+            let captures = re.captures(&output_str).unwrap();
+            let path = &captures[1];
+    
+            path.to_string()
+        };
     
         let contents = std::fs::read_to_string(file_path).expect("Failed to read file");
     
