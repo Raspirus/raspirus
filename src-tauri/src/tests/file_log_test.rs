@@ -29,19 +29,15 @@ mod tests {
         println!("String is: {}", output_str);
 
         let file_path = if cfg!(windows) {
-            let re = Regex::new(r#"\\\\\?\\(.+)"#).unwrap();
+            let re = Regex::new(r#"\\\\\?\\\\(.+)""#).unwrap();
             let captures = re.captures(&output_str).unwrap();
-            let mut path = &captures[1];
-    
-            path = path.trim_start_matches('\\');
-            path = &path[..path.len() - 3];
+            let path = &captures[1];
     
             path.to_string()
         } else {
-            let re = Regex::new(r#"path: "(.+)"\s}"#).unwrap();
+            let re = Regex::new(r#"path: "(.+)""#).unwrap();
             let captures = re.captures(&output_str).unwrap();
-            let mut path = &captures[1];
-            path = &path[..path.len() - 29];
+            let path = &captures[1];
     
             path.to_string()
         };
