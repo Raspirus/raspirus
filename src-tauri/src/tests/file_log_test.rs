@@ -40,10 +40,13 @@ mod tests {
         } else {
             let re = Regex::new(r#"path: "(.+)"\s}"#).unwrap();
             let captures = re.captures(&output_str).unwrap();
-            let path = &captures[1];
+            let mut path = &captures[1];
+            path = &path[..path.len() - 29];
     
             path.to_string()
         };
+
+        println!("Returned path: {}", file_path);
     
         let contents = std::fs::read_to_string(file_path).expect("Failed to read file");
     
