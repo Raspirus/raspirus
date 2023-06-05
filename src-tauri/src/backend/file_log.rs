@@ -7,7 +7,7 @@ use log::{debug, error, info, warn};
 use directories_next::ProjectDirs;
 
 pub struct FileLog {
-    file: Option<File>,
+    pub file: Option<File>,
 }
 
 /// A struct for creating and writing to a log file.
