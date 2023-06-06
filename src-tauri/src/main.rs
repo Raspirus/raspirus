@@ -104,7 +104,7 @@ async fn check_raspberry() -> Result<bool, String> {
 }
 
 #[tauri::command]
-async fn update_database(db_file: Option<String>) -> Result<String, String> {
+async fn update_database(db_file: Option<String>, window: tauri::Window) -> Result<String, String> {
     let mut use_db = "signatures.db".to_owned();
     match db_file {
         Some(fpath) => {
@@ -125,7 +125,7 @@ async fn update_database(db_file: Option<String>) -> Result<String, String> {
     let db_file_path = program_dir.join(&use_db);
     let db_file_str: &str = db_file_path.to_str().expect("Failed to get database path");
 
-    let mut db_connection = match DBOps::new(db_file_str) {
+    let mut db_connection = match DBOps::new(db_file_str, Some(window)) {
         Ok(db_conn) => db_conn,
         Err(err) => {
             error!("{err}");
