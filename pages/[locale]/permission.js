@@ -2,17 +2,26 @@ import Head from "next/head";
 import { useRouter } from "next/router";
 import { faCheck, faXmark, faHome } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useTranslation } from 'next-i18next'
-import { getStaticPaths, makeStaticProps } from '../../lib/getStatic'
+import { useTranslation } from 'next-i18next';
+import { getStaticPaths, makeStaticProps } from '../../lib/getStatic';
 
+/**
+ * Function that generates the necessary static paths and props manually
+ * This is to fix an issue with next18 translations
+ */
 const getStaticProps = makeStaticProps('common')
 export { getStaticPaths, getStaticProps }
 
-
+/**
+ * This page is a middle-page between the scanning process and the Home page. When the user requests a scan,
+ * he/she gets redirected here, where a confirmation of th Agreement is required. Afterward, a scan can start.
+ * @returns A full HTML page
+ */
 export default function Permission() {
   const router = useRouter();
   const {t} = useTranslation('common');
 
+  // When the user accepts the agreement, a redirect takes place with the path to scan retrieved from the Home page
   function startScanner() {
     let { query: { scan_path }, } = router;
     router.push({
@@ -21,6 +30,7 @@ export default function Permission() {
     })
   }
 
+  // Function to return home
   const backHome = () => {
     router.push("/");
   };
@@ -34,7 +44,7 @@ export default function Permission() {
         <button
           onClick={backHome}
           type="button"
-          className="inline-block align-middle px-6 py-2.5 m-2 bg-mainred text-white font-medium text-xs leading-tight uppercase rounded shadow-md hover:bg-mainred-dark hover:shadow-lg focus:bg-mainred-dark focus:shadow-lg focus:outline-none focus:ring-0 active:bg-mainred-dark active:shadow-lg transition duration-150 ease-in-out"
+          className="inline-block align-middle px-6 py-2.5 m-2 bg-mainred text-white font-medium text-xs leading-tight uppercase rounded shadow-md"
         >
           <FontAwesomeIcon
               icon={faHome}
@@ -58,7 +68,7 @@ export default function Permission() {
           <button
             onClick={backHome}
             type="button"
-            className="inline-block px-6 py-2.5 bg-mainred text-white font-medium text-xs leading-tight uppercase rounded shadow-md hover:bg-mainred-dark hover:shadow-lg focus:bg-mainred-dark focus:shadow-lg focus:outline-none focus:ring-0 active:bg-mainred-dark active:shadow-lg transition duration-150 ease-in-out"
+            className="inline-block px-6 py-2.5 bg-mainred text-white font-medium text-xs leading-tight uppercase rounded shadow-md"
           >
             <FontAwesomeIcon
               icon={faXmark}
@@ -70,7 +80,7 @@ export default function Permission() {
           <button
             onClick={startScanner}
             type="button"
-            className="inline-block px-6 py-2.5 m-3 bg-maingreen text-white font-medium text-xs leading-tight uppercase rounded shadow-md hover:bg-maingreen-dark hover:shadow-lg focus:bg-maingreen-dark focus:shadow-lg focus:outline-none focus:ring-0 active:bg-maingreen-dark active:shadow-lg transition duration-150 ease-in-out"
+            className="inline-block px-6 py-2.5 m-3 bg-maingreen text-white font-medium text-xs leading-tight uppercase rounded shadow-md"
           >
             <FontAwesomeIcon
               icon={faCheck}
