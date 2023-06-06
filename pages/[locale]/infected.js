@@ -9,34 +9,45 @@ import Image from "next/image";
 import { useTranslation } from 'next-i18next';
 import { getStaticPaths, makeStaticProps } from '../../lib/getStatic';
 
+/**
+ * Function that generates the necessary static paths and props manually
+ * This is to fix an issue with next18 translations
+ */
 const getStaticProps = makeStaticProps('common')
 export { getStaticPaths, getStaticProps }
 
+/**
+ * This page shows either a list of found viruses or, if obfuscated mode is active, just a warning
+ * @returns A full HTML page
+ */
 export default function Infected() {
     const router = useRouter();
+    // Check if obfuscated mode is active
     const [obfuscated, setObfuscated] = useState(false);
     let { query: { virus_list }, } = router;
-    const {t} = useTranslation('common');
+    const { t } = useTranslation('common');
 
     if (typeof virus_list == String) {
         virus_list = JSON.parse(virus_list);
     }
 
+    // Button to return back Home
     const backHome = () => {
         router.push('/');
     }
 
     useEffect(() => {
         if (typeof window !== "undefined") {
-    
-          invoke("create_config", {})
-            .then((output) => {
-              const parsedData = JSON.parse(output);
-              setObfuscated(parsedData.obfuscated_is_active);
-            })
-            .catch((err) => console.error(err))
+
+            // We retrieve the set obfuscated mode from the backends config
+            invoke("create_config", {})
+                .then((output) => {
+                    const parsedData = JSON.parse(output);
+                    setObfuscated(parsedData.obfuscated_is_active);
+                })
+                .catch((err) => console.error(err))
         }
-      }, []);
+    }, []);
 
     if (obfuscated) {
         return (
@@ -53,7 +64,7 @@ export default function Infected() {
                         width={500}
                         height={500}
                     />
-                    <button onClick={backHome} type="button" className="inline-block px-6 py-2.5 m-10 bg-mainred text-white font-medium text-xs leading-tight uppercase rounded shadow-md hover:bg-mainred-dark hover:shadow-lg focus:bg-mainred-dark focus:shadow-lg focus:outline-none focus:ring-0 active:bg-mainred-dark active:shadow-lg transition duration-150 ease-in-out">
+                    <button onClick={backHome} type="button" className="inline-block px-6 py-2.5 m-10 bg-mainred text-white font-medium text-xs leading-tight uppercase rounded shadow-md">
                         <FontAwesomeIcon
                             icon={faHome}
                             size="1x"
@@ -71,7 +82,7 @@ export default function Infected() {
                 <title>{t('infected_title')}</title>
             </Head>
             <div className="align-middle">
-                <button onClick={backHome} type="button" className="inline-block align-middle px-6 py-2.5 m-2 bg-mainred text-white font-medium text-xs leading-tight uppercase rounded shadow-md hover:bg-bmainred-dark hover:shadow-lg focus:bg-mainred-dark focus:shadow-lg focus:outline-none focus:ring-0 active:bg-mainred-dark active:shadow-lg transition duration-150 ease-in-out">
+                <button onClick={backHome} type="button" className="inline-block align-middle px-6 py-2.5 m-2 bg-mainred text-white font-medium text-xs leading-tight uppercase rounded shadow-md">
                     <FontAwesomeIcon
                         icon={faHome}
                         size="1x"
