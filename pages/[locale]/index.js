@@ -12,34 +12,58 @@ import DirectoryPickerButton from "../../components/DirectoryPickerButton";
 import Dropdown from "../../components/DriverDropdown";
 import DirectoryInput from "../../components/DirectoryInput";
 import SwitchLanguage from "../../components/LanguagePicker";
-import { useTranslation } from 'next-i18next'
-import { getStaticPaths, makeStaticProps } from '../../lib/getStatic'
+import { useTranslation } from 'next-i18next';
+import { getStaticPaths, makeStaticProps } from '../../lib/getStatic';
 
+/**
+ * Function that generates the necessary static paths and props manually
+ * This is to fix an issue with next18 translations
+ */
 const getStaticProps = makeStaticProps('common')
 export { getStaticPaths, getStaticProps }
 
+/**
+ * The main page of the application, displaying buttons to visit both the Information as the Settings page
+ * It also determines through the backend on which architecture the app is running to hide certain buttons
+ * Mainly it allows the user to choose a device or location to scan and start the scan.
+ * @returns A full HTML page
+ */
 export default function Home() {
   const router = useRouter();
+  // Keeps the selected directory, if one was selected
   const [value, setValue] = useState("None");
+  // Array of scannable USB devices
   const [dictionary, setDictionary] = useState([]);
+  // If the app is running on the Raspberry Pi (to disallow scanning folders)
   const [isRaspberryPi, setIsRaspberryPi] = useState(false);
+  // If a directory was selected
   const [selectedDirectory, setSelectedDirectory] = useState(false);
+  // Determines if an error occurred
+  const [errorOccurred, setError] = useLocalStorage("errorOccurred", 'false');
   const {t} = useTranslation('common');
 
+  /**
+   * Function triggered when a directory was selected
+   * @param {Path} directory Path to that directory as a string
+   */
   const handleSelectDirectory = (directory) => {
-    console.log("Incoming dir: ", directory);
     setValue(directory);
     setSelectedDirectory(true)
   }
 
+  // Reads the query params to see if a previous running process returned an error.
+  // For example if scanning failed, the user is redirected back to the Home page
+  // and an error message is appended as a query parameter, which is extracted here
   let {
     query: { scanner_error },
   } = router;
 
-  const [errorOccurred, setError] = useLocalStorage("errorOccurred", 'false');
+
   if (scanner_error != null && scanner_error != "" && errorOccurred == 'true') {
     console.error("Home error", scanner_error);
+    // Fires a JavaScript Alert to inform the user that an issue occurred
     Swal.fire(t('scanning_error'), scanner_error, "error");
+    // Then removes the error again, to avoid firing the alert twice
     setError('false');
     localStorage.removeItem("errorOccurred");
   }
@@ -47,14 +71,17 @@ export default function Home() {
   useEffect(() => {
     if (typeof window !== "undefined") {
 
+      // Using the backend, check if the app is running on the Raspberry Pi
       invoke("check_raspberry", {})
         .then((output) => setIsRaspberryPi(output))
 
+      // Using the backend, ask for a list of connected USB drives
       invoke("list_usb_drives", {})
         .then((output) => {
           setDictionary(JSON.parse(output));
         })
         .catch((error) => {
+          // Catches possible errors and display them using an Alert
           console.error(error);
           Swal.fire(
             t('usb_list_error'),
@@ -65,7 +92,14 @@ export default function Home() {
     }
   }, [t]);
 
+  /**
+   * The user is not directly redirected to the scanning process, he/she first needs to pass
+   * and accept the agreement page. Once done that, the scanning will start from that page.
+   * In this case we simply redirect the user to the agreement page and pass on some values
+   * by attaching them to the URL query.
+   */
   const openAgreement = () => {
+    // Checks that a folder or device was selected
     if (value.length <= 0 || value == "None") {
       Swal.fire(t('selection_warn'), t('selection_warn_msg'), "warning");
     } else {
@@ -76,16 +110,25 @@ export default function Home() {
     }
   };
 
+  // Redirects the user to the Information page
   const openInfo = () => {
     router.push("/info");
   };
 
+  // Redirects the user to the Settings page
   const openSettings = () => {
     router.push("/settings");
   };
 
+  /**
+   * Manually refreshes the page to reload the attached USB drives.
+   * This measure is necessary and was choosen over the constant-ping method.
+   * Instead of asking the backed every X time to send us data, we let the user decide
+   * when he inserted a new thum drive.
+   */
   function refreshContent() {
     let refreshButton = document.getElementById("refresh-icon");
+    // Starts a small animation
     refreshButton.classList.add(styles.refreshStart);
 
     if (typeof window !== "undefined") {
@@ -120,8 +163,7 @@ export default function Home() {
             onClick={openSettings}
             type="button"
             className="absolute top-0 right-0 px-6 py-2 border-2 m-2 border-maingreen text-maingreen bg-white 
-        font-medium text-xs leading-tight uppercase rounded hover:bg-black hover:bg-opacity-5 
-        focus:outline-none focus:ring-0 transition duration-150 ease-in-out"
+        font-medium text-xs leading-tight uppercase rounded"
           >
             <FontAwesomeIcon
               icon={faGear}
@@ -148,7 +190,7 @@ export default function Home() {
 
                 <button
                   onClick={refreshContent}
-                  className="inline-block p-3 ml-1 bg-maingreen rounded shadow-md hover:bg-maingreen-dark hover:shadow-lg focus:bg-maingreen-dark focus:shadow-lg focus:outline-none focus:ring-0 active:maingreen-dark active:shadow-lg transition duration-150 ease-in-out"
+                  className="inline-block p-3 ml-1 bg-maingreen rounded shadow-md"
                 >
                   <Image
                     id="refresh-icon"
@@ -164,14 +206,14 @@ export default function Home() {
                 <button
                   onClick={openInfo}
                   type="button"
-                  className="mr-2 inline-block px-7 py-3 border-2 border-maingreen text-maingreen bg-white font-medium text-sm leading-tight uppercase rounded hover:bg-black hover:bg-opacity-5 focus:outline-none focus:ring-0 transition duration-150 ease-in-out"
+                  className="mr-2 inline-block px-7 py-3 border-2 border-maingreen text-maingreen bg-white font-medium text-sm uppercase rounded"
                 >
                   {t('info')}
                 </button>
                 <button
                   onClick={openAgreement}
                   type="button"
-                  className="ml-2 inline-block px-7 py-3 bg-mainred text-white font-medium text-sm leading-snug uppercase rounded shadow-md hover:bg-mainred-dark hover:shadow-lg focus:bg-mainred-dark focus:shadow-lg focus:outline-none focus:ring-0 active:mainred-dark active:shadow-lg transition duration-150 ease-in-out"
+                  className="ml-2 inline-block px-7 py-3 bg-mainred text-white font-medium text-sm uppercase rounded shadow-md"
                 >
                   {t('start')}
                 </button>

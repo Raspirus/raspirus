@@ -1,21 +1,31 @@
-import Head from "next/head"
+import Head from "next/head";
 import { useRouter } from "next/router";
 import InfoComp from "../../components/InformationCard";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faR, faBook, faUser, faInfoCircle, faScaleBalanced, faHome } from '@fortawesome/free-solid-svg-icons';
 import Image from "next/image";
-import { useTranslation } from 'next-i18next'
-import { getStaticPaths, makeStaticProps } from '../../lib/getStatic'
+import { useTranslation } from 'next-i18next';
+import { getStaticPaths, makeStaticProps } from '../../lib/getStatic';
 
+/**
+ * Function that generates the necessary static paths and props manually
+ * This is to fix an issue with next18 translations
+ */
 const getStaticProps = makeStaticProps('common')
 export { getStaticPaths, getStaticProps }
 
-
+/**
+ * A page similar to the settings page that diaplays a list of cards.
+ * The cards are not interactive, but purely for style and display valuable information
+ * @returns A full HTML page
+ */
 export default function Info() {
     const router = useRouter();
+    // Retrieves the current version set in the package.json
     const appVersion = require('../../package.json').version;
     const {t} = useTranslation('common');
 
+    // Button to return Home
     const backHome = () => {
         router.push('/');
     }
@@ -26,7 +36,7 @@ export default function Info() {
                 <title>{t('info_title')}</title>
             </Head>
             <div className="align-middle">
-                <button onClick={backHome} type="button" className="inline-block align-middle px-6 py-2.5 m-2 bg-mainred text-white font-medium text-xs leading-tight uppercase rounded shadow-md hover:bg-mainred-dark hover:shadow-lg focus:bg-mainred-dark focus:shadow-lg focus:outline-none focus:ring-0 active:bg-mainred-dark active:shadow-lg transition duration-150 ease-in-out">
+                <button onClick={backHome} type="button" className="inline-block align-middle px-6 py-2.5 m-2 bg-mainred text-white font-medium text-xs leading-tight uppercase rounded shadow-md">
                     <FontAwesomeIcon
                         icon={faHome}
                         size="1x"
@@ -34,7 +44,9 @@ export default function Info() {
                     />
                     {t('back_btn')}
                 </button>
-                <h1 className="inline-block align-middle p-2 font-medium leading-tight text-5xl mt-0 mb-2 text-mainred">{t('info_title')}</h1>
+                <h1 className="inline-block align-middle p-2 font-medium leading-tight text-5xl mt-0 mb-2 text-mainred">
+                    {t('info_title')}
+                </h1>
             </div>
 
             <Image 
