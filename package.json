@@ -37,7 +37,8 @@
     "react-i18next": "^12.2.0",
     "react-time-picker": "^6.0.4",
     "rxjs": "^7.3.0",
-    "sweetalert2": "^11.4.8"
+    "sweetalert2": "^11.4.8",
+    "sweetalert2-react-content": "^5.0.7"
   },
   "devDependencies": {
     "@tauri-apps/cli": "^1.2.3",

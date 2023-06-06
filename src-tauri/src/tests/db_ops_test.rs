@@ -5,13 +5,13 @@ mod tests {
 
     #[test]
     fn test_init_table() {
-        let db_ops = DBOps::new(DB_FILE_LOC).unwrap();
+        let db_ops = DBOps::new(DB_FILE_LOC, None).unwrap();
         assert!(db_ops.init_table().is_ok());
     }
 
     #[test]
     fn test_download_files() {
-        let mut db_ops = DBOps::new(DB_FILE_LOC).unwrap();
+        let mut db_ops = DBOps::new(DB_FILE_LOC, None).unwrap();
         db_ops.download_files(vec![1, 2]);
     }
 
@@ -23,7 +23,7 @@ mod tests {
 
     #[test]
     fn test_insert_hashes() {
-        let mut db_ops = DBOps::new(DB_FILE_LOC).unwrap();
+        let mut db_ops = DBOps::new(DB_FILE_LOC, None).unwrap();
         db_ops
             .insert_hashes(vec![("93fe4fb85a682907137b0b1051991332".to_owned(), "ec2112c9c243d837247217baf351ab79".to_owned())])
             .unwrap();
@@ -31,7 +31,7 @@ mod tests {
 
     #[test]
     fn test_hash_exists() {
-        let mut db_ops = DBOps::new(DB_FILE_LOC).unwrap();
+        let mut db_ops = DBOps::new(DB_FILE_LOC, None).unwrap();
         db_ops
             .insert_hashes(vec![("93fe4fb85a682907137b0b1051991332".to_owned(), "ec2112c9c243d837247217baf351ab79".to_owned())])
             .unwrap();
@@ -41,7 +41,7 @@ mod tests {
 
     #[test]
     fn test_count_hashes() {
-        let db_ops = DBOps::new(DB_FILE_LOC).unwrap();
+        let db_ops = DBOps::new(DB_FILE_LOC, None).unwrap();
         let hash_count = db_ops.count_hashes();
     
         match hash_count {
@@ -58,14 +58,14 @@ mod tests {
 
     #[test]
     fn test_remove_hash() {
-        let db_ops = DBOps::new(DB_FILE_LOC).unwrap();
+        let db_ops = DBOps::new(DB_FILE_LOC, None).unwrap();
         assert!(db_ops._remove_hash("93fe4fb85a682907137b0b1051991332").is_ok());
         assert_eq!(db_ops.hash_exists("93fe4fb85a682907137b0b1051991332").unwrap(), false);
     }
 
     #[test]
     fn test_get_file_list() {
-        let db_ops = DBOps::new(DB_FILE_LOC).unwrap();
+        let db_ops = DBOps::new(DB_FILE_LOC, None).unwrap();
         assert!(db_ops.get_file_list() > 0);
     }
 
@@ -76,7 +76,7 @@ mod tests {
 
     #[test]
     fn test_get_db_files() {
-        let db_ops = DBOps::new(DB_FILE_LOC).unwrap();
+        let db_ops = DBOps::new(DB_FILE_LOC, None).unwrap();
         assert!(db_ops.get_db_files().is_some());
     }
 
