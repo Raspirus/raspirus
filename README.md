@@ -7,7 +7,7 @@
 ![banner_logo](https://user-images.githubusercontent.com/50681275/223684389-ed0f104f-c183-4223-9723-c268e7cc5268.png)
 
 ## Introduction
-Sometimes you work on a computer that is not connected to the internet. It even has no antivirus installed and you guess you are safe. But it could be used by a lot of people that upload and download files using their personal USB sticks. This bothers you, and it bothered me too. That's where Raspirus enters the game, an application to be used on the Raspberry Pi, but also for Windows and other Linux systems. Raspirus will scan all files on your USB key and warn you in case of possible threats. It's far from being a fully-fledged antivirus, as that would consume way too much RAM on a normal Raspberry Pi 3. It just computes the hash of each file and checks for a match in a signature database.
+Introducing Raspirus, an innovative application designed to address the security concerns of working on offline computers without antivirus protection, particularly those shared among multiple users who frequently utilize personal USB devices for file transfers. By leveraging the power of Raspberry Pi, as well as Windows and other Linux systems, Raspirus provides a comprehensive solution. Through file scanning functionality, Raspirus intelligently examines each file on the USB key, efficiently computing their hashes and cross-referencing them with an extensive signature database to promptly alert users about potential threats, all while minimizing resource consumption on Raspberry Pi 3 devices.
 
 ## Contributors ✨
 Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
