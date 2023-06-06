@@ -59,7 +59,7 @@ impl FileScanner {
     pub fn new(scanloc: &str, db_file: &str, t_win: tauri::Window) -> Result<Self, Error> {
         //check path
         if Path::new(&scanloc).exists() {
-            let tmpconf = match DBOps::new(db_file) {
+            let tmpconf = match DBOps::new(db_file, None) {
                 Ok(db_conn) => db_conn,
                 Err(err) => {
                     error!("{err}");

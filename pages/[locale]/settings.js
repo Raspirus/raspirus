@@ -2,16 +2,21 @@ import Head from 'next/head';
 import SettingComp from '../../components/SettingsCard';
 import { useRouter } from 'next/router';
 import { invoke } from "@tauri-apps/api/tauri";
+import { listen } from '@tauri-apps/api/event';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faFileLines, faUserNinja, faWrench, faHome, faClock } from '@fortawesome/free-solid-svg-icons';
 import React, { useState, useEffect } from 'react';
+import ReactDOM from 'react-dom';
 import Swal from 'sweetalert2';
+import withReactContent from 'sweetalert2-react-content';
 import moment from "moment";
 import { useTranslation } from 'next-i18next';
 import { getStaticPaths, makeStaticProps } from '../../lib/getStatic';
 import DateTimeSelector from '../../components/TimePicker';
 import WeekdaySelector from '../../components/WeekdaySelector';
 import schedule from 'node-schedule';
+import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
+import 'react-circular-progressbar/dist/styles.css';
 
 /**
  * Function that generates the necessary static paths and props manually
@@ -36,6 +41,8 @@ export default function Settings() {
   const [cronjob, setcronjob] = useState(null);
   const [logging, setLogging] = useState(false);
   const [obfuscated, setObfuscated] = useState(false);
+  // DB Update progress
+  const [progress, setProgress] = useState(0);
   let db_location = "";
 
   // When the user goes back to the Home page, an update of the set settings
@@ -67,7 +74,7 @@ export default function Settings() {
 
     if (typeof window !== "undefined") {
 
-      invoke("create_config", {contents: jsonString})
+      invoke("create_config", { contents: jsonString })
         .then((output) => {
           const parsedData = JSON.parse(output);
           console.log("Server answer: ", parsedData);
@@ -75,6 +82,38 @@ export default function Settings() {
         .catch((err) => console.error(err))
     }
   }
+
+  useEffect(() => {
+    // Reads the emited progress signal from the backend
+    const handleProgress = (event) => {
+      console.log("Progress: ", event.payload.message);
+      setProgress(event.payload.message);
+    };
+    // Backend can also send error instead of the progress
+    const handleProgressErr = (event) => {
+      console.error(error);
+      localStorage.setItem("errorOccurred", 'true');
+      // Returns to the Home page with an error statements that will be displayed there
+      router.push({
+        pathname: '/',
+        query: { scanner_error: event.payload.message }
+      })
+    }
+
+    // Starts listening for incoming signals emited from the backend
+    const startListening = async () => {
+      await listen('progress', handleProgress);
+      await listen('progerror', handleProgressErr);
+    };
+
+    startListening();
+
+    // Clean up function to remove the event listener when the component unmounts
+    return () => {
+      removeEventListener('progress', handleProgress);
+      removeEventListener('progerror', handleProgressErr);
+    };
+  }, [router])
 
   useEffect(() => {
     if (typeof window !== "undefined") {

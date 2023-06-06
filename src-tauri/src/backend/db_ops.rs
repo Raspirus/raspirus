@@ -4,15 +4,22 @@ use log::{debug, error, info, warn};
 use reqwest::StatusCode;
 use rusqlite::{params, Connection};
 
+use tauri::Manager;
+
 #[allow(unused)]
 pub struct DBOps {
     db_conn: Connection,
     db_file: String,
     file_nr: i32,
+    /// Tauri window for events
+    tauri_window: Option<tauri::Window>,
+}
+#[derive(Clone, serde::Serialize)]
+struct TauriEvent {
+    message: String,
 }
 
 impl DBOps {
-    
     /// Returns a new `DBOps` struct with a connection to the specified database file
     /// and initializes the table if it does not exist.
     ///
@@ -28,7 +35,7 @@ impl DBOps {
     /// let db_ops = DBOps::new("signatures.db").unwrap();
     /// assert_eq!(db_ops.db_conn, Connection::open("signatures.db").unwrap());
     /// ```
-    pub fn new(db_file: &str) -> Result<Self, rusqlite::Error> {
+    pub fn new(db_file: &str, t_win: Option<tauri::Window>) -> Result<Self, rusqlite::Error> {
         let conn = match Connection::open(db_file) {
             Ok(conn) => conn,
             Err(err) => return Err(err),
@@ -39,6 +46,7 @@ impl DBOps {
             db_conn: conn,
             db_file: db_file.to_owned(),
             file_nr: 0,
+            tauri_window: t_win,
         };
         ret.init_table()?;
         Ok(ret)
@@ -66,7 +74,7 @@ impl DBOps {
             Err(err) => Err(err),
         }
     }
-    
+
     /// Updates the database by downloading any missing files and inserting their hashes into the `signatures` table.
     ///
     /// # Examples
@@ -80,24 +88,42 @@ impl DBOps {
     pub fn update_db(&mut self) -> Result<u64, rusqlite::Error> {
         info!("Updating database...");
         let web_files = self.get_diff_file();
-        if web_files.len() > 0 {
+
+        if let Some(last_element) = web_files.last() {
+            self.file_nr = *last_element;
             info!("Database not up-to-date!");
             info!("Downloading {} file(s)", web_files.len());
             self.download_files(web_files);
+        } else {
+            if let Some(window) = &self.tauri_window {
+                if window
+                    .emit_all(
+                        "progress",
+                        TauriEvent {
+                            message: "100".to_string(),
+                        },
+                    )
+                    .is_err()
+                {
+                    error!("Couldn't send progress update to frontend");
+                }
+            } else {
+                error!("tauri_window is None");
+            }
         }
         info!("Total hashes in DB: {}", self.count_hashes().unwrap_or(0));
         Ok(self.count_hashes().unwrap_or(0))
     }
-    
+
     /// Downloads the specified files and inserts their hashes into the signatures table.
     ///
     /// # Examples
     ///
     /// ```
-    /// use rusqlite::Connection; 
-    /// use virus_scanner::backend::db_ops::DBOps; 
-    /// let mut db_ops = DBOps::new("signatures.db").unwrap(); 
-    /// db_ops.download_files(vec![1, 2, 3]); 
+    /// use rusqlite::Connection;
+    /// use virus_scanner::backend::db_ops::DBOps;
+    /// let mut db_ops = DBOps::new("signatures.db").unwrap();
+    /// db_ops.download_files(vec![1, 2, 3]);
     /// ```
     pub fn download_files(&mut self, files: Vec<i32>) {
         if files.len() == 0 {
@@ -107,16 +133,28 @@ impl DBOps {
         info!("Trying to fetch files...");
         let mut _retry = false;
         let mut i = 0;
+        let last_percentage: &mut f64 = &mut -1.0;
         while i < files.len() {
             _retry = false;
             match Self::download_file(files[i]) {
                 Ok(hashes) => match hashes {
                     Some(hashes) => {
+                        if self.tauri_window.is_none() {
+                            // Handle the case when `self.tauri_window` is `None`
+                            break;
+                        }
+                        
+                        if let Err(_) = Self::calculate_progress(self, last_percentage, i.try_into().unwrap(), self.file_nr) {
+                            error!("Progress calculation is broken");
+                            break;
+                        }
+                        
                         match self.insert_hashes(hashes) {
                             Ok(_) => i += 1,
                             Err(err) => error!("{err}"),
                         };
                     }
+                    
                     None => break,
                 },
                 Err(err) => {
@@ -131,17 +169,17 @@ impl DBOps {
         }
         info!("Done updating DB");
     }
-    
+
     /// Downloads the specified file and returns its content and file number as a tuple in the form of (file_nr, content).
     /// Returns None if the file does not exist or if there was an error creating a String from the file's bytes.
     ///
     /// # Examples
     ///
     /// ```
-    /// use rusqlite::Connection; 
+    /// use rusqlite::Connection;
     /// use virus_scanner::backend::db_ops::DBOps;
-    /// let file = DBOps::download_file(1).unwrap(); 
-    /// assert!(file.is_some()); 
+    /// let file = DBOps::download_file(1).unwrap();
+    /// assert!(file.is_some());
     /// ```
     pub fn download_file(file_nr: i32) -> Result<Option<Vec<(String, String)>>, reqwest::Error> {
         let url = format!(
@@ -180,16 +218,16 @@ impl DBOps {
         );
         Ok(Some(hashes))
     }
-    
+
     /// Inserts the given hashes into the signatures table.
     ///
     /// # Examples
     ///
     /// ```
-    /// use rusqlite::Connection; 
-    /// use virus_scanner::backend::db_ops::DBOps; 
-    /// let mut db_ops = DBOps::new("signatures.db").unwrap(); 
-    /// db_ops.insert_hashes(vec![("abcdef".to_owned(), "1".to_owned())]).unwrap(); 
+    /// use rusqlite::Connection;
+    /// use virus_scanner::backend::db_ops::DBOps;
+    /// let mut db_ops = DBOps::new("signatures.db").unwrap();
+    /// db_ops.insert_hashes(vec![("abcdef".to_owned(), "1".to_owned())]).unwrap();
     /// ```
     pub fn insert_hashes(&mut self, hashes: Vec<(String, String)>) -> Result<(), rusqlite::Error> {
         info!("Inserting File {}", hashes[0].1);
@@ -228,7 +266,7 @@ impl DBOps {
         transact.commit()?;
         Ok(())
     }
-   
+
     /// Returns true or false depending on if the given hash gets found in the database
     ///
     /// # Examples
@@ -243,14 +281,13 @@ impl DBOps {
         let mut stmt = self
             .db_conn
             .prepare("SELECT hash FROM signatures WHERE hash = ?")?;
-        
+
         match stmt.query_row(params![hash_str], |row| row.get::<_, String>(0)) {
             Ok(_) => Ok(true),
             Err(_) => Ok(false),
         }
     }
-    
-    
+
     /// Returns the number of hashes in the `signatures` table.
     ///
     /// # Examples
@@ -266,7 +303,7 @@ impl DBOps {
         let count: i64 = stmt.query_row([], |row| row.get(0))?;
         Ok(count as u64)
     }
-    
+
     /// Removes the specified hash from the `signatures` table.
     ///
     /// # Examples
@@ -342,7 +379,7 @@ impl DBOps {
 
         curr_fn
     }
-    
+
     /// Returns whether the file with the specified file number exists online.
     ///
     /// # Examples
@@ -425,16 +462,16 @@ impl DBOps {
         }
         Some(file_nr_values)
     }
-    
+
     /// Returns a list of file numbers for which there are no corresponding hashes in the signatures table.
     ///
     /// # Examples
     ///
     /// ```
-    /// use rusqlite::Connection; 
-    /// use virus_scanner::backend::db_ops::DBOps; 
-    /// let db_ops = DBOps::new("signatures.db").unwrap(); 
-    /// assert!(db_ops.get_diff_file().len() >= 0); 
+    /// use rusqlite::Connection;
+    /// use virus_scanner::backend::db_ops::DBOps;
+    /// let db_ops = DBOps::new("signatures.db").unwrap();
+    /// assert!(db_ops.get_diff_file().len() >= 0);
     /// ```
     pub fn get_diff_file(&self) -> Vec<i32> {
         let mut web_files: Vec<i32> = (0..=self.get_file_list()).collect();
@@ -445,5 +482,31 @@ impl DBOps {
         };
         web_files.retain(|x| !db_files.contains(x));
         web_files
+    }
+
+    fn calculate_progress(&mut self, last_percentage: &mut f64, mut scanned_size: i32, files_size: i32) -> Result<f64, String> {
+        scanned_size = scanned_size + files_size;
+        let scanned_percentage = (scanned_size as f64 / files_size as f64 * 100.0).round();
+        info!("Updated: {}%", scanned_percentage);
+        if scanned_percentage != *last_percentage {
+            if let Some(window) = &self.tauri_window {
+                if window
+                    .emit_all(
+                        "progress",
+                        TauriEvent {
+                            message: scanned_percentage.to_string(),
+                        },
+                    )
+                    .is_err()
+                {
+                    return Err("Couldn't send progress update to frontend".to_string());
+                }
+            } else {
+                return Err("tauri_window is None".to_string());
+            }
+            
+            *last_percentage = scanned_percentage;
+        }
+        Ok(scanned_percentage)
     }
 }
