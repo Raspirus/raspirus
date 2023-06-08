@@ -16,21 +16,21 @@ install:
 	@printf "$(TEXT)🚀 Starting installation...$(RESET)"
 	@sleep 3
 	@printf "$(TEXT)🌑 >>>> Updating system and removing temps$(RESET)"
-	apt update && apt upgrade -y
-	apt autoremove -y
+	apt-get update && apt-get upgrade -y
+	apt-get autoremove -y
 	@printf "$(TEXT)🌒 >>>> Installing curl$(RESET)"
-	apt install curl
+	apt-get -y install curl
 	@printf "$(TEXT)🌓 >>>> Installing Rust for Linux$(RESET)"
 	curl https://sh.rustup.rs -sSf | sh -s -- -y
 	export PATH="$HOME/.cargo/bin:$PATH"
 	-source "$HOME/.cargo/env"
 	@printf "$(TEXT)🌔 >>>> Installing Nodejs$(RESET)"
 	curl -fsSL https://deb.nodesource.com/setup_lts.x | bash
-	apt install -y nodejs
+	apt-get install -y nodejs
 	@printf "$(TEXT)🌕 >>>> Installing Nextjs and EsLint$(RESET)"
 	npm install next@latest react@latest react-dom@latest eslint-config-next@latest
 	@printf "$(TEXT)🌖 >>>> Installing Tauri deps$(RESET)"
-	apt install -y libwebkit2gtk-4.0-dev build-essential wget libssl-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev
+	apt-get install -y libwebkit2gtk-4.0-dev build-essential wget libssl-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev
 	@printf "$(TEXT)🌗 >>>> Installing Tauri$(RESET)"
 	cargo install tauri-cli
 	@printf "$(TEXT)🌘 >>>> Installing npm deps$(RESET)"
