@@ -11,6 +11,7 @@ pub struct DBOps {
     db_conn: Connection,
     db_file: String,
     file_nr: i32,
+    total_files: i32,
     /// Tauri window for events
     tauri_window: Option<tauri::Window>,
 }
@@ -46,6 +47,7 @@ impl DBOps {
             db_conn: conn,
             db_file: db_file.to_owned(),
             file_nr: 0,
+            total_files: 0,
             tauri_window: t_win,
         };
         ret.init_table()?;
@@ -90,7 +92,7 @@ impl DBOps {
         let web_files = self.get_diff_file();
 
         if let Some(last_element) = web_files.last() {
-            self.file_nr = *last_element;
+            self.total_files = *last_element;
             info!("Database not up-to-date!");
             info!("Downloading {} file(s)", web_files.len());
             self.download_files(web_files);
@@ -144,7 +146,7 @@ impl DBOps {
                             break;
                         }
                         
-                        if let Err(_) = Self::calculate_progress(self, last_percentage, i.try_into().unwrap(), self.file_nr) {
+                        if let Err(_) = Self::calculate_progress(self, last_percentage, i.try_into().unwrap(), self.total_files) {
                             error!("Progress calculation is broken");
                             break;
                         }
@@ -245,7 +247,7 @@ impl DBOps {
             ) {
                 Ok(_) => {
                     inserted += 1;
-                    debug!("[File {file_nr}]: Inserted {}", hash)
+                    // debug!("[File {file_nr}]: Inserted {}", hash)
                 }
                 Err(err) => {
                     skipped += 1;
@@ -484,8 +486,8 @@ impl DBOps {
         web_files
     }
 
-    fn calculate_progress(&mut self, last_percentage: &mut f64, mut scanned_size: i32, files_size: i32) -> Result<f64, String> {
-        scanned_size = scanned_size + files_size;
+    fn calculate_progress(&mut self, last_percentage: &mut f64, scanned_size: i32, files_size: i32) -> Result<f64, String> {
+        info!("Called calculate_perc with last_p: {}, scanned_size: {} and file_s: {}", last_percentage, scanned_size, files_size);
         let scanned_percentage = (scanned_size as f64 / files_size as f64 * 100.0).round();
         info!("Updated: {}%", scanned_percentage);
         if scanned_percentage != *last_percentage {
