@@ -6,7 +6,6 @@ import { listen } from '@tauri-apps/api/event';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faFileLines, faUserNinja, faWrench, faHome, faClock } from '@fortawesome/free-solid-svg-icons';
 import React, { useState, useEffect } from 'react';
-import ReactDOM from 'react-dom';
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
 import moment from "moment";
@@ -139,23 +138,40 @@ export default function Settings() {
   /**
    * Function to update the DB from the Settings page. 
    */
-  const updating = () => {
+  const updating = async () => {
     if (typeof window !== "undefined") {
       // Creates a pop-up with an indefinite loading animation
-      Swal.fire({
+      /*         html: <div className="m-auto w-fit"><CircularProgressbar value={progress} text={`${progress}%`}
+          styles={buildStyles({
+            textColor: '#35c091',
+            pathColor: '#ff3366',
+            trailColor: '#d6d6d6'
+          })} /></div>, */
+      const ReactSwal = withReactContent(Swal);
+      ReactSwal.fire({
         title: t('update_db_loading'),
         text: t('update_db_loading_val'),
-        iconHtml: '<img src=../images/loading-anim.gif>',
+        html: <div className="m-auto w-fit">Progress: {progress}%</div>,
         allowOutsideClick: false,
         showConfirmButton: false,
-        allowEscapeKey: true,
-        allowEnterKey: false
-      })
+        allowEscapeKey: false,
+        allowEnterKey: false,
+      });
+
+      const interval = setInterval(() => {
+        console.log("Updating swal with progress: ", progress);
+        ReactSwal.update({
+          html: <div className="m-auto w-fit">Progress: {progress}%</div>,
+        });
+      }, 3000);
+
       invoke("update_database", {
         dbfile: db_location,
       })
         .then((message) => {
           // If the update was successfull, update the data
+          clearInterval(interval); // Stop the interval
+          ReactSwal.close(); // Close the SweetAlert
           console.log(message);
           setCount(Number(message));
           setDate(moment().format("DD/MM/YYYY hh:mm:ss"));
@@ -163,6 +179,8 @@ export default function Settings() {
         })
         .catch((error) => {
           console.error(error);
+          clearInterval(interval); // Stop the interval
+          ReactSwal.close(); // Close the SweetAlert
           // On error, set the failed update status as Date
           setDate(t('update_db_status_2'));
           Swal.fire(t('update_db_failed'), t('update_db_failed_val'), "error");
