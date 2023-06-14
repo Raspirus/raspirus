@@ -5,7 +5,7 @@ import { invoke } from "@tauri-apps/api/tauri";
 import { listen } from '@tauri-apps/api/event';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faFileLines, faUserNinja, faWrench, faHome, faClock } from '@fortawesome/free-solid-svg-icons';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
 import moment from "moment";
@@ -14,8 +14,6 @@ import { getStaticPaths, makeStaticProps } from '../../lib/getStatic';
 import DateTimeSelector from '../../components/TimePicker';
 import WeekdaySelector from '../../components/WeekdaySelector';
 import schedule from 'node-schedule';
-import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
-import 'react-circular-progressbar/dist/styles.css';
 
 /**
  * Function that generates the necessary static paths and props manually
@@ -42,6 +40,7 @@ export default function Settings() {
   const [obfuscated, setObfuscated] = useState(false);
   // DB Update progress
   const [progress, setProgress] = useState(0);
+  const progressRef = useRef(progress);
   let db_location = "";
 
   // When the user goes back to the Home page, an update of the set settings
@@ -141,29 +140,29 @@ export default function Settings() {
   const updating = async () => {
     if (typeof window !== "undefined") {
       // Creates a pop-up with an indefinite loading animation
-      /*         html: <div className="m-auto w-fit"><CircularProgressbar value={progress} text={`${progress}%`}
-          styles={buildStyles({
-            textColor: '#35c091',
-            pathColor: '#ff3366',
-            trailColor: '#d6d6d6'
-          })} /></div>, */
       const ReactSwal = withReactContent(Swal);
       ReactSwal.fire({
         title: t('update_db_loading'),
         text: t('update_db_loading_val'),
-        html: <div className="m-auto w-fit">Progress: {progress}%</div>,
+        html: <div id="dyna-prog" className="m-auto w-fit">{progress}</div>,
         allowOutsideClick: false,
         showConfirmButton: false,
         allowEscapeKey: false,
         allowEnterKey: false,
-      });
+        showCancelButton: false,
+        didOpen: () => {
+          const interval = setInterval(() => {
+            const dynamicTimeElement = document.getElementById('dyna-prog');
+            if (dynamicTimeElement) {
+              dynamicTimeElement.textContent = 'Progress: ' + progressRef.current + '%';
+            }
+          }, 1000);
 
-      const interval = setInterval(() => {
-        console.log("Updating swal with progress: ", progress);
-        ReactSwal.update({
-          html: <div className="m-auto w-fit">Progress: {progress}%</div>,
-        });
-      }, 3000);
+          ReactSwal.getPopup().addEventListener('close', () => {
+            clearInterval(interval);
+          });
+        },
+      })
 
       invoke("update_database", {
         dbfile: db_location,
@@ -190,6 +189,11 @@ export default function Settings() {
       Swal.fire(t('client_mode_error'), t('client_mode_error_val'), "error");
     }
   }
+
+  useEffect(() => {
+    // Update the mutable ref when the progress state changes
+    progressRef.current = progress;
+  }, [progress]);
 
   /**
    * CURRENTLY NOT FULLY WORKING
