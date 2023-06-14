@@ -22,7 +22,3 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     </tr>
   </tbody>
 </table>
-
-## Future enhancements:
-- Add webpage that explains each type of possible malware to user
-- Ship with OS directly for Raspberry Pi installation
