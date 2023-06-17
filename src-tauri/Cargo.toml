@@ -24,7 +24,7 @@ tokio = "1.28.2"
 walkdir = "2.3.3"
 serde_json = "1.0"
 serde = { version = "1.0", features = ["derive"] }
-tauri = { version = "1.4.0", features = ["dialog-open"] }
+tauri = { version = "1.4.1", features = ["dialog-open"] }
 chrono = "0.4.26"
 directories-next = "2.0.0"
 
