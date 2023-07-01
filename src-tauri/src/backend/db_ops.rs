@@ -285,8 +285,6 @@ impl DBOps {
         let mut stmt = self.db_conn.prepare("SELECT hash FROM signatures WHERE hash = ?")?;
         let count: i64 = stmt.query_row(params![hash_str], |row| row.get(0))?;
     
-        println!("Rows found: {}", count);
-    
         Ok(count > 0)
     }
     
