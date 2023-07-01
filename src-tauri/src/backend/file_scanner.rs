@@ -136,24 +136,26 @@ impl FileScanner {
                     error!("Progress calculation is broken");
                     break;
                 }
-                if match self.db_conn.hash_exists(hash.as_str()) {
-                    Ok(exists) => {
+                if let Ok(Some(exists)) = self.db_conn.hash_exists(hash.as_str()) {
+                    if exists {
                         self.dirty_files.push(file.path().display().to_string());
                         if stop_early {
                             warn!("Stopping early at file: {:?}", file.path());
                             break;
                         }
-                        exists
+                        info!(
+                            "Found hash {} for file {}",
+                            hash,
+                            file.path().display().to_string()
+                        );
+                        self.log.log(hash, file.path().display().to_string());
                     }
-                    Err(_) => false,
-                } {
-                    info!(
-                        "Found hash {} for file {}",
-                        hash,
-                        file.path().display().to_string()
-                    );
-                    self.log.log(hash, file.path().display().to_string());
+                } else {
+                    // Handle the error case
+                    // For example, you can log the error or handle it based on your requirements
+                    error!("Error checking hash existence for file: {:?}", file.path());
                 }
+                
             }
         }
         let big_toc = time::Instant::now();
