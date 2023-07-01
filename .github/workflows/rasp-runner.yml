@@ -1,4 +1,4 @@
-name: Raspberry Pi aarch64 cpu
+name: Raspberry Pi compile
 on:
   workflow_dispatch:
 
