@@ -17,8 +17,6 @@ jobs:
       
       - name: Run commands
         run: |
-            export HOME=/root
-            export CARGO_REGISTRIES_CRATES_IO_PROTOCOL=sparse
             sudo apt-get update -y --allow-releaseinfo-change
             sudo apt-get upgrade -y
             sudo apt-get autoremove -y
