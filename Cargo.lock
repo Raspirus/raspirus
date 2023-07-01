@@ -2351,7 +2351,7 @@ dependencies = [
 
 [[package]]
 name = "raspirus"
-version = "0.1.8"
+version = "1.0.0"
 dependencies = [
  "chrono",
  "ctor 0.2.2",
