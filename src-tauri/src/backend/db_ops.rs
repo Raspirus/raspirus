@@ -279,15 +279,15 @@ impl DBOps {
     /// let db_ops = DBOps::new("signatures.db").unwrap();
     /// assert_eq!(db_ops.hash_exists("abcd1234").unwrap(), false);
     /// ```
-    pub fn hash_exists(&self, hash_str: &str) -> Result<bool, rusqlite::Error> {
+    pub fn hash_exists(&self, hash_str: &str) -> Result<Option<bool>, rusqlite::Error> {
         info!("Now scanning: {}", hash_str);
     
-        let mut stmt = self.db_conn.prepare("SELECT hash FROM signatures WHERE hash = ?")?;
+        let mut stmt = self.db_conn.prepare("SELECT COUNT(*) FROM signatures WHERE hash = ?")?;
         let count: i64 = stmt.query_row(params![hash_str], |row| row.get(0))?;
     
-        Ok(count > 0)
+        Ok(Some(count > 0))
     }
-    
+
 
     /// Returns the number of hashes in the `signatures` table.
     ///
