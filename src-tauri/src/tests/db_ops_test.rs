@@ -32,12 +32,24 @@ mod tests {
     #[test]
     fn test_hash_exists() {
         let mut db_ops = DBOps::new(DB_FILE_LOC, None).unwrap();
+        let hash_to_insert = "93fe4fb85a682907137b0b1051991332";
+        let hash_not_in_db = "hello";
+    
+        // Insert the hash into the database
         db_ops
-            .insert_hashes(vec![("93fe4fb85a682907137b0b1051991332".to_owned(), "ec2112c9c243d837247217baf351ab79".to_owned())])
+            .insert_hashes(vec![(hash_to_insert.to_owned(), "ec2112c9c243d837247217baf351ab79".to_owned())])
             .unwrap();
-        assert_eq!(db_ops.hash_exists("93fe4fb85a682907137b0b1051991332").unwrap(), true);
-        assert_eq!(db_ops.hash_exists("hello").unwrap(), false);
+    
+        // Check if the hash exists in the database
+        let exists_in_db = db_ops.hash_exists(hash_to_insert).unwrap();
+        let does_not_exist = db_ops.hash_exists(hash_not_in_db).unwrap();
+    
+        // Assert the results
+        assert_eq!(exists_in_db, Some(true));
+        assert_eq!(does_not_exist, Some(false));
     }
+    
+    
 
     #[test]
     fn test_count_hashes() {
@@ -55,12 +67,22 @@ mod tests {
         }
     }
     
-
     #[test]
     fn test_remove_hash() {
         let db_ops = DBOps::new(DB_FILE_LOC, None).unwrap();
-        assert!(db_ops._remove_hash("93fe4fb85a682907137b0b1051991332").is_ok());
-        assert_eq!(db_ops.hash_exists("93fe4fb85a682907137b0b1051991332").unwrap(), false);
+        let hash_to_remove = "93fe4fb85a682907137b0b1051991332";
+    
+        // Remove the hash from the database
+        db_ops._remove_hash(hash_to_remove).unwrap();
+    
+        // Check if the hash exists in the database after removal
+        let exists_after_removal = match db_ops.hash_exists(hash_to_remove).unwrap() {
+            Some(exists) => exists,
+            None => false, // Hash not found
+        };
+    
+        // Assert the result
+        assert_eq!(exists_after_removal, false);
     }
 
     #[test]
