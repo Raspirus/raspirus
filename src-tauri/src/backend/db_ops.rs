@@ -280,15 +280,16 @@ impl DBOps {
     /// assert_eq!(db_ops.hash_exists("abcd1234").unwrap(), false);
     /// ```
     pub fn hash_exists(&self, hash_str: &str) -> Result<bool, rusqlite::Error> {
-        let mut stmt = self
-            .db_conn
-            .prepare("SELECT hash FROM signatures WHERE hash = ?")?;
-
-        match stmt.query_row(params![hash_str], |row| row.get::<_, String>(0)) {
-            Ok(_) => Ok(true),
-            Err(_) => Ok(false),
-        }
+        info!("Now scanning: {}", hash_str);
+    
+        let mut stmt = self.db_conn.prepare("SELECT hash FROM signatures WHERE hash = ?")?;
+        let count: i64 = stmt.query_row(params![hash_str], |row| row.get(0))?;
+    
+        println!("Rows found: {}", count);
+    
+        Ok(count > 0)
     }
+    
 
     /// Returns the number of hashes in the `signatures` table.
     ///

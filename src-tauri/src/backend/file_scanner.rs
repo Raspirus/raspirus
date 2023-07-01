@@ -140,7 +140,7 @@ impl FileScanner {
                     Ok(exists) => {
                         self.dirty_files.push(file.path().display().to_string());
                         if stop_early {
-                            warn!("Stopping early");
+                            warn!("Stopping early at file: {:?}", file.path());
                             break;
                         }
                         exists
@@ -187,7 +187,7 @@ impl FileScanner {
         let file = match File::open(path) {
             Ok(file) => file,
             Err(err) => {
-                println!("{}", err);
+                error!("Can't open file: {}", err);
                 return None;
             }
         };
@@ -196,7 +196,7 @@ impl FileScanner {
         loop {
             let count = match reader.read(&mut buffer) {
                 Ok(count) => count,
-                Err(_) => return None,
+                Err(err) => {error!("Error while reading: {}", err); return None},
             };
 
             if count == 0 {

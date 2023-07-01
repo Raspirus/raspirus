@@ -13,7 +13,7 @@ Introducing Raspirus, an innovative application designed to address the security
 - Complete the documentation
 - Increase test coverage
 - Add more tasks and functions
-More tasks can be found in the [GitHub project](https://github.com/orgs/Raspirus/projects/3)
+- More tasks can be found in the [GitHub project](https://github.com/orgs/Raspirus/projects/3)
 
 ## Contributors ✨
 Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
