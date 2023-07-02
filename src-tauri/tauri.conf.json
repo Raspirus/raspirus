@@ -41,8 +41,8 @@
         "signingIdentity": null
       },
       "resources": [],
-      "shortDescription": "Small Virusscanner",
-      "targets": ["deb", "msi", "app", "updater"],
+      "shortDescription": "Lightweight hash-based virusscanner",
+      "targets":  ["deb", "appimage", "nsis", "msi", "app", "dmg", "updater"],
       "windows": {
         "certificateThumbprint": null,
         "digestAlgorithm": "sha256",
