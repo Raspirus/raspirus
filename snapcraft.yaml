@@ -18,7 +18,8 @@ parts:
       - cargo
       - npm
     override-build: |
-      cargo tauri build --release
+      snapcraftctl build
+      make build
 
 apps:
   raspirus:
