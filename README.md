@@ -6,6 +6,8 @@
 # :rocket: Raspirus
 ![banner_logo](https://user-images.githubusercontent.com/50681275/223684389-ed0f104f-c183-4223-9723-c268e7cc5268.png)
 
+[![Get it from the Snap Store](https://snapcraft.io/static/images/badges/en/snap-store-black.svg)](https://snapcraft.io/raspirus)
+
 ## Introduction
 Introducing Raspirus, an innovative application designed to address the security concerns of working on offline computers without antivirus protection, particularly those shared among multiple users who frequently utilize personal USB devices for file transfers. By leveraging the power of Raspberry Pi, as well as Windows and other Linux systems, Raspirus provides a comprehensive solution. Through file scanning functionality, Raspirus intelligently examines each file on the USB key, efficiently computing their hashes and cross-referencing them with an extensive signature database to promptly alert users about potential threats, all while minimizing resource consumption on Raspberry Pi 3 devices.
 
