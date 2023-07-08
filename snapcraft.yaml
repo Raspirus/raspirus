@@ -18,7 +18,6 @@ parts:
       - cargo
       - npm
     override-build: |
-      snapcraftctl build
       make build
 
 apps:
