@@ -6,6 +6,8 @@
 # :rocket: Raspirus
 ![banner_logo](https://user-images.githubusercontent.com/50681275/223684389-ed0f104f-c183-4223-9723-c268e7cc5268.png)
 
+[![Download Raspirus](https://a.fsdn.com/con/app/sf-download-button)](https://sourceforge.net/projects/raspirus/files/latest/download)
+
 # :construction: Updates on the dev branch
 ## The Raspirus app is being rewritten on the dev branch and will be merged into main once finished. This is the reason why you are not seeing any updates here, please be patient.
 
