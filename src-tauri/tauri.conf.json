@@ -42,7 +42,7 @@
       },
       "resources": [],
       "shortDescription": "Lightweight hash-based virusscanner",
-      "targets":  ["deb", "appimage", "nsis", "msi", "app", "dmg", "updater"],
+      "targets": "all",
       "windows": {
         "certificateThumbprint": null,
         "digestAlgorithm": "sha256",
