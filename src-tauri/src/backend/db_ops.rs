@@ -110,7 +110,7 @@ impl DBOps {
                     error!("Couldn't send progress update to frontend");
                 }
             } else {
-                error!("tauri_window is None");
+                warn!("tauri_window is None, won't send progress to frontend");
             }
         }
         info!("Total hashes in DB: {}", self.count_hashes().unwrap_or(0));
@@ -141,14 +141,9 @@ impl DBOps {
             match Self::download_file(files[i]) {
                 Ok(hashes) => match hashes {
                     Some(hashes) => {
-                        if self.tauri_window.is_none() {
-                            // Handle the case when `self.tauri_window` is `None`
-                            break;
-                        }
                         
                         if let Err(_) = Self::calculate_progress(self, last_percentage, i.try_into().unwrap(), self.total_files) {
-                            error!("Progress calculation is broken");
-                            break;
+                            warn!("Progress calculation is broken");
                         }
                         
                         match self.insert_hashes(hashes) {

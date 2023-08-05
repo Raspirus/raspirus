@@ -37,7 +37,7 @@ pub struct FileScanner {
     /// Amount scanned in bytes
     scanned_size: u64,
     /// Tauri window for events
-    tauri_window: tauri::Window
+    tauri_window: Option<tauri::Window>
 }
 
 impl FileScanner {
@@ -56,7 +56,7 @@ impl FileScanner {
     /// # Errors
     ///
     /// This function will return an `Error` with an `ErrorKind` of `Other` if the `scanloc` file path does not exist.
-    pub fn new(scanloc: &str, db_file: &str, t_win: tauri::Window) -> Result<Self, Error> {
+    pub fn new(scanloc: &str, db_file: &str, t_win: Option<tauri::Window>) -> Result<Self, Error> {
         //check path
         if Path::new(&scanloc).exists() {
             let tmpconf = match DBOps::new(db_file, None) {
@@ -257,16 +257,20 @@ impl FileScanner {
         let scanned_percentage = (self.scanned_size as f64 / self.folder_size as f64 * 100.0).round();
         // Check if folder is empty, because that would return infinity percentage
         if self.folder_size <= 0 {
-            if self.tauri_window.emit_all("progerror", TauriEvent {message: "Calculated foldersize is 0".to_string()}).is_err() {
-                return Err("Couldn't send progress update to frontend".to_string());
+            if let Some(tauri_win) = &self.tauri_window {
+                if tauri_win.emit_all("progerror", TauriEvent {message: "Calculated foldersize is 0".to_string()}).is_err() {
+                    return Err("Couldn't send progress update to frontend".to_string());
+                }
             }
             return Err("Calculated foldersize is 0".to_string());
         }
         info!("Scanned: {}%", scanned_percentage);
         if scanned_percentage != *last_percentage {
-            if self.tauri_window.emit_all("progress", TauriEvent {message: scanned_percentage.to_string()}).is_err() {
-                return Err("Couldn't send progress update to frontend".to_string());
-            };
+            if let Some(tauri_win) = &self.tauri_window {
+                if tauri_win.emit_all("progress", TauriEvent {message: scanned_percentage.to_string()}).is_err() {
+                    return Err("Couldn't send progress update to frontend".to_string());
+                };
+            }
             *last_percentage = scanned_percentage;
         }
         Ok(scanned_percentage)
