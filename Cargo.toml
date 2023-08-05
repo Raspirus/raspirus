@@ -1,6 +1,7 @@
 # This is needed to fix codecoverage workflow errors
 
 [workspace]
+resolver = "2"
 members = ["src-tauri"]
 
 [profile.release]
