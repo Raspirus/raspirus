@@ -8,9 +8,6 @@
 
 [![Download Raspirus](https://a.fsdn.com/con/app/sf-download-button)](https://sourceforge.net/projects/raspirus/files/latest/download)
 
-# :construction: Updates on the dev branch
-## The Raspirus app is being rewritten on the dev branch and will be merged into main once finished. This is the reason why you are not seeing any updates here, please be patient.
-
 ## Introduction
 Introducing Raspirus, an innovative application designed to address the security concerns of working on offline computers without antivirus protection, particularly those shared among multiple users who frequently utilize personal USB devices for file transfers. By leveraging the power of Raspberry Pi, as well as Windows and other Linux systems, Raspirus provides a comprehensive solution. Through file scanning functionality, Raspirus intelligently examines each file on the USB key, efficiently computing their hashes and cross-referencing them with an extensive signature database to promptly alert users about potential threats, all while minimizing resource consumption on Raspberry Pi 3 devices.
 
