@@ -9,7 +9,7 @@ env:
 defaults:
   run:
     shell: bash
-    working-directory: src-tauri
+    working-directory: src-tauri/src/backend
 
 jobs:
   build:
