@@ -179,8 +179,8 @@ struct UsbDevice {
 async fn list_usb_drives() -> Result<String, String> {
     let mut usb_drives = Vec::new();
 
-    if cfg!(target_os = "linux") {
-        info!("Trying to retrieve USB drives from Linux OS");
+    if cfg!(target_os = "linux") || cfg!(target_os = "macos") {
+        info!("Trying to retrieve USB drives from Unix-like OS");
         let username = match env::var("USER") {
             Ok(val) => val,
             Err(_) => panic!("Could not get current username"),
@@ -243,19 +243,14 @@ async fn list_usb_drives() -> Result<String, String> {
         for letter in drive_letters {
             let drive_path = letter.clone().into_string().unwrap() + ":\\";
             let drive_path = Path::new(&drive_path);
-            #[cfg(windows)]
             let drive_name = drive_path.file_name().unwrap_or_default();
             let drive_path = drive_path.to_str().unwrap();
 
-            #[cfg(windows)]
             let wide_path = OsStr::new(&drive_path).encode_wide().chain(once(0)).collect::<Vec<_>>();
-            #[cfg(windows)]
             let drive_type = unsafe { GetDriveTypeW(wide_path.as_ptr()) };
-            
-            #[cfg(windows)]
+
             match fs::metadata(drive_path) {
                 Ok(metadata) => {
-                    #[cfg(windows)]
                     if metadata.is_dir() && drive_type == DRIVE_REMOVABLE {
                         info!("Found Drive: {}", drive_path);
                         usb_drives.push(UsbDevice {
