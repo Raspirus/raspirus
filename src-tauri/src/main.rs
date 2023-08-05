@@ -8,8 +8,7 @@ use backend::file_scanner;
 use backend::config_file::Config;
 use log::{error, info, warn };
 use serde::{Deserialize, Serialize};
-use std::ffi::{OsString, OsStr};
-use std::iter::once;
+use std::ffi::OsString;
 use std::process::exit;
 use std::{env, fs, path::Path, time};
 use directories_next::ProjectDirs;
@@ -20,11 +19,24 @@ use std::os::windows::prelude::OsStrExt;
 use winapi::um::fileapi::GetDriveTypeW;
 #[cfg(windows)]
 use winapi::um::winbase::DRIVE_REMOVABLE;
+#[cfg(windows)]
+use std::iter::once;
+#[cfg(windows)]
+use std::ffi::OsStr;
 
 mod backend;
 mod tests;
 
 fn main() {
+    match pretty_env_logger::try_init() {
+        Ok(()) => {
+            info!("Logger initialized!");
+        }
+        Err(err) => {
+            warn!("Failed initializing logger: {err}");
+        }
+    }
+
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![start_scanner, list_usb_drives, update_database, check_raspberry, create_config])
         .run(tauri::generate_context!())
@@ -44,14 +56,6 @@ fn main() {
 /// An empty `Result` object if the scanner was successfully started, or an `Err` with an error message if an error occurred.
 #[tauri::command]
 async fn start_scanner(window: tauri::Window, path: String, dbfile: Option<String>) -> Result<String, String> {
-    match pretty_env_logger::try_init() {
-        Ok(()) => {
-            info!("Logger initialized!");
-        }
-        Err(err) => {
-            warn!("Failed initializing logger: {err}");
-        }
-    }
     let mut use_db = "signatures.db".to_owned();
     match dbfile {
         Some(fpath) => {
@@ -173,15 +177,6 @@ struct UsbDevice {
 /// A `Result` object containing a vector of strings representing the paths to the USB drives, or an `Err` with an error message if an error occurred.
 #[tauri::command]
 async fn list_usb_drives() -> Result<String, String> {
-    match pretty_env_logger::try_init() {
-        Ok(()) => {
-            info!("Logger initialized!");
-        }
-        Err(err) => {
-            warn!("Failed initializing logger: {err}");
-        }
-    }
-
     let mut usb_drives = Vec::new();
 
     if cfg!(target_os = "linux") {
@@ -248,6 +243,7 @@ async fn list_usb_drives() -> Result<String, String> {
         for letter in drive_letters {
             let drive_path = letter.clone().into_string().unwrap() + ":\\";
             let drive_path = Path::new(&drive_path);
+            #[cfg(windows)]
             let drive_name = drive_path.file_name().unwrap_or_default();
             let drive_path = drive_path.to_str().unwrap();
 
@@ -257,6 +253,7 @@ async fn list_usb_drives() -> Result<String, String> {
             let drive_type = unsafe { GetDriveTypeW(wide_path.as_ptr()) };
 
             match fs::metadata(drive_path) {
+                #[cfg(windows)]
                 Ok(metadata) => {
                     #[cfg(windows)]
                     if metadata.is_dir() && drive_type == DRIVE_REMOVABLE {
