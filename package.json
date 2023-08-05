@@ -14,7 +14,7 @@
     "@fortawesome/fontawesome-svg-core": "^6.2.1",
     "@fortawesome/free-solid-svg-icons": "^6.2.1",
     "@fortawesome/react-fontawesome": "^0.2.0",
-    "@tauri-apps/api": "^1.2.0",
+    "@tauri-apps/api": "^1.4.0",
     "@types/node": "18.17.3",
     "@types/react": "18.2.18",
     "@types/react-dom": "18.2.7",
@@ -41,7 +41,7 @@
     "sweetalert2-react-content": "^5.0.7"
   },
   "devDependencies": {
-    "@tauri-apps/cli": "^1.2.3",
+    "@tauri-apps/cli": "^1.4.0",
     "autoprefixer": "^10.4.13",
     "eslint-plugin-prettier": "^4.2.1",
     "postcss": "^8.4.21",
