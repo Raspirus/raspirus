@@ -72,7 +72,7 @@ async fn start_scanner(window: tauri::Window, path: String, dbfile: Option<Strin
     let db_file_path = program_dir.join(&use_db);
     let db_file_str: &str = db_file_path.to_str().expect("Failed to get database path");
 
-    let mut fs = match file_scanner::FileScanner::new(&path, db_file_str, window) {
+    let mut fs = match file_scanner::FileScanner::new(&path, db_file_str, Some(window)) {
         Ok(fs) => fs,
         Err(err) => {
             error!("{}", err);
