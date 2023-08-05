@@ -251,9 +251,9 @@ async fn list_usb_drives() -> Result<String, String> {
             let wide_path = OsStr::new(&drive_path).encode_wide().chain(once(0)).collect::<Vec<_>>();
             #[cfg(windows)]
             let drive_type = unsafe { GetDriveTypeW(wide_path.as_ptr()) };
-
+            
+            #[cfg(windows)]
             match fs::metadata(drive_path) {
-                #[cfg(windows)]
                 Ok(metadata) => {
                     #[cfg(windows)]
                     if metadata.is_dir() && drive_type == DRIVE_REMOVABLE {
