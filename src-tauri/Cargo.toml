@@ -32,7 +32,7 @@ mime_guess = "2.0.4"
 
 [dev-dependencies]
 ctor = "0.2.4"
-regex = "1.9.2"
+regex = "1.9.3"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
