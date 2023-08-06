@@ -9,7 +9,7 @@ use backend::file_scanner;
 use directories_next::ProjectDirs;
 use log::{error, info, warn};
 use serde::{Deserialize, Serialize};
-use std::ffi::OsString;
+
 use std::process::exit;
 use std::{env, fs, path::Path, time};
 
@@ -220,6 +220,7 @@ async fn list_usb_drives() -> Result<String, String> {
     } else if cfg!(target_os = "windows") {
         #[cfg(windows)]
         let mut win_usb_drives = list_usb_windows();
+        #[cfg(windows)]
         usb_drives.append(&mut win_usb_drives);
     } else {
         warn!("Not retrieving USBs -> Wrong OS");
@@ -229,7 +230,7 @@ async fn list_usb_drives() -> Result<String, String> {
 
 #[cfg(windows)]
 fn list_usb_windows() -> Vec<UsbDevice> {
-    use std::ffi::OsStr;
+    use std::ffi::{OsString, OsStr};
     use std::iter::once;
     use std::os::windows::prelude::OsStrExt;
     use winapi::um::fileapi::GetDriveTypeW;
