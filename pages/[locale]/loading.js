@@ -32,7 +32,7 @@ export default function Loading() {
   useEffect(() => {
     // Reads the emited progress signal from the backend
     const handleProgress = (event) => {
-      console.log("Progress: ", event.payload.message);
+      //console.log("Progress: ", event.payload.message);
       setProgress(event.payload.message);
     };
     // Backend can also send error instead of the progress
