@@ -219,7 +219,8 @@ async fn list_usb_drives() -> Result<String, String> {
         }
     } else if cfg!(target_os = "windows") {
         #[cfg(windows)]
-        usb_drives.append(&mut list_usb_windows());
+        let mut win_usb_drives = list_usb_windows();
+        usb_drives.append(&mut win_usb_drives);
     } else {
         warn!("Not retrieving USBs -> Wrong OS");
     }
