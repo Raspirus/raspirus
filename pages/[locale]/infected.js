@@ -27,7 +27,7 @@ export default function Infected() {
     let { query: { virus_list }, } = router;
     const { t } = useTranslation('common');
 
-    if (typeof virus_list == String) {
+    if (typeof virus_list === "string") {
         virus_list = JSON.parse(virus_list);
     }
 
@@ -43,6 +43,7 @@ export default function Infected() {
             invoke("create_config", {})
                 .then((output) => {
                     const parsedData = JSON.parse(output);
+                    console.log("Parsed Config data: ", parsedData);
                     setObfuscated(parsedData.obfuscated_is_active);
                 })
                 .catch((err) => console.error(err))
