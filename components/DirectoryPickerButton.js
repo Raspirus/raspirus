@@ -13,7 +13,7 @@ export default function DirectoryPickerButton({ onSelectDirectory }) {
     const { open } = await import('@tauri-apps/api/dialog');
     // Set user selection restrictions
     const selected = await open({
-      directory: true,
+      directory: false,
       multiple: false,
       defaultPath: "/",
     })
