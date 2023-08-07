@@ -32,7 +32,7 @@ simplelog = "0.12.1"
 
 [dev-dependencies]
 ctor = "0.2.4"
-regex = "1.9.2"
+regex = "1.9.3"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
