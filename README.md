@@ -11,11 +11,11 @@
 ## Introduction
 Introducing Raspirus, an innovative application designed to address the security concerns of working on offline computers without antivirus protection, particularly those shared among multiple users who frequently utilize personal USB devices for file transfers. By leveraging the power of Raspberry Pi, as well as Windows and other Linux systems, Raspirus provides a comprehensive solution. Through file scanning functionality, Raspirus intelligently examines each file on the USB key, efficiently computing their hashes and cross-referencing them with an extensive signature database to promptly alert users about potential threats, all while minimizing resource consumption on Raspberry Pi 3 devices.
 
-## TODO
-- Complete the documentation
-- Increase test coverage
-- Add more tasks and functions
-- More tasks can be found in the [GitHub project](https://github.com/orgs/Raspirus/projects/3)
+## Features
+- Free and Open Source
+- Lightweight with user-friendly UI
+- Supports ZIP archives
+- Cross-platform
 
 ## Contributors ✨
 Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
