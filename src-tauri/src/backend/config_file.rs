@@ -11,6 +11,7 @@ pub struct Config {
     pub obfuscated_is_active: bool,
     pub db_update_weekday: i32,
     pub db_update_time: String,
+    pub db_location: String,
 }
 
 impl Config {
@@ -22,6 +23,7 @@ impl Config {
             obfuscated_is_active: true,
             db_update_weekday: -1,
             db_update_time: "22:00:00".to_string(),
+            db_location: "".to_string()
         }
     }
 
@@ -30,9 +32,9 @@ impl Config {
             ProjectDirs::from("com", "Raspirus", "Data").expect("Failed to get project directories.");
         let program_dir = project_dirs.data_dir();
         fs::create_dir_all(&program_dir).expect("Failed to create program directory.");
-        let db_file_path = program_dir.join("raspirus.config.json");
-        let db_file_str = db_file_path.to_str().expect("Failed to get database path");
-        Ok(db_file_str.to_string())
+        let conf_file_path = program_dir.join("raspirus.config.json");
+        let conf_file_str = conf_file_path.to_str().expect("Failed to get config path");
+        Ok(conf_file_str.to_string())
     }
 
     pub fn save(&self) -> Result<(), io::Error> {

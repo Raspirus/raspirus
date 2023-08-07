@@ -19,32 +19,40 @@ mod tests;
 
 fn main() {
     let mut config = Config::new();
+    config.save().expect("Couldn't write config to system");
     config = config.load().expect("Couldn't load config at startup");
     let write_to_file = config.logging_is_active;
 
     if write_to_file {
         // We use ProjectDirs to find a suitable location for our logging file
-        let project_dirs = ProjectDirs::from("com", "Raspirus", "Logs").expect("Failed to get project directories.");
-        let log_dir = project_dirs.data_local_dir().join("logs"); // Create a "logs" subdirectory
+        let project_dirs = ProjectDirs::from("com", "Raspirus", "Logs")
+            .expect("Failed to get project directories.");
+        let log_dir = project_dirs.data_local_dir().join("main"); // Create a "main" subdirectory
 
         // If we are able to create both the file and directory path, we can start the FileLogger
         match fs::create_dir_all(&log_dir) {
             Ok(_) => {
                 match File::create(log_dir.join("app.log")) {
                     Ok(log_file) => {
-                        info!("Created logfile at DIR: {} NAME: app.log", log_dir.display());
+                        info!(
+                            "Created logfile at DIR: {} NAME: app.log",
+                            log_dir.display()
+                        );
                         // Define both File logger and Terminal logger
-                        let file_logger =
-                        WriteLogger::new(LevelFilter::Debug, simplelog::Config::default(), log_file);
-                    let term_logger = TermLogger::new(
-                        LevelFilter::Debug,
-                        simplelog::Config::default(),
-                        TerminalMode::Mixed,
-                        ColorChoice::Auto,
-                    );
-                    // Start both loggers concurrently
-                    CombinedLogger::init(vec![file_logger, term_logger])
-                        .expect("Failed to initialize CombinedLogger");
+                        let file_logger = WriteLogger::new(
+                            LevelFilter::Debug,
+                            simplelog::Config::default(),
+                            log_file,
+                        );
+                        let term_logger = TermLogger::new(
+                            LevelFilter::Debug,
+                            simplelog::Config::default(),
+                            TerminalMode::Mixed,
+                            ColorChoice::Auto,
+                        );
+                        // Start both loggers concurrently
+                        CombinedLogger::init(vec![file_logger, term_logger])
+                            .expect("Failed to initialize CombinedLogger");
                     }
                     Err(err) => {
                         error!("Failed creating logfile: {err}");
@@ -91,31 +99,34 @@ fn main() {
 #[tauri::command]
 async fn start_scanner(
     window: tauri::Window,
-    path: String,
-    dbfile: Option<String>,
+    path: String
 ) -> Result<String, String> {
-    let mut use_db = "signatures.db".to_owned();
-    match dbfile {
-        Some(fpath) => {
-            if Path::new(&fpath).to_owned().exists() && Path::new(&fpath).to_owned().is_file() {
-                info!("Using specific DB path {}", fpath);
-                use_db = fpath.to_owned();
-            } else {
-                info!("Falling back to default DB file (signatures.db)");
-            }
-        }
-        None => {
-            info!("Path is None; Falling back to default DB file (signatures.db)");
-        }
-    };
-    let project_dirs =
-        ProjectDirs::from("com", "Raspirus", "Data").expect("Failed to get project directories.");
-    let program_dir = project_dirs.data_dir();
-    fs::create_dir_all(&program_dir).expect("Failed to create program directory.");
-    let db_file_path = program_dir.join(&use_db);
-    let db_file_str: &str = db_file_path.to_str().expect("Failed to get database path");
+    let db_name = "signatures.db";
+    let config = Config::new().load().expect("Couldn't load config");
+    let mut db_file_str = config.db_location;
 
-    let mut fs = match file_scanner::FileScanner::new(&path, db_file_str, Some(window)) {
+    if db_file_str.is_empty() {
+        let project_dirs = ProjectDirs::from("com", "Raspirus", "Data")
+            .expect("Failed to get project directories.");
+        let program_dir = project_dirs.data_dir();
+        fs::create_dir_all(&program_dir).expect("Failed to create program directory.");
+        let db_file_path = program_dir.join(db_name);
+        db_file_str = db_file_path.to_string_lossy().to_string();
+    } else {
+        if Path::new(&db_file_str).to_owned().exists() && Path::new(&db_file_str).to_owned().is_file() {
+            info!("Using specific DB path {}", db_file_str);
+        } else {
+            info!("Falling back to default DB file (signatures.db)");
+            let project_dirs = ProjectDirs::from("com", "Raspirus", "Data")
+                .expect("Failed to get project directories.");
+            let program_dir = project_dirs.data_dir();
+            fs::create_dir_all(&program_dir).expect("Failed to create program directory.");
+            let db_file_path = program_dir.join(db_name);
+            db_file_str = db_file_path.to_string_lossy().to_string();
+        }
+    }
+
+    let mut fs = match file_scanner::FileScanner::new(&path, db_file_str.as_str(), Some(window)) {
         Ok(fs) => fs,
         Err(err) => {
             error!("{}", err);
@@ -149,29 +160,33 @@ async fn check_raspberry() -> Result<bool, String> {
 }
 
 #[tauri::command]
-async fn update_database(db_file: Option<String>, window: tauri::Window) -> Result<String, String> {
-    let mut use_db = "signatures.db".to_owned();
-    match db_file {
-        Some(fpath) => {
-            if Path::new(&fpath).to_owned().exists() && Path::new(&fpath).to_owned().is_file() {
-                info!("Using specific DB path {}", fpath);
-                use_db = fpath.to_owned();
-            } else {
-                info!("Falling back to default DB file (signatures.db)");
-            }
-        }
-        None => {
-            info!("Path is None; Falling back to default DB file (signatures.db)");
-        }
-    };
-    let project_dirs =
-        ProjectDirs::from("com", "Raspirus", "Data").expect("Failed to get project directories.");
-    let program_dir = project_dirs.data_dir();
-    fs::create_dir_all(&program_dir).expect("Failed to create program directory.");
-    let db_file_path = program_dir.join(&use_db);
-    let db_file_str: &str = db_file_path.to_str().expect("Failed to get database path");
+async fn update_database(window: tauri::Window) -> Result<String, String> {
+    let db_name = "signatures.db";
+    let config = Config::new().load().expect("Couldn't load config");
+    let mut db_file_str = config.db_location;
 
-    let mut db_connection = match DBOps::new(db_file_str, Some(window)) {
+    if db_file_str.is_empty() {
+        let project_dirs = ProjectDirs::from("com", "Raspirus", "Data")
+            .expect("Failed to get project directories.");
+        let program_dir = project_dirs.data_dir();
+        fs::create_dir_all(&program_dir).expect("Failed to create program directory.");
+        let db_file_path = program_dir.join(db_name);
+        db_file_str = db_file_path.to_string_lossy().to_string();
+    } else {
+        if Path::new(&db_file_str).to_owned().exists() && Path::new(&db_file_str).to_owned().is_file() {
+            info!("Using specific DB path {}", db_file_str);
+        } else {
+            info!("Falling back to default DB file (signatures.db)");
+            let project_dirs = ProjectDirs::from("com", "Raspirus", "Data")
+                .expect("Failed to get project directories.");
+            let program_dir = project_dirs.data_dir();
+            fs::create_dir_all(&program_dir).expect("Failed to create program directory.");
+            let db_file_path = program_dir.join(db_name);
+            db_file_str = db_file_path.to_string_lossy().to_string();
+        }
+    }
+
+    let mut db_connection = match DBOps::new(db_file_str.as_str(), Some(window)) {
         Ok(db_conn) => db_conn,
         Err(err) => {
             error!("{err}");
