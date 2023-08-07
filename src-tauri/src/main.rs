@@ -54,6 +54,7 @@ fn main() {
             Err(err) => error!("Failed creating logs folder: {err}"),
         }
     } else {
+        // If logging is disabled, only the terminal logger will run
         TermLogger::init(
             LevelFilter::Debug,
             simplelog::Config::default(),
@@ -63,6 +64,7 @@ fn main() {
         .expect("Failed to init TermLogger");
     }
 
+    // Builds the Tauri connections for each function listed here
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
             start_scanner,
