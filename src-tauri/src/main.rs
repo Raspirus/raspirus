@@ -7,9 +7,10 @@ use backend::config_file::Config;
 use backend::db_ops::DBOps;
 use backend::file_scanner;
 use directories_next::ProjectDirs;
-use log::{error, info, warn};
+use log::{error, info, warn, LevelFilter};
 use serde::{Deserialize, Serialize};
-
+use simplelog::{ColorChoice, CombinedLogger, TermLogger, TerminalMode, WriteLogger};
+use std::fs::File;
 use std::process::exit;
 use std::{env, fs, path::Path, time};
 
@@ -17,13 +18,49 @@ mod backend;
 mod tests;
 
 fn main() {
-    match pretty_env_logger::try_init() {
-        Ok(()) => {
-            info!("Logger initialized!");
+    let mut config = Config::new();
+    config = config.load().expect("Couldn't load config at startup");
+    let write_to_file = config.logging_is_active;
+
+    if write_to_file {
+        // We use ProjectDirs to find a suitable location for our logging file
+        let project_dirs = ProjectDirs::from("com", "Raspirus", "Logs").expect("Failed to get project directories.");
+        let log_dir = project_dirs.data_local_dir().join("logs"); // Create a "logs" subdirectory
+
+        // If we are able to create both the file and directory path, we can start the FileLogger
+        match fs::create_dir_all(&log_dir) {
+            Ok(_) => {
+                match File::create(log_dir.join("app.log")) {
+                    Ok(log_file) => {
+                        info!("Created logfile at DIR: {} NAME: app.log", log_dir.display());
+                        // Define both File logger and Terminal logger
+                        let file_logger =
+                        WriteLogger::new(LevelFilter::Debug, simplelog::Config::default(), log_file);
+                    let term_logger = TermLogger::new(
+                        LevelFilter::Debug,
+                        simplelog::Config::default(),
+                        TerminalMode::Mixed,
+                        ColorChoice::Auto,
+                    );
+                    // Start both loggers concurrently
+                    CombinedLogger::init(vec![file_logger, term_logger])
+                        .expect("Failed to initialize CombinedLogger");
+                    }
+                    Err(err) => {
+                        error!("Failed creating logfile: {err}");
+                    }
+                };
+            }
+            Err(err) => error!("Failed creating logs folder: {err}"),
         }
-        Err(err) => {
-            warn!("Failed initializing logger: {err}");
-        }
+    } else {
+        TermLogger::init(
+            LevelFilter::Debug,
+            simplelog::Config::default(),
+            TerminalMode::Mixed,
+            ColorChoice::Auto,
+        )
+        .expect("Failed to init TermLogger");
     }
 
     tauri::Builder::default()
@@ -230,7 +267,7 @@ async fn list_usb_drives() -> Result<String, String> {
 
 #[cfg(windows)]
 fn list_usb_windows() -> Vec<UsbDevice> {
-    use std::ffi::{OsString, OsStr};
+    use std::ffi::{OsStr, OsString};
     use std::iter::once;
     use std::os::windows::prelude::OsStrExt;
     use winapi::um::fileapi::GetDriveTypeW;
