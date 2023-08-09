@@ -4,7 +4,7 @@ import { useRouter } from 'next/router';
 import { invoke } from "@tauri-apps/api/tauri";
 import { listen } from '@tauri-apps/api/event';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faFileLines, faUserNinja, faWrench, faHome, faClock } from '@fortawesome/free-solid-svg-icons';
+import { faFileLines, faUserNinja, faWrench, faHome, faClock, faDatabase } from '@fortawesome/free-solid-svg-icons';
 import React, { useState, useEffect, useRef } from 'react';
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
@@ -13,7 +13,7 @@ import { useTranslation } from 'next-i18next';
 import { getStaticPaths, makeStaticProps } from '../../lib/getStatic';
 import DateTimeSelector from '../../components/TimePicker';
 import WeekdaySelector from '../../components/WeekdaySelector';
-import schedule from 'node-schedule';
+import { open } from '@tauri-apps/api/dialog';
 
 /**
  * Function that generates the necessary static paths and props manually
@@ -35,9 +35,10 @@ export default function Settings() {
   const [updated_date, setDate] = useState(t('update_db_status_1'));
   const [auto_time, setAutotime] = useState('22:00');
   const [selectedWeekday, setSelectedWeekday] = useState(-1);
-  const [cronjob, setcronjob] = useState(null);
   const [logging, setLogging] = useState(false);
   const [obfuscated, setObfuscated] = useState(false);
+  const [use_db_path, setUsedbPath] = useState(false);
+  const [custom_db_path, setCustomDbPath] = useState("");
   // DB Update progress
   const [progress, setProgress] = useState(0);
   const progressRef = useRef(progress);
@@ -53,6 +54,39 @@ export default function Settings() {
     router.push('/');
   };
 
+  // This function allows users to use a custom path for the DB file.
+  // The default state of the button is OFF, once cliked, the user opens a file picker.
+  // In the file picker, the user can select the db path and the button switches to ON.
+  // If nothing is selected, the button remains OFF. Once the button is in the ON state,
+  // if clicked again it switches back to OFF.
+  async function handleSetCustomDBPath() {
+    if (use_db_path) {
+      console.log("Button is ON");
+      setCustomDbPath('');
+      setUsedbPath(false);
+    } else {
+      console.log("Button is OFF");
+      try {
+        const selected = await open({
+          directory: false,
+          multiple: false,
+          defaultPath: "/",
+        });
+        
+        if (selected === null) {
+          console.log("Nothing selected");
+          // No dir selected
+        } else {
+          console.log("Selected: ", selected);
+          setCustomDbPath(selected); // Assuming selected is an array of paths
+          setUsedbPath(true);
+        }
+      } catch (error) {
+        console.error("Error with FilePicker: ", error);
+      }
+    }
+  }
+
   /**
    * Function to save the data to the backend
    * It basically stringifys the data and sends it to the backend using Tauri.
@@ -65,7 +99,8 @@ export default function Settings() {
       logging_is_active: logging,
       obfuscated_is_active: obfuscated,
       db_update_weekday: selectedWeekday,
-      db_update_time: auto_time
+      db_update_time: auto_time,
+      db_location: custom_db_path
     }
     const jsonString = JSON.stringify(jsonData);
     console.log("Client sends: ", jsonData);
@@ -129,6 +164,7 @@ export default function Settings() {
           setObfuscated(parsedData.obfuscated_is_active);
           setSelectedWeekday(parsedData.db_update_weekday);
           setAutotime(parsedData.db_update_time);
+          setCustomDbPath(parsedData.db_location);
         })
         .catch((err) => console.error(err))
     }
@@ -203,18 +239,15 @@ export default function Settings() {
     const [hours, minutes] = auto_time.split(':');
     const weekday = selectedWeekday;
 
-    if (cronjob == null) {
-      const job = schedule.scheduleJob('DataUpdater', { minute: minutes, hour: hours, dayOfWeek: weekday > 0 ? weekday : null }, () => { updating })
-      setcronjob(job);
-    } else {
-      cronjob.cancel;
-      schedule.gracefulShutdown()
-        .then(_ => {
-          const job = schedule.scheduleJob('DataUpdater', { minute: minutes, hour: hours, dayOfWeek: weekday > 0 ? weekday : null }, () => { updating })
-          setcronjob(job);
-        })
-        .catch(err => console.error("Cronjob got canceled: ", err))
+    if (typeof window !== "undefined") {
+      invoke("auto_update_scheduler", {
+        hour: hours,
+        weekday: weekday
+      }).catch((error) => {
+        console.error("Trying to invoke auto_update_scheduler: ", error);
+      })
     }
+
   }
 
   return (
@@ -265,12 +298,21 @@ export default function Settings() {
         setIsOn={setObfuscated}
       />
 
+      <SettingComp 
+        title="Database path"
+        short="Set the path to the .db file"
+        short2={custom_db_path}
+        icon={faDatabase}
+        isOn={use_db_path}
+        setIsOn={handleSetCustomDBPath}
+      />
+
       <SettingComp
         title={t('auto_db')}
         short={t('auto_db_val')}
         short2={<><WeekdaySelector selectedWeekday={selectedWeekday} setSelectedWeekday={setSelectedWeekday} /><DateTimeSelector time={auto_time} setTime={setAutotime} /></>}
         icon={faClock}
-        isOn={true}
+        isOn={false}
         action={updateSchedule}
         action_val={t('auto_db_btn')}
       />
