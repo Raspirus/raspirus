@@ -16,6 +16,8 @@ Introducing Raspirus, an innovative application designed to address the security
 - Lightweight with user-friendly UI
 - Supports ZIP archives
 - Cross-platform
+- Touch-screen support
+- Fast and reliable
 
 ## Contributors ✨
 Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
