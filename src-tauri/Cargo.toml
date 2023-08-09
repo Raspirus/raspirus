@@ -29,6 +29,7 @@ directories-next = "2.0.0"
 zip = "0.6.6"
 mime_guess = "2.0.4"
 simplelog = "0.12.1"
+job_scheduler_ng = "2.0.4"
 
 [dev-dependencies]
 ctor = "0.2.4"
