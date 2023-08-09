@@ -242,7 +242,7 @@ export default function Settings() {
 
       <SettingComp
         title={t('update_db')}
-        short={t('activate_logs_val')}
+        short={t('update_db_val')}
         short2={`${t('update_db_1')}: ${hash_count} | ${t('update_db_2')}: ${updated_date}`}
         icon={faWrench}
         action={updating}
