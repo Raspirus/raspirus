@@ -36,7 +36,7 @@ export default function Clean() {
                 <title>{t('clean_title')}</title>
             </Head>
             <div className="flex items-center justify-center h-screen flex-col">
-                <h1 className="text-center mb-10 pt-4 font-medium ltext-5xl text-maingreen">
+                <h1 className="text-center mb-10 pt-4 font-medium text-5xl text-maingreen">
                     {/* Display the translated title */}
                     {t('clean_title')}
                 </h1>

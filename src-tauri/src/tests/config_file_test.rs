@@ -24,7 +24,7 @@ mod tests {
             obfuscated_is_active: false,
             db_update_weekday: 2,
             db_update_time: "08:00:00".to_string(),
-            db_location: "".to_string()
+            db_location: "".to_string(),
         };
 
         let result_save = config.save();

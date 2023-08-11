@@ -1,5 +1,6 @@
 use std::fs::{self, File};
 use std::io::{self, Read};
+use std::path::Path;
 use directories_next::ProjectDirs;
 use serde::{Deserialize, Serialize};
 
@@ -14,6 +15,8 @@ pub struct Config {
     pub db_location: String,
 }
 
+/// The config file simply holds settings of the application that should perists during reboots
+/// The entire config is saved to a file and loaded or created on the first start
 impl Config {
     pub fn new() -> Self {
         Config {
@@ -23,10 +26,13 @@ impl Config {
             obfuscated_is_active: true,
             db_update_weekday: -1,
             db_update_time: "22:00:00".to_string(),
-            db_location: "".to_string()
+            db_location: "".to_string(),
         }
     }
 
+
+    /// Finds the suitable path for the current system, creates a subfolder for the app and returns
+    /// the path as a normal String
     pub fn set_path(&self) -> Result<String, io::Error> {
         let project_dirs =
             ProjectDirs::from("com", "Raspirus", "Data").expect("Failed to get project directories.");
@@ -37,6 +43,8 @@ impl Config {
         Ok(conf_file_str.to_string())
     }
 
+    /// Will safe the current configuration to the file
+    /// WARNING! If the fields are blank, it will clear the current config
     pub fn save(&self) -> Result<(), io::Error> {
         let path = self.set_path().expect("Couldn't get path to Data directories");
         let file = File::create(path)?;
@@ -44,9 +52,16 @@ impl Config {
         Ok(())
     }
 
+    /// Loads the current config and returns it, or creates a new one if there is non yet
     pub fn load(&self) -> Result<Self, io::Error> {
-        let path = Config::set_path(&self)?;
-        let mut file = File::open(path)?;
+        let path = self.set_path()?;
+
+        // Checks if the config file exists, else quickly creates it
+        if !Path::new(&path).exists() {
+            self.save()?;
+        };
+
+        let mut file = File::open(path).expect("Couldn't open file");
         let mut contents = String::new();
         file.read_to_string(&mut contents)?;
         let config: Config = serde_json::from_str(&contents)?;
