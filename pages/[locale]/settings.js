@@ -42,7 +42,6 @@ export default function Settings() {
   // DB Update progress
   const [progress, setProgress] = useState(0);
   const progressRef = useRef(progress);
-  let db_location = "";
 
   // When the user goes back to the Home page, an update of the set settings
   // is sent to the backend, which then saves it in a local file
@@ -77,8 +76,7 @@ export default function Settings() {
           console.log("Nothing selected");
           // No dir selected
         } else {
-          console.log("Selected: ", selected);
-          setCustomDbPath(selected); // Assuming selected is an array of paths
+          setCustomDbPath(selected);
           setUsedbPath(true);
         }
       } catch (error) {
@@ -100,7 +98,7 @@ export default function Settings() {
       obfuscated_is_active: obfuscated,
       db_update_weekday: selectedWeekday,
       db_update_time: auto_time,
-      db_location: custom_db_path
+      db_location: custom_db_path,
     }
     const jsonString = JSON.stringify(jsonData);
     console.log("Client sends: ", jsonData);
@@ -156,6 +154,7 @@ export default function Settings() {
       invoke("create_config", {})
         .then((output) => {
           const parsedData = JSON.parse(output);
+          console.log("Loaded config: ", parsedData);
           setCount(parsedData.hashes_in_db);
           if (parsedData.last_db_update != "Never") {
             setDate(parsedData.last_db_update);
@@ -165,6 +164,7 @@ export default function Settings() {
           setSelectedWeekday(parsedData.db_update_weekday);
           setAutotime(parsedData.db_update_time);
           setCustomDbPath(parsedData.db_location);
+          setUsedbPath(parsedData.db_location.length > 0);
         })
         .catch((err) => console.error(err))
     }
@@ -200,9 +200,7 @@ export default function Settings() {
         },
       })
 
-      invoke("update_database", {
-        dbfile: db_location,
-      })
+      invoke("update_database")
         .then((message) => {
           // If the update was successfull, update the data
           clearInterval(interval); // Stop the interval
@@ -301,7 +299,7 @@ export default function Settings() {
       <SettingComp 
         title="Database path"
         short="Set the path to the .db file"
-        short2={custom_db_path}
+        short2={`Currently: ${use_db_path ? custom_db_path : "Default"}`}
         icon={faDatabase}
         isOn={use_db_path}
         setIsOn={handleSetCustomDBPath}
