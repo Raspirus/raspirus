@@ -16,7 +16,6 @@ mod tests;
 
 fn main() {
     let mut config = Config::new();
-    config.save().expect("Couldn't write config to system");
     config = config.load().expect("Couldn't load config at startup");
     let write_to_file = config.logging_is_active;
 
@@ -129,7 +128,7 @@ async fn create_config(contents: Option<String>) -> Result<String, String> {
     let config = if let Some(contents) = contents {
         serde_json::from_str(&contents).map_err(|err| err.to_string())?
     } else {
-        Config::new().load().map_err(|err| err.to_string())?
+        Config::new().load().expect("Error while loading config")
     };
 
     config.save().map_err(|err| err.to_string())?;
