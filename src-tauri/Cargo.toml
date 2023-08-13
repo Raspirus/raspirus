@@ -12,14 +12,14 @@ rust-version = "1.59"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-log = "0.4.19"
+log = "0.4.20"
 md5 = "0.7.0"
 winapi = "0.3"
 sysinfo = "0.29"
 reqwest = { version = "0.11.18", features = ["blocking"] }
 rusqlite = { version = "0.29.0", features =  ["bundled"] }
 terminal_size = "0.2.6"
-tokio = "1.30.0"
+tokio = "1.31.0"
 walkdir = "2.3.3"
 serde_json = "1.0"
 serde = { version = "1.0", features = ["derive"] }
