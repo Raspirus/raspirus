@@ -4,7 +4,7 @@ import { useRouter } from 'next/router';
 import { invoke } from "@tauri-apps/api/tauri";
 import { listen } from '@tauri-apps/api/event';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faFileLines, faUserNinja, faWrench, faHome, faClock, faDatabase } from '@fortawesome/free-solid-svg-icons';
+import { faFileLines, faUserNinja, faWrench, faHome, faClock, faDatabase, faFileZipper } from '@fortawesome/free-solid-svg-icons';
 import React, { useState, useEffect, useRef } from 'react';
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
@@ -39,6 +39,7 @@ export default function Settings() {
   const [obfuscated, setObfuscated] = useState(false);
   const [use_db_path, setUsedbPath] = useState(false);
   const [custom_db_path, setCustomDbPath] = useState("");
+  const [scan_dir, setScanDir] = useState(false);
   // DB Update progress
   const [progress, setProgress] = useState(0);
   const progressRef = useRef(progress);
@@ -70,6 +71,10 @@ export default function Settings() {
           directory: false,
           multiple: false,
           defaultPath: "/",
+          filters: [{
+            name: "Database",
+            extensions: ["db"]
+          }]
         });
         
         if (selected === null) {
@@ -99,6 +104,7 @@ export default function Settings() {
       db_update_weekday: selectedWeekday,
       db_update_time: auto_time,
       db_location: custom_db_path,
+      scan_dir: scan_dir,
     }
     const jsonString = JSON.stringify(jsonData);
     console.log("Client sends: ", jsonData);
@@ -165,6 +171,7 @@ export default function Settings() {
           setAutotime(parsedData.db_update_time);
           setCustomDbPath(parsedData.db_location);
           setUsedbPath(parsedData.db_location.length > 0);
+          setScanDir(parsedData.scan_dir);
         })
         .catch((err) => console.error(err))
     }
@@ -297,12 +304,21 @@ export default function Settings() {
       />
 
       <SettingComp 
-        title="Database path"
-        short="Set the path to the .db file"
-        short2={`Currently: ${use_db_path ? custom_db_path : "Default"}`}
+        title={t('custom_db')}
+        short={t('custom_db_val')}
+        short2={`${t('custom_db_1')}: ${use_db_path ? custom_db_path : `${t('custom_db_2')}`}`}
         icon={faDatabase}
         isOn={use_db_path}
         setIsOn={handleSetCustomDBPath}
+      />
+
+      <SettingComp 
+        title={t('file_dialog_opt')}
+        short={t('file_dialog_opt_val')}
+        short2={t('file_dialog_opt_val2')}
+        icon={faFileZipper}
+        isOn={scan_dir}
+        setIsOn={setScanDir}
       />
 
       <SettingComp

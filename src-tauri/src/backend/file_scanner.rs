@@ -437,26 +437,50 @@ impl FileScanner {
     fn get_folder_size(&mut self, path: &Path) -> Result<u64, std::io::Error> {
         let metadata = fs::metadata(path)?;
         if metadata.is_file() {
-            info!(
-                "Added file: {} with size: {}",
-                path.to_str().unwrap(),
-                metadata.len()
-            );
-            self.folder_size = metadata.len();
-            return Ok(metadata.len());
-        }
-
-        let mut size: u64 = 0;
-
-        for entry in WalkDir::new(path).follow_links(true) {
-            let entry = entry?;
-            let entry_metadata = entry.metadata()?;
-            if entry_metadata.is_file() {
-                size += entry_metadata.len();
+            if let Some(mime_type) = from_path(path).first() {
+                if mime_type == "application/zip" {
+                    let file = File::open(path)?;
+                    let mut archive = ZipArchive::new(file)?;
+                
+                    let mut total_uncompressed_size: u64 = 0;
+                    for i in 0..archive.len() {
+                        let entry = archive.by_index(i)?;
+                        total_uncompressed_size += entry.size();
+                    }
+                    info!(
+                        "Added file: {} with size: {}",
+                        path.to_str().unwrap(),
+                        total_uncompressed_size
+                    );
+                    self.folder_size = total_uncompressed_size;
+                    return Ok(total_uncompressed_size);
+                    
+                } else {
+                    info!(
+                        "Added file: {} with size: {}",
+                        path.to_str().unwrap(),
+                        metadata.len()
+                    );
+                    self.folder_size = metadata.len();
+                    return Ok(metadata.len());
+                }
+            } else {
+                println!("Failed to determine the file type: {:?}", path);
+                return Err(std::io::Error::last_os_error());
             }
+        } else {
+            let mut size: u64 = 0;
+
+            for entry in WalkDir::new(path).follow_links(true) {
+                let entry = entry?;
+                let entry_metadata = entry.metadata()?;
+                if entry_metadata.is_file() {
+                    size += entry_metadata.len();
+                }
+            }
+            self.folder_size = size;
+            Ok(size)
         }
-        self.folder_size = size;
-        Ok(size)
     }
 
     fn calculate_progress(
