@@ -13,6 +13,7 @@ pub struct Config {
     pub db_update_weekday: i32,
     pub db_update_time: String,
     pub db_location: String,
+    pub scan_dir: bool
 }
 
 /// The config file simply holds settings of the application that should perists during reboots
@@ -27,6 +28,7 @@ impl Config {
             db_update_weekday: -1,
             db_update_time: "22:00:00".to_string(),
             db_location: "".to_string(),
+            scan_dir: true,
         }
     }
 

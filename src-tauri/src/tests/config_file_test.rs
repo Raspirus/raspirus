@@ -13,6 +13,7 @@ mod tests {
         assert_eq!(config.db_update_weekday, -1);
         assert_eq!(config.db_update_time, "22:00:00");
         assert_eq!(config.db_location, "");
+        assert_eq!(config.scan_dir, true);
     }
 
     #[test]
@@ -25,6 +26,7 @@ mod tests {
             db_update_weekday: 2,
             db_update_time: "08:00:00".to_string(),
             db_location: "".to_string(),
+            scan_dir: true,
         };
 
         let result_save = config.save();
@@ -42,5 +44,6 @@ mod tests {
         assert_eq!(loaded_config.db_update_weekday, config.db_update_weekday);
         assert_eq!(loaded_config.db_update_time, config.db_update_time);
         assert_eq!(loaded_config.db_location, config.db_location);
+        assert_eq!(loaded_config.scan_dir, config.scan_dir);
     }
 }

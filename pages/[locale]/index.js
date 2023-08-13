@@ -38,6 +38,8 @@ export default function Home() {
   const [isRaspberryPi, setIsRaspberryPi] = useState(false);
   // If a directory was selected
   const [selectedDirectory, setSelectedDirectory] = useState(false);
+  // Whether the dialog is a directory selection or not.
+  const [dir_selection, SetDirSelection] = useState(false);
   // Determines if an error occurred
   const [errorOccurred, setError] = useLocalStorage("errorOccurred", 'false');
   const {t} = useTranslation('common');
@@ -70,6 +72,17 @@ export default function Home() {
 
   useEffect(() => {
     if (typeof window !== "undefined") {
+
+      invoke("create_config", {})
+        .then((output) => {
+          const parsedData = JSON.parse(output);
+          console.log("Loaded config: ", parsedData);
+          SetDirSelection(parsedData.scan_dir);
+        })
+        .catch((error) => {
+          SetDirSelection(true);
+          console.error("Couldn't retrieve settings: ", error);
+        })
 
       // Using the backend, check if the app is running on the Raspberry Pi
       invoke("check_raspberry", {})
@@ -186,7 +199,7 @@ export default function Home() {
                   <DirectoryInput value={value} />
                   : <Dropdown dictionary={dictionary} value={value} setValue={setValue} />
                 }
-                {!isRaspberryPi && <DirectoryPickerButton onSelectDirectory={handleSelectDirectory} />}
+                {!isRaspberryPi && <DirectoryPickerButton onSelectDirectory={handleSelectDirectory} scanDirectory={dir_selection} />}
 
                 <button
                   onClick={refreshContent}

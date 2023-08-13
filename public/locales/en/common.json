@@ -37,6 +37,15 @@
     "update_db_failed": "Update error",
     "update_db_failed_val": "Couldn't start the update",
 
+    "custom_db": "Database path",
+    "custom_db_val": "Set the path to the .db file",
+    "custom_db_1": "Currently",
+    "custom_db_2": "Default",
+
+    "file_dialog_opt": "File dialog option",
+    "file_dialog_opt_val": "When on, will scan folders instead of a single file",
+    "file_dialog_opt_val2": "This option only affects the file picker",
+
     "activate_logs": "Activate Logging",
     "activate_logs_val": "Activates the writing of logs",
 
