@@ -6,14 +6,14 @@ import Image from 'next/image';
  * @param {Function} onSelectDirectory Function to trigger when a directory has been selected
  * @returns A button tag with a folder-icon Image
  */
-export default function DirectoryPickerButton({ onSelectDirectory }) {
+export default function DirectoryPickerButton({ onSelectDirectory, scanDirectory }) {
 
   /** Handles the button click */
   const handleButtonClick = async () => {
     const { open } = await import('@tauri-apps/api/dialog');
     // Set user selection restrictions
     const selected = await open({
-      directory: true,
+      directory: scanDirectory,
       multiple: false,
       defaultPath: "/",
     })
