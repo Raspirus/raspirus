@@ -1,3 +1,4 @@
+![Discord](https://img.shields.io/discord/1132753101485514774?logo=discord&label=Join%20the%20Discord)
 [![Rust Build & Test](https://github.com/Benji377/Raspirus/actions/workflows/rust.yml/badge.svg)](https://github.com/Benji377/Raspirus/actions/workflows/rust.yml)
 [![Codecov](https://codecov.io/gh/Raspirus/Raspirus/branch/main/graph/badge.svg?token=0GFFWY7YBP)](https://codecov.io/gh/Raspirus/Raspirus)
 ![GitHub downloads](https://img.shields.io/github/downloads/Raspirus/Raspirus/total?label=Downloads)
