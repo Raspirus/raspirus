@@ -11,9 +11,9 @@
 
 ## Introduction
 
-Raspirus: Empowering Your Malware Protection
+**Raspirus: Empowering Your Malware Protection**
 
-Welcome to the official documentation for Raspirus, your lightweight signature-based malware scanner. Originally designed to scan attached USB drives using a Raspberry Pi, Raspirus has evolved into a versatile tool capable of scanning local files and folders as well. Some of its standout features include:
+Welcome to Raspirus, your lightweight signature-based malware scanner. Originally designed to scan attached USB drives using a Raspberry Pi, Raspirus has evolved into a versatile tool capable of scanning local files and folders as well. Some of its standout features include:
 
 - **Cost-Free Protection:** Raspirus operates solely on donations, ensuring top-notch protection without any financial burden.
 - **Tailored Signature Detection:** Our custom signature-based approach guarantees accurate identification of malware.
@@ -34,7 +34,7 @@ Getting started with Raspirus is a breeze. Follow these simple steps:
 
 ### For Developers
 
-Are you a developer looking to set up Raspirus? We've got you covered. Check out our comprehensive guides for various operating systems in the [Developers section](https://raspirus.github.io/docs/developers).
+Are you a developer looking to set up Raspirus? We've got you covered. Check out our comprehensive guides for various operating systems in the [Developers section](https://raspirus.github.io/docs/developers) on our docs.
 
 ## Questions?
 
@@ -45,16 +45,3 @@ Got questions about Raspirus? We're here to help!
 - If you've encountered a bug, browse the GitHub issues to see if it's already reported.
 
 Thank you for choosing Raspirus for your malware protection needs. Together, we're making the digital world safer for everyone.
-## Contributors ✨
-Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
-
-<table>
-  <tbody>
-    <tr>
-      <td align="center" valign="top" width="14.28%"><a href="https://github.com/mwallnoefer"><img src="https://avatars.githubusercontent.com/u/7541399?v=4?s=100" width="100px;" alt="Matthias Dieter Wallnöfer"/><br /><sub><b>Matthias Dieter Wallnöfer</b></sub></a><br /><a href="#mentoring-mwallnoefer" title="Mentoring">🧑‍🏫</a></td>
-      <td align="center" valign="top" width="14.28%"><a href="http://zacktech.xyz"><img src="https://avatars.githubusercontent.com/u/38058764?v=4?s=100" width="100px;" alt="Zack Amoroso"/><br /><sub><b>Zack Amoroso</b></sub></a><br /><a href="#platform-zja203" title="Packaging/porting to new platform">📦</a></td>
-      <td align="center" valign="top" width="14.28%"><a href="http://paul-guyot.com/"><img src="https://avatars.githubusercontent.com/u/168407?v=4?s=100" width="100px;" alt="Paul Guyot"/><br /><sub><b>Paul Guyot</b></sub></a><br /><a href="https://github.com/Raspirus/Raspirus/commits?author=pguyot" title="Code">💻</a></td>
-      <td align="center" valign="top" width="14.28%"><a href="https://github.com/GamingGuy003"><img src="https://avatars.githubusercontent.com/u/77393763?v=4?s=100" width="100px;" alt="GamingGuy003"/><br /><sub><b>GamingGuy003</b></sub></a><br /><a href="https://github.com/Raspirus/Raspirus/commits?author=GamingGuy003" title="Code">💻</a></td>
-    </tr>
-  </tbody>
-</table>
