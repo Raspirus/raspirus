@@ -36,6 +36,10 @@ Getting started with Raspirus is a breeze. Follow these simple steps:
 
 Are you a developer looking to set up Raspirus? We've got you covered. Check out our comprehensive guides for various operating systems in the [Developers section](https://raspirus.github.io/docs/developers) on our docs.
 
+## Roadmap and Changelog
+
+You can find the Changelog in the dedicated [CHANGELOG.md file](./CHANGELOG.md). As the Roadmap, we use the built-in GitHub Projects function. You can read about future updates and features [here](https://github.com/orgs/Raspirus/projects/3)
+
 ## Questions?
 
 Got questions about Raspirus? We're here to help!
@@ -43,5 +47,16 @@ Got questions about Raspirus? We're here to help!
 - Visit our [FAQ section](https://raspirus.github.io/docs/faq) for answers to common queries.
 - Join our thriving community on the [Discord server](https://discord.gg/Vx7fW9PA8B) to engage with fellow users.
 - If you've encountered a bug, browse the GitHub issues to see if it's already reported.
+
+## Star History
+
+<a href="https://star-history.com/#Raspirus/Raspirus&Date">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=Raspirus/Raspirus&type=Date&theme=dark" />
+    <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=Raspirus/Raspirus&type=Date" />
+    <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=Raspirus/Raspirus&type=Date" />
+  </picture>
+</a>
+
 
 Thank you for choosing Raspirus for your malware protection needs. Together, we're making the digital world safer for everyone.
