@@ -55,15 +55,44 @@
     "updater": {
       "active": false
     },
-    "windows": [
-      {
-        "fullscreen": false,
-        "height": 480,
-        "resizable": true,
-        "title": "Raspirus",
-        "width": 800,
-        "decorations": true
+    "cli": {
+      "description": "This is a description",
+      "longDescription": "This description is longer",
+      "beforeHelp": "Before the HELP", 
+      "afterHelp": "After the HELP", 
+      "args": [
+        {
+          "name": "scanfile",
+          "short": "s",
+          "takesValue": true
+        },
+        {
+          "name": "scanfolder",
+          "short": "f",
+          "takesValue": true
+        }
+      ],
+      "subcommands": {
+        "database": {
+          "args": [
+            {
+              "name": "update",
+              "short": "u",
+              "takesValue": false
+            },
+            {
+              "name": "rebuild",
+              "short": "r",
+              "takesValue": false
+            },
+            {
+              "name": "setpath",
+              "short": "p",
+              "takesValue": true
+            }
+          ]
+        }
       }
-    ]
+    }
   }
 }

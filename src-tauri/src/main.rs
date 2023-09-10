@@ -1,7 +1,5 @@
-#![cfg_attr(
-    all(not(debug_assertions), target_os = "windows"),
-    windows_subsystem = "windows"
-)]
+// Prevents additional console window on Windows in release, DO NOT REMOVE!!
+//#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use backend::config_file::Config;
 use backend::utils;
@@ -70,15 +68,65 @@ fn main() {
 
     // Builds the Tauri connections for each function listed here
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![
-            start_scanner,
-            list_usb_drives,
-            update_database,
-            check_raspberry,
-            create_config
-        ])
-        .run(tauri::generate_context!())
-        .expect("error while running tauri application");
+    .setup(|app| {
+      // Default to GUI if the app was opened with no CLI args.
+      if std::env::args_os().count() <= 1 {
+        cli_gui(app.handle())?;
+      }
+      let matches = app.get_cli_matches()?;
+      for (key, value) in matches.args {
+        if value.occurrences > 0 {
+          match key.as_str() {
+            "gui" => cli_gui(app.handle())?,
+            "example" => cli_example(app.handle()),
+            _ => cli_unknown_arg(key, app.handle()),
+          }
+        }
+      }
+      Ok(())
+    })
+    .invoke_handler(tauri::generate_handler![
+        start_scanner,
+        list_usb_drives,
+        update_database,
+        check_raspberry,
+        create_config
+    ])
+    .run(tauri::generate_context!())
+    .expect("error while running tauri application");
+}
+
+
+#[cfg(all(not(debug_assertions), windows))]
+fn remove_windows_console() {
+  unsafe {
+    windows_sys::Win32::System::Console::FreeConsole();
+  }
+}
+
+fn cli_gui(app: tauri::AppHandle) -> Result<(), tauri::Error> {
+  println!("showing gui");
+  #[cfg(all(not(debug_assertions), windows))]
+  remove_windows_console();
+  tauri::WindowBuilder::new(&app, "raspirus", tauri::WindowUrl::App("index.html".into()))
+    .title("Raspirus")
+    .inner_size(800., 480.)
+    .resizable(true)
+    .build()?;
+  println!("this won't show on Windows release builds");
+  Ok(())
+}
+
+fn cli_example(app: tauri::AppHandle) {
+  println!("sleeping for example");
+  std::thread::sleep(std::time::Duration::from_secs(5));
+  app.exit(0);
+}
+
+fn cli_unknown_arg(key: String, app: tauri::AppHandle) {
+  println!("sleeping for unhandled cli arg: {}", key);
+  std::thread::sleep(std::time::Duration::from_secs(5));
+  app.exit(1);
 }
 
 /// Starts the scanner for the given path and updates the database if update is true.
