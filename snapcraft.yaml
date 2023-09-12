@@ -12,19 +12,46 @@ apps:
       - gnome-3-34
     desktop: raspirus.desktop
 parts:
-  dump-binary:
-    plugin: dump
-    source: target/release
-    source-type: local
-    stage:
-      - lib
-      - icons
-      - raspirus
-      - raspirus.desktop
-    prime:
-      - lib
-      - icons
-      - raspirus
-      - raspirus.desktop
+  install-deps:
+    plugin: nil
+    build-packages:
+      - curl
+      - nodejs
+      - npm
+      - libwebkit2gtk-4.0-dev
+      - build-essential
+      - wget
+      - libssl-dev
+      - libgtk-3-dev
+      - libayatana-appindicator3-dev
+      - librsvg2-dev
     stage-packages:
       - libc6
+
+  rust:
+    plugin: rust
+    source: .
+    build-packages:
+      - rustc
+    stage-packages:
+      - libc6
+
+  tauri:
+    plugin: nil
+    override-build: |
+      export PATH="$HOME/.cargo/bin:$PATH"
+      source "$HOME/.cargo/env"
+      curl https://sh.rustup.rs -sSf | sh -s -- -y
+      npm install next@latest react@latest react-dom@latest eslint-config-next@latest
+      cargo install tauri-cli
+
+  npm-deps:
+    plugin: nil
+    override-build: |
+      npm install
+
+  build:
+    after: [install-deps, rust, tauri, npm-deps]
+    plugin: nil
+    override-build: |
+      cargo tauri build
