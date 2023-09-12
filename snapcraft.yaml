@@ -14,7 +14,7 @@ apps:
 parts:
   dump-binary:
     plugin: dump
-    source: release
+    source: target/release
     source-type: local
     stage:
       - lib
