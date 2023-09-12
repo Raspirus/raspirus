@@ -7,6 +7,7 @@
 # :rocket: Raspirus
 ![banner_logo](https://user-images.githubusercontent.com/50681275/223684389-ed0f104f-c183-4223-9723-c268e7cc5268.png)
 
+[![Get it from the Snap Store](https://snapcraft.io/static/images/badges/en/snap-store-white.svg)](https://snapcraft.io/raspirus)
 [![Download Raspirus](https://a.fsdn.com/con/app/sf-download-button)](https://sourceforge.net/projects/raspirus/files/latest/download)
 
 ## Introduction
