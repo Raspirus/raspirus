@@ -1,30 +1,30 @@
 name: raspirus
-version: git
-summary: A lightweight hash-based virus scanner
-description: |
-  Raspirus is a user-friendly hash-based virus scanner written
-  in Rust and JavaScript.
-
-base: core22
-confinement: classic
-adopt-info: raspirus
-grade: stable
-
-parts:
-  raspirus:
-    source: .
-    plugin: rust
-    build-packages:
-      - cargo
-      - npm
-    override-build: |
-      TERM=xterm make build
-
+base: core18
+version: 1.1.0
+summary: A resource- and human-friendly malware scanner
+description: Raspirus is your cost-free, versatile malware scanner. Tailored signature detection, comprehensive file scans, and privacy prioritized for swift, reliable protection.
+grade: devel
+confinement: strict
 apps:
   raspirus:
-    command: bin/raspirus
-
-  # If you have a GUI-based frontend, you may need to specify a desktop launcher.
-  # raspirus-desktop:
-  #   command: bin/raspirus
-  #   desktop: usr/share/applications/raspirus.desktop
+    command: raspirus
+    extensions:
+      - gnome-3-34
+    desktop: raspirus.desktop
+parts:
+  dump-binary:
+    plugin: dump
+    source: release
+    source-type: local
+    stage:
+      - lib
+      - icons
+      - raspirus
+      - raspirus.desktop
+    prime:
+      - lib
+      - icons
+      - raspirus
+      - raspirus.desktop
+    stage-packages:
+      - libc6
