@@ -56,9 +56,3 @@ parts:
     prime:
       - -target
       - '*'
-
-after:
-  - npm-deps
-  - rust-deps
-  - tauri-install
-  - tauri-build
