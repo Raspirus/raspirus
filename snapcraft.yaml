@@ -1,47 +1,80 @@
 name: raspirus
-base: core18
-version: 1.1.0
+base: core22
+version: git
 summary: A resource- and human-friendly malware scanner
 description: Raspirus is your cost-free, versatile malware scanner. Tailored signature detection, comprehensive file scans, and privacy prioritized for swift, reliable protection.
 grade: devel
 confinement: strict
+compression: lzo
+architectures:
+  - amd64
+
+
 apps:
   raspirus:
     command: raspirus
     extensions:
       - gnome-3-34
     desktop: raspirus.desktop
+
+plugs:
+  graphics-core22:
+    interface: content
+    target: $SNAP/graphics
+    default-provider: mesa-core22
+
+layout:
+  /usr/share/libdrm:
+    bind: $SNAP/graphics/libdrm
+  /usr/share/drirc.d:
+    symlink: $SNAP/graphics/drirc.d
+  /usr/share/X11/XErrorDB:
+    symlink: $SNAP/graphics/X11/XErrorDB
+  /usr/share/X11/locale:
+    symlink: $SNAP/graphics/X11/locale
+
 parts:
-  build-deps:
+  raspirus-app:
     plugin: nil
+    source: .
     build-packages:
       - curl
-      - nodejs
-      - npm
-      - libwebkit2gtk-4.0-dev
       - build-essential
-      - wget
-      - libssl-dev
+      - pkg-config
       - libgtk-3-dev
+      - libwebkit2gtk-4.1-dev
       - libayatana-appindicator3-dev
       - librsvg2-dev
-    source: .
-
-  npm-deps:
-    plugin: nodejs
-    npm-packages:
-      - next@latest
-      - react@latest
-      - react-dom@latest
-      - eslint-config-next@latest
-    
-  tauri-install:
-    plugin: rust
-    source: .
-    override-build: |
+      - libsoup-3.0-dev
+      - libjavascriptcoregtk-4.1-dev
+    stage-packages:
+      - libgtk-3-0
+      - libwebkit2gtk-4.1-0
+      - libayatana-appindicator3-1
+      - librsvg2-2
+      - libsoup-3.0-0
+      - libjavascriptcoregtk-4.1-0
+    override-pull: |
+      echo "Install Node"
+      curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.5/install.sh | bash
+      source ~/.bashrc
+      echo "Install Cargo"
+      curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+      PATH=~/.cargo/bin:${PATH}
+      echo "Install Dependencies"
+      echo "Cargo Dependencies"
       cargo install tauri-cli
       cargo install --path .\src-tauri\
-      cargo tauri build
+      echo "Node Dependencies"
+      nvm install --lts
+      npm i
+    override-build: |
+      PATH=~/.cargo/bin:${PATH}
+      cargo tauri build --ci
+    stage:
+      - target
+    prime:
+      - target
 
   dump-binary:
     plugin: dump
