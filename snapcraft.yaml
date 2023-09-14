@@ -5,14 +5,16 @@ summary: A resource- and human-friendly malware scanner
 description: Raspirus is your cost-free, versatile malware scanner. Tailored signature detection, comprehensive file scans, and privacy prioritized for swift, reliable protection.
 grade: devel
 confinement: strict
+
 apps:
   raspirus:
     command: raspirus
     extensions:
       - gnome-3-34
     desktop: raspirus.desktop
+
 parts:
-  install-deps:
+  build-deps:
     plugin: nil
     build-packages:
       - curl
@@ -25,33 +27,38 @@ parts:
       - libgtk-3-dev
       - libayatana-appindicator3-dev
       - librsvg2-dev
-    stage-packages:
-      - libc6
-
-  rust:
-    plugin: rust
     source: .
-    build-packages:
-      - rustc
-    stage-packages:
-      - libc6
-
-  tauri:
-    plugin: nil
-    override-build: |
-      export PATH="$HOME/.cargo/bin:$PATH"
-      source "$HOME/.cargo/env"
-      curl https://sh.rustup.rs -sSf | sh -s -- -y
-      npm install next@latest react@latest react-dom@latest eslint-config-next@latest
-      cargo install tauri-cli
 
   npm-deps:
-    plugin: nil
-    override-build: |
-      npm install
+    plugin: nodejs
+    npm-packages:
+      - next@latest
+      - react@latest
+      - react-dom@latest
+      - eslint-config-next@latest
 
-  build:
-    after: [install-deps, rust, tauri, npm-deps]
-    plugin: nil
+  rust-deps:
+    plugin: rust
+    rust-version: 1.55.0
+    source: .
+
+  tauri-install:
+    plugin: rust
+    source: .
+    override-build: |
+      cargo install tauri-cli
+
+  tauri-build:
+    plugin: rust
+    source: .
     override-build: |
       cargo tauri build
+    prime:
+      - -target
+      - '*'
+
+after:
+  - npm-deps
+  - rust-deps
+  - tauri-install
+  - tauri-build
