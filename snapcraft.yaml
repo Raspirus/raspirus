@@ -30,17 +30,12 @@ parts:
       - libayatana-appindicator3-dev 
       - librsvg2-dev
     override-pull: |
-      echo "Install Node"
       curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.5/install.sh | bash
       export NVM_DIR="$HOME/.nvm"
-      echo "Install Cargo"
       curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
       PATH=~/.cargo/bin:${PATH}
-      echo "Install Dependencies"
-      echo "Cargo Dependencies"
       cargo install tauri-cli
       cargo install --path .\src-tauri\
-      echo "Node Dependencies"
       nvm install --lts
       npm i
     override-build: |
@@ -67,3 +62,4 @@ parts:
       - raspirus.desktop
     stage-packages:
       - libc6
+
