@@ -5,14 +5,12 @@ summary: A resource- and human-friendly malware scanner
 description: Raspirus is your cost-free, versatile malware scanner. Tailored signature detection, comprehensive file scans, and privacy prioritized for swift, reliable protection.
 grade: devel
 confinement: strict
-
 apps:
   raspirus:
     command: raspirus
     extensions:
       - gnome-3-34
     desktop: raspirus.desktop
-
 parts:
   build-deps:
     plugin: nil
@@ -36,23 +34,28 @@ parts:
       - react@latest
       - react-dom@latest
       - eslint-config-next@latest
-
-  rust-deps:
-    plugin: rust
-    rust-version: 1.55.0
-    source: .
-
+    
   tauri-install:
     plugin: rust
     source: .
     override-build: |
       cargo install tauri-cli
-
-  tauri-build:
-    plugin: rust
-    source: .
-    override-build: |
+      cargo install --path .\src-tauri\
       cargo tauri build
+
+  dump-binary:
+    plugin: dump
+    source: target/release
+    source-type: local
+    stage:
+      - lib
+      - icons
+      - raspirus
+      - raspirus.desktop
     prime:
-      - -target
-      - '*'
+      - lib
+      - icons
+      - raspirus
+      - raspirus.desktop
+    stage-packages:
+      - libc6
