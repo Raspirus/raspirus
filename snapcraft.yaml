@@ -8,62 +8,10 @@ confinement: strict
 architectures:
   - amd64
 
+parts:
+    plugin: dump
+    source: https://github.com/Raspirus/Raspirus/releases/download/v1.1.0/raspirus_1.1.0_amd64.deb
+
 apps:
   raspirus:
     command: raspirus
-    extensions: [gnome-3-34]
-    desktop: raspirus.desktop
-
-parts:
-  raspirus-app:
-    plugin: nil
-    source: .
-    build-packages:
-      - curl
-      - wget
-      - build-essential
-      - libwebkit2gtk-4.0-dev
-      - libssl-dev
-      - libgtk-3-dev
-      - libayatana-appindicator3-dev 
-      - librsvg2-dev
-    override-pull: |
-      cd ../../../
-      curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-      PATH=~/.cargo/bin:${PATH}
-      cargo install tauri-cli
-      mkdir out
-      cargo install --path src-tauri
-      ls -ll ${SNAPCRAFT_PROJECT_DIR}
-      ls -ll ${SNAPCRAFT_PART_BUILD}
-    override-build: |
-      cd ../../../
-      npm i
-      PATH=~/.cargo/bin:${PATH}
-      cargo tauri build --ci --out-dir $CRAFT_PART_INSTALL --bundles deb
-    build-snaps:
-    - node/16/stable
-    stage:
-      - target/release/bundle/deb/raspirus_1.1.0_amd64/
-    prime:
-      - target/release/bundle/deb/raspirus_1.1.0_amd64/data/usr/bin/raspirus
-      - target/release/bundle/deb/raspirus_1.1.0_amd64/data/usr/share/applications/raspirus.desktop
-      - target/release/bundle/deb/raspirus_1.1.0_amd64/data/usr/share/icons/hicolor/**/apps/raspirus.png
-
-  dump-binary:
-    after: [raspirus-app]
-    plugin: dump
-    source: target/release
-    source-type: local
-    stage:
-      - lib
-      - icons
-      - raspirus
-      - raspirus.desktop
-    prime:
-      - lib
-      - icons
-      - raspirus
-      - raspirus.desktop
-    stage-packages:
-      - libc6
