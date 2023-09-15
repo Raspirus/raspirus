@@ -5,28 +5,13 @@ summary: A resource- and human-friendly malware scanner
 description: Raspirus is your cost-free, versatile malware scanner. Tailored signature detection, comprehensive file scans, and privacy prioritized for swift, reliable protection.
 grade: stable
 confinement: strict
-architectures:
-  - amd64
-  - arm64
 
 parts:
-  raspirus-amd64:
+  raspirus:
     plugin: dump
-    source: https://github.com/Raspirus/Raspirus/releases/download/v$SNAPCRAFT_PROJECT_VERSION/raspirus_$SNAPCRAFT_PROJECT_VERSION_amd64.deb
-    source-type: deb
-    organize:
-      usr/bin/raspirus: usr/bin/raspirus-amd64
-
-  raspirus-arm64:
-    plugin: dump
-    source: https://github.com/Raspirus/Raspirus/releases/download/v$SNAPCRAFT_PROJECT_VERSION/raspirus_$SNAPCRAFT_PROJECT_VERSION_arm64.deb
-    source-type: deb
-    organize:
-      usr/bin/raspirus: usr/bin/raspirus-arm64
+    source: https://github.com/Raspirus/Raspirus/releases/download/v1.1.0/Raspirus_x64.app.tar.gz
 
 apps:
-  raspirus-amd64:
-    command: raspirus-amd64
-  raspirus-arm64:
-    command: raspirus-arm64
+  raspirus:
+    command: raspirus
 
