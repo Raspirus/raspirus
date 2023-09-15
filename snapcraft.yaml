@@ -36,11 +36,13 @@ parts:
       PATH=~/.cargo/bin:${PATH}
       cargo install tauri-cli
       ls -ll ../../../
-      ls -ll ../../
+      ls -ll ${SNAPCRAFT_PART_SRC}
+      mkdir ../../../out
       cargo install --path ../../../src-tauri
       nvm install --lts
       npm i
     override-build: |
+      ls -ll
       mkdir out
       PATH=~/.cargo/bin:${PATH}
       cargo tauri build --ci
