@@ -32,7 +32,6 @@ parts:
       curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
       PATH=~/.cargo/bin:${PATH}
       cargo install tauri-cli
-      mkdir ../../../out
       cargo install --path ../../../src-tauri
       ls -ll ${SNAPCRAFT_PROJECT_DIR}
       ls -ll ${SNAPCRAFT_PART_BUILD}
