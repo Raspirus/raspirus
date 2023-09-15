@@ -9,7 +9,6 @@ compression: lzo
 architectures:
   - amd64
 
-
 apps:
   raspirus:
     command: raspirus
@@ -42,7 +41,7 @@ parts:
       ls -ll
       npm i
       PATH=~/.cargo/bin:${PATH}
-      cargo tauri build --ci
+      cargo tauri build --ci --bundles [deb]
     build-snaps:
     - node/16/stable
     prime:
