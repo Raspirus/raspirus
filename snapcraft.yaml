@@ -37,7 +37,7 @@ parts:
       cargo install tauri-cli
       ls -ll
       ls -la
-      cargo install --path ./src-tauri
+      cargo install --path src-tauri --root ${SNAPCRAFT_PART_INSTALL}
       nvm install --lts
       npm i
     override-build: |
