@@ -42,7 +42,7 @@ parts:
       npm i
       PATH=~/.cargo/bin:${PATH}
       cargo tauri build --ci --bundles deb
-      dpkg -i target/release/bundle/deb/raspirus_1.1.0_arm64.deb
+      dpkg -i target/release/bundle/deb/raspirus_1.1.0_amd64.deb
     build-snaps:
     - node/16/stable
     prime:
