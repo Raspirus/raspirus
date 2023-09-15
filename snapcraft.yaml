@@ -30,22 +30,21 @@ parts:
       - libayatana-appindicator3-dev 
       - librsvg2-dev
     override-pull: |
-      curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.5/install.sh | bash
-      export NVM_DIR="$HOME/.nvm"
       curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
       PATH=~/.cargo/bin:${PATH}
       cargo install tauri-cli
-      ls -ll ../../../
-      ls -ll ${SNAPCRAFT_PART_SRC}
+      ls -ll ${SNAPCRAFT_PROJECT_DIR}
+      ls -ll ${SNAPCRAFT_PART_BUILD}
       mkdir ../../../out
       cargo install --path ../../../src-tauri
-      nvm install --lts
-      npm i
     override-build: |
       ls -ll
       mkdir out
+      npm i
       PATH=~/.cargo/bin:${PATH}
       cargo tauri build --ci
+    build-snaps:
+    - node/16/stable
     prime:
       - "*"
 
