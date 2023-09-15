@@ -35,7 +35,9 @@ parts:
       curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
       PATH=~/.cargo/bin:${PATH}
       cargo install tauri-cli
-      cargo install --path src-tauri
+      ls -ll
+      ls -la
+      cargo install --path ./src-tauri
       nvm install --lts
       npm i
     override-build: |
