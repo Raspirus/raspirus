@@ -36,7 +36,7 @@ parts:
       mkdir ../../../out
       cargo install --path ../../../src-tauri
       ls -ll ${SNAPCRAFT_PROJECT_DIR}
-      mv ${SNAPCRAFT_PROJECT_DIR}/* ${SNAPCRAFT_PART_BUILD}
+      cp -rp ${SNAPCRAFT_PROJECT_DIR}/* ${SNAPCRAFT_PART_BUILD}
       ls -ll ${SNAPCRAFT_PART_BUILD}
     override-build: |
       ls -ll
