@@ -9,6 +9,7 @@ architectures:
   - amd64
 
 parts:
+  raspirus:
     plugin: dump
     source: https://github.com/Raspirus/Raspirus/releases/download/v1.1.0/raspirus_1.1.0_amd64.deb
 
