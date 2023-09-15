@@ -3,9 +3,8 @@ base: core18
 version: git
 summary: A resource- and human-friendly malware scanner
 description: Raspirus is your cost-free, versatile malware scanner. Tailored signature detection, comprehensive file scans, and privacy prioritized for swift, reliable protection.
-grade: devel
-confinement: strict
-compression: lzo
+grade: stable
+confinement: classic
 architectures:
   - amd64
 
@@ -29,10 +28,12 @@ parts:
       - libayatana-appindicator3-dev 
       - librsvg2-dev
     override-pull: |
+      cd ../../../
       curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
       PATH=~/.cargo/bin:${PATH}
       cargo install tauri-cli
-      cargo install --path ../../../src-tauri
+      mkdir out
+      cargo install --path src-tauri
       ls -ll ${SNAPCRAFT_PROJECT_DIR}
       ls -ll ${SNAPCRAFT_PART_BUILD}
     override-build: |
@@ -45,22 +46,3 @@ parts:
     - node/16/stable
     prime:
       - "*"
-
-  dump-binary:
-    after: [raspirus-app]
-    plugin: dump
-    source: $SNAPCRAFT_PRIME
-    source-type: local
-    stage:
-      - lib
-      - icons
-      - raspirus
-      - raspirus.desktop
-    prime:
-      - lib
-      - icons
-      - raspirus
-      - raspirus.desktop
-    stage-packages:
-      - libc6
-
