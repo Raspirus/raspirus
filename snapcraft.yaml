@@ -40,7 +40,6 @@ parts:
     override-build: |
       cd ../../../
       ls -ll
-      mkdir out
       npm i
       cargo tauri build --ci
     build-snaps:
