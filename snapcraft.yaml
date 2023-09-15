@@ -13,15 +13,22 @@ parts:
   raspirus-amd64:
     plugin: dump
     source: https://github.com/Raspirus/Raspirus/releases/download/v$SNAPCRAFT_PROJECT_VERSION/raspirus_$SNAPCRAFT_PROJECT_VERSION_amd64.deb
-    organize:
-      usr/bin/raspirus: usr/bin/raspirus-amd64  # Rename the amd64 binary
 
   raspirus-arm64:
     plugin: dump
     source: https://github.com/Raspirus/Raspirus/releases/download/v$SNAPCRAFT_PROJECT_VERSION/raspirus_$SNAPCRAFT_PROJECT_VERSION_arm64.deb
-    organize:
-      usr/bin/raspirus: usr/bin/raspirus-arm64  # Rename the arm64 binary
 
 apps:
   raspirus:
-    command: raspirus
+    command: usr/bin/raspirus
+    filesets:
+      - raspirus-amd64
+    build-attributes:
+      - build-attributes/architecture: amd64
+
+  raspirus-arm64:
+    command: usr/bin/raspirus
+    filesets:
+      - raspirus-arm64
+    build-attributes:
+      - build-attributes/architecture: arm64
