@@ -62,13 +62,8 @@
       "afterHelp": "Thank you for using Raspirus <3", 
       "args": [
         {
-          "name": "scanfile",
+          "name": "scan",
           "short": "s",
-          "takesValue": true
-        },
-        {
-          "name": "scanfolder",
-          "short": "f",
           "takesValue": true
         },
         {
