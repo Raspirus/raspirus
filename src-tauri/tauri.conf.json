@@ -56,10 +56,10 @@
       "active": false
     },
     "cli": {
-      "description": "This is a description",
-      "longDescription": "This description is longer",
-      "beforeHelp": "Before the HELP", 
-      "afterHelp": "After the HELP", 
+      "description": "Raspirus, the resource- and human-friendly malware scanner",
+      "longDescription": "Raspirus is your cost-free, versatile malware scanner. Tailored signature detection, comprehensive file scans, and privacy prioritized for swift, reliable protection.",
+      "beforeHelp": "RASPIRUS HELP PAGE", 
+      "afterHelp": "Thank you for using Raspirus <3", 
       "args": [
         {
           "name": "scanfile",
@@ -70,29 +70,24 @@
           "name": "scanfolder",
           "short": "f",
           "takesValue": true
+        },
+        {
+          "name": "db-update",
+          "short": "u",
+          "takesValue": false
+        },
+        {
+          "name": "db-rebuild",
+          "short": "r",
+          "takesValue": false
+        },
+        {
+          "name": "db-setpath",
+          "short": "p",
+          "takesValue": true
         }
       ],
-      "subcommands": {
-        "database": {
-          "args": [
-            {
-              "name": "update",
-              "short": "u",
-              "takesValue": false
-            },
-            {
-              "name": "rebuild",
-              "short": "r",
-              "takesValue": false
-            },
-            {
-              "name": "setpath",
-              "short": "p",
-              "takesValue": true
-            }
-          ]
-        }
-      }
+      "subcommands": {}
     }
   }
 }

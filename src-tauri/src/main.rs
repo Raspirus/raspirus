@@ -6,6 +6,7 @@ use backend::utils;
 use directories_next::ProjectDirs;
 use log::{error, info, LevelFilter};
 use simplelog::{ColorChoice, CombinedLogger, TermLogger, TerminalMode, WriteLogger};
+use tauri::api::cli::ArgData;
 use std::fs::File;
 use std::{env, fs};
 
@@ -13,10 +14,11 @@ mod backend;
 mod tests;
 
 fn main() {
+    // We immediatley try to load the config at startup, or create a new one. The config defines the application states
     let mut config = Config::new();
     config = config.load().expect("Couldn't load config at startup");
     let write_to_file = config.logging_is_active;
-
+    // We check if we should log the application messages to a file or not, default is yes. Defined in the Config
     if write_to_file {
         // We use ProjectDirs to find a suitable location for our logging file
         let project_dirs = ProjectDirs::from("com", "Raspirus", "Logs")
@@ -26,6 +28,7 @@ fn main() {
         // If we are able to create both the file and directory path, we can start the FileLogger
         match fs::create_dir_all(&log_dir) {
             Ok(_) => {
+                // Create a new file with the given name. Will overwrite the old/existisng file
                 match File::create(log_dir.join("app.log")) {
                     Ok(log_file) => {
                         info!(
@@ -38,6 +41,7 @@ fn main() {
                             simplelog::Config::default(),
                             log_file,
                         );
+                        // Terminal logger is used if for development
                         let term_logger = TermLogger::new(
                             LevelFilter::Debug,
                             simplelog::Config::default(),
@@ -66,24 +70,42 @@ fn main() {
         .expect("Failed to init TermLogger");
     }
 
-    // Builds the Tauri connections for each function listed here
+    // Builds the Tauri connection
     tauri::Builder::default()
     .setup(|app| {
       // Default to GUI if the app was opened with no CLI args.
       if std::env::args_os().count() <= 1 {
         cli_gui(app.handle())?;
       }
-      let matches = app.get_cli_matches()?;
-      for (key, value) in matches.args {
-        if value.occurrences > 0 {
-          match key.as_str() {
-            "gui" => cli_gui(app.handle())?,
-            "example" => cli_example(app.handle()),
-            _ => cli_unknown_arg(key, app.handle()),
-          }
+      // Else, we start in CLI mode and parse the given parameters
+      let matches = match app.get_cli_matches() {
+        Ok(matches) => matches,
+        Err(err) => {
+            eprintln!("{}", err);
+            app.handle().exit(1);
+            return Ok(());
         }
-      }
-      Ok(())
+    };
+
+    for (key, data) in matches.args {
+        if data.occurrences > 0 || key.as_str() == "help" || key.as_str() == "version" {
+            // Define all CLI commands/arguments here and in the tauri.conf.json file
+            match key.as_str() {
+                "gui" => {
+                    if let Err(err) = cli_gui(app.handle()) {
+                        eprintln!("GUI Error: {}", err);
+                        // Handle the error as needed
+                    }
+                }
+                "example" => cli_example(app.handle()),
+                "scanfile" => cli_scanner(app.handle(), data),
+                "help" => print_data(app.handle(), data),
+                "version" => print_data(app.handle(), data),
+                _ => print_data(app.handle(), data),
+            }
+        }
+    }    
+    Ok(())
     })
     .invoke_handler(tauri::generate_handler![
         start_scanner,
@@ -104,6 +126,18 @@ fn remove_windows_console() {
   }
 }
 
+fn print_data(app: tauri::AppHandle, data: ArgData) {
+    if let Some(json_str) = data.value.as_str() {
+        let unescaped_str = json_str.replace("\\n", "\n").replace("\\t", "\t");
+        println!("{}", unescaped_str);
+        app.exit(0);
+    } else {
+        // Handle the case where data.value is not a string
+        eprintln!("data.value is not a string");
+        app.exit(1);
+    }
+}
+
 fn cli_gui(app: tauri::AppHandle) -> Result<(), tauri::Error> {
   println!("showing gui");
   #[cfg(all(not(debug_assertions), windows))]
@@ -117,16 +151,32 @@ fn cli_gui(app: tauri::AppHandle) -> Result<(), tauri::Error> {
   Ok(())
 }
 
+
+fn cli_scanner(app: tauri::AppHandle, data: ArgData) {
+    if let Some(json_str) = data.value.as_str() {
+        let unescaped_str = json_str.replace("\\n", "\n").replace("\\t", "\t");
+        println!("{}", unescaped_str);
+        match utils::scanner_utils::sync_start_scanner(None, unescaped_str) {
+            Ok(res) => {
+                println!("Result: {res}");
+                app.exit(0);
+            },
+            Err(err) => {
+                eprintln!("Error: {err}");
+                app.exit(1);
+            },
+        }
+    } else {
+        // Handle the case where data.value is not a string
+        eprintln!("data.value is not a string");
+        app.exit(1);
+    }
+}
+
 fn cli_example(app: tauri::AppHandle) {
   println!("sleeping for example");
   std::thread::sleep(std::time::Duration::from_secs(5));
   app.exit(0);
-}
-
-fn cli_unknown_arg(key: String, app: tauri::AppHandle) {
-  println!("sleeping for unhandled cli arg: {}", key);
-  std::thread::sleep(std::time::Duration::from_secs(5));
-  app.exit(1);
 }
 
 /// Starts the scanner for the given path and updates the database if update is true.
@@ -142,7 +192,7 @@ fn cli_unknown_arg(key: String, app: tauri::AppHandle) {
 /// An empty `Result` object if the scanner was successfully started, or an `Err` with an error message if an error occurred.
 #[tauri::command]
 async fn start_scanner(window: tauri::Window, path: String) -> Result<String, String> {
-    utils::scanner_utils::start_scanner(window, path).await
+    utils::scanner_utils::start_scanner(Some(window), path).await
 }
 
 #[tauri::command]
