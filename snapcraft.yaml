@@ -1,30 +1,41 @@
 name: raspirus
-version: git
-summary: A lightweight hash-based virus scanner
-description: |
-  Raspirus is a user-friendly hash-based virus scanner written
-  in Rust and JavaScript.
-
-base: core22
-confinement: classic
-adopt-info: raspirus
+base: core18
+version: 1.1.0
+summary: A resource- and human-friendly malware scanner
+description: Raspirus is your cost-free, versatile malware scanner. Tailored signature detection, comprehensive file scans, and privacy prioritized for swift, reliable protection.
 grade: stable
+confinement: strict
+architectures:
+  - amd64
+  - arm64
+  - armhf
 
 parts:
-  raspirus:
-    source: .
-    plugin: rust
-    build-packages:
-      - cargo
-      - npm
-    override-build: |
-      TERM=xterm make build
+  raspirus-amd64:
+    plugin: dump
+    source: https://github.com/Raspirus/Raspirus/releases/download/v$SNAPCRAFT_PROJECT_VERSION/raspirus_$SNAPCRAFT_PROJECT_VERSION_amd64.deb
+    source-type: deb
+    organize:
+      usr/bin/raspirus: usr/bin/raspirus-amd64
+
+  raspirus-arm64:
+    plugin: dump
+    source: https://github.com/Raspirus/Raspirus/releases/download/v$SNAPCRAFT_PROJECT_VERSION/raspirus_$SNAPCRAFT_PROJECT_VERSION_arm64.deb
+    source-type: deb
+    organize:
+      usr/bin/raspirus: usr/bin/raspirus-arm64
+  
+  raspirus-armhf:
+    plugin: dump
+    source: https://github.com/Raspirus/Raspirus/releases/download/v$SNAPCRAFT_PROJECT_VERSION/raspirus_$SNAPCRAFT_PROJECT_VERSION_armhf.deb
+    source-type: deb
+    organize:
+      usr/bin/raspirus: usr/bin/raspirus-armhf
 
 apps:
-  raspirus:
-    command: bin/raspirus
-
-  # If you have a GUI-based frontend, you may need to specify a desktop launcher.
-  # raspirus-desktop:
-  #   command: bin/raspirus
-  #   desktop: usr/share/applications/raspirus.desktop
+  raspirus-amd64:
+    command: raspirus-amd64
+  raspirus-arm64:
+    command: raspirus-arm64
+  raspirus-armhf:
+    command: raspirus-armhf
