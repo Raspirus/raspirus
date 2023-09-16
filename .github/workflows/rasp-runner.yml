@@ -36,4 +36,4 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: Debian Bundle
-          path: ${{ github.workspace }}/target/release/bundle/deb/raspirus_1.0.0_arm64.deb
+          path: ${{ github.workspace }}/target/release/bundle/deb/raspirus_1.1.0_arm64.deb
