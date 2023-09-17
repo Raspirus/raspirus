@@ -6,18 +6,28 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize)]
 pub struct Config {
+    // Amount of hashes in the database
     pub hashes_in_db: u32,
+    // Last time and date when the db was successfully updated
     pub last_db_update: String,
+    // If we should log information to a file
     pub logging_is_active: bool,
+    // Check if we should obfuscate the result
     pub obfuscated_is_active: bool,
+    // Automatic updates: Set weekday
     pub db_update_weekday: i32,
+    // Automatic update: Set time
     pub db_update_time: String,
+    // Location of the .db file
     pub db_location: String,
-    pub scan_dir: bool
+    // If we should scan direcories instead of files (You can only choose one on the current file picker dialog)
+    pub scan_dir: bool,
+    // List of hashes that should be ignored during scans
+    pub ignored_hashes: Vec<String>
 }
 
 /// The config file simply holds settings of the application that should perists during reboots
-/// The entire config is saved to a file and loaded or created on the first start
+/// The entire config is saved to a JSON file and loaded or created on the first start
 impl Config {
     pub fn new() -> Self {
         Config {
@@ -29,6 +39,7 @@ impl Config {
             db_update_time: "22:00:00".to_string(),
             db_location: "".to_string(),
             scan_dir: true,
+            ignored_hashes: Vec::new()
         }
     }
 

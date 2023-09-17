@@ -48,7 +48,7 @@ impl FileLog {
                 Some(mut file) => {
                     match file.write_all(format!("{hash}\t{fpath}\n").as_bytes()) {
                         Ok(_) => {
-                            debug!("Wrote {hash}\t{fpath} to {:?}", self.file.as_ref().unwrap())
+                            debug!("Wrote {hash}\t{fpath} to {:?}", self.file.as_ref().expect("Invalid file reference"))
                         }
                         Err(err) => error!("Failed loggin: {err}"),
                     };
