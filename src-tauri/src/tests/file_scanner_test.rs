@@ -1,5 +1,7 @@
 #[cfg(test)]
 mod tests {
+    use log::debug;
+
     use crate::backend::file_scanner::FileScanner;
     use std::env;
 
@@ -14,7 +16,7 @@ mod tests {
             .to_string_lossy()
             .to_string();
 
-        println!("SCAN LOCATION: {:?}", scanloc);
+        debug!("SCAN LOCATION: {:?}", scanloc);
 
         let scanner = FileScanner::new(&scanloc, DB_FILE_LOC, t_win).unwrap();
         // Check if the scanner is initialized properly
@@ -62,7 +64,7 @@ mod tests {
 
         let mut scanner = FileScanner::new(&scanloc, DB_FILE_LOC, t_win).unwrap();
         let hash = scanner.create_hash(&current_file_path).unwrap();
-        println!("VALID FILE HASH: {:?}", hash);
+        debug!("VALID FILE HASH: {:?}", hash);
         // Assert that the hash is generated correctly for a valid file
         assert_eq!(hash.len(), 32); // Assuming MD5 hash length is 32 characters
     }
@@ -78,7 +80,7 @@ mod tests {
 
         let mut scanner = FileScanner::new(&scanloc, DB_FILE_LOC, t_win).unwrap();
         let hash = scanner.create_hash("/path/to/invalid/file.txt");
-        println!("INVALID FILE HASH: {:?}", hash);
+        debug!("INVALID FILE HASH: {:?}", hash);
         // Assert that the function returns None for an invalid file path
         assert!(hash.is_none());
     }

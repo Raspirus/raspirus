@@ -50,6 +50,8 @@ mod tests {
     #[cfg(test)]
     #[ctor::dtor]
     fn teardown() {
+        use log::{info, error};
+
         let log = FileLog::new("log.txt".to_owned());
         let file = log.file.unwrap();
 
@@ -73,12 +75,12 @@ mod tests {
 
         if std::path::Path::new(&file_path).exists() {
             if let Err(err) = std::fs::remove_file(file_path) {
-                eprintln!("Failed to delete the log file: {}", err);
+                error!("Failed to delete the log file: {}", err);
             } else {
-                println!("Log file deleted successfully");
+                info!("Log file deleted successfully");
             }
         } else {
-            println!("Teardown skipped, file does not exist");
+            info!("Teardown skipped, file does not exist");
         }
     }  
     

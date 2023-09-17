@@ -8,9 +8,11 @@ struct UsbDevice {
     path: String,
 }
 
+// Lists all the attached USBs for various platforms
 pub async fn list_usb_drives() -> Result<String, String> {
     let mut usb_drives = Vec::new();
 
+    // In Linux we look at a specific directory for mounted devices
     if cfg!(target_os = "linux") || cfg!(target_os = "macos") {
         info!("Trying to retrieve USB drives from Unix-like OS");
         let username = match env::var("USER") {
@@ -50,9 +52,10 @@ pub async fn list_usb_drives() -> Result<String, String> {
     } else {
         warn!("Not retrieving USBs -> Wrong OS");
     }
-    Ok(serde_json::to_string(&usb_drives).unwrap())
+    Ok(serde_json::to_string(&usb_drives).expect("Couldnt convert usb drives to a Serde string"))
 }
 
+// In Windows we need to iterate through all possible mount points and see what type of device is mounted
 #[cfg(windows)]
 fn list_usb_windows() -> Vec<UsbDevice> {
     use std::ffi::{OsStr, OsString};
@@ -92,6 +95,7 @@ fn list_usb_windows() -> Vec<UsbDevice> {
         OsString::from("Z"),
     ];
     for letter in drive_letters {
+        // We retrieve all possible information to determine if its a removable USB device
         let drive_path = letter.clone().into_string().unwrap() + ":\\";
         let drive_path = Path::new(&drive_path);
         let drive_name = drive_path.file_name().unwrap_or_default();
