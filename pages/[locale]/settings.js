@@ -4,7 +4,7 @@ import { useRouter } from 'next/router';
 import { invoke } from "@tauri-apps/api/tauri";
 import { listen } from '@tauri-apps/api/event';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faFileLines, faUserNinja, faWrench, faHome, faClock, faDatabase, faFileZipper } from '@fortawesome/free-solid-svg-icons';
+import { faFileLines, faUserNinja, faWrench, faHome, faClock, faDatabase, faFileZipper, faFingerprint } from '@fortawesome/free-solid-svg-icons';
 import React, { useState, useEffect, useRef } from 'react';
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
@@ -14,6 +14,7 @@ import { getStaticPaths, makeStaticProps } from '../../lib/getStatic';
 import DateTimeSelector from '../../components/TimePicker';
 import WeekdaySelector from '../../components/WeekdaySelector';
 import { open } from '@tauri-apps/api/dialog';
+import IgnoredHashComp from '../../components/IgnoredHashes';
 
 /**
  * Function that generates the necessary static paths and props manually
@@ -40,6 +41,7 @@ export default function Settings() {
   const [use_db_path, setUsedbPath] = useState(false);
   const [custom_db_path, setCustomDbPath] = useState("");
   const [scan_dir, setScanDir] = useState(false);
+  const [ignored_hashes, setIgnoredHashes] = useState([]);
   // DB Update progress
   const [progress, setProgress] = useState(0);
   const progressRef = useRef(progress);
@@ -105,6 +107,7 @@ export default function Settings() {
       db_update_time: auto_time,
       db_location: custom_db_path,
       scan_dir: scan_dir,
+      ignored_hashes: ignored_hashes,
     }
     const jsonString = JSON.stringify(jsonData);
     console.log("Client sends: ", jsonData);
@@ -172,6 +175,7 @@ export default function Settings() {
           setCustomDbPath(parsedData.db_location);
           setUsedbPath(parsedData.db_location.length > 0);
           setScanDir(parsedData.scan_dir);
+          setIgnoredHashes(parsedData.ignored_hashes);
         })
         .catch((err) => console.error(err))
     }
@@ -252,7 +256,6 @@ export default function Settings() {
         console.error("Trying to invoke auto_update_scheduler: ", error);
       })
     }
-
   }
 
   return (
@@ -319,6 +322,14 @@ export default function Settings() {
         icon={faFileZipper}
         isOn={scan_dir}
         setIsOn={setScanDir}
+      />
+
+      <IgnoredHashComp
+        title={t('ignore_sign_title')}
+        short={t('ignore_sign_val')}
+        hashes={ignored_hashes}
+        icon={faFingerprint}
+        setHashes={setIgnoredHashes}
       />
 
       <SettingComp
