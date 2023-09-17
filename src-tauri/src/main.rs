@@ -116,9 +116,7 @@ fn main() {
         list_usb_drives,
         update_database,
         check_raspberry,
-        create_config,
-        add_ignored_hashes,
-        remove_ignored_hash
+        create_config
     ])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");
@@ -231,35 +229,6 @@ async fn list_usb_drives() -> Result<String, String> {
     utils::usb_utils::list_usb_drives().await
 }
 
-#[tauri::command]
-async fn add_ignored_hashes(signature: String) -> Result<String, String> {
-    // Check if given string has the same length of an MD5 hash
-    //     "7dea362b3fac8e00956a4952a3d4f474",
-    // "81051bcc2cf1bedf378224b0a93e2877"
-    if signature.len() != 32 {
-        return Err("Input string is not valid MD5".to_string());
-    } else {
-        let mut config = Config::new();
-        config = config.load().expect("Couldn't load config at startup");
-        config.ignored_hashes.push(signature);
-
-        return Ok("Signature added".to_string());
-    }
-}
-
-#[tauri::command]
-async fn remove_ignored_hash(signature: String) -> Result<String, String> {
-    // Try to remove a given hash, return an error if it doesn't exist
-    let mut config = Config::new();
-    config = config.load().expect("Couldn't load config at startup");
-    
-    if let Some(index) = config.ignored_hashes.iter().position(|s| s == signature.as_str()) {
-        config.ignored_hashes.remove(index);
-        Ok("Signature removed".to_string())
-    } else {
-        Err(format!("String '{}' not found in the vector.", signature))
-    }
-}
 
 // Creates the config from the GUI
 #[tauri::command]

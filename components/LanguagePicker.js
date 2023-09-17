@@ -15,7 +15,7 @@ export default function LanguageSelector() {
   // Either use the language (locale) from the URL, or use the default one set in the config file (next-i18next.config.js)
   const currentLocale = router.query.locale || i18nextConfig.i18n.defaultLocale;
   // Loads all defined locales from the config file
-  const locales = i18nextConfig.i18n.locales;
+  const {locales} = i18nextConfig.i18n;
 
   return (
     <div className='absolute top-0 left-0 m-2'>
