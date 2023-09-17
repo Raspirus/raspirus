@@ -9,7 +9,7 @@ import { useTranslation } from 'next-i18next';
  * @returns If USB storage units were found, it returns a list of them, else a div-tag with some helpful message.
  */
 export default function Dropdown({dictionary, value, setValue}) {
-    const t = useTranslation('common').t;
+    const {t} = useTranslation('common');
 
     return (
         <>
