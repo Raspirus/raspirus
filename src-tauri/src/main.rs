@@ -4,7 +4,7 @@
 use backend::config_file::Config;
 use backend::utils;
 use directories_next::ProjectDirs;
-use log::{error, info, LevelFilter};
+use log::{error, info, LevelFilter, debug, warn};
 use simplelog::{ColorChoice, CombinedLogger, TermLogger, TerminalMode, WriteLogger};
 use tauri::api::cli::ArgData;
 use std::fs::File;
@@ -85,7 +85,7 @@ fn main() {
       let matches = match app.get_cli_matches() {
         Ok(matches) => matches,
         Err(err) => {
-            eprintln!("{}", err);
+            error!("{}", err);
             app.handle().exit(1);
             return Ok(());
         }
@@ -98,7 +98,7 @@ fn main() {
             match key.as_str() {
                 "gui" => {
                     if let Err(err) = cli_gui(app.handle()) {
-                        eprintln!("GUI Error: {}", err);
+                        error!("GUI Error: {}", err);
                     }
                 }
                 "scan" => cli_scanner(app.handle(), data),
@@ -116,7 +116,9 @@ fn main() {
         list_usb_drives,
         update_database,
         check_raspberry,
-        create_config
+        create_config,
+        add_ignored_hashes,
+        remove_ignored_hash
     ])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");
@@ -133,24 +135,24 @@ fn remove_windows_console() {
 fn print_data(app: tauri::AppHandle, data: ArgData) {
     if let Some(json_str) = data.value.as_str() {
         let unescaped_str = json_str.replace("\\n", "\n").replace("\\t", "\t");
-        println!("{}", unescaped_str);
+        debug!("{}", unescaped_str);
         app.exit(0);
     } else {
         // Handle the case where data.value is not a string
-        eprintln!("data.value is not a string");
+        error!("data.value is not a string");
         app.exit(1);
     }
 }
 
 // If a command is not yet implemented
 fn not_done(app: tauri::AppHandle) {
-    println!("Function not implemented yet");
+    warn!("Function not implemented yet");
     app.exit(2);
 }
 
 // Starts the GUI without attaching a CLI
 fn cli_gui(app: tauri::AppHandle) -> Result<(), tauri::Error> {
-  println!("showing gui");
+  debug!("showing gui");
   #[cfg(all(not(debug_assertions), windows))]
   remove_windows_console();
   tauri::WindowBuilder::new(&app, "raspirus", tauri::WindowUrl::App("index.html".into()))
@@ -158,7 +160,7 @@ fn cli_gui(app: tauri::AppHandle) -> Result<(), tauri::Error> {
     .inner_size(800., 480.)
     .resizable(true)
     .build()?;
-  println!("this won't show on Windows release builds");
+  debug!("this won't show on Windows release builds");
   Ok(())
 }
 
@@ -166,20 +168,20 @@ fn cli_gui(app: tauri::AppHandle) -> Result<(), tauri::Error> {
 fn cli_scanner(app: tauri::AppHandle, data: ArgData) {
     if let Some(json_str) = data.value.as_str() {
         let unescaped_str = json_str.replace("\\n", "\n").replace("\\t", "\t");
-        println!("{}", unescaped_str);
+        debug!("Data provided: {}", unescaped_str);
         match utils::scanner_utils::sync_start_scanner(None, unescaped_str) {
             Ok(res) => {
-                println!("Result: {res}");
+                info!("Result: {res}");
                 app.exit(0);
             },
             Err(err) => {
-                eprintln!("Error: {err}");
+                error!("Error: {err}");
                 app.exit(1);
             },
         }
     } else {
         // Handle the case where data.value is not a string
-        eprintln!("data.value is not a string");
+        error!("data.value is not a string");
         app.exit(1);
     }
 }
@@ -188,11 +190,11 @@ fn cli_scanner(app: tauri::AppHandle, data: ArgData) {
 fn cli_dbupdate(app: tauri::AppHandle) {
     match utils::update_utils::sync_update_database(None) {
         Ok(res) => {
-            println!("Result: {res}");
+            info!("Result: {res}");
             app.exit(0);
         },
         Err(err) => {
-            eprintln!("Error: {err}");
+            error!("Error: {err}");
             app.exit(1);
         },
     }
@@ -229,6 +231,36 @@ async fn list_usb_drives() -> Result<String, String> {
     utils::usb_utils::list_usb_drives().await
 }
 
+#[tauri::command]
+async fn add_ignored_hashes(signature: String) -> Result<String, String> {
+    // Check if given string has the same length of an MD5 hash
+    //     "7dea362b3fac8e00956a4952a3d4f474",
+    // "81051bcc2cf1bedf378224b0a93e2877"
+    if signature.len() != 32 {
+        return Err("Input string is not valid MD5".to_string());
+    } else {
+        let mut config = Config::new();
+        config = config.load().expect("Couldn't load config at startup");
+        config.ignored_hashes.push(signature);
+
+        return Ok("Signature added".to_string());
+    }
+}
+
+#[tauri::command]
+async fn remove_ignored_hash(signature: String) -> Result<String, String> {
+    // Try to remove a given hash, return an error if it doesn't exist
+    let mut config = Config::new();
+    config = config.load().expect("Couldn't load config at startup");
+    
+    if let Some(index) = config.ignored_hashes.iter().position(|s| s == signature.as_str()) {
+        config.ignored_hashes.remove(index);
+        Ok("Signature removed".to_string())
+    } else {
+        Err(format!("String '{}' not found in the vector.", signature))
+    }
+}
+
 // Creates the config from the GUI
 #[tauri::command]
 async fn create_config(contents: Option<String>) -> Result<String, String> {
@@ -239,7 +271,7 @@ async fn create_config(contents: Option<String>) -> Result<String, String> {
     };
 
     config.save().map_err(|err| err.to_string())?;
-    let config_str = serde_json::to_string(&config).unwrap();
+    let config_str = serde_json::to_string(&config).expect("Issue with transforming congig to Serde string");
 
     Ok(config_str)
 }

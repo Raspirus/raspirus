@@ -181,7 +181,7 @@ fn log_update_res(data: &str, fname: String) -> std::io::Result<()> {
     let project_dirs = ProjectDirs::from("com", "Raspirus", "Logs").expect("Failed to get project directories.");
     let log_dir = project_dirs.data_local_dir().join("updates"); 
     // Open the file (creates if it doesn't exist)
-    let mut file = File::create(log_dir.join(fname)).unwrap();
+    let mut file = File::create(log_dir.join(fname)).expect("Couldnt open log file");
     // Write the data to the file
     file.write_all(data.as_bytes())?;
     // Flush the buffer to ensure all data is written

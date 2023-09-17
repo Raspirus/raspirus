@@ -1,5 +1,5 @@
 use directories_next::ProjectDirs;
-use log::{error, info, warn};
+use log::{error, info, warn, debug};
 use std::{fs, path::Path};
 
 use crate::backend::{file_scanner, config_file::Config};
@@ -59,7 +59,7 @@ pub async fn start_scanner(
             return Err(e);
         }
     };
-    println!("Dirty files received: {:?}", dirty_files);
+    debug!("Dirty files received: {:?}", dirty_files);
     // For the GUI it is important to return JSON 
     Ok(serde_json::to_string(&dirty_files).expect("Error when trying to parse vector to string"))
 }
@@ -112,6 +112,6 @@ pub fn sync_start_scanner(
             return Err(e);
         }
     };
-    println!("Dirty files received: {:?}", dirty_files);
+    debug!("Dirty files received: {:?}", dirty_files);
     Ok(serde_json::to_string(&dirty_files).expect("Error when trying to parse vector to string"))
 }
