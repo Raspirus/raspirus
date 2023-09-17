@@ -1,6 +1,7 @@
-REMOVE THIS FILE BEFORE RELEASE
+# :warning: REMOVE THIS FILE BEFORE RELEASE
 
 This file contains a short list of added changes since the last release
 
 - Added CLI capabilities
 - Added more documentation to the code
+- Refactoring code
