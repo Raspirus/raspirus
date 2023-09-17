@@ -321,6 +321,7 @@ impl FileScanner {
         let ret = format!("{:x}", context.compute());
 
         if self.false_positive.contains(&ret) {
+            debug!("Skipping Hash: {}", ret);
             return None;
         }
 
@@ -363,6 +364,7 @@ impl FileScanner {
 
             if count == 0 {
                 if it == 0 {
+                    debug!("Skipping Empty file: {}", path);
                     return None;
                 }
                 break;
@@ -373,6 +375,7 @@ impl FileScanner {
         let ret = format!("{:?}", context.compute());
 
         if self.false_positive.contains(&ret) {
+            debug!("Skipping Hash: {}", ret);
             return None;
         }
 

@@ -14,7 +14,7 @@ import { useTranslation } from 'next-i18next';
  * @returns A div-tag representing a single Card-like component with a title, an icon, a description and a button
  */
 export default function SettingComp({ title, short, short2 = null, icon, isOn = false, setIsOn = null, action = null, action_val = null }) {
-    const t = useTranslation('common').t;
+    const {t} = useTranslation('common');
 
     return (
         <div className="flex flex-col m-6 p-2 bg-white rounded-2xl shadow-md">
