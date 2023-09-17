@@ -1,5 +1,7 @@
 #[cfg(test)]
 mod tests {
+    use log::{info, error};
+
     use crate::backend::db_ops::DBOps;
     const DB_FILE_LOC:&str = "signatures.db";
 
@@ -58,7 +60,7 @@ mod tests {
     
         match hash_count {
             Ok(count) => {
-                println!("Hash count: {}", count);
+                info!("Hash count: {}", count);
                 assert!(true);
             }
             Err(err) => {
@@ -107,9 +109,9 @@ mod tests {
     fn teardown() {
         if std::path::Path::new(DB_FILE_LOC).exists() {
             if let Err(err) = std::fs::remove_file(DB_FILE_LOC) {
-                eprintln!("Failed to delete the database file: {}", err);
+                error!("Failed to delete the database file: {}", err);
             } else {
-                println!("Database file deleted successfully");
+                info!("Database file deleted successfully");
             }
         }
     }

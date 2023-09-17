@@ -142,7 +142,7 @@ impl DBOps {
                 Ok(hashes) => match hashes {
                     Some(hashes) => {
                         
-                        if let Err(_) = Self::calculate_progress(self, last_percentage, i.try_into().unwrap(), self.total_files) {
+                        if let Err(_) = Self::calculate_progress(self, last_percentage, i.try_into().expect("Issue with scanned size"), self.total_files) {
                             warn!("Progress calculation is broken");
                         }
                         
@@ -198,7 +198,7 @@ impl DBOps {
         let big_tuc = time::Instant::now();
         let lines = file_as_string.lines();
         if lines.clone().count() == 9 {
-            println!("{file_as_string}");
+            info!("{file_as_string}");
             return Ok(None);
         }
         let mut hashes: Vec<(String, String)> = Vec::new();

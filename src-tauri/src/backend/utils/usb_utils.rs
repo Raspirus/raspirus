@@ -52,7 +52,7 @@ pub async fn list_usb_drives() -> Result<String, String> {
     } else {
         warn!("Not retrieving USBs -> Wrong OS");
     }
-    Ok(serde_json::to_string(&usb_drives).unwrap())
+    Ok(serde_json::to_string(&usb_drives).expect("Couldnt convert usb drives to a Serde string"))
 }
 
 // In Windows we need to iterate through all possible mount points and see what type of device is mounted

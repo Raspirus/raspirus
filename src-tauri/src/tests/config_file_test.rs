@@ -14,6 +14,7 @@ mod tests {
         assert_eq!(config.db_update_time, "22:00:00");
         assert_eq!(config.db_location, "");
         assert_eq!(config.scan_dir, true);
+        assert_eq!(config.ignored_hashes, Vec::<String>::new());
     }
 
     #[test]
@@ -27,6 +28,7 @@ mod tests {
             db_update_time: "08:00:00".to_string(),
             db_location: "".to_string(),
             scan_dir: true,
+            ignored_hashes: Vec::new(),
         };
 
         let result_save = config.save();
@@ -45,5 +47,6 @@ mod tests {
         assert_eq!(loaded_config.db_update_time, config.db_update_time);
         assert_eq!(loaded_config.db_location, config.db_location);
         assert_eq!(loaded_config.scan_dir, config.scan_dir);
+        assert_eq!(loaded_config.ignored_hashes, config.ignored_hashes);
     }
 }
