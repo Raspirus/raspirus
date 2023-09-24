@@ -31,7 +31,6 @@ mime_guess = "2.0.4"
 simplelog = "0.12.1"
 job_scheduler_ng = "2.0.4"
 windows-sys = "0.48.0"
-is_elevated = "0.1.2"
 
 [dev-dependencies]
 ctor = "0.2.4"
