@@ -13,6 +13,7 @@ use tauri::Manager;
 use terminal_size::terminal_size;
 use walkdir::WalkDir;
 use zip::ZipArchive;
+use is_elevated::is_elevated;
 
 use super::{config_file::Config, db_ops::DBOps, file_log::FileLog};
 
@@ -250,8 +251,15 @@ impl FileScanner {
         let mut skipped: i128 = 0;
         let last_percentage: &mut f64 = &mut -1.0;
         let big_tic = time::Instant::now();
-        if self.get_folder_size(path).is_err() {
-            return Err("Can't get folder size".to_string());
+        let folder_size = self.get_folder_size(path);
+        if folder_size.is_err() {
+            if is_elevated() {
+                info!("Program is running with administrative privileges");
+            } else {
+                info!("Program is running with normal privileges");
+            }
+            error!("Can't get folder size because of {:?}", folder_size);
+            return Err("Can't get folder size: Access is denied".to_string());
         }
         for file in WalkDir::new(path).into_iter().filter_map(|file| file.ok()) {
             if (match file.metadata() {
