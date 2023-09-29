@@ -40,5 +40,4 @@ next-env.d.ts
 target/
 .bash.example
 .lines
-package-lock.json
 Cargo.lock
