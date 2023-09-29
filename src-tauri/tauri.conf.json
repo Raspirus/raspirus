@@ -55,7 +55,7 @@
     "updater": {
       "active": true,
       "endpoints": [
-        "https://github.com/Raspirus/Raspirus/raspirus-update.json"
+        "https://gist.githubusercontent.com/Benji377/2af9c9fc7889b7cc3f0429d328f4f2a9/raw/raspirus-update.json"
       ],
       "dialog": true,
       "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDFCREJBRkEwNDY1QUQ4Q0UKUldUTzJGcEdvSy9iRzg1UUdKR0NOQlZtNWllSUhTbGlsOTBkRFlSZHRWcUc3RFZMOXZLU0JxMWMK"
