@@ -116,7 +116,8 @@ fn main() {
         list_usb_drives,
         update_database,
         check_raspberry,
-        create_config
+        create_config,
+        download_logs
     ])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");
@@ -249,4 +250,24 @@ async fn create_config(contents: Option<String>) -> Result<String, String> {
 pub async fn auto_update_scheduler(tauri_win: tauri::Window, hour: i32, weekday: i32) {
     // ISSUE: Needs to restart app to apply new update schedule
     utils::update_utils::auto_update_scheduler(Some(tauri_win), hour, weekday).await
+}
+
+#[tauri::command]
+async fn download_logs() -> Result<String, String> {
+    let project_dirs = ProjectDirs::from("com", "Raspirus", "Logs")
+        .expect("Failed to get project directories.");
+    let log_dir = project_dirs.data_local_dir().join("main"); // Create a "main" subdirectory
+    let log_path = log_dir.join("app.log");
+
+    let downloads_dir = tauri::api::path::download_dir().expect("Failed to get download directory");
+
+    let destination_path = downloads_dir.join("log.txt");
+
+    if let Err(err) = std::fs::copy(&log_path, &destination_path) {
+        // If there's an error during copying, return an error message
+        Err(format!("Error copying log file: {:?}", err))
+    } else {
+        // If the copy operation is successful, return Ok indicating success
+        Ok(destination_path.to_str().unwrap().to_string())
+    }
 }
