@@ -265,7 +265,7 @@ async fn download_logs() -> Result<String, String> {
 
     let destination_path = downloads_dir.join("log.txt");
 
-    if let Err(err) = std::fs::copy(&log_path, &destination_path) {
+    if let Err(err) = std::fs::copy(log_path, &destination_path) {
         // If there's an error during copying, return an error message
         Err(format!("Error copying log file: {:?}", err))
     } else {
