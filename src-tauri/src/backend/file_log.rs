@@ -3,7 +3,7 @@ use std::{
     io::Write,
 };
 
-use log::{debug, error, info, warn};
+use log::{trace, error, warn};
 use directories_next::ProjectDirs;
 
 pub struct FileLog {
@@ -43,19 +43,17 @@ impl FileLog {
     /// log.log("abc123".to_owned(), "C:/Users/user/Desktop/file.txt".to_owned());
     /// ```
     pub fn log(&self, hash: String, fpath: String) {
-        if self.file.is_some() {
-            match self.file.as_ref() {
-                Some(mut file) => {
-                    match file.write_all(format!("{hash}\t{fpath}\n").as_bytes()) {
-                        Ok(_) => {
-                            debug!("Wrote {hash}\t{fpath} to {:?}", self.file.as_ref().expect("Invalid file reference"))
-                        }
-                        Err(err) => error!("Failed loggin: {err}"),
-                    };
-                }
-                None => {
-                    warn!("Logfile invalid!");
-                }
+        match self.file.as_ref() {
+            Some(mut file) => {
+                match file.write_all(format!("{hash}\t{fpath}\n").as_bytes()) {
+                    Ok(_) => {
+                        trace!("Wrote {hash}\t{fpath} to {:?}", self.file.as_ref().expect("Invalid file reference"))
+                    }
+                    Err(err) => error!("Failed loggin: {err}"),
+                };
+            }
+            None => {
+                warn!("Logfile invalid!");
             }
         }
     }
@@ -80,7 +78,7 @@ impl FileLog {
             Ok(_) => {
                 self.file = match File::create(log_dir.join(fname.clone())) {
                     Ok(file) => {
-                        info!("Created logfile at DIR: {} NAME: {}", log_dir.display(), fname);
+                        trace!("Created logfile at DIR: {} NAME: {}", log_dir.display(), fname);
                         Some(file)
                     }
                     Err(err) => {
