@@ -96,22 +96,12 @@ impl DBOps {
             info!("Database not up-to-date!");
             info!("Downloading {} file(s)", web_files.len());
             self.download_files(web_files);
-        } else {
-            if let Some(window) = &self.tauri_window {
-                if window
-                    .emit_all(
-                        "progress",
-                        TauriEvent {
-                            message: "100".to_string(),
-                        },
-                    )
-                    .is_err()
-                {
-                    error!("Couldn't send progress update to frontend");
-                }
-            } else {
-                warn!("tauri_window is None, won't send progress to frontend");
+        } else if let Some(window) = &self.tauri_window {
+            if window.emit_all("progress", TauriEvent { message: "100".to_string(), },).is_err() {
+                error!("Couldn't send progress update to frontend");
             }
+        } else {
+            warn!("tauri_window is None, won't send progress to frontend");
         }
         info!("Total hashes in DB: {}", self.count_hashes().unwrap_or(0));
         Ok(self.count_hashes().unwrap_or(0))
@@ -128,7 +118,7 @@ impl DBOps {
     /// db_ops.download_files(vec![1, 2, 3]);
     /// ```
     pub fn download_files(&mut self, files: Vec<i32>) {
-        if files.len() == 0 {
+        if files.is_empty() {
             return;
         }
 
@@ -142,7 +132,7 @@ impl DBOps {
                 Ok(hashes) => match hashes {
                     Some(hashes) => {
                         
-                        if let Err(_) = Self::calculate_progress(self, last_percentage, i.try_into().expect("Issue with scanned size"), self.total_files) {
+                        if Self::calculate_progress(self, last_percentage, i.try_into().expect("Issue with scanned size"), self.total_files).is_err() {
                             warn!("Progress calculation is broken");
                         }
                         
@@ -179,10 +169,7 @@ impl DBOps {
     /// assert!(file.is_some());
     /// ```
     pub fn download_file(file_nr: i32) -> Result<Option<Vec<(String, String)>>, reqwest::Error> {
-        let url = format!(
-            "https://virusshare.com/hashfiles/VirusShare_{}.md5",
-            format!("{:0>5}", file_nr)
-        );
+        let url = format!("https://virusshare.com/hashfiles/VirusShare_{:0>5}.md5", file_nr);
         info!("Downloading {url}");
         let big_tic = time::Instant::now();
         let file = reqwest::blocking::get(&url)?;
@@ -203,7 +190,7 @@ impl DBOps {
         }
         let mut hashes: Vec<(String, String)> = Vec::new();
         for l in lines {
-            if !l.starts_with("#") {
+            if !l.starts_with('#') {
                 hashes.push((l.to_owned(), format!("{}", file_nr.clone())));
             }
         }
@@ -312,7 +299,7 @@ impl DBOps {
     /// ```
     pub fn _remove_hash(&self, hash_str: &str) -> Result<(), rusqlite::Error> {
         self.db_conn
-            .execute("DELETE FROM signatures WHERE hash = ?", &[hash_str])?;
+            .execute("DELETE FROM signatures WHERE hash = ?", [hash_str])?;
         Ok(())
     }
 
@@ -387,10 +374,7 @@ impl DBOps {
     /// assert!(db_ops.file_exists(123).unwrap_or(false));
     /// ```
     pub fn file_exists(file_nr: i32) -> Result<bool, reqwest::Error> {
-        let url = format!(
-            "https://virusshare.com/hashfiles/VirusShare_{}.md5",
-            format!("{:0>5}", file_nr)
-        );
+        let url = format!("https://virusshare.com/hashfiles/VirusShare_{:0>5}.md5", file_nr);
         let client = reqwest::blocking::Client::new();
         info!("Checking if file {file_nr} exists...");
         let code = client.get(url).send()?;

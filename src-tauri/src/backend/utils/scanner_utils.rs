@@ -22,7 +22,7 @@ pub async fn start_scanner(
         let project_dirs = ProjectDirs::from("com", "Raspirus", "Data")
             .expect("Failed to get project directories.");
         let program_dir = project_dirs.data_dir();
-        fs::create_dir_all(&program_dir).expect("Failed to create program directory.");
+        fs::create_dir_all(program_dir).expect("Failed to create program directory.");
         let db_file_path = program_dir.join(db_name);
         db_file_str = db_file_path.to_string_lossy().to_string();
     } else {
@@ -34,7 +34,7 @@ pub async fn start_scanner(
             let project_dirs = ProjectDirs::from("com", "Raspirus", "Data")
                 .expect("Failed to get project directories.");
             let program_dir = project_dirs.data_dir();
-            fs::create_dir_all(&program_dir).expect("Failed to create program directory.");
+            fs::create_dir_all(program_dir).expect("Failed to create program directory.");
             let db_file_path = program_dir.join(db_name);
             db_file_str = db_file_path.to_string_lossy().to_string();
         }
@@ -77,21 +77,19 @@ pub fn sync_start_scanner(
         let project_dirs = ProjectDirs::from("com", "Raspirus", "Data")
             .expect("Failed to get project directories.");
         let program_dir = project_dirs.data_dir();
-        fs::create_dir_all(&program_dir).expect("Failed to create program directory.");
+        fs::create_dir_all(program_dir).expect("Failed to create program directory.");
         let db_file_path = program_dir.join(db_name);
         db_file_str = db_file_path.to_string_lossy().to_string();
+    } else if Path::new(&db_file_str).to_owned().exists() && Path::new(&db_file_str).to_owned().is_file() {
+        info!("Using specific DB path {}", db_file_str);
     } else {
-        if Path::new(&db_file_str).to_owned().exists() && Path::new(&db_file_str).to_owned().is_file() {
-            info!("Using specific DB path {}", db_file_str);
-        } else {
-            info!("Falling back to default DB file (signatures.db)");
-            let project_dirs = ProjectDirs::from("com", "Raspirus", "Data")
-                .expect("Failed to get project directories.");
-            let program_dir = project_dirs.data_dir();
-            fs::create_dir_all(&program_dir).expect("Failed to create program directory.");
-            let db_file_path = program_dir.join(db_name);
-            db_file_str = db_file_path.to_string_lossy().to_string();
-        }
+        info!("Falling back to default DB file (signatures.db)");
+        let project_dirs = ProjectDirs::from("com", "Raspirus", "Data")
+            .expect("Failed to get project directories.");
+        let program_dir = project_dirs.data_dir();
+        fs::create_dir_all(program_dir).expect("Failed to create program directory.");
+        let db_file_path = program_dir.join(db_name);
+        db_file_str = db_file_path.to_string_lossy().to_string();
     }
 
     let mut fs = match file_scanner::FileScanner::new(&path, db_file_str.as_str(), window) {
