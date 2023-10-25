@@ -44,7 +44,7 @@ pub struct FileScanner {
 impl FileScanner {
     // Creates a FileScanner object
     pub fn new(scanloc: &str, db_file: &str, t_win: Option<tauri::Window>) -> Result<Self, Error> {
-        //check if the pat that should be scanned exists
+        //check if the path that should be scanned exists
         if Path::new(&scanloc).exists() {
             let tmpconf = match DBOps::new(db_file, None) {
                 Ok(db_conn) => db_conn,
@@ -58,11 +58,11 @@ impl FileScanner {
             let now_str = now.format("%Y_%m_%d_%H_%M_%S").to_string();
             let log_str = format!("{}.log", now_str);
 
-            // Add all false positives here
             let mut config = Config::new();
             config = config
                 .load()
                 .expect("Couldn't load config in the flie scanner");
+            // Add all false positives here
             let false_pos: Vec<String> = config.ignored_hashes;
 
             Ok(FileScanner {
@@ -88,43 +88,39 @@ impl FileScanner {
         let path = Path::new(scanloc.as_str());
         debug!("Path of scanloc = {}", path.display().to_string());
 
-        if path.exists() {
-            debug!("Path exists");
-            if path.is_file() {
-                debug!("Path is file");
-                if let Some(mime_type) = from_path(path).first() {
-                    if mime_type == "application/zip" {
-                        debug!("Path is ZIP file");
-                        self.zip_file_search(path, stop_early)
-                    } else {
-                        debug!("Path is single file");
-                        self.scan_single_file(path)
-                    }
-                } else {
-                    error!("Failed to determine the file type: {:?}", path);
-                    Err("Failed to determine mime type".to_string())
-                }
-            } else if path.is_dir() {
-                debug!("Path is folder");
-                self.folder_scanner(path, stop_early)
-            } else {
-                error!(
-                    "Given path exists, but is neither a file nor a directory: {:?}",
-                    path
-                );
-                Err("Given path exists, but is neither a file nor a directory".to_string())
-            }
-        } else {
+        if !path.exists() {
             error!("Path to scan not found: {:?}", path);
-            Err("Path to scan not found".to_string())
+            return Err("Path to scan not found".to_string())
+        }
+
+        debug!("Path exists");
+        if path.is_file() {
+            debug!("Path is file");
+            if let Some(mime_type) = from_path(path).first() {
+                if mime_type == "application/zip" {
+                    debug!("Path is ZIP file");
+                    self.zip_file_search(path, stop_early)
+                } else {
+                    debug!("Path is single file");
+                    self.scan_single_file(path)
+                }
+            } else {
+                error!("Failed to determine the file type: {:?}", path);
+                Err("Failed to determine mime type".to_string())
+            }
+        } else if path.is_dir() {
+            debug!("Path is folder");
+            self.folder_scanner(path, stop_early)
+        } else {
+            error!(
+                "Given path exists, but is neither a file nor a directory: {:?}",
+                path
+            );
+            Err("Given path exists, but is neither a file nor a directory".to_string())
         }
     }
 
-    fn zip_file_search(
-        &mut self,
-        zip_path: &Path,
-        stop_early: bool,
-    ) -> Result<Vec<String>, String> {
+    fn zip_file_search(&mut self, zip_path: &Path, stop_early: bool) -> Result<Vec<String>, String> {
         if self.get_folder_size(zip_path).is_err() {
             return Err("Can't get folder size".to_string());
         }
@@ -145,19 +141,33 @@ impl FileScanner {
             }
         };
 
-        let mut analysed: i128 = 0;
-        let mut skipped: i128 = 0;
-        let last_percentage: &mut f64 = &mut -1.0;
+        let mut analysed: u128 = 0;
+        let mut skipped: u128 = 0;
+        let last_percentage = &mut -1.0;
         let big_tic = time::Instant::now();
 
         for i in 0..archive.len() {
-            let mut file = archive.by_index(i).expect("Couldnt get file index");
+            let file = archive.by_index(i).expect("Couldnt get file index");
 
             if file.is_file() {
+                // is probably very memory inefficient, hence trying new solution below
+                /*
                 let mut buffer = Vec::new();
                 file.read_to_end(&mut buffer).expect("Couldnt read to the end of the file");
 
                 let hash = match self.create_hash_from_buffer(&buffer, file.name()) {
+                    Some(hash) => {
+                        analysed += 1;
+                        hash
+                    }
+                    None => {
+                        skipped += 1;
+                        "".to_owned()
+                    }
+                };
+                */
+                // might be borked but should use less memory
+                let hash = match self.create_hash(file.name()) {
                     Some(hash) => {
                         analysed += 1;
                         hash
@@ -224,21 +234,21 @@ impl FileScanner {
             .db_conn
             .hash_exists(hash.clone().unwrap_or("".to_string()).as_str())
         {
-            if exists {
-                self.dirty_files.push(path.display().to_string());
-                info!(
-                    "Found hash {:?} for file {}",
-                    hash.clone(),
-                    path.display().to_string()
-                );
-                self.log.log(
-                    hash.unwrap_or("None".to_string()),
-                    path.display().to_string(),
-                );
-                Ok(self.dirty_files.clone())
-            } else {
-                Ok(Vec::new())
+            if !exists {
+                return Ok(Vec::new())
             }
+
+            self.dirty_files.push(path.display().to_string());
+            info!(
+                "Found hash {:?} for file {}",
+                hash.clone(),
+                path.display().to_string()
+            );
+            self.log.log(
+                hash.unwrap_or("None".to_string()),
+                path.display().to_string(),
+            );
+            Ok(self.dirty_files.clone())
         } else {
             error!("Error checking hash existence for file: {:?}", path);
             Err("Couldn't check if the hash of the file exists in the DB".to_string())
@@ -313,6 +323,7 @@ impl FileScanner {
         Ok(self.dirty_files.clone())
     }
 
+    // unsure what do
     fn create_hash_from_buffer(&mut self, buffer: &[u8], filename: &str) -> Option<String> {
         let mut context = md5::Context::new();
 

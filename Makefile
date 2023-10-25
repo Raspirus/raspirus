@@ -53,3 +53,8 @@ test: install
 	@printf "$(TEXT)>>>> Executing cargo tests$(RESET)"
 	cd /src-tauri/ && \
 	cargo test
+	@printf "$(TEXT)>>>> Done!$(RESET)"
+check:
+	@printf "$(TEXT)>>>> Checking codebase$(RESET)"
+	cargo clippy --all-features
+	@printf "$(TEXT)>>>> Done!$(RESET)"
