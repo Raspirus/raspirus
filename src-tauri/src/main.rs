@@ -8,7 +8,7 @@ use log::{error, info, LevelFilter, debug, warn};
 use simplelog::{ColorChoice, CombinedLogger, TermLogger, TerminalMode, WriteLogger};
 use tauri::api::cli::ArgData;
 use std::fs::File;
-use std::{env, fs};
+use std::fs;
 
 mod backend;
 mod tests;
@@ -22,6 +22,7 @@ fn main() {
     let mut config = Config::new();
     config = config.load().expect("Couldn't load config at startup");
     let write_to_file = config.logging_is_active;
+    
     // We check if we should log the application messages to a file or not, default is yes. Defined in the Config
     if write_to_file {
         // We use ProjectDirs to find a suitable location for our logging file
@@ -45,6 +46,7 @@ fn main() {
                             simplelog::Config::default(),
                             log_file,
                         );
+                        
                         // Terminal logger is used if for development
                         let term_logger = TermLogger::new(
                             LevelFilter::Debug,

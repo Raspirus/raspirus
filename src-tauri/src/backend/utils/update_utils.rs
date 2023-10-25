@@ -20,21 +20,19 @@ pub async fn update_database(window: Option<tauri::Window>) -> Result<String, St
         let project_dirs = ProjectDirs::from("com", "Raspirus", "Data")
             .expect("Failed to get project directories.");
         let program_dir = project_dirs.data_dir();
-        fs::create_dir_all(&program_dir).expect("Failed to create program directory.");
+        fs::create_dir_all(program_dir).expect("Failed to create program directory.");
         let db_file_path = program_dir.join(db_name);
         db_file_str = db_file_path.to_string_lossy().to_string();
+    } else if Path::new(&db_file_str).to_owned().exists() && Path::new(&db_file_str).to_owned().is_file() {
+        info!("Using specific DB path {}", db_file_str);
     } else {
-        if Path::new(&db_file_str).to_owned().exists() && Path::new(&db_file_str).to_owned().is_file() {
-            info!("Using specific DB path {}", db_file_str);
-        } else {
-            info!("Falling back to default DB file (signatures.db)");
-            let project_dirs = ProjectDirs::from("com", "Raspirus", "Data")
-                .expect("Failed to get project directories.");
-            let program_dir = project_dirs.data_dir();
-            fs::create_dir_all(&program_dir).expect("Failed to create program directory.");
-            let db_file_path = program_dir.join(db_name);
-            db_file_str = db_file_path.to_string_lossy().to_string();
-        }
+        info!("Falling back to default DB file (signatures.db)");
+        let project_dirs = ProjectDirs::from("com", "Raspirus", "Data")
+            .expect("Failed to get project directories.");
+        let program_dir = project_dirs.data_dir();
+        fs::create_dir_all(program_dir).expect("Failed to create program directory.");
+        let db_file_path = program_dir.join(db_name);
+        db_file_str = db_file_path.to_string_lossy().to_string();
     }
 
     let mut db_connection = match DBOps::new(db_file_str.as_str(), window) {
@@ -48,17 +46,13 @@ pub async fn update_database(window: Option<tauri::Window>) -> Result<String, St
     let big_tic = time::Instant::now();
     // Spawns a thread to update async, else would be sync
     match tokio::task::spawn_blocking(move || {
-        let hash_count;
         match db_connection.update_db() {
-            Ok(res) => {
-                hash_count = res;
-            }
+            Ok(ok) => ok,
             Err(err) => {
                 error!("{err}");
                 exit(-1);
             }
         }
-        hash_count
     })
     .await
     {
@@ -87,21 +81,19 @@ pub fn sync_update_database(window: Option<tauri::Window>) -> Result<String, Str
         let project_dirs = ProjectDirs::from("com", "Raspirus", "Data")
             .expect("Failed to get project directories.");
         let program_dir = project_dirs.data_dir();
-        fs::create_dir_all(&program_dir).expect("Failed to create program directory.");
+        fs::create_dir_all(program_dir).expect("Failed to create program directory.");
         let db_file_path = program_dir.join(db_name);
         db_file_str = db_file_path.to_string_lossy().to_string();
+    } else if Path::new(&db_file_str).to_owned().exists() && Path::new(&db_file_str).to_owned().is_file() {
+        info!("Using specific DB path {}", db_file_str);
     } else {
-        if Path::new(&db_file_str).to_owned().exists() && Path::new(&db_file_str).to_owned().is_file() {
-            info!("Using specific DB path {}", db_file_str);
-        } else {
-            info!("Falling back to default DB file (signatures.db)");
-            let project_dirs = ProjectDirs::from("com", "Raspirus", "Data")
-                .expect("Failed to get project directories.");
-            let program_dir = project_dirs.data_dir();
-            fs::create_dir_all(&program_dir).expect("Failed to create program directory.");
-            let db_file_path = program_dir.join(db_name);
-            db_file_str = db_file_path.to_string_lossy().to_string();
-        }
+        info!("Falling back to default DB file (signatures.db)");
+        let project_dirs = ProjectDirs::from("com", "Raspirus", "Data")
+            .expect("Failed to get project directories.");
+        let program_dir = project_dirs.data_dir();
+        fs::create_dir_all(program_dir).expect("Failed to create program directory.");
+        let db_file_path = program_dir.join(db_name);
+        db_file_str = db_file_path.to_string_lossy().to_string();
     }
 
     let mut db_connection = match DBOps::new(db_file_str.as_str(), window) {

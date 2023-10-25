@@ -1,5 +1,5 @@
 use log::{info, warn};
-use std::{env, fs, path::Path};
+use std::{env, fs};
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -97,7 +97,7 @@ fn list_usb_windows() -> Vec<UsbDevice> {
     for letter in drive_letters {
         // We retrieve all possible information to determine if its a removable USB device
         let drive_path = letter.clone().into_string().unwrap() + ":\\";
-        let drive_path = Path::new(&drive_path);
+        let drive_path = std::Path::new(&drive_path);
         let drive_name = drive_path.file_name().unwrap_or_default();
         let drive_path = drive_path.to_str().unwrap();
         let wide_path = OsStr::new(&drive_path)
