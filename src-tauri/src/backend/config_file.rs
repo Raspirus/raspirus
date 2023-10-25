@@ -50,7 +50,7 @@ impl Config {
         let project_dirs =
             ProjectDirs::from("com", "Raspirus", "Data").expect("Failed to get project directories.");
         let program_dir = project_dirs.data_dir();
-        fs::create_dir_all(&program_dir).expect("Failed to create program directory.");
+        fs::create_dir_all(program_dir).expect("Failed to create program directory.");
         let conf_file_path = program_dir.join("raspirus.config.json");
         let conf_file_str = conf_file_path.to_str().expect("Failed to get config path");
         Ok(conf_file_str.to_string())

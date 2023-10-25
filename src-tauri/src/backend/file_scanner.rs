@@ -102,7 +102,7 @@ impl FileScanner {
                     }
                 } else {
                     error!("Failed to determine the file type: {:?}", path);
-                    return Err("Failed to determine mime type".to_string());
+                    Err("Failed to determine mime type".to_string())
                 }
             } else if path.is_dir() {
                 debug!("Path is folder");
@@ -112,11 +112,11 @@ impl FileScanner {
                     "Given path exists, but is neither a file nor a directory: {:?}",
                     path
                 );
-                return Err("Given path exists, but is neither a file nor a directory".to_string());
+                Err("Given path exists, but is neither a file nor a directory".to_string())
             }
         } else {
             error!("Path to scan not found: {:?}", path);
-            return Err("Path to scan not found".to_string());
+            Err("Path to scan not found".to_string())
         }
     }
 
@@ -325,18 +325,12 @@ impl FileScanner {
             return None;
         }
 
-        match terminal_size() {
-            Some((width, _)) => {
-                match width.0.checked_sub(filename.len() as u16 + 2) {
-                    Some(spacing) => {
-                        debug!("\n {}{:>width$} ", filename, ret, width = spacing as usize);
-                    }
-                    None => {}
-                };
+        if let Some((width, _)) = terminal_size() {
+            if let Some(spacing) = width.0.checked_sub(filename.len() as u16 + 2) {
+                debug!("\n {}{:>width$} ", filename, ret, width = spacing as usize);
             }
-            None => {}
         }
-
+        
         Some(ret)
     }
 
@@ -379,54 +373,17 @@ impl FileScanner {
             return None;
         }
 
-        match terminal_size() {
-            Some((width, _)) => {
-                match width.0.checked_sub(path.len() as u16 + 2) {
-                    Some(spacing) => {
-                        debug!("\n {}{:>width$} ", path, ret, width = spacing as usize);
-                    }
-                    None => {}
-                };
+        if let Some((width, _)) = terminal_size() {
+            if let Some(spacing) = width.0.checked_sub(path.len() as u16 + 2) {
+                debug!("\n {}{:>width$} ", path, ret, width = spacing as usize);
             }
-            None => {}
-        };
+        }
         Some(ret)
     }
 
     fn get_folder_size(&mut self, path: &Path) -> Result<u64, std::io::Error> {
         let metadata = fs::metadata(path)?;
-        if metadata.is_file() {
-            if let Some(mime_type) = from_path(path).first() {
-                if mime_type == "application/zip" {
-                    let file = File::open(path)?;
-                    let mut archive = ZipArchive::new(file)?;
-
-                    let mut total_uncompressed_size: u64 = 0;
-                    for i in 0..archive.len() {
-                        let entry = archive.by_index(i)?;
-                        total_uncompressed_size += entry.size();
-                    }
-                    info!(
-                        "Added file: {} with size: {}",
-                        path.to_str().expect("Couldnt convert path to str"),
-                        total_uncompressed_size
-                    );
-                    self.folder_size = total_uncompressed_size;
-                    return Ok(total_uncompressed_size);
-                } else {
-                    info!(
-                        "Added file: {} with size: {}",
-                        path.to_str().expect("Couldnt convert path to str"),
-                        metadata.len()
-                    );
-                    self.folder_size = metadata.len();
-                    return Ok(metadata.len());
-                }
-            } else {
-                error!("Failed to determine the file type: {:?}", path);
-                return Err(std::io::Error::last_os_error());
-            }
-        } else {
+        if !metadata.is_file() {
             let mut size: u64 = 0;
 
             for entry in WalkDir::new(path).follow_links(true) {
@@ -437,7 +394,38 @@ impl FileScanner {
                 }
             }
             self.folder_size = size;
-            Ok(size)
+            return Ok(size)
+        }
+
+        if let Some(mime_type) = from_path(path).first() {
+            if mime_type == "application/zip" {
+                let file = File::open(path)?;
+                let mut archive = ZipArchive::new(file)?;
+
+                let mut total_uncompressed_size: u64 = 0;
+                for i in 0..archive.len() {
+                    let entry = archive.by_index(i)?;
+                    total_uncompressed_size += entry.size();
+                }
+                info!(
+                    "Added file: {} with size: {}",
+                    path.to_str().expect("Couldnt convert path to str"),
+                    total_uncompressed_size
+                );
+                self.folder_size = total_uncompressed_size;
+                Ok(total_uncompressed_size)
+            } else {
+                info!(
+                    "Added file: {} with size: {}",
+                    path.to_str().expect("Couldnt convert path to str"),
+                    metadata.len()
+                );
+                self.folder_size = metadata.len();
+                Ok(metadata.len())
+            }
+        } else {
+            error!("Failed to determine the file type: {:?}", path);
+            Err(std::io::Error::last_os_error())
         }
     }
 
@@ -446,13 +434,13 @@ impl FileScanner {
         last_percentage: &mut f64,
         file_size: u64,
     ) -> Result<f64, String> {
-        self.scanned_size = self.scanned_size + file_size;
+        self.scanned_size += file_size;
         debug!("Calculated scanned size = {}", self.scanned_size);
         debug!("Calculated folder size = {}", self.folder_size);
         let scanned_percentage =
             (self.scanned_size as f64 / self.folder_size as f64 * 100.0).round();
         // Check if folder is empty, because that would return infinity percentage
-        if self.folder_size <= 0 {
+        if self.folder_size == 0 {
             if let Some(tauri_win) = &self.tauri_window {
                 if tauri_win
                     .emit_all(
