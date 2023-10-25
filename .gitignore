@@ -37,8 +37,7 @@ next-env.d.ts
 *.log
 
 # Custom
-src-tauri/signatures.db
 target/
 .bash.example
-src-tauri/signatures.db-journal
 .lines
+Cargo.lock
