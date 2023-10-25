@@ -33,7 +33,7 @@ jobs:
           workspaces: './src-tauri -> target'
 
       - name: Sync node version and setup cache
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: 'lts/*'
           cache: 'npm' # Set this to npm, yarn or pnpm.
@@ -48,6 +48,8 @@ jobs:
 
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
+          TAURI_KEY_PASSWORD: ${{ secrets.TAURI_PRIVATE_PASSWD }}
         with:
           tagName: ${{ github.ref_name }}
           releaseName: 'Raspirus v__VERSION__' # tauri-action replaces \_\_VERSION\_\_ with the app version.
