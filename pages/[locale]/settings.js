@@ -4,7 +4,7 @@ import { useRouter } from 'next/router';
 import { invoke } from "@tauri-apps/api/tauri";
 import { listen } from '@tauri-apps/api/event';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faFileLines, faUserNinja, faWrench, faHome, faClock, faDatabase, faFileZipper, faFingerprint } from '@fortawesome/free-solid-svg-icons';
+import { faFileLines, faUserNinja, faWrench, faHome, faClock, faDatabase, faFileZipper, faFingerprint, faL, faHistory } from '@fortawesome/free-solid-svg-icons';
 import React, { useState, useEffect, useRef } from 'react';
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
@@ -63,11 +63,9 @@ export default function Settings() {
   // if clicked again it switches back to OFF.
   async function handleSetCustomDBPath() {
     if (use_db_path) {
-      console.log("Button is ON");
       setCustomDbPath('');
       setUsedbPath(false);
     } else {
-      console.log("Button is OFF");
       try {
         const selected = await open({
           directory: false,
@@ -78,7 +76,7 @@ export default function Settings() {
             extensions: ["db"]
           }]
         });
-        
+
         if (selected === null) {
           console.log("Nothing selected");
           // No dir selected
@@ -158,6 +156,7 @@ export default function Settings() {
   useEffect(() => {
     if (typeof window !== "undefined") {
 
+
       // Tries to create the config file on the backend, which returns the new created data
       // or the config found. This data then updates the frontend and is displayed
       invoke("create_config", {})
@@ -181,6 +180,21 @@ export default function Settings() {
     }
   }, []);
 
+  const download_log_file = async () => {
+    if (typeof window !== "undefined") {
+      invoke("download_logs")
+        .then((output) => {
+          console.log("Log path: ", output);
+          const ReactSwal = withReactContent(Swal);
+          ReactSwal.fire({
+            icon: "success",
+            title: "Logs downloaded",
+            text: "Location: " + output,
+          })
+        })
+        .catch((err) => console.error(err))
+    }
+  }
   /**
    * Function to update the DB from the Settings page. 
    */
@@ -298,6 +312,7 @@ export default function Settings() {
         isOn={logging}
         setIsOn={setLogging}
       />
+
       <SettingComp
         title={t('obfuscated_mode')}
         short={t('obfuscated_mode_val')}
@@ -306,7 +321,7 @@ export default function Settings() {
         setIsOn={setObfuscated}
       />
 
-      <SettingComp 
+      <SettingComp
         title={t('custom_db')}
         short={t('custom_db_val')}
         short2={`${t('custom_db_1')}: ${use_db_path ? custom_db_path : `${t('custom_db_2')}`}`}
@@ -315,7 +330,7 @@ export default function Settings() {
         setIsOn={handleSetCustomDBPath}
       />
 
-      <SettingComp 
+      <SettingComp
         title={t('file_dialog_opt')}
         short={t('file_dialog_opt_val')}
         short2={t('file_dialog_opt_val2')}
@@ -330,6 +345,15 @@ export default function Settings() {
         hashes={ignored_hashes}
         icon={faFingerprint}
         setHashes={setIgnoredHashes}
+      />
+
+      <SettingComp
+        title={"Download logs"}
+        short={"Download logs from the backend"}
+        icon={faHistory}
+        action={download_log_file}
+        action_val={"Download"}
+        isOn={false}
       />
 
       <SettingComp

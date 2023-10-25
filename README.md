@@ -59,5 +59,13 @@ Got questions about Raspirus? We're here to help!
   </picture>
 </a>
 
+## Awards
+<div style="display: flex; flex-direction: row;">
+    <img src="https://raw.githubusercontent.com/Raspirus/media/main/awards/oss-rising-star-white.svg" alt="Sourceforge award 1" width="200" style="max-width:100%;">
+    <img src="https://raw.githubusercontent.com/Raspirus/media/main/awards/oss-users-love-us-white.svg" alt="Sourceforge award 2" width="200" style="max-width:100%;">
+</div>
+
+
+
 
 Thank you for choosing Raspirus for your malware protection needs. Together, we're making the digital world safer for everyone.
