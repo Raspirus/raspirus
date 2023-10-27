@@ -58,7 +58,7 @@ impl FileScanner {
             let now_str = now.format("%Y_%m_%d_%H_%M_%S").to_string();
             let log_str = format!("{}.log", now_str);
 
-            let mut config = Config::new()?.load()?;
+            let config = Config::new()?.load()?;
             // Add all false positives here
             let false_pos: Vec<String> = config.ignored_hashes;
 
@@ -329,6 +329,7 @@ impl FileScanner {
     }
 
     // unsure what do
+    /*
     fn create_hash_from_buffer(&mut self, buffer: &[u8], filename: &str) -> Option<String> {
         let mut context = md5::Context::new();
 
@@ -351,6 +352,7 @@ impl FileScanner {
 
         Some(ret)
     }
+    */
 
     pub fn create_hash(&mut self, path: &str) -> Option<String> {
         let mut context = md5::Context::new();

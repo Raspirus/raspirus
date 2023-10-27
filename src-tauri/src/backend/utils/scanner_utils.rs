@@ -97,7 +97,7 @@ pub fn sync_start_scanner(window: Option<tauri::Window>, path: String) -> Result
             return Err(err.to_string());
         }
     };
-    let mut config = Config::new()?.load()?;
+    let config = Config::new()?.load()?;
     let obfuscated = config.obfuscated_is_active;
     warn!("Obfuscated mode is: {}", obfuscated);
     let dirty_files = match fs.search_files(obfuscated) {
