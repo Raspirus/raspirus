@@ -49,9 +49,9 @@ build: install
 	cargo tauri build
 	@printf "$(TEXT)>>>> Done!$(RESET)"
 
-test: install
+test:
 	@printf "$(TEXT)>>>> Executing cargo tests$(RESET)"
-	cd /src-tauri/ && \
+	cd src-tauri/ && \
 	cargo test
 	@printf "$(TEXT)>>>> Done!$(RESET)"
 check:
