@@ -1,6 +1,6 @@
 use log::{info, warn};
-use std::{env, fs};
 use serde::{Deserialize, Serialize};
+use std::{env, fs};
 
 #[derive(Serialize, Deserialize, Debug)]
 struct UsbDevice {
@@ -66,35 +66,7 @@ fn list_usb_windows() -> Vec<UsbDevice> {
 
     info!("Trying to retrieve USB drives from Windows OS");
     let mut usb_drives = Vec::new();
-    let drive_letters: Vec<OsString> = vec![
-        OsString::from("A"),
-        OsString::from("B"),
-        OsString::from("C"),
-        OsString::from("D"),
-        OsString::from("E"),
-        OsString::from("F"),
-        OsString::from("G"),
-        OsString::from("H"),
-        OsString::from("I"),
-        OsString::from("J"),
-        OsString::from("K"),
-        OsString::from("L"),
-        OsString::from("M"),
-        OsString::from("N"),
-        OsString::from("O"),
-        OsString::from("P"),
-        OsString::from("Q"),
-        OsString::from("R"),
-        OsString::from("S"),
-        OsString::from("T"),
-        OsString::from("U"),
-        OsString::from("V"),
-        OsString::from("W"),
-        OsString::from("X"),
-        OsString::from("Y"),
-        OsString::from("Z"),
-    ];
-    for letter in drive_letters {
+    for letter in 'A'..='Z' {
         // We retrieve all possible information to determine if its a removable USB device
         let drive_path = letter.clone().into_string().unwrap() + ":\\";
         let drive_path = std::Path::new(&drive_path);
