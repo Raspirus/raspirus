@@ -42,7 +42,10 @@ mod tests {
         assert_eq!(loaded_config.hashes_in_db, config.hashes_in_db);
         assert_eq!(loaded_config.last_db_update, config.last_db_update);
         assert_eq!(loaded_config.logging_is_active, config.logging_is_active);
-        assert_eq!(loaded_config.obfuscated_is_active, config.obfuscated_is_active);
+        assert_eq!(
+            loaded_config.obfuscated_is_active,
+            config.obfuscated_is_active
+        );
         assert_eq!(loaded_config.db_update_weekday, config.db_update_weekday);
         assert_eq!(loaded_config.db_update_time, config.db_update_time);
         assert_eq!(loaded_config.db_location, config.db_location);
