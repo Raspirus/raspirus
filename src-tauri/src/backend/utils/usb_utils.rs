@@ -58,7 +58,7 @@ pub async fn list_usb_drives() -> Result<String, String> {
 // In Windows we need to iterate through all possible mount points and see what type of device is mounted
 #[cfg(windows)]
 fn list_usb_windows() -> Vec<UsbDevice> {
-    use std::ffi::{OsStr, OsString};
+    use std::ffi::OsStr;
     use std::iter::once;
     use std::os::windows::prelude::OsStrExt;
     use winapi::um::fileapi::GetDriveTypeW;
@@ -68,8 +68,8 @@ fn list_usb_windows() -> Vec<UsbDevice> {
     let mut usb_drives = Vec::new();
     for letter in 'A'..='Z' {
         // We retrieve all possible information to determine if its a removable USB device
-        let drive_path = letter.clone().into_string().unwrap() + ":\\";
-        let drive_path = std::Path::new(&drive_path);
+        let drive_path = letter.clone().to_string() + ":\\";
+        let drive_path = std::path::Path::new(&drive_path);
         let drive_name = drive_path.file_name().unwrap_or_default();
         let drive_path = drive_path.to_str().unwrap();
         let wide_path = OsStr::new(&drive_path)
