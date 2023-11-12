@@ -21,13 +21,19 @@ install:
 	@printf "$(TEXT)🌒 >>>> Installing curl$(RESET)"
 	sudo apt-get -y install curl
 	@printf "$(TEXT)🌓 >>>> Installing Rust for Linux$(RESET)"
-	// curl https://sh.rustup.rs -sSf | sh -s -- -y
-	export PATH="$HOME/.cargo/bin:$PATH"
-	-source "$HOME/.cargo/env"
+	sudo curl https://sh.rustup.rs -sSf | sh -s -- -y
+	@printf "$(TEXT)🌓 >>>> Adding variables to bashrc$(RESET)"
+	@if ! grep -q "export PATH=\$$HOME/.cargo/bin:\$$PATH" $(HOME)/.bashrc; then \
+	    echo "export PATH=\$$HOME/.cargo/bin:\$$PATH" >> $(HOME)/.bashrc; \
+	fi
+	@if ! grep -q "source \$$HOME/.cargo/env" $(HOME)/.bashrc; then \
+	    echo "source \$$HOME/.cargo/env" >> $(HOME)/.bashrc; \
+	    echo "Appended source to ~/.bashrc"; \
+	fi
 	@printf "$(TEXT)🌔 >>>> Installing Nodejs$(RESET)"
 	sudo apt-get update && sudo apt-get install -y ca-certificates gnupg
 	sudo mkdir -p /etc/apt/keyrings
-	curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | sudo gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg
+	curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | sudo gpg --yes --dearmor -o /etc/apt/keyrings/nodesource.gpg
 	echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_18.x nodistro main" | sudo tee /etc/apt/sources.list.d/nodesource.list
 	sudo apt-get update
 	sudo apt-get install nodejs -y
@@ -36,7 +42,7 @@ install:
 	@printf "$(TEXT)🌖 >>>> Installing Tauri deps$(RESET)"
 	sudo apt-get install -y libwebkit2gtk-4.0-dev build-essential wget libssl-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev
 	@printf "$(TEXT)🌗 >>>> Installing Tauri$(RESET)"
-	cargo install tauri-cli
+	source $(HOME)/.cargo/env && cargo install tauri-cli
 	@printf "$(TEXT)🌘 >>>> Installing npm deps$(RESET)"
 	sudo npm install
 	@printf "$(TEXT)🌘 >>>> Setting up required folders$(RESET)"
