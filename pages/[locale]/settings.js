@@ -228,7 +228,6 @@ export default function Settings() {
       invoke("update_database")
         .then((message) => {
           // If the update was successfull, update the data
-          clearInterval(interval); // Stop the interval
           ReactSwal.close(); // Close the SweetAlert
           console.log(message);
           setCount(Number(message));
@@ -237,7 +236,6 @@ export default function Settings() {
         })
         .catch((error) => {
           console.error(error);
-          clearInterval(interval); // Stop the interval
           ReactSwal.close(); // Close the SweetAlert
           // On error, set the failed update status as Date
           setDate(t('update_db_status_2'));
