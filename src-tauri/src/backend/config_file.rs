@@ -4,7 +4,7 @@ use std::fs::{self, File};
 use std::io::Read;
 use std::path::Path;
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct Config {
     // Amount of hashes in the database
     pub hashes_in_db: u32,
@@ -77,6 +77,8 @@ impl Config {
         let mut contents = String::new();
         file.read_to_string(&mut contents)
             .expect("Failed reading config to string");
-        serde_json::from_str(&contents).map_err(|err| err.to_string())
+        let mut config_from_str: Config = serde_json::from_str(&contents).map_err(|err| err.to_string()).expect("Failed deserializing config");
+        config_from_str.program_path = Self::set_path()?;
+        Ok(config_from_str)
     }
 }
