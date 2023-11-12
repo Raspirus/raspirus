@@ -1,0 +1,11 @@
+{
+  "hashes_in_db": 0,
+  "last_db_update": "Never",
+  "logging_is_active": false,
+  "obfuscated_is_active": true,
+  "db_update_weekday": -1,
+  "db_update_time": "22:00:00",
+  "db_location": "",
+  "scan_dir": true,
+  "ignored_hashes": []
+}
