@@ -25,6 +25,7 @@ pub struct Config {
     // List of hashes that should be ignored during scans
     pub ignored_hashes: Vec<String>,
     // config path
+    #[serde(skip)]
     program_path: String,
 }
 
