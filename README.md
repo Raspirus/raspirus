@@ -49,6 +49,10 @@ Got questions about Raspirus? We're here to help!
 - Join our thriving community on the [Discord server](https://discord.gg/Vx7fW9PA8B) to engage with fellow users.
 - If you've encountered a bug, browse the GitHub issues to see if it's already reported.
 
+
+## Support the Project
+If you find value in this project, consider sponsoring it through [GitHub Sponsors](https://github.com/sponsors/Raspirus) to contribute to its continued development and maintenance. Your support is greatly appreciated!
+
 ## Star History
 
 <a href="https://star-history.com/#Raspirus/Raspirus&Date">
