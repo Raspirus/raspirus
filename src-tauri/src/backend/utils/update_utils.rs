@@ -1,11 +1,11 @@
+use chrono::{DateTime, Local, Utc};
 use directories_next::ProjectDirs;
+use job_scheduler_ng::{Job, JobScheduler};
 use log::{error, info};
 use std::process::exit;
 use std::{fs, path::Path, time};
-use chrono::{DateTime, Local, Utc};
-use tokio::runtime::Runtime;
 use std::{fs::File, io::Write, time::Duration};
-use job_scheduler_ng::{Job, JobScheduler};
+use tokio::runtime::Runtime;
 
 use crate::backend::config_file::Config;
 use crate::backend::db_ops::DBOps;
@@ -13,28 +13,28 @@ use crate::backend::db_ops::DBOps;
 // Updates the database async (Very similar to the scanner_utils.rs setup)
 pub async fn update_database(window: Option<tauri::Window>) -> Result<String, String> {
     let db_name = "signatures.db";
-    let config = Config::new().load().expect("Couldn't load config");
+    let config = Config::new()?.load()?;
     let mut db_file_str = config.db_location;
 
     if db_file_str.is_empty() {
         let project_dirs = ProjectDirs::from("com", "Raspirus", "Data")
             .expect("Failed to get project directories.");
         let program_dir = project_dirs.data_dir();
-        fs::create_dir_all(&program_dir).expect("Failed to create program directory.");
+        fs::create_dir_all(program_dir).expect("Failed to create program directory.");
         let db_file_path = program_dir.join(db_name);
         db_file_str = db_file_path.to_string_lossy().to_string();
+    } else if Path::new(&db_file_str).to_owned().exists()
+        && Path::new(&db_file_str).to_owned().is_file()
+    {
+        info!("Using specific DB path {}", db_file_str);
     } else {
-        if Path::new(&db_file_str).to_owned().exists() && Path::new(&db_file_str).to_owned().is_file() {
-            info!("Using specific DB path {}", db_file_str);
-        } else {
-            info!("Falling back to default DB file (signatures.db)");
-            let project_dirs = ProjectDirs::from("com", "Raspirus", "Data")
-                .expect("Failed to get project directories.");
-            let program_dir = project_dirs.data_dir();
-            fs::create_dir_all(&program_dir).expect("Failed to create program directory.");
-            let db_file_path = program_dir.join(db_name);
-            db_file_str = db_file_path.to_string_lossy().to_string();
-        }
+        info!("Falling back to default DB file (signatures.db)");
+        let project_dirs = ProjectDirs::from("com", "Raspirus", "Data")
+            .expect("Failed to get project directories.");
+        let program_dir = project_dirs.data_dir();
+        fs::create_dir_all(program_dir).expect("Failed to create program directory.");
+        let db_file_path = program_dir.join(db_name);
+        db_file_str = db_file_path.to_string_lossy().to_string();
     }
 
     let mut db_connection = match DBOps::new(db_file_str.as_str(), window) {
@@ -47,18 +47,12 @@ pub async fn update_database(window: Option<tauri::Window>) -> Result<String, St
 
     let big_tic = time::Instant::now();
     // Spawns a thread to update async, else would be sync
-    match tokio::task::spawn_blocking(move || {
-        let hash_count;
-        match db_connection.update_db() {
-            Ok(res) => {
-                hash_count = res;
-            }
-            Err(err) => {
-                error!("{err}");
-                exit(-1);
-            }
+    match tokio::task::spawn_blocking(move || match db_connection.update_db() {
+        Ok(ok) => ok,
+        Err(err) => {
+            error!("{err}");
+            exit(-1);
         }
-        hash_count
     })
     .await
     {
@@ -80,28 +74,28 @@ pub async fn update_database(window: Option<tauri::Window>) -> Result<String, St
 // Almost identical to above
 pub fn sync_update_database(window: Option<tauri::Window>) -> Result<String, String> {
     let db_name = "signatures.db";
-    let config = Config::new().load().expect("Couldn't load config");
+    let config = Config::new()?.load()?;
     let mut db_file_str = config.db_location;
 
     if db_file_str.is_empty() {
         let project_dirs = ProjectDirs::from("com", "Raspirus", "Data")
             .expect("Failed to get project directories.");
         let program_dir = project_dirs.data_dir();
-        fs::create_dir_all(&program_dir).expect("Failed to create program directory.");
+        fs::create_dir_all(program_dir).expect("Failed to create program directory.");
         let db_file_path = program_dir.join(db_name);
         db_file_str = db_file_path.to_string_lossy().to_string();
+    } else if Path::new(&db_file_str).to_owned().exists()
+        && Path::new(&db_file_str).to_owned().is_file()
+    {
+        info!("Using specific DB path {}", db_file_str);
     } else {
-        if Path::new(&db_file_str).to_owned().exists() && Path::new(&db_file_str).to_owned().is_file() {
-            info!("Using specific DB path {}", db_file_str);
-        } else {
-            info!("Falling back to default DB file (signatures.db)");
-            let project_dirs = ProjectDirs::from("com", "Raspirus", "Data")
-                .expect("Failed to get project directories.");
-            let program_dir = project_dirs.data_dir();
-            fs::create_dir_all(&program_dir).expect("Failed to create program directory.");
-            let db_file_path = program_dir.join(db_name);
-            db_file_str = db_file_path.to_string_lossy().to_string();
-        }
+        info!("Falling back to default DB file (signatures.db)");
+        let project_dirs = ProjectDirs::from("com", "Raspirus", "Data")
+            .expect("Failed to get project directories.");
+        let program_dir = project_dirs.data_dir();
+        fs::create_dir_all(program_dir).expect("Failed to create program directory.");
+        let db_file_path = program_dir.join(db_name);
+        db_file_str = db_file_path.to_string_lossy().to_string();
     }
 
     let mut db_connection = match DBOps::new(db_file_str.as_str(), window) {
@@ -114,23 +108,23 @@ pub fn sync_update_database(window: Option<tauri::Window>) -> Result<String, Str
 
     let big_tic = time::Instant::now();
     // THIS PART CHANGES. Tokio thread removed to make sync
-        match db_connection.update_db() {
-            Ok(res) => {
-                let big_toc = time::Instant::now();
-                info!(
-                    "Updated DB in {} seconds",
-                    big_toc.duration_since(big_tic).as_secs_f64()
-                );
-                Ok(serde_json::to_string(&res).unwrap_or_default())
-            }
-            Err(err) => {
-                error!("{err}");
-                exit(-1);
-            }
+    match db_connection.update_db() {
+        Ok(res) => {
+            let big_toc = time::Instant::now();
+            info!(
+                "Updated DB in {} seconds",
+                big_toc.duration_since(big_tic).as_secs_f64()
+            );
+            Ok(serde_json::to_string(&res).unwrap_or_default())
         }
+        Err(err) => {
+            error!("{err}");
+            exit(-1);
+        }
+    }
 }
 
-// Not yet implemented
+// Not yet implemented => borked?
 pub async fn auto_update_scheduler(tauri_win: Option<tauri::Window>, hour: i32, weekday: i32) {
     // ISSUE: Needs to restart app to apply new update schedule
 
@@ -149,7 +143,8 @@ pub async fn auto_update_scheduler(tauri_win: Option<tauri::Window>, hour: i32, 
             let log_str = format!("{}.log", now_str);
             // Write to logs that the update function has started
             let message = format!("{} DB update executed\n", Utc::now());
-            log_update_res(&message, log_str.clone()).expect("Failed to write update logs to file.");
+            log_update_res(&message, log_str.clone())
+                .expect("Failed to write update logs to file.");
             // Execute the async function using Tokio's Runtime
             let runtime = Runtime::new().expect("Unable to create AutoUpdate Runtime");
             match runtime.block_on(update_database(tauri_win.clone())) {
@@ -178,8 +173,9 @@ pub async fn auto_update_scheduler(tauri_win: Option<tauri::Window>, hour: i32, 
 
 // Simply logs the database update result to a file
 fn log_update_res(data: &str, fname: String) -> std::io::Result<()> {
-    let project_dirs = ProjectDirs::from("com", "Raspirus", "Logs").expect("Failed to get project directories.");
-    let log_dir = project_dirs.data_local_dir().join("updates"); 
+    let project_dirs =
+        ProjectDirs::from("com", "Raspirus", "Logs").expect("Failed to get project directories.");
+    let log_dir = project_dirs.data_local_dir().join("updates");
     // Open the file (creates if it doesn't exist)
     let mut file = File::create(log_dir.join(fname)).expect("Couldnt open log file");
     // Write the data to the file
