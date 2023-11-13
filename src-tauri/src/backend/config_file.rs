@@ -33,7 +33,7 @@ pub struct Config {
 /// The entire config is saved to a JSON file and loaded or created on the first start
 impl Config {
     pub fn new() -> Result<Self, String> {
-        Ok(Config {
+        let mut cfg = Config {
             hashes_in_db: 0,
             last_db_update: "Never".to_string(),
             logging_is_active: false,
@@ -43,20 +43,25 @@ impl Config {
             db_location: "".to_string(),
             scan_dir: true,
             ignored_hashes: Vec::new(),
-            program_path: Self::set_path()?,
-        })
+            program_path: String::new(),
+        };
+        cfg.set_path()?;
+        Ok(cfg)
     }
 
     /// Finds the suitable path for the current system, creates a subfolder for the app and returns
     /// the path as a normal String
-    fn set_path() -> Result<String, String> {
+    fn set_path(&mut self) -> Result<(), String> {
         let project_dirs = ProjectDirs::from("com", "Raspirus", "Data")
             .expect("Failed to get project directories.");
         let program_dir = project_dirs.data_dir();
         fs::create_dir_all(program_dir).expect("Failed to create program directory.");
         let conf_file_path = program_dir.join("raspirus.config.json");
-        let conf_file_str = conf_file_path.to_str().expect("Failed to get config path");
-        Ok(conf_file_str.to_string())
+        self.program_path = conf_file_path
+            .to_str()
+            .expect("Failed to get config path")
+            .to_owned();
+        Ok(())
     }
 
     /// Will save the current configuration to the file
@@ -77,8 +82,10 @@ impl Config {
         let mut contents = String::new();
         file.read_to_string(&mut contents)
             .expect("Failed reading config to string");
-        let mut config_from_str: Config = serde_json::from_str(&contents).map_err(|err| err.to_string()).expect("Failed deserializing config");
-        config_from_str.program_path = Self::set_path()?;
+        let mut config_from_str: Config = serde_json::from_str(&contents)
+            .map_err(|err| err.to_string())
+            .expect("Failed deserializing config");
+        config_from_str.set_path()?;
         Ok(config_from_str)
     }
 }
