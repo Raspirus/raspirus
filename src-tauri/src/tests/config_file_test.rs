@@ -35,7 +35,7 @@ mod tests {
         let result_save = config_clean.save();
         assert!(result_save.is_ok());
 
-        let loaded_config = Config::new().unwrap();
+        let mut loaded_config = Config::new().unwrap();
         let result_load = loaded_config.load();
         assert!(result_load.is_ok());
 
