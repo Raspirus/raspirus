@@ -2,23 +2,16 @@ name: Build snap package
 
 on:
   workflow_dispatch:
-
 jobs:
-  my-job:
-    runs-on: ubuntu-22.04
-    env:
-      SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_TOKEN }}
+  build:
+    runs-on: ubuntu-latest
     steps:
-      - name: Check out Git repository
-        uses: actions/checkout@v4
-
-      - name: Install Snapcraft
-        uses: samuelmeuli/action-snapcraft@v2
-
-      # You can now run Snapcraft shell commands
-      - name: Use Snapcraft
-        run: |
-          snapcraft
-          snapcraft upload raspirus/src-tauri/target/raspirus_1.1.1_amd64.snap
-          snapcraft upload raspirus/src-tauri/target/raspirus_1.1.1_arm64.snap
-          snapcraft upload raspirus/src-tauri/target/raspirus_1.1.1_armhf.snap
+    - uses: actions/checkout@v4
+    - uses: snapcore/action-build@v1
+      id: build
+    - uses: snapcore/action-publish@v1
+      env:
+        SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_TOKEN }}
+      with:
+        snap: ${{ steps.build.outputs.snap }}
+        release: edge
