@@ -66,13 +66,14 @@ impl Config {
 
     /// Will save the current configuration to the file
     /// WARNING! If the fields are blank, it will clear the current config
-    pub fn save(&self) -> Result<(), String> {
+    pub fn save(&mut self) -> Result<(), String> {
+        self.set_path()?;
         let file = File::create(self.program_path.clone()).expect("Failed creating path");
         serde_json::to_writer_pretty(file, self).map_err(|err| err.to_string())
     }
 
     /// Loads the current config and returns it, or creates a new one if there is non yet
-    pub fn load(&self) -> Result<Self, String> {
+    pub fn load(&mut self) -> Result<Self, String> {
         // Checks if the config file exists, else quickly creates it
         if !Path::new(&self.program_path).exists() {
             self.save()?;

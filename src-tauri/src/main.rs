@@ -234,7 +234,7 @@ async fn list_usb_drives() -> Result<String, String> {
 // Creates the config from the GUI
 #[tauri::command]
 async fn create_config(contents: Option<String>) -> Result<String, String> {
-    let config = if let Some(contents) = contents {
+    let mut config = if let Some(contents) = contents {
         serde_json::from_str(&contents).map_err(|err| err.to_string())?
     } else {
         Config::new()?.load()?
