@@ -231,7 +231,7 @@ export default function Settings() {
           ReactSwal.close(); // Close the SweetAlert
           console.log(message);
           setCount(Number(message));
-          setDate(moment().format("DD/MM/YYYY hh:mm:ss"));
+          setDate(moment().format("DD/MM/YYYY HH:mm:ss")); // Format it to be 24h instead of 12h
           Swal.fire(t('update_db_completed'), t('update_db_completed_val'), "success");
         })
         .catch((error) => {
