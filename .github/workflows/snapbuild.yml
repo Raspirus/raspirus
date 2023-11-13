@@ -5,7 +5,7 @@ on:
 
 jobs:
   my-job:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     env:
       SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_TOKEN }}
     steps:
@@ -18,7 +18,6 @@ jobs:
       # You can now run Snapcraft shell commands
       - name: Use Snapcraft
         run: |
-          snapcraft login
           snapcraft
           snapcraft upload raspirus/src-tauri/target/raspirus_1.1.1_amd64.snap
           snapcraft upload raspirus/src-tauri/target/raspirus_1.1.1_arm64.snap
