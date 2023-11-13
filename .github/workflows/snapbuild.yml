@@ -20,6 +20,6 @@ jobs:
         run: |
           snapcraft login
           snapcraft
-          snapcraft upload raspirus/src-tauri/target/raspirus_1.1.0_amd64.snap
-          snapcraft upload raspirus/src-tauri/target/raspirus_1.1.0_arm64.snap
-          snapcraft upload raspirus/src-tauri/target/raspirus_1.1.0_armhf.snap
+          snapcraft upload raspirus/src-tauri/target/raspirus_1.1.1_amd64.snap
+          snapcraft upload raspirus/src-tauri/target/raspirus_1.1.1_arm64.snap
+          snapcraft upload raspirus/src-tauri/target/raspirus_1.1.1_armhf.snap
