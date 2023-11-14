@@ -30,7 +30,7 @@ zip = "0.6.6"
 mime_guess = "2.0.4"
 simplelog = "0.12.1"
 job_scheduler_ng = "2.0.4"
-windows-sys = "0.48.0"
+windows-sys = "0.45.0"
 
 [dev-dependencies]
 ctor = "0.2.5"
