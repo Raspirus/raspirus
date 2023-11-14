@@ -24,7 +24,8 @@ jobs:
 
       - name: Update packages
         run: |
-          sudo apt-get update && sudo apt-get upgrade -y
+          sudo apt-get update
+          sudo apt-get upgrade --ignore-missing -y
 
       - name: Install Tauri dependencies
         run: |
