@@ -30,7 +30,7 @@ jobs:
 
       - name: Create .cargo/config.toml
         run: |
-          mkdir $GITHUB_WORKSPACE/.cargo/config.toml
+          mkdir $GITHUB_WORKSPACE/.cargo
           echo '[target.armv7-unknown-linux-gnueabihf]' >> $GITHUB_WORKSPACE/.cargo/config.toml
           echo 'linker = "arm-linux-gnueabihf-gcc"' >> $GITHUB_WORKSPACE/.cargo/config.toml
           echo '[target.aarch64-unknown-linux-gnu]' >> $GITHUB_WORKSPACE/.cargo/config.toml
