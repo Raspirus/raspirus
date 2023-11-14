@@ -30,7 +30,7 @@ jobs:
 
       - name: Update packages
         run: |
-          apt-get update && sudo apt-get upgrade -y
+          sudo apt-get update && sudo apt-get upgrade -y
 
       - name: Install Tauri dependencies
         run: |
