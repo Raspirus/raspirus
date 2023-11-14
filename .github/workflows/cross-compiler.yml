@@ -1,6 +1,6 @@
 name: Cross-compile ARM binaries
 on:
-  pull_request:
+#  pull_request:
   workflow_dispatch:
 
 jobs:
@@ -22,11 +22,11 @@ jobs:
           sudo dpkg --add-architecture armhf
           sudo dpkg --add-architecture arm64
 
-      - name: Adjust package sources
-        run: |
-          # Add package sources for armhf and arm64 architectures
-          echo "deb [arch=armhf] http://ports.ubuntu.com/ubuntu-ports focal main universe" | sudo tee -a /etc/apt/sources.list
-          echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports focal main universe" | sudo tee -a /etc/apt/sources.list
+#      - name: Adjust package sources
+#        run: |
+#          # Add package sources for armhf and arm64 architectures
+#          echo "deb [arch=armhf] http://ports.ubuntu.com/ubuntu-ports focal main universe" | sudo tee -a /etc/apt/sources.list
+#          echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports focal main universe" | sudo tee -a /etc/apt/sources.list
 
       - name: Update packages
         run: |
