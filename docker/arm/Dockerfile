@@ -1,4 +1,4 @@
-FROM rust:1.73.0-bullseye
+FROM rust:1.74.0-bullseye
 WORKDIR /usr/app
 
 COPY ./ ./
