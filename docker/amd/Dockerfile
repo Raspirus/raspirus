@@ -1,4 +1,4 @@
-FROM rust:1.73-slim-buster
+FROM rust:1.74-slim-buster
 ENV TERM=xterm
 WORKDIR /usr/src/raspirus
 COPY . .
