@@ -22,7 +22,7 @@
     "date-fns": "^2.29.3",
     "eslint": "8.54.0",
     "eslint-config-next": "^14.0.2",
-    "flag-icons": "^6.6.6",
+    "flag-icons": "^7.0.0",
     "i18next": "^23.2.1",
     "moment": "^2.29.4",
     "next": "^14.0.2",
