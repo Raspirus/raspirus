@@ -64,3 +64,7 @@ check:
 	@printf "$(TEXT)>>>> Checking codebase$(RESET)"
 	cargo clippy --all-features
 	@printf "$(TEXT)>>>> Done!$(RESET)"
+clean:
+	@printf "$(TEXT)>>>> Cleaning cwd$(RESET)"
+	cargo clean -v -v
+	@printf "$(TEXT)>>>> Done!$(RESET)"
