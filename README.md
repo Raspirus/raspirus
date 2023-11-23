@@ -53,6 +53,7 @@ Got questions about Raspirus? We're here to help!
 ## Support the Project
 If you find value in this project, consider sponsoring it through [GitHub Sponsors](https://github.com/sponsors/Raspirus) to contribute to its continued development and maintenance. Your support is greatly appreciated!
 
+### Our sponsors:
 <table>
   <tbody>
     <tr>
