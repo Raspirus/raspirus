@@ -53,6 +53,16 @@ Got questions about Raspirus? We're here to help!
 ## Support the Project
 If you find value in this project, consider sponsoring it through [GitHub Sponsors](https://github.com/sponsors/Raspirus) to contribute to its continued development and maintenance. Your support is greatly appreciated!
 
+<table>
+  <tbody>
+    <tr>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/tuchaVshortah"><img src="https://avatars.githubusercontent.com/u/71591558?v=4" width="100px;" alt="Profile picture"/><br /><sub><b>Nurkanat Baysenkul</b></sub></a></td>
+    </tr>
+  </tbody>
+</table>
+
+Check out all the contributors on [our Documentation](https://raspirus.github.io/docs/stars/)
+
 ## Star History
 
 <a href="https://star-history.com/#Raspirus/Raspirus&Date">
