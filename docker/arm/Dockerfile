@@ -31,6 +31,7 @@ RUN mkdir out
 
 # Install app deps
 RUN cargo install --path src-tauri/
+RUN cargo install tauri-cli
 
 # Set environment variables
 RUN export PKG_CONFIG_SYSROOT_DIR=/usr/aarch64-linux-gnu/
