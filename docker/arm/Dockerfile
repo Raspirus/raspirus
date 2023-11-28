@@ -26,6 +26,9 @@ RUN rustup target add aarch64-unknown-linux-gnu
 # Perform npm install
 RUN npm install
 
+# Create the out directory
+RUN mkdir out
+
 # Install app deps
 RUN cargo install --path src-tauri/
 
