@@ -1,0 +1,7 @@
+node_modules/
+out/
+.*
+target/
+snapcraft.yaml
+Makefile
+docker/
