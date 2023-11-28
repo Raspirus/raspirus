@@ -35,6 +35,4 @@ RUN mkdir out
 RUN cargo install --path src-tauri/
 
 # Build app
-RUN cargo tauri build
-
-
+RUN cargo tauri build --target aarch64-unknown-linux-musl
