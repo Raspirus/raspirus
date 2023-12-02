@@ -40,4 +40,4 @@ RUN cargo install tauri-cli
 ENV PKG_CONFIG_SYSROOT_DIR=/usr/aarch64-linux-gnu/
 
 # Build app
-RUN cargo tauri build --target aarch64-unknown-linux-gnu
+RUN cargo tauri build --target aarch64-unknown-linux-gnu -b deb,updater
