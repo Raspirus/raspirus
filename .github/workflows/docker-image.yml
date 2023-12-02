@@ -10,9 +10,9 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Build the Docker image
-      run: docker build -t raspirus_arm -f .\docker\arm\Dockerfile .
+      run: docker build -t raspirus-arm -f .\docker\arm\Dockerfile .
     - name: Create the Docker container
-      run: docker create --name raspirus raspirus_arm
+      run: docker create --name raspirus raspirus-arm
     - name: Create destination directory
       run: mkdir dist
     - name: Copy file from docker
