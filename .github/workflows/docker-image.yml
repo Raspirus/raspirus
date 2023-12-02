@@ -10,4 +10,12 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Build the Docker image
-      run: docker build -t raspirus-arm -f .\docker\arm\Dockerfile .
+      run: docker build -t raspirus_arm -f .\docker\arm\Dockerfile .
+    - name: Create the Docker container
+      run: docker create --name raspirus raspirus_arm
+    - name: Copy file from docker
+      run: docker cp raspirus:/usr/app/raspirus/target/aarch64-unknown-linux-gnu/release/bundle/deb/raspirus_1.1.1_arm64.deb /dist
+    - name: Upload file to artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        path: dist
