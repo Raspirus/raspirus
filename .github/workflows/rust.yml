@@ -41,5 +41,3 @@ jobs:
           use-cross: true
           command: test
           args: --target ${{matrix.target}}
-          env:
-            IGNORE_PANICS: true
