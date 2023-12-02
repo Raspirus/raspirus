@@ -1,22 +1,64 @@
 name: Docker Image CI
 
+env:
+  RASPIRUS_VERSION: 1.1.1
+
 on:
   workflow_dispatch:
 
 jobs:
-  build:
+  build_arm64:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
-    - name: Build the Docker image
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Build the arm64 Docker image
       run: docker build -t raspirus-arm -f ./docker/arm/Dockerfile .
+
     - name: Create the Docker container
       run: docker create --name raspirus raspirus-arm
+
     - name: Create dist folder
-      run: mkdir ./dist
+      run: mkdir -p ./dist
+
     - name: Copy file from docker
-      run: docker cp raspirus:/usr/app/raspirus/target/aarch64-unknown-linux-gnu/release/bundle/deb/raspirus_1.1.1_arm64.deb ./dist
+      run: docker cp raspirus:/usr/app/raspirus/target/aarch64-unknown-linux-gnu/release/bundle/deb/raspirus_$RASPIRUS_VERSION_arm64.deb ./dist
+
+    - name: Clear docker image
+      run: docker rm -f raspirus
+
+  build_armhf:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Build the armhf Docker image
+      run: docker build -t raspirus-armhf -f ./docker/armhf/Dockerfile .
+
+    - name: Create the Docker container
+      run: docker create --name raspirus raspirus-armhf
+
+    - name: Create dist folder
+      run: mkdir -p ./dist
+
+    - name: Copy file from docker
+      run: docker cp raspirus:/usr/app/raspirus/target/armv7-unknown-linux-gnueabihf/release/bundle/deb/raspirus_$RASPIRUS_VERSION_armhf.deb ./dist
+
+    - name: Clear docker image
+      run: docker rm -f raspirus
+
+  upload_artifacts:
+    needs: [build_arm64, build_armhf]
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
     - name: Upload file to artifacts
       uses: actions/upload-artifact@v3
       with:
