@@ -23,8 +23,10 @@ jobs:
     - name: Copy file from docker
       run: docker cp raspirus:/usr/app/raspirus/target/aarch64-unknown-linux-gnu/release/bundle/deb/raspirus_1.1.1_arm64.deb ./dist
 
-    - name: Clear docker image
-      run: docker rm -f raspirus
+    - name: Upload file to artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        path: ./dist/raspirus_1.1.1_arm64.deb
 
   build_armhf:
     runs-on: ubuntu-latest
@@ -45,38 +47,7 @@ jobs:
     - name: Copy file from docker
       run: docker cp raspirus:/usr/app/raspirus/target/armv7-unknown-linux-gnueabihf/release/bundle/deb/raspirus_1.1.1_armhf.deb ./dist
 
-    - name: Clear docker image
-      run: docker rm -f raspirus
-    
-  build_amd:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Login to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: Build and push
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          push: true
-          tags: raspirus:latest
-
-  upload_artifacts:
-    needs: [build_arm64, build_armhf]
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
     - name: Upload file to artifacts
       uses: actions/upload-artifact@v3
       with:
-        path: ./dist
+        path: ./dist/raspirus_1.1.1_armhf.deb
