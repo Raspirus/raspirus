@@ -1,6 +1,10 @@
 node_modules/
 out/
-.*
+.github/
+.next/
+.eslintrc.json
+.gitignore
+.tokeignore
 target/
 snapcraft.yaml
 Makefile
