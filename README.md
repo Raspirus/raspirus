@@ -7,8 +7,7 @@
 # :rocket: Raspirus
 ![banner_logo](https://user-images.githubusercontent.com/50681275/223684389-ed0f104f-c183-4223-9723-c268e7cc5268.png)
 
-[![Get it from the Snap Store](https://snapcraft.io/static/images/badges/en/snap-store-white.svg)](https://snapcraft.io/raspirus)
-[![Download Raspirus](https://a.fsdn.com/con/app/sf-download-button)](https://sourceforge.net/projects/raspirus/files/latest/download)
+<a href="https://www.producthunt.com/posts/raspirus?utm_source=badge-featured&utm_medium=badge&utm_souce=badge-raspirus" target="_blank"><img src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=428255&theme=neutral" alt="Raspirus - An&#0032;open&#0045;source&#0032;user&#0045;&#0032;and&#0032;resources&#0045;friendly&#0032;malware&#0032;scanner | Product Hunt" style="width: 250px; height: 54px;" width="250" height="54" /></a>
 
 ## Introduction
 
@@ -25,6 +24,8 @@ Welcome to Raspirus, your lightweight signature-based malware scanner. Originall
 - **Sleek Modern Interface:** With user-friendliness at its core, Raspirus boasts a beautiful and intuitive UI.
 
 ## Getting Started
+[![Get it from the Snap Store](https://snapcraft.io/static/images/badges/en/snap-store-white.svg)](https://snapcraft.io/raspirus)
+[![Download Raspirus](https://a.fsdn.com/con/app/sf-download-button)](https://sourceforge.net/projects/raspirus/files/latest/download)
 
 ### For Regular Users
 
