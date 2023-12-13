@@ -33,7 +33,7 @@ job_scheduler_ng = "2.0.4"
 windows-sys = "0.45.0"
 
 [dev-dependencies]
-ctor = "0.2.5"
+ctor = "0.2.6"
 regex = "1.10.2"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
