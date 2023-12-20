@@ -17,7 +17,7 @@ md5 = "0.7.0"
 winapi = "0.3"
 sysinfo = "0.29"
 reqwest = { version = "0.11.22", features = ["blocking"] }
-rusqlite = { version = "0.29.0", features =  ["bundled"] }
+rusqlite = { version = "0.30.0", features =  ["bundled"] }
 terminal_size = "0.3.0"
 tokio = "1.34.0"
 walkdir = "2.4.0"
@@ -30,7 +30,7 @@ zip = "0.6.6"
 mime_guess = "2.0.4"
 simplelog = "0.12.1"
 job_scheduler_ng = "2.0.4"
-windows-sys = "0.48.0"
+windows-sys = "0.52.0"
 
 [dev-dependencies]
 ctor = "0.2.5"
