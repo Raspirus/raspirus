@@ -24,15 +24,16 @@ pub struct Config {
     pub scan_dir: bool,
     // List of hashes that should be ignored during scans
     pub ignored_hashes: Vec<String>,
-    // config path
+    // program_path
     #[serde(skip)]
-    program_path: String,
+    program_path: Option<ProjectDirs>,
 }
 
 /// The config file simply holds settings of the application that should perists during reboots
 /// The entire config is saved to a JSON file and loaded or created on the first start
 impl Config {
     pub fn new() -> Result<Self, String> {
+        // creates instance of new config
         let mut cfg = Config {
             hashes_in_db: 0,
             last_db_update: "Never".to_string(),
@@ -43,50 +44,64 @@ impl Config {
             db_location: "".to_string(),
             scan_dir: true,
             ignored_hashes: Vec::new(),
-            program_path: String::new(),
+            program_path: None,
         };
-        cfg.set_path()?;
+        cfg.set_program_path()?;
+        cfg.load()?;
         Ok(cfg)
     }
 
     /// Finds the suitable path for the current system, creates a subfolder for the app and returns
     /// the path as a normal String
-    fn set_path(&mut self) -> Result<(), String> {
+    fn set_program_path(&mut self) -> Result<(), String> {
         let project_dirs = ProjectDirs::from("com", "Raspirus", "Data")
             .expect("Failed to get project directories.");
         let program_dir = project_dirs.data_dir();
         fs::create_dir_all(program_dir).expect("Failed to create program directory.");
-        let conf_file_path = program_dir.join("raspirus.config.json");
-        self.program_path = conf_file_path
+        Ok(self.program_path = Some(project_dirs))
+    }
+
+    // OS compliant config path
+    pub fn get_config_path() -> String {
+        ProjectDirs::from("com", "Raspirus", "Raspirus")
+            .expect("Failed to get project directories")
+            .config_dir()
+            .join("raspirus.config.json")
             .to_str()
             .expect("Failed to get config path")
-            .to_owned();
-        Ok(())
+            .to_owned()
     }
 
     /// Will save the current configuration to the file
     /// WARNING! If the fields are blank, it will clear the current config
     pub fn save(&mut self) -> Result<(), String> {
-        self.set_path()?;
-        let file = File::create(self.program_path.clone()).expect("Failed creating path");
+        if !Path::new(&Self::get_config_path()).exists() {
+            fs::create_dir_all(
+                Path::new(&Self::get_config_path())
+                    .parent()
+                    .expect("Path creation failed"))
+            .expect("Failed creating config file");
+        }
+        
+        let file = File::create(Self::get_config_path()).expect("Failed to open config file");
         serde_json::to_writer_pretty(file, self).map_err(|err| err.to_string())
     }
 
     /// Loads the current config and returns it, or creates a new one if there is non yet
     pub fn load(&mut self) -> Result<Self, String> {
         // Checks if the config file exists, else quickly creates it
-        if !Path::new(&self.program_path).exists() {
+        if !Path::new(&Self::get_config_path()).exists() {
             self.save()?;
         };
 
-        let mut file = File::open(self.program_path.clone()).expect("Couldn't open file");
+        let mut file = File::open(Self::get_config_path()).expect("Couldn't open file");
         let mut contents = String::new();
         file.read_to_string(&mut contents)
             .expect("Failed reading config to string");
         let mut config_from_str: Config = serde_json::from_str(&contents)
             .map_err(|err| err.to_string())
             .expect("Failed deserializing config");
-        config_from_str.set_path()?;
+        config_from_str.set_program_path()?;
         Ok(config_from_str)
     }
 }
