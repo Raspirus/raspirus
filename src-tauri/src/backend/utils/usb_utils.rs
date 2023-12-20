@@ -1,6 +1,6 @@
 use log::info;
 use serde::{Deserialize, Serialize};
-use std::fs;
+use std::{fs, env};
 
 #[derive(Serialize, Deserialize, Debug)]
 struct UsbDevice {
@@ -29,7 +29,7 @@ pub async fn list_usb_drives() -> Result<String, String> {
             },
             Err(err) => {
                 println!("{err}");
-                return Err(err.to_string());
+                return Err(format!("{err}"));
             }
         };
 
