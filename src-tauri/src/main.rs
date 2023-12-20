@@ -13,15 +13,13 @@ use tauri::api::cli::ArgData;
 mod backend;
 mod tests;
 
-static DB_NAME: &str = "signatures.db";
-
 // NOTE: All functions with #[tauri::command] can and will be called from the GUI
 // Their name should not be changed and any new functions should return JSON data
 // using serde parsing
 
 fn main() -> Result<(), String> {
     // We immediatley try to load the config at startup, or create a new one. The config defines the application states
-    let config = Config::new()?.load()?;
+    let config = Config::new()?;
 
     // We check if we should log the application messages to a file or not, default is yes. Defined in the Config
     if config.logging_is_active {
@@ -228,7 +226,7 @@ async fn create_config(contents: Option<String>) -> Result<String, String> {
     let mut config = if let Some(contents) = contents {
         serde_json::from_str(&contents).map_err(|err| err.to_string())?
     } else {
-        Config::new()?.load()?
+        Config::new()?
     };
 
     config.save().map_err(|err| err.to_string())?;
