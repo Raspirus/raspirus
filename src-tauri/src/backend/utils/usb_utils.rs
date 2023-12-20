@@ -1,6 +1,6 @@
 use log::info;
 use serde::{Deserialize, Serialize};
-use std::{fs, env};
+use std::fs;
 
 #[derive(Serialize, Deserialize, Debug)]
 struct UsbDevice {
@@ -15,7 +15,7 @@ pub async fn list_usb_drives() -> Result<String, String> {
     #[cfg(any(target_os= "linux", target_os = "macos"))]
     {
         info!("Trying to retrieve USB drives from Unix-like OS");
-        let username = match env::var("USER") {
+        let username = match std::env::var("USER") {
             Ok(val) => val,
             Err(_) => panic!("Could not get current username"),
         };
