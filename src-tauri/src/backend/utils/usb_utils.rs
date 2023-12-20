@@ -87,18 +87,15 @@ fn list_usb_windows() -> Vec<UsbDevice> {
             .collect::<Vec<_>>();
         let drive_type = unsafe { GetDriveTypeW(wide_path.as_ptr()) };
 
-        match fs::metadata(drive_path) {
-            Ok(metadata) => {
-                if metadata.is_dir() && drive_type == DRIVE_REMOVABLE {
-                    info!("Found Drive: {}", drive_path);
-                    usb_drives.push(UsbDevice {
-                        name: drive_path.to_string() + " " + &drive_name.to_string_lossy(),
-                        path: drive_path.to_string(),
-                    });
-                }
+        if let Ok(metadata) = fs::metadata(drive_path) {
+            if metadata.is_dir() && drive_type == DRIVE_REMOVABLE {
+                info!("Found Drive: {}", drive_path);
+                usb_drives.push(UsbDevice {
+                    name: drive_path.to_string() + " " + &drive_name.to_string_lossy(),
+                    path: drive_path.to_string(),
+                });
             }
-            Err(_) => {}
         }
     }
-    return usb_drives;
+    usb_drives
 }
