@@ -247,10 +247,6 @@ impl Scanner {
                         return Ok(false);
                     }
                 };
-                
-                if Self::calculate_progress(self, fs::metadata(path).expect("Failed to get file size").len()).is_err() {
-                    error!("Progress calculation is broken");
-                }
 
                 let mut archive = match ZipArchive::new(file) {
                     Ok(archive) => archive,
@@ -272,6 +268,10 @@ impl Scanner {
                     };
                     
                     if file.is_file() {
+                        if Self::calculate_progress(self, file.size()).is_err() {
+                            error!("Progress calculation is broken");
+                        }
+
                         let hash = match Self::compute_hash(file) {
                             Ok(hash) => hash,
                             Err(err) => {
