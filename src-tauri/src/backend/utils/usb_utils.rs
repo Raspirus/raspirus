@@ -1,6 +1,6 @@
-use log::{info, warn};
+use log::info;
 use serde::{Deserialize, Serialize};
-use std::{env, fs};
+use std::fs;
 
 #[derive(Serialize, Deserialize, Debug)]
 struct UsbDevice {
@@ -10,10 +10,10 @@ struct UsbDevice {
 
 // Lists all the attached USBs for various platforms
 pub async fn list_usb_drives() -> Result<String, String> {
-    let mut usb_drives = Vec::new();
+    let mut usb_drives: Vec<UsbDevice> = Vec::new();
 
-    // In Linux we look at a specific directory for mounted devices
-    if cfg!(target_os = "linux") || cfg!(target_os = "macos") {
+    #[cfg(any(target_os= "linux", target_os = "macos"))]
+    {
         info!("Trying to retrieve USB drives from Unix-like OS");
         let username = match env::var("USER") {
             Ok(val) => val,
@@ -22,11 +22,17 @@ pub async fn list_usb_drives() -> Result<String, String> {
 
         let dir_path = format!("/media/{}", username);
         let entries = match fs::read_dir(dir_path) {
-            Ok(entries) => entries,
+            
+            Ok(entries) => {
+                println!("{:#?}", entries);
+                entries
+            },
             Err(err) => {
+                println!("{err}");
                 return Err(err.to_string());
             }
         };
+
 
         for entry in entries {
             let entry = entry.expect("I couldn't read something inside the directory");
@@ -44,14 +50,17 @@ pub async fn list_usb_drives() -> Result<String, String> {
                     .to_string(),
             });
         }
-    } else if cfg!(target_os = "windows") {
-        #[cfg(windows)]
-        let mut win_usb_drives = list_usb_windows();
-        #[cfg(windows)]
-        usb_drives.append(&mut win_usb_drives);
-    } else {
-        warn!("Not retrieving USBs -> Wrong OS");
     }
+
+    #[cfg(target_os = "windows")]
+    {
+        let mut win_usb_drives = list_usb_windows();
+        usb_drives.append(&mut win_usb_drives);
+    }
+
+    #[cfg(all(not(target_os = "windows"), not(target_os = "linux"), not(target_os = "macos")))]
+    warn!("Not retrieving USBs -> Wrong OS");
+
     Ok(serde_json::to_string(&usb_drives).expect("Couldnt convert usb drives to a Serde string"))
 }
 
