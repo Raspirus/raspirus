@@ -284,7 +284,7 @@ impl Scanner {
                         if self.false_positive.contains(&hash) {
                             info!("Found false postitive! Skipping...");
                             self.skipped += 1;
-                            continue;;
+                            continue;
                         }
 
                         match self.db_conn.hash_exists(&hash) {
