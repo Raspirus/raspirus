@@ -239,7 +239,7 @@ impl Scanner {
         let mut found = false;
         match path.extension().unwrap_or_default().to_str().unwrap_or_default() {
             "zip" => {
-                let file = match File::open(&path) {
+                let file = match File::open(path) {
                     Ok(file) => file,
                     Err(err) => {
                         error!("Failed to get file: {err}");
@@ -303,7 +303,7 @@ impl Scanner {
                 }
             }
             _ => {
-                let file = match File::open(&path) {
+                let file = match File::open(path) {
                     Ok(file) => file,
                     Err(err) => {
                         error!("Failed to get file: {err}");

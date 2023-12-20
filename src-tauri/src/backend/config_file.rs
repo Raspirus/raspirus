@@ -58,7 +58,8 @@ impl Config {
             .expect("Failed to get project directories.");
         let program_dir = project_dirs.data_dir();
         fs::create_dir_all(program_dir).expect("Failed to create program directory.");
-        Ok(self.program_path = Some(project_dirs))
+        self.program_path = Some(project_dirs);
+        Ok(())
     }
 
     // OS compliant config path
@@ -102,6 +103,7 @@ impl Config {
             .map_err(|err| err.to_string())
             .expect("Failed deserializing config");
         config_from_str.set_program_path()?;
-        Ok(*self = config_from_str)
+        *self = config_from_str;
+        Ok(())
     }
 }
