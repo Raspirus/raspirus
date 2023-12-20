@@ -26,7 +26,7 @@ pub struct Config {
     pub ignored_hashes: Vec<String>,
     // program_path
     #[serde(skip)]
-    program_path: Option<ProjectDirs>,
+    pub program_path: Option<ProjectDirs>,
 }
 
 /// The config file simply holds settings of the application that should perists during reboots
@@ -88,7 +88,7 @@ impl Config {
     }
 
     /// Loads the current config and returns it, or creates a new one if there is non yet
-    pub fn load(&mut self) -> Result<Self, String> {
+    pub fn load(&mut self) -> Result<(), String> {
         // Checks if the config file exists, else quickly creates it
         if !Path::new(&Self::get_config_path()).exists() {
             self.save()?;
@@ -102,6 +102,6 @@ impl Config {
             .map_err(|err| err.to_string())
             .expect("Failed deserializing config");
         config_from_str.set_program_path()?;
-        Ok(config_from_str)
+        Ok(*self = config_from_str)
     }
 }

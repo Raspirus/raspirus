@@ -35,11 +35,10 @@ mod tests {
         let result_save = config_clean.save();
         assert!(result_save.is_ok());
 
-        let mut loaded_config = Config::new().unwrap();
-        let result_load = loaded_config.load();
-        assert!(result_load.is_ok());
+        let loaded_config = Config::new();
+        assert!(loaded_config.is_ok());
 
-        let loaded_config = result_load.unwrap();
+        let loaded_config = loaded_config.unwrap();
         assert_eq!(loaded_config.hashes_in_db, config_clean.hashes_in_db);
         assert_eq!(loaded_config.last_db_update, config_clean.last_db_update);
         assert_eq!(
