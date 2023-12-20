@@ -3,8 +3,8 @@ use std::{
     io::Write,
 };
 
-use log::{trace, error, warn};
 use directories_next::ProjectDirs;
+use log::{error, trace, warn};
 
 pub struct FileLog {
     pub file: Option<File>,
@@ -47,7 +47,10 @@ impl FileLog {
             Some(mut file) => {
                 match file.write_all(format!("{hash}\t{fpath}\n").as_bytes()) {
                     Ok(_) => {
-                        trace!("Wrote {hash}\t{fpath} to {:?}", self.file.as_ref().expect("Invalid file reference"))
+                        trace!(
+                            "Wrote {hash}\t{fpath} to {:?}",
+                            self.file.as_ref().expect("Invalid file reference")
+                        )
                     }
                     Err(err) => error!("Failed loggin: {err}"),
                 };
@@ -71,14 +74,19 @@ impl FileLog {
     /// log.create_file("new_log.txt".to_owned());
     /// ```
     pub fn create_file(&mut self, fname: String) {
-        let project_dirs = ProjectDirs::from("com", "Raspirus", "Logs").expect("Failed to get project directories.");
+        let project_dirs = ProjectDirs::from("com", "Raspirus", "Logs")
+            .expect("Failed to get project directories.");
         let log_dir = project_dirs.data_local_dir().join("logs"); // Create a "logs" subdirectory
 
         match fs::create_dir_all(&log_dir) {
             Ok(_) => {
                 self.file = match File::create(log_dir.join(fname.clone())) {
                     Ok(file) => {
-                        trace!("Created logfile at DIR: {} NAME: {}", log_dir.display(), fname);
+                        trace!(
+                            "Created logfile at DIR: {} NAME: {}",
+                            log_dir.display(),
+                            fname
+                        );
                         Some(file)
                     }
                     Err(err) => {
