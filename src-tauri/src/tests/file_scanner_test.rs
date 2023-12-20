@@ -12,7 +12,8 @@ mod tests {
         let t_win = None;
 
         // Get the parent directory of the current test file as the scan location
-        let scanloc = env::current_dir().expect("Failed to get current directory")
+        let scanloc = env::current_dir()
+            .expect("Failed to get current directory")
             .to_string_lossy()
             .to_string();
 
@@ -37,7 +38,8 @@ mod tests {
         let t_win = None;
 
         // Get the parent directory of the current test file as the scan location
-        let scanloc = env::current_dir().expect("Failed to get current directory")
+        let scanloc = env::current_dir()
+            .expect("Failed to get current directory")
             .to_string_lossy()
             .to_string();
 
@@ -50,15 +52,18 @@ mod tests {
     #[test]
     fn test_create_hash_valid_file() {
         let t_win = None;
-        
+
         // Get the parent directory of the current test file as the scan location
-        let scanloc = env::current_dir().expect("Failed to get current directory")
+        let scanloc = env::current_dir()
+            .expect("Failed to get current directory")
             .to_string_lossy()
             .to_string();
 
         // We are using the current file to test a valid hashable file
         let exe_path = env::current_exe().expect("Failed to get current executable path");
-        let current_file_path = std::env::current_dir().unwrap().join(exe_path)
+        let current_file_path = std::env::current_dir()
+            .unwrap()
+            .join(exe_path)
             .to_string_lossy()
             .to_string();
 
@@ -74,7 +79,8 @@ mod tests {
         let t_win = None;
 
         // Get the parent directory of the current test file as the scan location
-        let scanloc = env::current_dir().expect("Failed to get current directory")
+        let scanloc = env::current_dir()
+            .expect("Failed to get current directory")
             .to_string_lossy()
             .to_string();
 
