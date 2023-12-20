@@ -281,6 +281,12 @@ impl Scanner {
                             }
                         };
 
+                        if self.false_positive.contains(&hash) {
+                            info!("Found false postitive! Skipping...");
+                            self.skipped += 1;
+                            continue;;
+                        }
+
                         match self.db_conn.hash_exists(&hash) {
                             Ok(exists) => {
                                 if exists {
@@ -324,6 +330,12 @@ impl Scanner {
                         return Err(String::from("Encountered error while computing hash"))
                     }
                 };
+
+                if self.false_positive.contains(&hash) {
+                    info!("Found false postitive! Skipping...");
+                    self.skipped += 1;
+                    return Ok(found);
+                }
 
                 match self.db_conn.hash_exists(&hash) {
                     Ok(exists) => {
