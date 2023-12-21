@@ -38,18 +38,18 @@ install:
 	sudo apt-get update
 	sudo apt-get install nodejs -y
 	@printf "$(TEXT)🌕 >>>> Installing Nextjs and EsLint$(RESET)"
-	sudo npm install next@latest react@latest react-dom@latest eslint-config-next@latest
+	npm install next@latest react@latest react-dom@latest eslint-config-next@latest
 	@printf "$(TEXT)🌖 >>>> Installing Tauri deps$(RESET)"
 	sudo apt-get install -y libwebkit2gtk-4.0-dev build-essential wget libssl-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev
 	@printf "$(TEXT)🌗 >>>> Installing Tauri$(RESET)"
 	source $(HOME)/.cargo/env && cargo install tauri-cli
 	@printf "$(TEXT)🌘 >>>> Installing npm deps$(RESET)"
-	sudo npm install
+	npm install
 	@printf "$(TEXT)🌘 >>>> Setting up required folders$(RESET)"
 	mkdir -p out
 	@printf "$(TEXT)🎉 >>>> Done!$(RESET)"
 
-build: install
+build:
 	@clear
 	@printf "$(TEXT)>>>> Building release$(RESET)"
 	cargo tauri build
@@ -63,4 +63,8 @@ test:
 check:
 	@printf "$(TEXT)>>>> Checking codebase$(RESET)"
 	cargo clippy --all-features
+	@printf "$(TEXT)>>>> Done!$(RESET)"
+clean:
+	@printf "$(TEXT)>>>> Cleaning cwd$(RESET)"
+	cargo clean -v -v
 	@printf "$(TEXT)>>>> Done!$(RESET)"

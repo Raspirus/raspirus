@@ -13,24 +13,23 @@ rust-version = "1.59"
 
 [dependencies]
 log = "0.4.20"
-md5 = "0.7.0"
 winapi = "0.3"
 sysinfo = "0.29"
 reqwest = { version = "0.11.23", features = ["blocking"] }
 rusqlite = { version = "0.30.0", features =  ["bundled"] }
 terminal_size = "0.3.0"
 tokio = "1.35.1"
-walkdir = "2.4.0"
+#walkdir = "2.4.0"
 serde_json = "1.0"
 serde = { version = "1.0", features = ["derive"] }
 tauri = { version = "1.5.4", features = [ "cli", "dialog-open", "updater"] }
 chrono = "0.4.31"
 directories-next = "2.0.0"
 zip = "0.6.6"
-mime_guess = "2.0.4"
 simplelog = "0.12.1"
 job_scheduler_ng = "2.0.4"
 windows-sys = "0.45.0"
+md5 = "0.7.0"
 
 [dev-dependencies]
 ctor = "0.2.6"
