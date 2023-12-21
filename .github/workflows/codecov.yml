@@ -20,24 +20,15 @@ jobs:
       run: sudo apt-get update && sudo apt-get install -y libgtk-3-dev libsoup2.4-dev pkg-config libssl-dev libjavascriptcoregtk-4.0-dev libwebkit2gtk-4.0-dev
     - name: Create necessary out directory
       run: mkdir out
-    - uses: actions-rs/toolchain@v1
-      with:
-        toolchain: nightly
-        override: true    
-    - name: Build
-      run: cargo build --verbose
-      # Zprofile is a nightly feature
-    - name: Run tests
-      run: cargo test --verbose
-      env:
-        CARGO_INCREMENTAL: '0'
-        RUSTFLAGS: '-Zprofile -Ccodegen-units=1 -Cinline-threshold=0 -Clink-dead-code -Coverflow-checks=off -Cpanic=abort -Zpanic_abort_tests'
-        RUSTDOCFLAGS: '-Zprofile -Ccodegen-units=1 -Cinline-threshold=0 -Clink-dead-code -Coverflow-checks=off -Cpanic=abort -Zpanic_abort_tests'
-    - name: rust-grcov
-      uses: actions-rs/grcov@v0.1.6
-    - name: Codecov
+    - name: Install Rust
+      run: rustup update stable
+    - name: Install cargo-llvm-cov
+      uses: taiki-e/install-action@cargo-llvm-cov
+    - name: Generate code coverage
+      run: cargo llvm-cov --all-features --workspace --lcov --output-path lcov.info
+    - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v3
       with:
-        token: ${{ secrets.CODECOV_TOKEN }}
-        verbose: true
+        token: ${{ secrets.CODECOV_TOKEN }} # not required for public repos
+        files: lcov.info
         fail_ci_if_error: true
