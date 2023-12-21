@@ -11,8 +11,7 @@ static DB_NAME: &str = "signatures.db";
 pub async fn start_scanner(window: Option<tauri::Window>, path: String) -> Result<String, String> {
     // Define default values, will be overwritten later
     let config = Config::new().expect("Failed to load config");
-    let project_dir = config.program_path.expect("Failed to get program path");
-    let program_dir = project_dir.data_dir();
+    let program_dir = config.project_dirs.data;
 
     // Basically checks if a db file path has been set in the Config
     let db_file_str = if !config.db_location.is_empty() && Path::new(&config.db_location).to_owned().exists() && Path::new(&config.db_location).to_owned().is_file() {
@@ -49,8 +48,7 @@ pub async fn start_scanner(window: Option<tauri::Window>, path: String) -> Resul
 // Same as above, but in synchron (Should be rewritten to better suit the CLI, probably also renamed)
 pub fn sync_start_scanner(window: Option<tauri::Window>, path: String) -> Result<String, String> {
     let config = Config::new()?;
-    let project_dir = config.program_path.expect("Failed to get program path");
-    let program_dir = project_dir.data_dir();
+    let program_dir = config.project_dirs.data;
 
     let db_file_str = if !config.db_location.is_empty() && Path::new(&config.db_location).to_owned().exists() && Path::new(&config.db_location).to_owned().is_file() {
         info!("Using specific DB path {}", config.db_location);

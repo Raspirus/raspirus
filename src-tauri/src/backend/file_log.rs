@@ -3,8 +3,9 @@ use std::{
     io::Write,
 };
 
-use directories_next::ProjectDirs;
 use log::{error, trace, warn};
+
+use super::config_file::Config;
 
 pub struct FileLog {
     pub file: Option<File>,
@@ -23,10 +24,10 @@ impl FileLog {
     /// ```
     /// let log = FileLog::new("log.txt".to_owned());
     /// ```
-    pub fn new(fname: String) -> Self {
+    pub fn new(fname: String) -> Result<Self, String> {
         let mut ret = FileLog { file: None };
-        ret.create_file(fname);
-        ret
+        ret.create_file(fname)?;
+        Ok(ret)
     }
 
     /// Appends the specified `hash` and `fpath` to the log file.
@@ -73,19 +74,18 @@ impl FileLog {
     /// let mut log = FileLog::new("log.txt".to_owned());
     /// log.create_file("new_log.txt".to_owned());
     /// ```
-    pub fn create_file(&mut self, fname: String) {
-        let project_dirs = ProjectDirs::from("com", "Raspirus", "Logs")
-            .expect("Failed to get project directories.");
-        let log_dir = project_dirs.data_local_dir().join("logs"); // Create a "logs" subdirectory
+    pub fn create_file(&mut self, fname: String) -> Result<(), String>{
+        let config = Config::new()?;
+        let log_dir = config.project_dirs.logs.scan.as_path();
 
         match fs::create_dir_all(&log_dir) {
             Ok(_) => {
                 self.file = match File::create(log_dir.join(fname.clone())) {
                     Ok(file) => {
                         trace!(
-                            "Created logfile at DIR: {} NAME: {}",
+                            "Created logfile {} at {}",
+                            fname,
                             log_dir.display(),
-                            fname
                         );
                         Some(file)
                     }
@@ -97,5 +97,6 @@ impl FileLog {
             }
             Err(err) => error!("Failed creating logs folder: {err}"),
         }
+        Ok(())
     }
 }

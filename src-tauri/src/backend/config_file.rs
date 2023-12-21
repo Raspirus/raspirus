@@ -2,7 +2,7 @@ use directories_next::ProjectDirs;
 use serde::{Deserialize, Serialize};
 use std::fs::{self, File};
 use std::io::Read;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Config {
@@ -24,9 +24,22 @@ pub struct Config {
     pub scan_dir: bool,
     // List of hashes that should be ignored during scans
     pub ignored_hashes: Vec<String>,
-    // program_path
+    // stores the different dirs as a struct
     #[serde(skip)]
-    pub program_path: Option<ProjectDirs>,
+    pub project_dirs: Dirs
+}
+
+#[derive(Debug, Default)]
+pub struct Dirs {
+    pub logs: Logs,
+    pub data: Box<PathBuf>,
+}
+
+#[derive(Debug, Default)]
+pub struct Logs {
+    pub main: Box<PathBuf>,
+    pub scan: Box<PathBuf>,
+    pub update: Box<PathBuf>,
 }
 
 /// The config file simply holds settings of the application that should perists during reboots
@@ -44,21 +57,36 @@ impl Config {
             db_location: "".to_string(),
             scan_dir: true,
             ignored_hashes: Vec::new(),
-            program_path: None,
+            project_dirs: Dirs::default()
         };
         cfg.set_program_path()?;
         cfg.load()?;
         Ok(cfg)
     }
 
-    /// Finds the suitable path for the current system, creates a subfolder for the app and returns
-    /// the path as a normal String
+    /// Finds the suitable path for the current system, creates a subfolder for the app
     fn set_program_path(&mut self) -> Result<(), String> {
-        let project_dirs = ProjectDirs::from("com", "Raspirus", "Data")
+        let project_dirs = ProjectDirs::from("com", "Raspirus", "Raspirus")
             .expect("Failed to get project directories.");
-        let program_dir = project_dirs.data_dir();
-        fs::create_dir_all(program_dir).expect("Failed to create program directory.");
-        self.program_path = Some(project_dirs);
+        
+        self.project_dirs = Dirs {
+            logs: Logs {
+                main: Box::new(project_dirs.data_local_dir().join("logs").join("main")),
+                scan: Box::new(project_dirs.data_local_dir().join("logs").join("scan")),
+                update: Box::new(project_dirs.data_local_dir().join("logs").join("update")),
+            },
+            data: Box::new(project_dirs.data_dir().join("data")),
+        };
+        Ok(())
+    }
+
+    pub fn create_dirs(&self) -> std::io::Result<()> {
+        // create logs
+        fs::create_dir_all(self.project_dirs.logs.main.as_path())?;
+        fs::create_dir_all(self.project_dirs.logs.scan.as_path())?;
+        fs::create_dir_all(self.project_dirs.logs.update.as_path())?;
+        // create data folders
+        fs::create_dir_all(self.project_dirs.data.as_path())?;
         Ok(())
     }
 

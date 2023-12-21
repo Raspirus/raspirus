@@ -1,5 +1,4 @@
 use chrono::{DateTime, Local, Utc};
-use directories_next::ProjectDirs;
 use job_scheduler_ng::{Job, JobScheduler};
 use log::{error, info};
 use std::process::exit;
@@ -15,8 +14,7 @@ static DB_NAME: &str = "signatures.db";
 // Updates the database async (Very similar to the scanner_utils.rs setup)
 pub async fn update_database(window: Option<tauri::Window>) -> Result<String, String> {
     let config = Config::new()?;
-    let project_dirs = ProjectDirs::from("com", "Raspirus", "Data").expect("Failed to get project directories.");
-    let program_dir = project_dirs.data_dir();
+    let program_dir = config.project_dirs.data;
 
     let db_file_str = if !config.db_location.is_empty() && Path::new(&config.db_location).to_owned().exists() && Path::new(&config.db_location).to_owned().is_file() {
         info!("Using specific DB path {}", config.db_location);
@@ -63,8 +61,7 @@ pub async fn update_database(window: Option<tauri::Window>) -> Result<String, St
 // Almost identical to above
 pub fn sync_update_database(window: Option<tauri::Window>) -> Result<String, String> {
     let config = Config::new()?;
-    let project_dirs = ProjectDirs::from("com", "Raspirus", "Data").expect("Failed to get project directories.");
-    let program_dir = project_dirs.data_dir();
+    let program_dir = config.project_dirs.data;
 
     let db_file_str = if !config.db_location.is_empty() && Path::new(&config.db_location).to_owned().exists() && Path::new(&config.db_location).to_owned().is_file() {
         info!("Using specific DB path {}", config.db_location);
@@ -150,12 +147,14 @@ pub async fn auto_update_scheduler(tauri_win: Option<tauri::Window>, hour: i32, 
 // Simply logs the database update result to a file
 fn log_update_res(data: &str, fname: String) -> std::io::Result<()> {
     // Open the file (creates if it doesn't exist)
+    let config = match Config::new() {
+        Ok(config) => config,
+        Err(err) => {
+            return Err(std::io::Error::new(std::io::ErrorKind::Other, err))
+        }
+    };
     let mut file = File::create(
-        ProjectDirs::from("com", "Raspirus", "Logs")
-            .expect("Failed to get project directories.")
-            .data_local_dir()
-            .join("updates")
-            .join(fname),
+        config.project_dirs.logs.update.join(fname),
     )
     .expect("Couldnt open log file");
     // Write the data to the file
