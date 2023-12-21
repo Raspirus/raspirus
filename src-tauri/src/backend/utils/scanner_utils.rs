@@ -1,57 +1,39 @@
-use directories_next::ProjectDirs;
 use log::{debug, error, info, warn};
-use std::{fs, path::Path};
+use std::path::Path;
 
-use crate::backend::{config_file::Config, file_scanner};
+use crate::backend::{config_file::Config, scanner};
+
+static DB_NAME: &str = "signatures.db";
 
 // There are tow equal functions here, one is async and gets called from the GUI to ensure the main thread doesn't stop
 // The second one is sync and is called from the CLI. The second one can probably be rewritten
 
 pub async fn start_scanner(window: Option<tauri::Window>, path: String) -> Result<String, String> {
     // Define default values, will be overwritten later
-    let db_name = "signatures.db";
-    let config = Config::new()?.load().expect("Failed to load config");
-    let mut db_file_str = config.db_location;
+    let config = Config::new().expect("Failed to load config");
+    let program_dir = config.project_dirs.data;
 
     // Basically checks if a db file path has been set in the Config
-    if db_file_str.is_empty() {
-        // If no path has been set, we check in the default location for one
-        let project_dirs = ProjectDirs::from("com", "Raspirus", "Data")
-            .expect("Failed to get project directories.");
-        let program_dir = project_dirs.data_dir();
-        fs::create_dir_all(program_dir).expect("Failed to create program directory.");
-        let db_file_path = program_dir.join(db_name);
-        db_file_str = db_file_path.to_string_lossy().to_string();
+    let db_file_str = if !config.db_location.is_empty() && Path::new(&config.db_location).to_owned().exists() && Path::new(&config.db_location).to_owned().is_file() {
+        info!("Using specific DB path {}", config.db_location);
+        config.db_location
     } else {
-        // Else we use the specified file
-        if Path::new(&db_file_str).to_owned().exists()
-            && Path::new(&db_file_str).to_owned().is_file()
-        {
-            info!("Using specific DB path {}", db_file_str);
-        } else {
-            info!("Falling back to default DB file (signatures.db)");
-            let project_dirs = ProjectDirs::from("com", "Raspirus", "Data")
-                .expect("Failed to get project directories.");
-            let program_dir = project_dirs.data_dir();
-            fs::create_dir_all(program_dir).expect("Failed to create program directory.");
-            let db_file_path = program_dir.join(db_name);
-            db_file_str = db_file_path.to_string_lossy().to_string();
-        }
-    }
+        // if not we use the default path
+        program_dir.join(DB_NAME).to_string_lossy().to_string()
+    };
+
     // Here we create an instance of the scanner, but don't start it yet
-    let mut fs = match file_scanner::FileScanner::new(&path, db_file_str.as_str(), window) {
+    let fs = match scanner::Scanner::new(db_file_str.as_str(), window) {
         Ok(fs) => fs,
         Err(err) => {
             error!("{}", err);
             return Err(err.to_string());
         }
     };
+
     // Finally, before starting the scanner, we check if obfuscated mode has been activated or not
-    let mut config = Config::new()?;
-    config = config.load().expect("Unable to load config");
-    let obfuscated = config.obfuscated_is_active;
-    warn!("Obfuscated mode is: {}", obfuscated);
-    let dirty_files = match fs.search_files(obfuscated) {
+    warn!("Obfuscated mode is: {}", config.obfuscated_is_active);
+    let dirty_files = match fs.init(config.obfuscated_is_active, &path) {
         Ok(files) => files,
         Err(e) => {
             error!("{}", e);
@@ -65,42 +47,26 @@ pub async fn start_scanner(window: Option<tauri::Window>, path: String) -> Resul
 
 // Same as above, but in synchron (Should be rewritten to better suit the CLI, probably also renamed)
 pub fn sync_start_scanner(window: Option<tauri::Window>, path: String) -> Result<String, String> {
-    let db_name = "signatures.db";
-    let config = Config::new()?.load()?;
-    let mut db_file_str = config.db_location;
+    let config = Config::new()?;
+    let program_dir = config.project_dirs.data;
 
-    if db_file_str.is_empty() {
-        let project_dirs = ProjectDirs::from("com", "Raspirus", "Data")
-            .expect("Failed to get project directories.");
-        let program_dir = project_dirs.data_dir();
-        fs::create_dir_all(program_dir).expect("Failed to create program directory.");
-        let db_file_path = program_dir.join(db_name);
-        db_file_str = db_file_path.to_string_lossy().to_string();
-    } else if Path::new(&db_file_str).to_owned().exists()
-        && Path::new(&db_file_str).to_owned().is_file()
-    {
-        info!("Using specific DB path {}", db_file_str);
+    let db_file_str = if !config.db_location.is_empty() && Path::new(&config.db_location).to_owned().exists() && Path::new(&config.db_location).to_owned().is_file() {
+        info!("Using specific DB path {}", config.db_location);
+        config.db_location
     } else {
-        info!("Falling back to default DB file (signatures.db)");
-        let project_dirs = ProjectDirs::from("com", "Raspirus", "Data")
-            .expect("Failed to get project directories.");
-        let program_dir = project_dirs.data_dir();
-        fs::create_dir_all(program_dir).expect("Failed to create program directory.");
-        let db_file_path = program_dir.join(db_name);
-        db_file_str = db_file_path.to_string_lossy().to_string();
-    }
+        program_dir.join(DB_NAME).to_string_lossy().to_string()
+    };
 
-    let mut fs = match file_scanner::FileScanner::new(&path, db_file_str.as_str(), window) {
+    let fs = match scanner::Scanner::new( db_file_str.as_str(), window) {
         Ok(fs) => fs,
         Err(err) => {
             error!("{}", err);
             return Err(err.to_string());
         }
     };
-    let config = Config::new()?.load()?;
-    let obfuscated = config.obfuscated_is_active;
-    warn!("Obfuscated mode is: {}", obfuscated);
-    let dirty_files = match fs.search_files(obfuscated) {
+
+    warn!("Obfuscated mode is: {}", config.obfuscated_is_active);
+    let dirty_files = match fs.init(config.obfuscated_is_active, &path) {
         Ok(files) => files,
         Err(e) => {
             error!("{}", e);

@@ -3,7 +3,6 @@
 
 use backend::config_file::Config;
 use backend::utils;
-use directories_next::ProjectDirs;
 use log::{debug, error, info, warn, LevelFilter};
 use simplelog::{ColorChoice, CombinedLogger, TermLogger, TerminalMode, WriteLogger};
 use std::fs;
@@ -19,60 +18,53 @@ mod tests;
 
 fn main() -> Result<(), String> {
     // We immediatley try to load the config at startup, or create a new one. The config defines the application states
-    let config = Config::new()?.load()?;
-    let write_to_file = config.logging_is_active;
+    let config = Config::new()?;
+    match config.create_dirs() {
+        Ok(_) => {},
+        Err(err) => {
+            error!("Failed to create project dirs: {err}");
+            return Err(String::from("Failed to create project dirs"));
+        }
+    };
 
     // We check if we should log the application messages to a file or not, default is yes. Defined in the Config
-    if write_to_file {
-        // We use ProjectDirs to find a suitable location for our logging file
-        let project_dirs = ProjectDirs::from("com", "Raspirus", "Logs")
-            .expect("Failed to get project directories.");
-        let log_dir = project_dirs.data_local_dir().join("main"); // Create a "main" subdirectory
+    if config.logging_is_active {
+        let log_dir = config.project_dirs.logs.main.as_path(); // Create a "main" subdirectory
+
+        // Terminal logger is always used if logging so we add it right away
+        let mut loggers: Vec<Box<dyn simplelog::SharedLogger>> = vec![TermLogger::new(
+            LevelFilter::Debug,
+            simplelog::Config::default(),
+            TerminalMode::Mixed,
+            ColorChoice::Auto,
+        )];
 
         // If we are able to create both the file and directory path, we can start the FileLogger
-        match fs::create_dir_all(&log_dir) {
+        match fs::create_dir_all(log_dir) {
             Ok(_) => {
                 // Create a new file with the given name. Will overwrite the old/existisng file
                 match File::create(log_dir.join("app.log")) {
                     Ok(log_file) => {
                         info!(
-                            "Created logfile at DIR: {} NAME: app.log",
+                            "Created logfile app.log at {}",
                             log_dir.display()
                         );
-                        // Define both File logger and Terminal logger
-                        let file_logger = WriteLogger::new(
+
+                        // file logger is only used if log path is defined
+                        loggers.push(WriteLogger::new(
                             LevelFilter::Debug,
                             simplelog::Config::default(),
                             log_file,
-                        );
-
-                        // Terminal logger is used if for development
-                        let term_logger = TermLogger::new(
-                            LevelFilter::Debug,
-                            simplelog::Config::default(),
-                            TerminalMode::Mixed,
-                            ColorChoice::Auto,
-                        );
-                        // Start both loggers concurrently
-                        CombinedLogger::init(vec![file_logger, term_logger])
-                            .expect("Failed to initialize CombinedLogger");
+                        ));
                     }
-                    Err(err) => {
-                        error!("Failed creating logfile: {err}");
-                    }
+                    Err(err) => error!("Failed creating logfile: {err}"),
                 };
             }
             Err(err) => error!("Failed creating logs folder: {err}"),
         }
-    } else {
-        // If logging is disabled, only the terminal logger will run
-        TermLogger::init(
-            LevelFilter::Debug,
-            simplelog::Config::default(),
-            TerminalMode::Mixed,
-            ColorChoice::Auto,
-        )
-        .expect("Failed to init TermLogger");
+
+        // Start loggers
+        CombinedLogger::init(loggers).expect("Failed to initialize CombinedLogger");
     }
 
     // Builds the Tauri connection
@@ -92,7 +84,7 @@ fn main() -> Result<(), String> {
                 }
             };
             // Iterate over each key and execute functions based on them
-            for (key, data) in matches.args {
+            matches.args.iter().for_each(|(key, data)| {
                 if data.occurrences > 0 || key.as_str() == "help" || key.as_str() == "version" {
                     // Define all CLI commands/arguments here and in the tauri.conf.json file
                     // WARNING: If the commmand is not defined in the tauri.conf.json file, it can't be used here
@@ -109,7 +101,7 @@ fn main() -> Result<(), String> {
                         _ => not_done(app.handle()),
                     }
                 }
-            }
+            });
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
@@ -132,7 +124,7 @@ fn remove_windows_console() {
     }
 }
 // Basically prints the given data with \n and \t correctly formatted
-fn print_data(app: tauri::AppHandle, data: ArgData) {
+fn print_data(app: tauri::AppHandle, data: &ArgData) {
     if let Some(json_str) = data.value.as_str() {
         let unescaped_str = json_str.replace("\\n", "\n").replace("\\t", "\t");
         debug!("{}", unescaped_str);
@@ -165,7 +157,7 @@ fn cli_gui(app: tauri::AppHandle) -> Result<(), tauri::Error> {
 }
 
 // Starts the scanner on the CLI
-fn cli_scanner(app: tauri::AppHandle, data: ArgData) {
+fn cli_scanner(app: tauri::AppHandle, data: &ArgData) {
     if let Some(json_str) = data.value.as_str() {
         let unescaped_str = json_str.replace("\\n", "\n").replace("\\t", "\t");
         debug!("Data provided: {}", unescaped_str);
@@ -237,7 +229,7 @@ async fn create_config(contents: Option<String>) -> Result<String, String> {
     let mut config = if let Some(contents) = contents {
         serde_json::from_str(&contents).map_err(|err| err.to_string())?
     } else {
-        Config::new()?.load()?
+        Config::new()?
     };
 
     config.save().map_err(|err| err.to_string())?;
@@ -255,13 +247,10 @@ pub async fn auto_update_scheduler(tauri_win: tauri::Window, hour: i32, weekday:
 
 #[tauri::command]
 async fn download_logs() -> Result<String, String> {
-    let project_dirs =
-        ProjectDirs::from("com", "Raspirus", "Logs").expect("Failed to get project directories.");
-    let log_dir = project_dirs.data_local_dir().join("main"); // Create a "main" subdirectory
+    let config = Config::new()?;
+    let log_dir = config.project_dirs.logs.main.as_path(); // Create a "main" subdirectory
     let log_path = log_dir.join("app.log");
-
     let downloads_dir = tauri::api::path::download_dir().expect("Failed to get download directory");
-
     let destination_path = downloads_dir.join("log.txt");
 
     if let Err(err) = std::fs::copy(log_path, &destination_path) {
