@@ -64,7 +64,7 @@ impl Scanner {
         Ok(Scanner {
             db_conn: tmpconf,
             dirty_files: Vec::new(),
-            log: FileLog::new(log_str),
+            log: FileLog::new(log_str).expect("Failed to initialize scan logger"),
             false_positive,
             folder_size: 0,
             scanned_size: 0,
@@ -399,5 +399,3 @@ impl Scanner {
         Ok(scanned_percentage)
     }
 }
-
-    // initializes the scan
