@@ -78,7 +78,7 @@ impl FileLog {
         let config = Config::new()?;
         let log_dir = config.project_dirs.logs.scan.as_path();
 
-        match fs::create_dir_all(&log_dir) {
+        match fs::create_dir_all(log_dir) {
             Ok(_) => {
                 self.file = match File::create(log_dir.join(fname.clone())) {
                     Ok(file) => {
