@@ -1,5 +1,3 @@
-# ... previous config options...
-
 comment:
   layout: "header, diff, flags, components"  # show component info in the PR comment
   

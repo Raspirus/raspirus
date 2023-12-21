@@ -1,6 +1,10 @@
 name: Codecov check
 
 on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
   workflow_dispatch:
 
 env:
@@ -22,6 +26,7 @@ jobs:
         override: true    
     - name: Build
       run: cargo build --verbose
+      # Zprofile is a nightly feature
     - name: Run tests
       run: cargo test --verbose
       env:
@@ -29,15 +34,10 @@ jobs:
         RUSTFLAGS: '-Zprofile -Ccodegen-units=1 -Cinline-threshold=0 -Clink-dead-code -Coverflow-checks=off -Cpanic=abort -Zpanic_abort_tests'
         RUSTDOCFLAGS: '-Zprofile -Ccodegen-units=1 -Cinline-threshold=0 -Clink-dead-code -Coverflow-checks=off -Cpanic=abort -Zpanic_abort_tests'
     - name: rust-grcov
-      # You may pin to the exact commit or the version.
-      # uses: actions-rs/grcov@bb47b1ed7883a1502fa6875d562727ace2511248
       uses: actions-rs/grcov@v0.1.6
     - name: Codecov
-      # You may pin to the exact commit or the version.
       uses: codecov/codecov-action@v3
       with:
-        # Repository upload token - get it from codecov.io. Required only for private repositories
         token: ${{ secrets.CODECOV_TOKEN }}
-        # Specify whether the Codecov output should be verbose
         verbose: true
         fail_ci_if_error: true
