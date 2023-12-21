@@ -26,6 +26,9 @@ RUN dpkg --add-architecture armhf \
 # Add Rust target
 RUN rustup target add armv7-unknown-linux-gnueabihf
 
+# Use latest npm version
+RUN npm install -g npm@latest
+
 # Perform npm install
 RUN npm install
 
