@@ -20,7 +20,7 @@ pub async fn list_usb_drives() -> Result<String, String> {
             Err(_) => panic!("Could not get current username"),
         };
 
-        let dir_path = format!("/media/{}", username);
+        let dir_path = format!("/run/media/{}", username);
         let entries = match fs::read_dir(dir_path) {
             
             Ok(entries) => {
