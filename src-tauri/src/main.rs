@@ -40,7 +40,7 @@ fn main() -> Result<(), String> {
         )];
 
         // If we are able to create both the file and directory path, we can start the FileLogger
-        match fs::create_dir_all(&log_dir) {
+        match fs::create_dir_all(log_dir) {
             Ok(_) => {
                 // Create a new file with the given name. Will overwrite the old/existisng file
                 match File::create(log_dir.join("app.log")) {
