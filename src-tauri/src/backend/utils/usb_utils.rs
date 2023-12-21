@@ -24,11 +24,9 @@ pub async fn list_usb_drives() -> Result<String, String> {
         let entries = match fs::read_dir(dir_path) {
             
             Ok(entries) => {
-                println!("{:#?}", entries);
                 entries
             },
             Err(err) => {
-                println!("{err}");
                 return Err(format!("{err}"));
             }
         };
