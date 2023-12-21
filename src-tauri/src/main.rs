@@ -3,7 +3,6 @@
 
 use backend::config_file::Config;
 use backend::utils;
-use directories_next::ProjectDirs;
 use log::{debug, error, info, warn, LevelFilter};
 use simplelog::{ColorChoice, CombinedLogger, TermLogger, TerminalMode, WriteLogger};
 use std::fs;
@@ -20,13 +19,17 @@ mod tests;
 fn main() -> Result<(), String> {
     // We immediatley try to load the config at startup, or create a new one. The config defines the application states
     let config = Config::new()?;
+    match config.create_dirs() {
+        Ok(_) => {},
+        Err(err) => {
+            error!("Failed to create project dirs: {err}");
+            return Err(String::from("Failed to create project dirs"));
+        }
+    };
 
     // We check if we should log the application messages to a file or not, default is yes. Defined in the Config
     if config.logging_is_active {
-        // We use ProjectDirs to find a suitable location for our logging file
-        let project_dirs = ProjectDirs::from("com", "Raspirus", "Logs")
-            .expect("Failed to get project directories.");
-        let log_dir = project_dirs.data_local_dir().join("main"); // Create a "main" subdirectory
+        let log_dir = config.project_dirs.logs.main.as_path(); // Create a "main" subdirectory
 
         // Terminal logger is always used if logging so we add it right away
         let mut loggers: Vec<Box<dyn simplelog::SharedLogger>> = vec![TermLogger::new(
@@ -43,7 +46,7 @@ fn main() -> Result<(), String> {
                 match File::create(log_dir.join("app.log")) {
                     Ok(log_file) => {
                         info!(
-                            "Created logfile at DIR: {} NAME: app.log",
+                            "Created logfile app.log at {}",
                             log_dir.display()
                         );
 
@@ -244,13 +247,10 @@ pub async fn auto_update_scheduler(tauri_win: tauri::Window, hour: i32, weekday:
 
 #[tauri::command]
 async fn download_logs() -> Result<String, String> {
-    let project_dirs =
-        ProjectDirs::from("com", "Raspirus", "Logs").expect("Failed to get project directories.");
-    let log_dir = project_dirs.data_local_dir().join("main"); // Create a "main" subdirectory
+    let config = Config::new()?;
+    let log_dir = config.project_dirs.logs.main.as_path(); // Create a "main" subdirectory
     let log_path = log_dir.join("app.log");
-
     let downloads_dir = tauri::api::path::download_dir().expect("Failed to get download directory");
-
     let destination_path = downloads_dir.join("log.txt");
 
     if let Err(err) = std::fs::copy(log_path, &destination_path) {
