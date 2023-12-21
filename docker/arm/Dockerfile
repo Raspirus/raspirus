@@ -26,6 +26,9 @@ RUN dpkg --add-architecture arm64 \
 # Add Rust target
 RUN rustup target add aarch64-unknown-linux-gnu
 
+# Use latest npm version
+RUN npm install -g npm@latest
+
 # Perform npm install
 RUN npm install
 
