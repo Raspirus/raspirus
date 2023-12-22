@@ -18,7 +18,7 @@ sysinfo = "0.29"
 reqwest = { version = "0.11.23", features = ["blocking"] }
 rusqlite = { version = "0.30.0", features =  ["bundled"] }
 terminal_size = "0.3.0"
-tokio = {version = "1.35.1", features = ["rt", "macros"]}
+tokio = {version = "1.35.1", features = ["rt", "macros"] }
 #walkdir = "2.4.0"
 serde_json = "1.0"
 serde = { version = "1.0", features = ["derive"] }
@@ -28,7 +28,7 @@ directories-next = "2.0.0"
 zip = "0.6.6"
 simplelog = "0.12.1"
 job_scheduler_ng = "2.0.4"
-windows-sys = "0.45.0"
+windows-sys = {version="0.45.0", features = ["Win32", "Win32_System", "Win32_System_Console", "Win32_Foundation"] }
 md5 = "0.7.0"
 
 [dev-dependencies]
