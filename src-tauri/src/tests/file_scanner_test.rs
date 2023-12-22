@@ -55,10 +55,8 @@ mod tests {
             .to_string_lossy()
             .to_string();
 
-        panic!("scanloc: {}", scanloc);
-
         // Scan the current test file
-        scanloc.push_str("\\src\\tests\\file_scanner_test.rs");
+        scanloc.push_str("/src/tests/file_scanner_test.rs");
 
         let scanner = Scanner::new(DB_FILE_LOC, t_win).unwrap();
         let dirty_files = scanner.init(false, &scanloc).unwrap();
@@ -78,7 +76,7 @@ mod tests {
         // Warning, this returns the src-tauri folder
 
         // Scan the zip sample file
-        scanloc.push_str("\\src\\tests\\test_sample.zip");
+        scanloc.push_str("/src/tests/test_sample.zip");
 
         let scanner = Scanner::new(DB_FILE_LOC, t_win).unwrap();
         let dirty_files = scanner.init(false, &scanloc).unwrap();
