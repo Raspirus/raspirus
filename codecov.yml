@@ -22,3 +22,4 @@ ignore:
   - "**/tests/**"  # ignore all files in the tests folder
   - "**/tests"  # ignore the tests folder itself
   - "src-tauri/src/backend/utils/**"  # ignore all files in the utils folder
+  - "src-tauri/src/main.rs" # ignore the main.rs file
