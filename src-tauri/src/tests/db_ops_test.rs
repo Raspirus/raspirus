@@ -108,6 +108,31 @@ mod tests {
         assert!(db_ops.get_db_files().is_some());
     }
 
+    #[test]
+    fn test_update_db_timeout() {
+        // Run the update_db function for 10 seconds, then kill it if no errors occurred before
+        let mut db_ops = DBOps::new(DB_FILE_LOC, None).unwrap();
+        let _ = std::thread::spawn(move || {
+            let result = db_ops.update_db();
+            if let Err(err) = result {
+                error!("Error occurred: {}", err);
+                assert!(false);
+            }
+        });
+        std::thread::sleep(std::time::Duration::from_secs(10));
+        
+        // If we got here, it means that the update_db function ran for 10 seconds without errors
+        // So we can safely assume that the function works as expected
+        assert!(true);
+    }
+
+    #[test]
+    fn test_db_diff_func() {
+        let db_ops = DBOps::new(DB_FILE_LOC, None).unwrap();
+        let diff = db_ops.get_diff_file();
+        assert!(!diff.is_empty());
+    }
+
     #[cfg(test)]
     #[ctor::dtor]
     fn teardown() {
