@@ -1,7 +1,7 @@
 use std::{
     fs::{self, File},
     path::Path,
-    process::exit, time, io::Read,
+    time, io::Read,
 };
 
 use chrono::{DateTime, Local};
@@ -43,13 +43,11 @@ impl Scanner {
     // Creates a FileScanner object
     pub fn new(db_file: &str, t_win: Option<tauri::Window>) -> Result<Self, String> {
         //check if the path that should be scanned exists
-        
 
         let tmpconf = match DBOps::new(db_file, None) {
             Ok(db_conn) => db_conn,
             Err(err) => {
-                error!("{err}");
-                exit(-1);
+                return Err(format!("Failed to initialize database: {err}"));
             }
         };
 
