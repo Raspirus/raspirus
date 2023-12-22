@@ -19,7 +19,7 @@
     "@types/react": "18.2.45",
     "@types/react-dom": "18.2.18",
     "bootstrap": "^5.2.3",
-    "date-fns": "^2.29.3",
+    "date-fns": "^3.0.0",
     "eslint": "8.56.0",
     "eslint-config-next": "^14.0.2",
     "flag-icons": "^7.0.0",
