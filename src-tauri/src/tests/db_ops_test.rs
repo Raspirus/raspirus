@@ -47,14 +47,6 @@ mod tests {
                 "ec2112c9c243d837247217baf351ab79".to_owned(),
             )])
             .unwrap();
-
-        // Check if the hash exists in the database
-        // let exists_in_db = db_ops.hash_exists(hash_to_insert).unwrap();
-        // let does_not_exist = db_ops.hash_exists(hash_not_in_db).unwrap();
-
-        // Assert the results
-        //assert_eq!(exists_in_db, Some(true));
-        //assert_eq!(does_not_exist, Some(false));
     }
 
     #[test]
