@@ -1,8 +1,8 @@
 #[cfg(test)]
 mod tests {
-    use log::debug;
     use crate::backend::scanner::Scanner;
     use crate::backend::utils::scanner_utils;
+    use log::debug;
     use std::env;
 
     const DB_FILE_LOC: &str = "signatures.db";
@@ -45,15 +45,15 @@ mod tests {
     async fn test_start_scanner() {
         // Get the parent directory of the current test file as the scan location
         let scanloc = env::current_dir()
-                .expect("Failed to get current directory")
-                .to_string_lossy()
-                .to_string();
+            .expect("Failed to get current directory")
+            .to_string_lossy()
+            .to_string();
 
-            // Call the asynchronous function with appropriate parameters
-            let result = scanner_utils::start_scanner(None, scanloc).await;
+        // Call the asynchronous function with appropriate parameters
+        let result = scanner_utils::start_scanner(None, scanloc).await;
 
-            // Assert that the result is what you expect
-            assert!(result.is_ok()); // Modify based on your specific expectations
+        // Assert that the result is what you expect
+        assert!(result.is_ok()); // Modify based on your specific expectations
     }
 
     // Test synchronous function
@@ -63,9 +63,9 @@ mod tests {
 
         // Get the parent directory of the current test file as the scan location
         let scanloc = env::current_dir()
-                .expect("Failed to get current directory")
-                .to_string_lossy()
-                .to_string();
+            .expect("Failed to get current directory")
+            .to_string_lossy()
+            .to_string();
 
         // Call the synchronous function with appropriate parameters
         let result = scanner_utils::sync_start_scanner(None, scanloc);

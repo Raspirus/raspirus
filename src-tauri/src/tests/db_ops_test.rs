@@ -3,6 +3,9 @@ mod tests {
     use log::{error, info};
 
     use crate::backend::db_ops::DBOps;
+    use crate::backend::utils::update_utils::{
+        sync_update_database, update_database,
+    };
     const DB_FILE_LOC: &str = "signatures.db";
 
     #[test]
@@ -106,6 +109,28 @@ mod tests {
     fn test_get_db_files() {
         let db_ops = DBOps::new(DB_FILE_LOC, None).unwrap();
         assert!(db_ops.get_db_files().is_some());
+    }
+
+    #[tokio::test]
+    async fn test_update_database() {
+        // Set up your test environment or create necessary mocks
+
+        // Call the asynchronous function with appropriate parameters
+        let result = update_database(None).await;
+
+        // Assert that the result is what you expect
+        assert!(result.is_ok()); // Modify based on your specific expectations
+    }
+
+    #[test]
+    fn test_sync_update_database() {
+        // Set up your test environment or create necessary mocks
+
+        // Call the synchronous function with appropriate parameters
+        let result = sync_update_database(None);
+
+        // Assert that the result is what you expect
+        assert!(result.is_ok()); // Modify based on your specific expectations
     }
 
     #[cfg(test)]
