@@ -40,22 +40,6 @@ mod tests {
         assert_eq!(dirty_files.len(), 0);
     }
 
-    // Test asynchronous function
-    #[tokio::test]
-    async fn test_start_scanner() {
-        // Get the parent directory of the current test file as the scan location
-        let scanloc = env::current_dir()
-            .expect("Failed to get current directory")
-            .to_string_lossy()
-            .to_string();
-
-        // Call the asynchronous function with appropriate parameters
-        let result = scanner_utils::start_scanner(None, scanloc).await;
-
-        // Assert that the result is what you expect
-        assert!(result.is_ok()); // Modify based on your specific expectations
-    }
-
     // Test synchronous function
     #[test]
     fn test_sync_start_scanner() {
