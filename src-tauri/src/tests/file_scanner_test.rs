@@ -55,6 +55,8 @@ mod tests {
             .to_string_lossy()
             .to_string();
 
+        panic!("scanloc: {}", scanloc);
+
         // Scan the current test file
         scanloc.push_str("\\src\\tests\\file_scanner_test.rs");
 
