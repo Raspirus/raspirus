@@ -5,7 +5,7 @@ use crate::backend::{config_file::Config, scanner};
 
 static DB_NAME: &str = "signatures.db";
 
-// There are tow equal functions here, one is async and gets called from the GUI to ensure the main thread doesn't stop
+// There are two equal functions here, one is async and gets called from the GUI to ensure the main thread doesn't stop
 // The second one is sync and is called from the CLI. The second one can probably be rewritten
 
 pub async fn start_scanner(window: Option<tauri::Window>, path: String) -> Result<String, String> {
