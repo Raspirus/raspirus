@@ -34,7 +34,7 @@ md5 = "0.7.0"
 [dev-dependencies]
 ctor = "0.2.6"
 regex = "1.10.2"
-criterion = "0.4"
+criterion = "0.5"
 
 [[bench]]
 name = "raspirus_bench"
