@@ -26,6 +26,7 @@ jobs:
     - name: Upload file to artifacts
       uses: actions/upload-artifact@v4
       with:
+        name: raspirus_1.1.1_arm64_${{ github.run_number }}.deb
         path: ./dist/raspirus_1.1.1_arm64.deb
 
   build_armhf:
@@ -50,4 +51,5 @@ jobs:
     - name: Upload file to artifacts
       uses: actions/upload-artifact@v4
       with:
+        name: raspirus_1.1.1_armhf_${{ github.run_number }}.deb
         path: ./dist/raspirus_1.1.1_armhf.deb
