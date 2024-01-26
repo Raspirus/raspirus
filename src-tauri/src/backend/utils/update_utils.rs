@@ -8,11 +8,14 @@ use tokio::runtime::Runtime;
 
 use crate::backend::config_file::Config;
 use crate::backend::db_ops::DBOps;
-
+/// Default name of the database file
 static DB_NAME: &str = "signatures.db";
 
-// Updates the database async (Very similar to the scanner_utils.rs setup)
+/// Updates the database in async mode, returns a JSON string with the dirty files
+/// This is the function getting called from the GUI trough the tauri API
+/// It is async to ensure the main thread doesn't stop
 pub async fn update_database(window: Option<tauri::Window>) -> Result<String, String> {
+    // Loading settings from config file
     let config = Config::new()?;
     let program_dir = config.project_dirs.data;
 
@@ -24,6 +27,7 @@ pub async fn update_database(window: Option<tauri::Window>) -> Result<String, St
         program_dir.join(DB_NAME).to_string_lossy().to_string()
     };
 
+    // Initializing the database connection using the path from above
     let mut db_connection = match DBOps::new(db_file_str.as_str(), window) {
         Ok(db_conn) => db_conn,
         Err(err) => {
@@ -43,12 +47,14 @@ pub async fn update_database(window: Option<tauri::Window>) -> Result<String, St
     })
     .await
     {
+        // We await for the database update to finish
         Ok(res) => {
             let big_toc = time::Instant::now();
             info!(
                 "Updated DB in {} seconds",
                 big_toc.duration_since(big_tic).as_secs_f64()
             );
+            // Return the result as JSON
             Ok(serde_json::to_string(&res).unwrap_or_default())
         }
         Err(err) => {
@@ -58,7 +64,9 @@ pub async fn update_database(window: Option<tauri::Window>) -> Result<String, St
     }
 }
 
-// Almost identical to above
+/// Updates the database in sync mode, returns a JSON string with the dirty files
+/// This is the function getting called from the CLI
+/// It is sync because the CLI is sync, but for the rest it is very similar to the one above
 pub fn sync_update_database(window: Option<tauri::Window>) -> Result<String, String> {
     let config = Config::new()?;
     let program_dir = config.project_dirs.data;
@@ -98,6 +106,7 @@ pub fn sync_update_database(window: Option<tauri::Window>) -> Result<String, Str
 }
 
 // Not yet implemented => borked?
+#[doc(hidden)]
 pub async fn auto_update_scheduler(tauri_win: Option<tauri::Window>, hour: i32, weekday: i32) {
     // ISSUE: Needs to restart app to apply new update schedule
 
@@ -144,7 +153,8 @@ pub async fn auto_update_scheduler(tauri_win: Option<tauri::Window>, hour: i32, 
     }
 }
 
-// Simply logs the database update result to a file
+/// Logs the result of the update function to a file
+/// This is used by the auto update function to check if the update was successful
 fn log_update_res(data: &str, fname: String) -> std::io::Result<()> {
     // Open the file (creates if it doesn't exist)
     let config = match Config::new() {
