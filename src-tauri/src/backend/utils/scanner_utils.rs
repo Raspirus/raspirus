@@ -2,12 +2,15 @@ use log::{debug, error, info, warn};
 use std::path::Path;
 
 use crate::backend::{config_file::Config, scanner};
-
+/// Default name of the database file
 static DB_NAME: &str = "signatures.db";
 
 // There are two equal functions here, one is async and gets called from the GUI to ensure the main thread doesn't stop
-// The second one is sync and is called from the CLI. The second one can probably be rewritten
+// The second one is sync and is called from the CLI.
 
+/// Starts the scanner in async mode, returns a JSON string with the dirty files
+/// This is the function getting called from the GUI trough the tauri API
+/// It is async to ensure the main thread doesn't stop
 pub async fn start_scanner(window: Option<tauri::Window>, path: String) -> Result<String, String> {
     // Define default values, will be overwritten later
     let config = Config::new().expect("Failed to load config");
@@ -32,6 +35,7 @@ pub async fn start_scanner(window: Option<tauri::Window>, path: String) -> Resul
     };
 
     // Finally, before starting the scanner, we check if obfuscated mode has been activated or not
+    // and then start the scanner
     warn!("Obfuscated mode is: {}", config.obfuscated_is_active);
     let dirty_files = match fs.init(config.obfuscated_is_active, &path) {
         Ok(files) => files,
@@ -45,7 +49,9 @@ pub async fn start_scanner(window: Option<tauri::Window>, path: String) -> Resul
     Ok(serde_json::to_string(&dirty_files).expect("Error when trying to parse vector to string"))
 }
 
-// Same as above, but in synchron (Should be rewritten to better suit the CLI, probably also renamed)
+/// Starts the scanner in sync mode, returns a JSON string with the dirty files
+/// This is the function getting called from the CLI
+/// It is sync because the CLI is sync, but for the rest it is very similar to the one above
 pub fn sync_start_scanner(window: Option<tauri::Window>, path: String) -> Result<String, String> {
     let config = Config::new()?;
     let program_dir = config.project_dirs.data;
