@@ -4,37 +4,40 @@ use std::fs::{self, File};
 use std::io::Read;
 use std::path::{Path, PathBuf};
 
+/// The config file simply holds settings of the application that should perists during reboots
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Config {
-    // Amount of hashes in the database
+    /// Amount of hashes in the database
     pub hashes_in_db: u32,
-    // Last time and date when the db was successfully updated
+    /// Last time and date when the db was successfully updated
     pub last_db_update: String,
-    // If we should log information to a file
+    /// If we should log information to a file
     pub logging_is_active: bool,
-    // Check if we should obfuscate the result
+    /// Check if we should obfuscate the result
     pub obfuscated_is_active: bool,
-    // Automatic updates: Set weekday
+    /// Automatic updates: Set weekday
     pub db_update_weekday: i32,
-    // Automatic update: Set time
+    /// Automatic update: Set time
     pub db_update_time: String,
-    // Location of the .db file
+    /// Location of the .db file
     pub db_location: String,
-    // If we should scan direcories instead of files (You can only choose one on the current file picker dialog)
+    /// If we should scan direcories instead of files (You can only choose one on the current file picker dialog)
     pub scan_dir: bool,
-    // List of hashes that should be ignored during scans
+    /// List of hashes that should be ignored during scans
     pub ignored_hashes: Vec<String>,
-    // stores the different dirs as a struct
+    /// stores the different dirs as a struct
     #[serde(skip)]
     pub project_dirs: Dirs
 }
 
+/// Stores directories as a struct for easier access
 #[derive(Debug, Default)]
 pub struct Dirs {
     pub logs: Logs,
     pub data: Box<PathBuf>,
 }
 
+/// Stores the different log paths as a struct for easier access
 #[derive(Debug, Default)]
 pub struct Logs {
     pub main: Box<PathBuf>,
@@ -80,6 +83,8 @@ impl Config {
         Ok(())
     }
 
+    /// Creates the directories for the logs and data
+    /// If they already exist, it will do nothing
     pub fn create_dirs(&self) -> std::io::Result<()> {
         // create logs
         fs::create_dir_all(self.project_dirs.logs.main.as_path())?;
@@ -90,7 +95,7 @@ impl Config {
         Ok(())
     }
 
-    // OS compliant config path
+    /// OS compliant config path getter
     pub fn get_config_path() -> String {
         ProjectDirs::from("com", "Raspirus", "Raspirus")
             .expect("Failed to get project directories")
@@ -103,6 +108,7 @@ impl Config {
 
     /// Will save the current configuration to the file
     /// WARNING! If the fields are blank, it will clear the current config
+    /// Since the user is not supposed to edit the config file, this should not be a problem
     pub fn save(&mut self) -> Result<(), String> {
         if !Path::new(&Self::get_config_path()).exists() {
             fs::create_dir_all(
