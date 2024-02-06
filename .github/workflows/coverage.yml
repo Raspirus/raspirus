@@ -1,0 +1,29 @@
+name: Code coverage
+
+on:
+  workflow_dispatch:
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Install dependencies
+      run: sudo apt-get update && sudo apt-get install -y libgtk-3-dev libsoup2.4-dev pkg-config libssl-dev libjavascriptcoregtk-4.0-dev libwebkit2gtk-4.0-dev
+    - name: Create necessary out directory
+      run: mkdir out
+    - name: Install Rust
+      run: rustup update stable
+    - name: Install cargo-llvm-cov
+      uses: taiki-e/install-action@cargo-llvm-cov
+    - name: Generate code coverage
+      run: cargo llvm-cov --all-features --workspace --lcov --output-path lcov.info
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v4
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }} # not required for public repos
+        files: lcov.info
+        fail_ci_if_error: false
