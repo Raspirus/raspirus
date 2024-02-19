@@ -7,6 +7,8 @@ import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
 import { useTranslation } from 'next-i18next';
 import { getStaticPaths, makeStaticProps } from '../../lib/getStatic';
+import { Config } from "../../services/getConfigSettings";
+import Swal from "sweetalert2";
 
 /**
  * Function that generates the necessary static paths and props manually
@@ -67,31 +69,56 @@ export default function Loading() {
 
   // Starts the scan on the backend and periodically updates the frontend
   const scanning = async () => {
-    try {
-      // Start the function on the backend using Tauri
-      const message = await invoke("start_scanner", {
-        path: scan_path,
-        dbfile: db_location,
-      });
+    const config = new Config();
+    config.loadConfig();
+    if (config.hash_count <= 0) {
+      // There are no signatures in the database, so the scanner cannot start
 
-      // If the array of found viruses is not empty, redirected to the "infected" page
-      if (message && message.length > 0 && message != "[]") {
-        console.log(message);
-        router.push({
-          pathname: '/infected',
-          query: { virus_list: message }
-        });
-      } else {
-        // No virus found, device is clean
-        router.push("/clean");
-      }
-    } catch (error) {
-      console.error(error);
-      localStorage.setItem("errorOccurred", 'true');
-      router.push({
-        pathname: '/',
-        query: { scanner_error: error }
+      const { isConfirmed } = await Swal.fire({
+        title: "Do you want to continue?",
+        text: "The database is empty, you should probably perform an update first.",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Cancel",
+        cancelButtonText: "Continue anyway",
       })
+      
+      if (isConfirmed) {
+        router.push("/");
+        console.log("Cancelled");
+        return;
+      } else {
+        console.log("Performing scan");
+
+        try {
+          // Start the function on the backend using Tauri
+          const message = await invoke("start_scanner", {
+            path: scan_path,
+            dbfile: db_location,
+          });
+    
+          // If the array of found viruses is not empty, redirected to the "infected" page
+          if (message && message.length > 0 && message != "[]") {
+            console.log(message);
+            router.push({
+              pathname: '/infected',
+              query: { virus_list: message }
+            });
+          } else {
+            // No virus found, device is clean
+            router.push("/clean");
+          }
+        } catch (error) {
+          console.error(error);
+          localStorage.setItem("errorOccurred", 'true');
+          router.push({
+            pathname: '/',
+            query: { scanner_error: error }
+          })
+        }
+      }
     }
   };
 

@@ -16,6 +16,8 @@ import WeekdaySelector from '../../components/WeekdaySelector';
 import { open } from '@tauri-apps/api/dialog';
 import IgnoredHashComp from '../../components/IgnoredHashes';
 
+import { Config } from '../../services/getConfigSettings';
+
 /**
  * Function that generates the necessary static paths and props manually
  * This is to fix an issue with next18 translations
@@ -45,6 +47,9 @@ export default function Settings() {
   // DB Update progress
   const [progress, setProgress] = useState(0);
   const progressRef = useRef(progress);
+
+  const config = new Config();
+
 
   // When the user goes back to the Home page, an update of the set settings
   // is sent to the backend, which then saves it in a local file
@@ -107,17 +112,9 @@ export default function Settings() {
       scan_dir: scan_dir,
       ignored_hashes: ignored_hashes,
     }
-    const jsonString = JSON.stringify(jsonData);
-    console.log("Client sends: ", jsonData);
 
     if (typeof window !== "undefined") {
-
-      invoke("create_config", { contents: jsonString })
-        .then((output) => {
-          const parsedData = JSON.parse(output);
-          console.log("Server answer: ", parsedData);
-        })
-        .catch((err) => console.error(err))
+      config.saveConfig(jsonData);
     }
   }
 
@@ -156,27 +153,17 @@ export default function Settings() {
   useEffect(() => {
     if (typeof window !== "undefined") {
 
-
-      // Tries to create the config file on the backend, which returns the new created data
-      // or the config found. This data then updates the frontend and is displayed
-      invoke("create_config", {})
-        .then((output) => {
-          const parsedData = JSON.parse(output);
-          console.log("Loaded config: ", parsedData);
-          setCount(parsedData.hashes_in_db);
-          if (parsedData.last_db_update != "Never") {
-            setDate(parsedData.last_db_update);
-          }
-          setLogging(parsedData.logging_is_active);
-          setObfuscated(parsedData.obfuscated_is_active);
-          setSelectedWeekday(parsedData.db_update_weekday);
-          setAutotime(parsedData.db_update_time);
-          setCustomDbPath(parsedData.db_location);
-          setUsedbPath(parsedData.db_location.length > 0);
-          setScanDir(parsedData.scan_dir);
-          setIgnoredHashes(parsedData.ignored_hashes);
-        })
-        .catch((err) => console.error(err))
+      config.loadConfig();
+      setCount(config.hash_count);
+      setDate(config.updated_date);
+      setAutotime(config.auto_time);
+      setSelectedWeekday(config.selectedWeekday);
+      setLogging(config.logging);
+      setObfuscated(config.obfuscated);
+      setUsedbPath(config.use_db_path);
+      setCustomDbPath(config.custom_db_path);
+      setScanDir(config.scan_dir);
+      setIgnoredHashes(config.ignored_hashes);
     }
   }, []);
 
