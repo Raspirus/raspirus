@@ -1,5 +1,4 @@
 import Head from 'next/head';
-import { useState } from 'react';
 import "@fortawesome/fontawesome-svg-core/styles.css";
 import "/node_modules/flag-icons/css/flag-icons.min.css";
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -17,9 +16,6 @@ config.autoAddCss = false;
  * @returns 
  */
 const App = ({ Component, pageProps }) => {
-  // Saves the context of the settings page
-  const [settings, setSettings] = useState({});
-
   return (
     <>
       <Head>
