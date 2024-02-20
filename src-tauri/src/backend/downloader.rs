@@ -23,14 +23,9 @@ struct TauriEvent {
 }
 
 /// sends given percentage to the frontend
-pub fn send_progress(window: &Option<tauri::Window>, message: String) {
+pub fn send(window: &Option<tauri::Window>, event: &str, message: String) {
     if let Some(window) = window {
-        match window.emit_all(
-            "progress",
-            TauriEvent {
-                message: message.clone(),
-            },
-        ) {
+        match window.emit_all(event, message.clone()) {
             Ok(_) => trace!("Updated progress to: {message}"),
             Err(err) => warn!("Failed to send progress to frontend: {err}"),
         }
@@ -43,7 +38,7 @@ pub fn calculate_progress(
     last_percentage: f32,
     current: usize,
     total: usize,
-    message: String,
+    event: &str,
 ) -> Result<f32, String> {
     let new_percentage = ((current as f32 / total as f32) * 100.0).round();
     // if percentage has not changed return new percentage
@@ -51,7 +46,7 @@ pub fn calculate_progress(
         return Ok(new_percentage);
     }
 
-    send_progress(window, format!("{message} {new_percentage}%"));
+    send(window, event, format!("{new_percentage}"));
     Ok(new_percentage)
 }
 
@@ -158,7 +153,7 @@ pub fn download_all(total_files: usize, window: &Option<tauri::Window>) -> std::
     let mut p = 0.0;
     for current in 0..=total_files {
         let _ = rx.recv().expect("Failed to read from channel");
-        p = calculate_progress(window, p, current, total_files, "Downloading...".to_owned())
+        p = calculate_progress(window, p, current, total_files, "dwld")
             .map_err(|err| std::io::Error::new(std::io::ErrorKind::Other, err))?;
     }
 

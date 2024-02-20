@@ -11,7 +11,7 @@ use std::{path::Path, time};
 
 use crate::backend::config_file::Config;
 use crate::backend::db_ops::DBOps;
-use crate::backend::downloader::{calculate_progress, send_progress};
+use crate::backend::downloader::{calculate_progress, send};
 
 static DB_NAME: &str = "signatures.db";
 
@@ -72,7 +72,7 @@ pub fn get_remote_timestamp() -> Result<String, std::io::Error> {
 
 /// updates if update is necessary
 pub fn update(window: Option<tauri::Window>) -> Result<String, String> {
-    send_progress(&window, String::from("Checking for updates..."));
+    send(&window, "chck", String::new());
     // if remote is not newer than local we skip
     if !check_update_necessary().map_err(|err| err.to_string())? {
         info!("Database already up to date. Skipping...");
@@ -165,7 +165,7 @@ pub fn insert_all(db: &mut DBOps, window: &Option<tauri::Window>) -> Result<(), 
             Err(err) => warn!("Error inserting: {err}"),
         }
         i += 1;
-        p = calculate_progress(window, p, i, len, "Inserting...".to_owned())?;
+        p = calculate_progress(window, p, i, len, "ins")?;
     }
 
     info!(
