@@ -42,7 +42,7 @@ export default function Home() {
   const [dir_selection, SetDirSelection] = useState(false);
   // Determines if an error occurred
   const [errorOccurred, setError] = useLocalStorage("errorOccurred", 'false');
-  const {t} = useTranslation('common');
+  const { t } = useTranslation('common');
   const [updateAvailable, setUpdateAvailable] = useState(false);
 
   /**
@@ -190,37 +190,40 @@ export default function Home() {
       </Head>
       <main className="h-screen">
         <div className="flex justify-start">
-        <SwitchLanguage />
+          <SwitchLanguage />
 
-        {true && (
-          <button
-            onClick={() => router.push("/settings")}
-          type="button"
-          className="absolute top-10 right-10 px-6 py-2 border-2 m-2 border-maingreen text-maingreen bg-white 
+          <div className="flex justify-center absolute top-0 right-0">
+
+            {true && (
+              <button
+                onClick={() => router.push("/settings")}
+                type="button"
+                className="px-6 py-2 border-2 m-2 border-mainred text-white bg-mainred 
       font-medium text-xs leading-tight uppercase rounded"
-        >
-          <FontAwesomeIcon
-            icon={faGear}
-            size="1x"
-            className="pr-1"
-          />
-          {t('settings')}
-        </button>
-        )}
+              >
+                <FontAwesomeIcon
+                  icon={faGear}
+                  size="1x"
+                  className="pr-1"
+                />
+              </button>
+            )}
 
-          <button
-            onClick={openSettings}
-            type="button"
-            className="absolute top-0 right-0 px-6 py-2 border-2 m-2 border-maingreen text-maingreen bg-white 
+            <button
+              onClick={openSettings}
+              type="button"
+              className="px-6 py-2 border-2 m-2 border-maingreen text-maingreen bg-white 
         font-medium text-xs leading-tight uppercase rounded"
-          >
-            <FontAwesomeIcon
-              icon={faGear}
-              size="1x"
-              className="pr-1"
-            />
-            {t('settings')}
-          </button>
+            >
+              <FontAwesomeIcon
+                icon={faGear}
+                size="1x"
+                className="pr-1"
+              />
+              {t('settings')}
+            </button>
+
+          </div>
         </div>
 
         <div className="flex h-full justify-center p-12 text-center">

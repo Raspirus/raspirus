@@ -200,8 +200,6 @@ export default function Settings() {
           }
           setLogging(parsedData.logging_is_active);
           setObfuscated(parsedData.obfuscated_is_active);
-          setSelectedWeekday(parsedData.db_update_weekday);
-          setAutotime(parsedData.db_update_time);
           setCustomDbPath(parsedData.db_location);
           setUsedbPath(parsedData.db_location.length > 0);
           setScanDir(parsedData.scan_dir);
