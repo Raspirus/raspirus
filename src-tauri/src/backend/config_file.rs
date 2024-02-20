@@ -15,10 +15,6 @@ pub struct Config {
     pub logging_is_active: bool,
     // Check if we should obfuscate the result
     pub obfuscated_is_active: bool,
-    // Automatic updates: Set weekday
-    pub db_update_weekday: i32,
-    // Automatic update: Set time
-    pub db_update_time: String,
     // Location of the .db file
     pub db_location: String,
     // If we should scan direcories instead of files (You can only choose one on the current file picker dialog)
@@ -39,8 +35,6 @@ impl Default for Config {
             last_db_update: "Never".to_string(),
             logging_is_active: false,
             obfuscated_is_active: true,
-            db_update_weekday: -1,
-            db_update_time: "22:00:00".to_string(),
             db_location: "".to_string(),
             scan_dir: true,
             ignored_hashes: Vec::new(),
