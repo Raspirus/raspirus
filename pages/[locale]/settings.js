@@ -43,6 +43,7 @@ export default function Settings() {
   const [custom_db_path, setCustomDbPath] = useState("");
   const [scan_dir, setScanDir] = useState(false);
   const [ignored_hashes, setIgnoredHashes] = useState([]);
+  const [mirror, setMirror] = useState("");
   // DB Update progress
   const [progress, setProgress] = useState(0);
   const progressRef = useRef(progress);
@@ -111,6 +112,7 @@ export default function Settings() {
       db_location: custom_db_path,
       scan_dir: scan_dir,
       ignored_hashes: ignored_hashes,
+      mirror: mirror
     }
     const jsonString = JSON.stringify(jsonData);
     console.log("Client sends: ", jsonData);
@@ -211,6 +213,7 @@ export default function Settings() {
           setUsedbPath(parsedData.db_location.length > 0);
           setScanDir(parsedData.scan_dir);
           setIgnoredHashes(parsedData.ignored_hashes);
+          setMirror(parsedData.mirror);
         })
         .catch((err) => console.error(err))
     }
@@ -262,7 +265,7 @@ export default function Settings() {
                 dynamicTitleElement.textContent = titleRef.current;
               }
             }
-          }, 1000);
+          }, 100);
 
           ReactSwal.getPopup().addEventListener('close', () => {
             clearInterval(interval);
@@ -411,6 +414,8 @@ export default function Settings() {
         action_val={"Download"}
         isOn={false}
       />
+
+      {/* TODO: Replace with Mirror setting */}
 
       <SettingComp
         title={t('auto_db')}
