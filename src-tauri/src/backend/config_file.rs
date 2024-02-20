@@ -2,55 +2,39 @@ use directories_next::ProjectDirs;
 use serde::{Deserialize, Serialize};
 use std::fs::{self, File};
 use std::io::Read;
-use std::path::{Path, PathBuf};
+use std::path::Path;
 
-/// The config file simply holds settings of the application that should perists during reboots
 #[derive(Serialize, Deserialize, Debug)]
+#[serde(default)]
 pub struct Config {
-    /// Amount of hashes in the database
+    // Amount of hashes in the database
     pub hashes_in_db: u32,
-    /// Last time and date when the db was successfully updated
+    // Last time and date when the db was successfully updated
     pub last_db_update: String,
-    /// If we should log information to a file
+    // If we should log information to a file
     pub logging_is_active: bool,
-    /// Check if we should obfuscate the result
+    // Check if we should obfuscate the result
     pub obfuscated_is_active: bool,
-    /// Automatic updates: Set weekday
+    // Automatic updates: Set weekday
     pub db_update_weekday: i32,
-    /// Automatic update: Set time
+    // Automatic update: Set time
     pub db_update_time: String,
-    /// Location of the .db file
+    // Location of the .db file
     pub db_location: String,
-    /// If we should scan direcories instead of files (You can only choose one on the current file picker dialog)
+    // If we should scan direcories instead of files (You can only choose one on the current file picker dialog)
     pub scan_dir: bool,
-    /// List of hashes that should be ignored during scans
+    // List of hashes that should be ignored during scans
     pub ignored_hashes: Vec<String>,
-    /// stores the different dirs as a struct
+    // mirror to folder with hashfiles for update
+    pub mirror: String,
+    // program_path
     #[serde(skip)]
-    pub project_dirs: Dirs
+    pub program_path: Option<ProjectDirs>,
 }
 
-/// Stores directories as a struct for easier access
-#[derive(Debug, Default)]
-pub struct Dirs {
-    pub logs: Logs,
-    pub data: Box<PathBuf>,
-}
-
-/// Stores the different log paths as a struct for easier access
-#[derive(Debug, Default)]
-pub struct Logs {
-    pub main: Box<PathBuf>,
-    pub scan: Box<PathBuf>,
-    pub update: Box<PathBuf>,
-}
-
-/// The config file simply holds settings of the application that should perists during reboots
-/// The entire config is saved to a JSON file and loaded or created on the first start
-impl Config {
-    pub fn new() -> Result<Self, String> {
-        // creates instance of new config
-        let mut cfg = Config {
+impl Default for Config {
+    fn default() -> Self {
+        Self {
             hashes_in_db: 0,
             last_db_update: "Never".to_string(),
             logging_is_active: false,
@@ -60,42 +44,35 @@ impl Config {
             db_location: "".to_string(),
             scan_dir: true,
             ignored_hashes: Vec::new(),
-            project_dirs: Dirs::default()
-        };
+            mirror: "https://raw.githubusercontent.com/Raspirus/signatures/main/hashes".to_string(),
+            program_path: None,
+        }
+    }
+}
+
+/// The config file simply holds settings of the application that should perists during reboots
+/// The entire config is saved to a JSON file and loaded or created on the first start
+impl Config {
+    pub fn new() -> Result<Self, String> {
+        // creates instance of new config
+        let mut cfg = Config::default();
         cfg.set_program_path()?;
         cfg.load()?;
         Ok(cfg)
     }
 
-    /// Finds the suitable path for the current system, creates a subfolder for the app
+    /// Finds the suitable path for the current system, creates a subfolder for the app and returns
+    /// the path as a normal String
     fn set_program_path(&mut self) -> Result<(), String> {
-        let project_dirs = ProjectDirs::from("com", "Raspirus", "Raspirus")
+        let project_dirs = ProjectDirs::from("com", "Raspirus", "Data")
             .expect("Failed to get project directories.");
-        
-        self.project_dirs = Dirs {
-            logs: Logs {
-                main: Box::new(project_dirs.data_local_dir().join("logs").join("main")),
-                scan: Box::new(project_dirs.data_local_dir().join("logs").join("scan")),
-                update: Box::new(project_dirs.data_local_dir().join("logs").join("update")),
-            },
-            data: Box::new(project_dirs.data_dir().join("data")),
-        };
+        let program_dir = project_dirs.data_dir();
+        fs::create_dir_all(program_dir).expect("Failed to create program directory.");
+        self.program_path = Some(project_dirs);
         Ok(())
     }
 
-    /// Creates the directories for the logs and data
-    /// If they already exist, it will do nothing
-    pub fn create_dirs(&self) -> std::io::Result<()> {
-        // create logs
-        fs::create_dir_all(self.project_dirs.logs.main.as_path())?;
-        fs::create_dir_all(self.project_dirs.logs.scan.as_path())?;
-        fs::create_dir_all(self.project_dirs.logs.update.as_path())?;
-        // create data folders
-        fs::create_dir_all(self.project_dirs.data.as_path())?;
-        Ok(())
-    }
-
-    /// OS compliant config path getter
+    // OS compliant config path
     pub fn get_config_path() -> String {
         ProjectDirs::from("com", "Raspirus", "Raspirus")
             .expect("Failed to get project directories")
@@ -108,16 +85,16 @@ impl Config {
 
     /// Will save the current configuration to the file
     /// WARNING! If the fields are blank, it will clear the current config
-    /// Since the user is not supposed to edit the config file, this should not be a problem
     pub fn save(&mut self) -> Result<(), String> {
         if !Path::new(&Self::get_config_path()).exists() {
             fs::create_dir_all(
                 Path::new(&Self::get_config_path())
                     .parent()
-                    .expect("Path creation failed"))
+                    .expect("Path creation failed"),
+            )
             .expect("Failed creating config file");
         }
-        
+
         let file = File::create(Self::get_config_path()).expect("Failed to open config file");
         serde_json::to_writer_pretty(file, self).map_err(|err| err.to_string())
     }

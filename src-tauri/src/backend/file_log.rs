@@ -3,25 +3,45 @@ use std::{
     io::Write,
 };
 
+use directories_next::ProjectDirs;
 use log::{error, trace, warn};
-use super::config_file::Config;
 
-/// A struct for creating and writing to a log file.
 pub struct FileLog {
     pub file: Option<File>,
 }
 
-/// A struct for creating and writing to a log file. The `file` field is an `Option<File>` and is `None` by default.
-/// This is the implementation of the `FileLog` struct.
+/// A struct for creating and writing to a log file.
 impl FileLog {
     /// Creates a new `FileLog` struct and attempts to create a new file with the specified name.
-    pub fn new(fname: String) -> Result<Self, String> {
+    ///
+    /// # Arguments
+    ///
+    /// * `fname` - A string representing the name of the file to create.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// let log = FileLog::new("log.txt".to_owned());
+    /// ```
+    pub fn new(fname: String) -> Self {
         let mut ret = FileLog { file: None };
-        ret.create_file(fname)?;
-        Ok(ret)
+        ret.create_file(fname);
+        ret
     }
 
     /// Appends the specified `hash` and `fpath` to the log file.
+    ///
+    /// # Arguments
+    ///
+    /// * `hash` - A string representing the hash to log.
+    /// * `fpath` - A string representing the file path to log.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// let log = FileLog::new("log.txt".to_owned());
+    /// log.log("abc123".to_owned(), "C:/Users/user/Desktop/file.txt".to_owned());
+    /// ```
     pub fn log(&self, hash: String, fpath: String) {
         match self.file.as_ref() {
             Some(mut file) => {
@@ -42,18 +62,30 @@ impl FileLog {
     }
 
     /// Creates a new file with the specified name and attempts to create a logs folder if it doesn't already exist.
-    pub fn create_file(&mut self, fname: String) -> Result<(), String>{
-        let config = Config::new()?;
-        let log_dir = config.project_dirs.logs.scan.as_path();
+    ///
+    /// # Arguments
+    ///
+    /// * `fname` - A string representing the name of the file to create.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// let mut log = FileLog::new("log.txt".to_owned());
+    /// log.create_file("new_log.txt".to_owned());
+    /// ```
+    pub fn create_file(&mut self, fname: String) {
+        let project_dirs = ProjectDirs::from("com", "Raspirus", "Logs")
+            .expect("Failed to get project directories.");
+        let log_dir = project_dirs.data_local_dir().join("logs"); // Create a "logs" subdirectory
 
-        match fs::create_dir_all(log_dir) {
+        match fs::create_dir_all(&log_dir) {
             Ok(_) => {
                 self.file = match File::create(log_dir.join(fname.clone())) {
                     Ok(file) => {
                         trace!(
-                            "Created logfile {} at {}",
-                            fname,
+                            "Created logfile at DIR: {} NAME: {}",
                             log_dir.display(),
+                            fname
                         );
                         Some(file)
                     }
@@ -65,6 +97,5 @@ impl FileLog {
             }
             Err(err) => error!("Failed creating logs folder: {err}"),
         }
-        Ok(())
     }
 }

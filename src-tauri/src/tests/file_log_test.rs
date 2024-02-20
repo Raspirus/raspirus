@@ -7,7 +7,7 @@ mod tests {
 
     #[test]
     fn test_create_file() {
-        let log = FileLog::new("log.txt".to_owned()).unwrap();
+        let log = FileLog::new("log.txt".to_owned());
 
         // Assert that the file is created
         assert!(log.file.is_some());
@@ -15,7 +15,7 @@ mod tests {
 
     #[test]
     fn test_log() {
-        let log = FileLog::new("log.txt".to_owned()).unwrap();
+        let log = FileLog::new("log.txt".to_owned());
 
         // Log a hash and file path
         log.log(
@@ -54,7 +54,7 @@ mod tests {
     fn teardown() {
         use log::{error, info};
 
-        let log = FileLog::new("log.txt".to_owned()).unwrap();
+        let log = FileLog::new("log.txt".to_owned());
         let file = log.file.unwrap();
 
         let mut output = Vec::new();
