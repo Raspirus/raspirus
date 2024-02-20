@@ -1,11 +1,8 @@
-use chrono::{DateTime, Local, Utc};
-use directories_next::ProjectDirs;
-use job_scheduler_ng::{Job, JobScheduler};
 use log::{error, info, warn};
 use reqwest::StatusCode;
 use std::fs::{self, DirEntry};
 use std::io::{BufRead, BufReader};
-use std::{fs::File, io::Write, time::Duration};
+use std::{fs::File};
 use std::{path::Path, time};
 
 use crate::backend::config_file::Config;
@@ -167,68 +164,4 @@ pub fn insert_all(db: &mut DBOps, window: &Option<tauri::Window>) -> Result<(), 
     info!("Clearing cache...");
     let _ = fs::remove_dir_all(cache_dir);
     Ok(())
-}
-
-// TODO
-
-// Not yet implemented => borked?
-pub async fn auto_update_scheduler(tauri_win: Option<tauri::Window>, hour: i32, weekday: i32) {
-    // ISSUE: Needs to restart app to apply new update schedule
-
-    // In cron, the time is in 24h format, while the weekday starts at 0 = sunday and 6 = saturday
-    let mut scheduler = JobScheduler::new();
-
-    // Construct the cron-like syntax using the given hour and weekday
-    let cron_schedule = format!("0 {} * * {}", hour, weekday);
-
-    scheduler.add(Job::new(
-        cron_schedule.parse().expect("Given CronSyntax is invalid"),
-        move || {
-            // Check current time and use it for the name of the update logs file
-            let now: DateTime<Local> = Local::now();
-            let now_str = now.format("%Y_%m_%d_%H_%M_%S").to_string();
-            let log_str = format!("{}.log", now_str);
-            // Write to logs that the update function has started
-            let message = format!("{} DB update executed\n", Utc::now());
-            log_update_res(&message, log_str.clone())
-                .expect("Failed to write update logs to file.");
-            match update(tauri_win.clone()) {
-                Ok(result) => {
-                    let message = format!("{} DB update finished\n", Utc::now());
-                    log_update_res(&message, log_str.clone())
-                        .expect("Failed to write update logs to file.");
-                    info!("AutoUpdate finished with: {}", result);
-                }
-                Err(error) => {
-                    let message = format!("{} DB update error {}\n", Utc::now(), error);
-                    log_update_res(&message, log_str.clone())
-                        .expect("Failed to write update logs to file.");
-                    error!("AutoUpdate failed with: {}", error)
-                }
-            };
-        },
-    ));
-
-    // Block the main thread to keep the program running until terminated
-    loop {
-        scheduler.tick();
-        std::thread::sleep(Duration::from_millis(500));
-    }
-}
-
-// Simply logs the database update result to a file
-fn log_update_res(data: &str, fname: String) -> std::io::Result<()> {
-    // Open the file (creates if it doesn't exist)
-    let mut file = File::create(
-        ProjectDirs::from("com", "Raspirus", "Logs")
-            .expect("Failed to get project directories.")
-            .data_local_dir()
-            .join("updates")
-            .join(fname),
-    )
-    .expect("Couldnt open log file");
-    // Write the data to the file
-    file.write_all(data.as_bytes())?;
-    // Flush the buffer to ensure all data is written
-    file.flush()
 }
