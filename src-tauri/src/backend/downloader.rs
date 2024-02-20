@@ -2,7 +2,7 @@ use std::{
     fs::{self, File},
     io::Write,
     path::Path,
-    sync::mpsc,
+    sync::{atomic::AtomicBool, mpsc, Arc},
     time::Duration,
 };
 
@@ -27,7 +27,7 @@ pub fn send(window: &Option<tauri::Window>, event: &str, message: String) {
     if let Some(window) = window {
         trace!("Sending {event}: {message}");
         match window.emit_all(event, message) {
-            Ok(_) => {},
+            Ok(_) => {}
             Err(err) => warn!("Failed to send progress to frontend: {err}"),
         }
     }
@@ -131,25 +131,33 @@ pub fn download_all(total_files: usize, window: &Option<tauri::Window>) -> std::
 
     // frontend channel
     let (tx, rx): (mpsc::Sender<bool>, mpsc::Receiver<bool>) = mpsc::channel();
-    // thread channel
-    //let ()
+    // terminator
+    let should_continue = Arc::new(AtomicBool::new(true));
+
     let pool = ThreadPool::new(PARALLEL_DOWNLOADS)?;
     for file_id in 0..=total_files {
         let dir = cache_dir.clone();
         let mirror = config.mirror.clone();
         let tx = tx.clone();
+
+        let should_continue_thread = should_continue.clone();
+
         pool.execute(move || {
-            //match 
-            let download_path = dir.join(format!("{:0>5}", file_id));
-            let file_url = format!("{}/{:0>5}", mirror, file_id);
-            match download_file(&download_path, file_url.clone()) {
-                Ok(_) => info!(
-                    "Downloaded {} to {}",
-                    download_path.display(),
-                    dir.clone().display()
-                ),
-                Err(err) => error!("Failed to download {file_url}: {err}"),
-            };
+            if should_continue_thread.load(std::sync::atomic::Ordering::Relaxed) {
+                let download_path = dir.join(format!("{:0>5}", file_id));
+                let file_url = format!("{}/{:0>5}", mirror, file_id);
+                match download_file(&download_path, file_url.clone()) {
+                    Ok(_) => info!(
+                        "Downloaded {} to {}",
+                        download_path.display(),
+                        dir.clone().display()
+                    ),
+                    Err(err) => {
+                        error!("Failed to download {file_url}: {err}");
+                        should_continue_thread.store(false, std::sync::atomic::Ordering::Relaxed);
+                    }
+                };
+            }
             tx.send(true)
                 .expect("Download thread failed to send on channel")
         });
@@ -157,9 +165,22 @@ pub fn download_all(total_files: usize, window: &Option<tauri::Window>) -> std::
 
     let mut p = 0.0;
     for current in 0..=total_files {
-        let _ = rx.recv().expect("Failed to read from channel");
+        rx.recv().map_err(|err| {
+            std::io::Error::new(
+                std::io::ErrorKind::Other,
+                format!("Thread failed to receive on channel: {}", err),
+            )
+        })?;
         p = calculate_progress(window, p, current, total_files, "dwld")
             .map_err(|err| std::io::Error::new(std::io::ErrorKind::Other, err))?;
+    }
+
+    if !should_continue.load(std::sync::atomic::Ordering::Relaxed) {
+        let _ = fs::remove_dir_all(cache_dir);
+        return Err(std::io::Error::new(
+            std::io::ErrorKind::Other,
+            "A thread failed to download!",
+        ));
     }
 
     info!(
