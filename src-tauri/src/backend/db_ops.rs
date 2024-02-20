@@ -87,9 +87,10 @@ impl DBOps {
         send(window, "ins", String::from("0"));
         insert_all(self, window)
             .map_err(|err| std::io::Error::new(std::io::ErrorKind::Other, err))?;
-
         info!("Total hashes in DB: {}", self.count_hashes().unwrap_or(0));
-        Ok(self.count_hashes().unwrap_or(0))
+        Ok(self
+            .count_hashes()
+            .map_err(|err| std::io::Error::new(std::io::ErrorKind::Other, err.to_string()))?)
     }
 
     /// Inserts the given hashes into the signatures table.
