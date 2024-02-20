@@ -5,7 +5,6 @@ use log::{error, info, warn};
 use reqwest::StatusCode;
 use std::fs::{self, DirEntry};
 use std::io::{BufRead, BufReader};
-use std::process::exit;
 use std::{fs::File, io::Write, time::Duration};
 use std::{path::Path, time};
 
@@ -81,10 +80,10 @@ pub fn update(window: Option<tauri::Window>) -> Result<String, String> {
 
     info!("Updating database...");
     let mut config = Config::new()?;
-    let project_dir = config
-        .program_path
-        .as_ref()
-        .expect("Failed to get project directories.");
+    let project_dir = match config.program_path.as_ref() {
+        Some(project_dir) => Ok(project_dir),
+        None => Err(String::from("Failed to get project directories.")),
+    }?;
     let program_dir = project_dir.data_dir();
 
     // try to get a usable database path
@@ -100,13 +99,10 @@ pub fn update(window: Option<tauri::Window>) -> Result<String, String> {
     };
 
     // connect to database
-    let mut db_connection = match DBOps::new(db_file_str.as_str()) {
-        Ok(db_conn) => db_conn,
-        Err(err) => {
-            error!("{err}");
-            exit(-1);
-        }
-    };
+    let mut db_connection = DBOps::new(db_file_str.as_str()).map_err(|err| {
+        error!("{err}");
+        err.to_string()
+    })?;
 
     // Actually run the update
     let big_tic = time::Instant::now();
@@ -126,7 +122,7 @@ pub fn update(window: Option<tauri::Window>) -> Result<String, String> {
         }
         Err(err) => {
             error!("{err}");
-            exit(-1);
+            Err(err.to_string())
         }
     }
 }
@@ -134,10 +130,10 @@ pub fn update(window: Option<tauri::Window>) -> Result<String, String> {
 pub fn insert_all(db: &mut DBOps, window: &Option<tauri::Window>) -> Result<(), String> {
     let start_time = std::time::Instant::now();
     let config = Config::new()?;
-    let project_dir = config
-        .program_path
-        .as_ref()
-        .expect("Failed to get project directories.");
+    let project_dir = match config.program_path.as_ref() {
+        Some(project_dir) => Ok(project_dir),
+        None => Err(String::from("Failed to get project directories.")),
+    }?;
     let cache_dir = project_dir.cache_dir();
 
     // get all files from a folder
