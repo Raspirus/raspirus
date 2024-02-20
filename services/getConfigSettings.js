@@ -35,18 +35,5 @@ export class Config {
         })
         .catch((err) => console.error(err))
     }
-
-    saveConfig(jsonData) {
-        const jsonString = JSON.stringify(jsonData);
-        console.log("Client sends: ", jsonData);
-
-        invoke("create_config", { contents: jsonString })
-        .then((output) => {
-          const parsedData = JSON.parse(output);
-          console.log("Server answer: ", parsedData);
-        })
-        .catch((err) => console.error(err))
-    }
-
 }
 
