@@ -213,11 +213,7 @@ async fn check_raspberry() -> Result<bool, String> {
 // Updates the database over the GUi
 #[tauri::command]
 async fn update_database(window: tauri::Window) -> Result<String, String> {
-    tokio::task::spawn_blocking(|| {
-        let a = utils::update_utils::update(Some(window));
-        println!("Done");
-        a
-        })
+    tokio::task::spawn_blocking(|| utils::update_utils::update(Some(window)))
         .await
         .map_err(|err| err.to_string())?
 }
