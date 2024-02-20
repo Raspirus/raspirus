@@ -46,6 +46,10 @@ export default function Settings() {
   // DB Update progress
   const [progress, setProgress] = useState(0);
   const progressRef = useRef(progress);
+  const [title, setTitle] = useState(t('loading_title'));
+  const titleRef = useRef(title);
+  const [showProg, setShowProg] = useState(false);
+  const showProgRef = useRef(showProg);
 
   // When the user goes back to the Home page, an update of the set settings
   // is sent to the backend, which then saves it in a local file
@@ -123,41 +127,72 @@ export default function Settings() {
   }
 
   useEffect(() => {
-    // Reads the emited progress signal from the backend
-    const handleProgress = (event) => {
-      console.log("Progress: ", event.payload.message);
-      setProgress(event.payload.message);
+    // Event listener for the check state
+    const checkState = (event) => {
+      console.log("Check: ", event.payload);
+      setTitle("Checking for updates");
+      setShowProg(false);
     };
+    // Event listener for the index state
+    const indexState = (event) => {
+      console.log("Index: ", event.payload);
+      setTitle("Indexing the database");
+      setShowProg(false);
+    };
+    // Event listener for the download state
+    const downloadState = (event) => {
+      console.log("Download: ", event.payload);
+      setProgress(event.payload);
+      setTitle("Downloading updates");
+      setShowProg(true);
+    };
+    // Event listener for the install state
+    const installState = (event) => {
+      console.log("Install: ", event.payload);
+      setProgress(event.payload);
+      setTitle("Installing updates");
+      setShowProg(true);
+    };
+
     // Backend can also send error instead of the progress
-    const handleProgressErr = (event) => {
-      console.error(error);
+    const errorState = (event) => {
+      console.error(event);
       localStorage.setItem("errorOccurred", 'true');
       // Returns to the Home page with an error statements that will be displayed there
       router.push({
         pathname: '/',
-        query: { scanner_error: event.payload.message }
+        query: { scanner_error: event.payload }
       })
-    }
+    };
 
     // Starts listening for incoming signals emited from the backend
+    // chck - Check State
+    // idx - Index State
+    // dwld - Download State
+    // ins - Install State 
+    // err - Error State
     const startListening = async () => {
-      await listen('progress', handleProgress);
-      await listen('progerror', handleProgressErr);
+      await listen('chck', checkState);
+      await listen('idx', indexState);
+      await listen('dwld', downloadState);
+      await listen('ins', installState);
+      await listen('err', errorState);
     };
 
     startListening();
 
     // Clean up function to remove the event listener when the component unmounts
     return () => {
-      removeEventListener('progress', handleProgress);
-      removeEventListener('progerror', handleProgressErr);
+      removeEventListener('chck', checkState);
+      removeEventListener('idx', indexState);
+      removeEventListener('dwld', downloadState);
+      removeEventListener('ins', installState);
+      removeEventListener('err', errorState);
     };
   }, [router])
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-
-
       // Tries to create the config file on the backend, which returns the new created data
       // or the config found. This data then updates the frontend and is displayed
       invoke("create_config", {})
@@ -204,7 +239,7 @@ export default function Settings() {
       // Creates a pop-up with an indefinite loading animation
       const ReactSwal = withReactContent(Swal);
       ReactSwal.fire({
-        title: t('update_db_loading'),
+        title: <p id="dyna-title" className="m-auto w-fit text-xl">{title}</p>,
         text: t('update_db_loading_val'),
         html: <div id="dyna-prog" className="m-auto w-fit">{progress}</div>,
         allowOutsideClick: false,
@@ -214,9 +249,18 @@ export default function Settings() {
         showCancelButton: false,
         didOpen: () => {
           const interval = setInterval(() => {
-            const dynamicTimeElement = document.getElementById('dyna-prog');
-            if (dynamicTimeElement) {
-              dynamicTimeElement.textContent = 'Progress: ' + progressRef.current + '%';
+            const dynamicProgressElement = document.getElementById('dyna-prog');
+            if (dynamicProgressElement && !showProgRef.current) {
+              // Hide the progress element if the updater is not running
+              dynamicProgressElement.style.display = 'none';
+            } else if (dynamicProgressElement) {
+              dynamicProgressElement.textContent = 'Progress: ' + progressRef.current + '%';
+            }
+            const dynamicTitleElement = document.getElementById('dyna-title');
+            if (dynamicTitleElement) {
+              if (dynamicTitleElement.textContent != titleRef.current) {
+                dynamicTitleElement.textContent = titleRef.current;
+              }
             }
           }, 1000);
 
@@ -253,6 +297,17 @@ export default function Settings() {
     progressRef.current = progress;
   }, [progress]);
 
+  useEffect(() => {
+    // Update the mutable ref when the title changes
+    titleRef.current = title;
+  }, [title]);
+
+  useEffect(() => {
+    // Update the mutable ref when we want to show the progress of the updater
+    showProgRef.current = showProg;
+  }, [showProg]);
+
+
   /**
    * CURRENTLY NOT FULLY WORKING
    * Creates a Cronjob to update the database on a specific schedule.
@@ -270,6 +325,8 @@ export default function Settings() {
       })
     }
   }
+
+
 
   return (
     <>
