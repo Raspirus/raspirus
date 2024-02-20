@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import { invoke } from "@tauri-apps/api/tauri";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faGear } from '@fortawesome/free-solid-svg-icons';
+import { faGear, faWrench } from '@fortawesome/free-solid-svg-icons';
 import Swal from "sweetalert2";
 import Image from "next/image";
 import { useLocalStorage } from "../../services/useLocalStorage";
@@ -42,7 +42,7 @@ export default function Home() {
   const [dir_selection, SetDirSelection] = useState(false);
   // Determines if an error occurred
   const [errorOccurred, setError] = useLocalStorage("errorOccurred", 'false');
-  const {t} = useTranslation('common');
+  const { t } = useTranslation('common');
   const [updateAvailable, setUpdateAvailable] = useState(false);
 
   /**
@@ -190,37 +190,41 @@ export default function Home() {
       </Head>
       <main className="h-screen">
         <div className="flex justify-start">
-        <SwitchLanguage />
+          <SwitchLanguage />
 
-        {true && (
-          <button
-            onClick={() => router.push("/settings")}
-          type="button"
-          className="absolute top-10 right-10 px-6 py-2 border-2 m-2 border-maingreen text-maingreen bg-white 
+          <div className="flex justify-center absolute top-0 right-0">
+
+            {updateAvailable && (
+              <button
+                onClick={() => router.push("/settings")}
+                type="button"
+                className="px-2 py-2 border-2 m-2 border-mainred text-white bg-mainred 
       font-medium text-xs leading-tight uppercase rounded"
-        >
-          <FontAwesomeIcon
-            icon={faGear}
-            size="1x"
-            className="pr-1"
-          />
-          {t('settings')}
-        </button>
-        )}
+              >
+                <FontAwesomeIcon
+                  icon={faWrench}
+                  size="1x"
+                  className="pr-1"
+                />
+                New DB Update!
+              </button>
+            )}
 
-          <button
-            onClick={openSettings}
-            type="button"
-            className="absolute top-0 right-0 px-6 py-2 border-2 m-2 border-maingreen text-maingreen bg-white 
+            <button
+              onClick={openSettings}
+              type="button"
+              className="px-6 py-2 border-2 m-2 border-maingreen text-maingreen bg-white 
         font-medium text-xs leading-tight uppercase rounded"
-          >
-            <FontAwesomeIcon
-              icon={faGear}
-              size="1x"
-              className="pr-1"
-            />
-            {t('settings')}
-          </button>
+            >
+              <FontAwesomeIcon
+                icon={faGear}
+                size="1x"
+                className="pr-1"
+              />
+              {t('settings')}
+            </button>
+
+          </div>
         </div>
 
         <div className="flex h-full justify-center p-12 text-center">
