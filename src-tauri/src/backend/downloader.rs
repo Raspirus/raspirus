@@ -6,7 +6,7 @@ use std::{
     time::Duration,
 };
 
-use log::{error, info, trace, warn};
+use log::{debug, error, info, trace, warn};
 use reqwest::StatusCode;
 use tauri::Manager;
 use threadpool_rs::threadpool::pool::ThreadPool;
@@ -171,21 +171,25 @@ pub fn download_all(total_files: usize, window: &Option<tauri::Window>) -> std::
     let mut should_update = true;
     for current in 0..=total_files {
         // if we receive false, meaning a thread yielded to an error, we stop updating the progress
-        (!rx.try_recv().map_err(|err| {
+        if rx.try_recv().map_err(|err| {
+            debug!("Clearing cache!");
+            let _ = fs::remove_dir_all(&cache_dir);
             std::io::Error::new(
                 std::io::ErrorKind::Other,
                 format!("Thread failed to receive on channel: {}", err),
             )
-        })?)
-        .then(|| should_update = false);
-
-        if should_update {
-            p = calculate_progress(window, p, current, total_files, "dwld")
-                .map_err(|err| std::io::Error::new(std::io::ErrorKind::Other, err))?;
+        })? {
+            if should_update {
+                p = calculate_progress(window, p, current, total_files, "dwld")
+                    .map_err(|err| std::io::Error::new(std::io::ErrorKind::Other, err))?;
+            }
+        } else {
+            should_update = false;
         }
     }
 
     if !should_continue.load(std::sync::atomic::Ordering::Relaxed) {
+        debug!("Clearing cache!");
         let _ = fs::remove_dir_all(cache_dir);
         return Err(std::io::Error::new(
             std::io::ErrorKind::Other,
