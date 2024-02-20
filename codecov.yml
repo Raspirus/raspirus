@@ -1,6 +1,10 @@
 comment:
   layout: "header, diff, flags, components"  # show component info in the PR comment
-  
+
+coverage:
+  round: up
+  range: "60...100"
+
 component_management:
   default_rules:  # default rules that will be inherited by all components
     statuses:
