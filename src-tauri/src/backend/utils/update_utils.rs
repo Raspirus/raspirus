@@ -1,85 +1,106 @@
 use chrono::{DateTime, Local, Utc};
+use directories_next::ProjectDirs;
 use job_scheduler_ng::{Job, JobScheduler};
-use log::{error, info};
+use log::{error, info, warn};
+use reqwest::StatusCode;
+use std::fs::{self, DirEntry};
+use std::io::{BufRead, BufReader};
 use std::process::exit;
-use std::{path::Path, time};
 use std::{fs::File, io::Write, time::Duration};
-use tokio::runtime::Runtime;
+use std::{path::Path, time};
 
 use crate::backend::config_file::Config;
 use crate::backend::db_ops::DBOps;
-/// Default name of the database file
+use crate::backend::downloader::{calculate_progress, send_progress};
+
 static DB_NAME: &str = "signatures.db";
 
-/// Updates the database in async mode, returns a JSON string with the dirty files
-/// This is the function getting called from the GUI trough the tauri API
-/// It is async to ensure the main thread doesn't stop
-pub async fn update_database(window: Option<tauri::Window>) -> Result<String, String> {
-    // Loading settings from config file
-    let config = Config::new()?;
-    let program_dir = config.project_dirs.data;
+/// Checks if local is running behind remote. Returns true if remote is newer
+pub fn check_update_necessary() -> Result<bool, std::io::Error> {
+    let config =
+        Config::new().map_err(|err| std::io::Error::new(std::io::ErrorKind::Other, err))?;
 
-    let db_file_str = if !config.db_location.is_empty() && Path::new(&config.db_location).to_owned().exists() && Path::new(&config.db_location).to_owned().is_file() {
-        info!("Using specific DB path {}", config.db_location);
-        config.db_location
-    } else {
-        // if not we use the default path
-        program_dir.join(DB_NAME).to_string_lossy().to_string()
-    };
+    // get local timestamp
+    let local_timestamp = match config.last_db_update.as_str() {
+        "Never" => "0".to_owned(),
+        timestamp => timestamp.to_owned(),
+    }
+    .parse::<u128>()
+    .map_err(|err| std::io::Error::new(std::io::ErrorKind::InvalidInput, err))?;
 
-    // Initializing the database connection using the path from above
-    let mut db_connection = match DBOps::new(db_file_str.as_str(), window) {
-        Ok(db_conn) => db_conn,
-        Err(err) => {
-            error!("{err}");
-            exit(-1);
+    // fetch remote timestamp
+    let remote_timestamp = get_remote_timestamp()?
+        .parse::<u128>()
+        .map_err(|err| std::io::Error::new(std::io::ErrorKind::InvalidInput, err))?;
+
+    Ok(remote_timestamp > local_timestamp)
+}
+
+/// fetches remote timestamp from mirror
+pub fn get_remote_timestamp() -> Result<String, std::io::Error> {
+    let config =
+        Config::new().map_err(|err| std::io::Error::new(std::io::ErrorKind::Other, err))?;
+    let file_url = format!("{}/timestamp", config.mirror.clone());
+
+    let client = reqwest::blocking::Client::new();
+    for current_retry in 0..=crate::backend::downloader::MAX_RETRY {
+        let response = match client.get(&file_url).send() {
+            Ok(response) => response,
+            Err(err) => {
+                warn!("Failed to download {file_url} on try {current_retry}: {err}");
+                continue;
+            }
+        };
+
+        // if ok we write to file, otherwise we retry
+        match response.status() {
+            StatusCode::OK => match response.text() {
+                Ok(data) => return Ok(data),
+                Err(err) => warn!("Failed to download {file_url} on try {current_retry}: {err}"),
+            },
+            _ => warn!(
+                "Failed to download {file_url} on try {current_retry}; Statuscode was {}",
+                response.status()
+            ),
         }
-    };
+    }
+    Err(std::io::Error::new(
+        std::io::ErrorKind::ConnectionAborted,
+        "Could not download timestamp",
+    ))
+}
 
-    let big_tic = time::Instant::now();
-    // Spawns a thread to update async, else would be sync
-    match tokio::task::spawn_blocking(move || match db_connection.update_db() {
-        Ok(ok) => ok,
-        Err(err) => {
-            error!("{err}");
-            exit(-1);
-        }
-    })
-    .await
+/// updates if update is necessary
+pub fn update(window: Option<tauri::Window>) -> Result<String, String> {
+    send_progress(&window, String::from("Checking for updates..."));
+    // if remote is not newer than local we skip
+    if !check_update_necessary().map_err(|err| err.to_string())? {
+        info!("Database already up to date. Skipping...");
+        return Ok("100".to_owned());
+    }
+
+    info!("Updating database...");
+    let mut config = Config::new()?;
+    let project_dir = config
+        .program_path
+        .as_ref()
+        .expect("Failed to get project directories.");
+    let program_dir = project_dir.data_dir();
+
+    // try to get a usable database path
+    let db_file_str = if !config.db_location.is_empty()
+        && Path::new(&config.db_location).to_owned().exists()
+        && Path::new(&config.db_location).to_owned().is_file()
     {
-        // We await for the database update to finish
-        Ok(res) => {
-            let big_toc = time::Instant::now();
-            info!(
-                "Updated DB in {} seconds",
-                big_toc.duration_since(big_tic).as_secs_f64()
-            );
-            // Return the result as JSON
-            Ok(serde_json::to_string(&res).unwrap_or_default())
-        }
-        Err(err) => {
-            error!("{err}");
-            exit(-1);
-        }
-    }
-}
-
-/// Updates the database in sync mode, returns a JSON string with the dirty files
-/// This is the function getting called from the CLI
-/// It is sync because the CLI is sync, but for the rest it is very similar to the one above
-pub fn sync_update_database(window: Option<tauri::Window>) -> Result<String, String> {
-    let config = Config::new()?;
-    let program_dir = config.project_dirs.data;
-
-    let db_file_str = if !config.db_location.is_empty() && Path::new(&config.db_location).to_owned().exists() && Path::new(&config.db_location).to_owned().is_file() {
         info!("Using specific DB path {}", config.db_location);
-        config.db_location
+        config.db_location.clone()
     } else {
         // if not we use the default path
         program_dir.join(DB_NAME).to_string_lossy().to_string()
     };
 
-    let mut db_connection = match DBOps::new(db_file_str.as_str(), window) {
+    // connect to database
+    let mut db_connection = match DBOps::new(db_file_str.as_str()) {
         Ok(db_conn) => db_conn,
         Err(err) => {
             error!("{err}");
@@ -87,16 +108,21 @@ pub fn sync_update_database(window: Option<tauri::Window>) -> Result<String, Str
         }
     };
 
+    // Actually run the update
     let big_tic = time::Instant::now();
-    // THIS PART CHANGES. Tokio thread removed to make sync
-    match db_connection.update_db() {
+    match db_connection.update_db(&window) {
         Ok(res) => {
+            // write remote timestamp to config
+            let timestamp = get_remote_timestamp().map_err(|err| err.to_string())?;
+            config.last_db_update = timestamp;
+            config.save().map_err(|err| err.to_string())?;
+
             let big_toc = time::Instant::now();
             info!(
                 "Updated DB in {} seconds",
                 big_toc.duration_since(big_tic).as_secs_f64()
             );
-            Ok(serde_json::to_string(&res).unwrap_or_default())
+            Ok(res.to_string())
         }
         Err(err) => {
             error!("{err}");
@@ -104,9 +130,59 @@ pub fn sync_update_database(window: Option<tauri::Window>) -> Result<String, Str
         }
     }
 }
+
+pub fn insert_all(db: &mut DBOps, window: &Option<tauri::Window>) -> Result<(), String> {
+    let start_time = std::time::Instant::now();
+    let config = Config::new()?;
+    let project_dir = config
+        .program_path
+        .as_ref()
+        .expect("Failed to get project directories.");
+    let cache_dir = project_dir.cache_dir();
+
+    // get all files from a folder
+    let entries: Vec<DirEntry> = fs::read_dir(cache_dir)
+        .map_err(|err| err.to_string())?
+        .filter_map(Result::ok)
+        .collect();
+
+    // read all files line by line into buffer
+    let mut p = 0.0;
+    let mut i = 0;
+    let len = entries.len();
+    for file in entries {
+        let mut lines: Vec<String> = Vec::new();
+        let file = File::open(file.path()).map_err(|err| err.to_string())?;
+        let reader = BufReader::new(file);
+
+        reader
+            .lines()
+            .map_while(Result::ok)
+            .for_each(|line| lines.push(line));
+
+        match db.insert_hashes(&lines) {
+            Ok(_) => {}
+            Err(err) => warn!("Error inserting: {err}"),
+        }
+        i += 1;
+        p = calculate_progress(window, p, i, len, "Inserting...".to_owned())?;
+    }
+
+    info!(
+        "Building database took {}s",
+        std::time::Instant::now()
+            .duration_since(start_time)
+            .as_secs_f32()
+    );
+
+    info!("Clearing cache...");
+    let _ = fs::remove_dir_all(cache_dir);
+    Ok(())
+}
+
+// TODO
 
 // Not yet implemented => borked?
-#[doc(hidden)]
 pub async fn auto_update_scheduler(tauri_win: Option<tauri::Window>, hour: i32, weekday: i32) {
     // ISSUE: Needs to restart app to apply new update schedule
 
@@ -127,9 +203,7 @@ pub async fn auto_update_scheduler(tauri_win: Option<tauri::Window>, hour: i32, 
             let message = format!("{} DB update executed\n", Utc::now());
             log_update_res(&message, log_str.clone())
                 .expect("Failed to write update logs to file.");
-            // Execute the async function using Tokio's Runtime
-            let runtime = Runtime::new().expect("Unable to create AutoUpdate Runtime");
-            match runtime.block_on(update_database(tauri_win.clone())) {
+            match update(tauri_win.clone()) {
                 Ok(result) => {
                     let message = format!("{} DB update finished\n", Utc::now());
                     log_update_res(&message, log_str.clone())
@@ -153,18 +227,15 @@ pub async fn auto_update_scheduler(tauri_win: Option<tauri::Window>, hour: i32, 
     }
 }
 
-/// Logs the result of the update function to a file
-/// This is used by the auto update function to check if the update was successful
+// Simply logs the database update result to a file
 fn log_update_res(data: &str, fname: String) -> std::io::Result<()> {
     // Open the file (creates if it doesn't exist)
-    let config = match Config::new() {
-        Ok(config) => config,
-        Err(err) => {
-            return Err(std::io::Error::new(std::io::ErrorKind::Other, err))
-        }
-    };
     let mut file = File::create(
-        config.project_dirs.logs.update.join(fname),
+        ProjectDirs::from("com", "Raspirus", "Logs")
+            .expect("Failed to get project directories.")
+            .data_local_dir()
+            .join("updates")
+            .join(fname),
     )
     .expect("Couldnt open log file");
     // Write the data to the file
