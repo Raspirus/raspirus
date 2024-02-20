@@ -4,7 +4,7 @@ use log::{info, warn};
 use rusqlite::{params, Connection};
 
 use crate::backend::{
-    downloader::{download_all, index, send_progress},
+    downloader::{download_all, index, send},
     utils::update_utils::insert_all,
 };
 
@@ -80,11 +80,11 @@ impl DBOps {
     /// ```
     pub fn update_db(&mut self, window: &Option<tauri::Window>) -> Result<u64, std::io::Error> {
         info!("Updating database...");
-        send_progress(window, String::from("Indexing..."));
+        send(window, "idx", String::new());
         let max_file = index()?;
-        send_progress(window, String::from("Downloading..."));
+        send(window, "dwld", String::from("0%"));
         download_all(max_file, window)?;
-        send_progress(window, String::from("Inserting..."));
+        send(window, "ins", String::from("0%"));
         insert_all(self, window)
             .map_err(|err| std::io::Error::new(std::io::ErrorKind::Other, err))?;
 
