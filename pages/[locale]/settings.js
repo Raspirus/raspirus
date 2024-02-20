@@ -244,7 +244,7 @@ export default function Settings() {
         didOpen: () => {
           const interval = setInterval(() => {
             const dynamicProgressElement = document.getElementById('dyna-prog');
-            if (dynamicProgressElement && !showProgRef.current) {
+            if (dynamicProgressElement && !showProgRef.current && progressRef.current <= 0) {
               // Hide the progress element if the updater is not running
               dynamicProgressElement.style.display = 'none';
             } else if (dynamicProgressElement) {
