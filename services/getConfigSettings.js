@@ -13,6 +13,7 @@ export class Config {
         this.custom_db_path = "";
         this.scan_dir = false;
         this.ignored_hashes = [];
+        this.mirror = "";
     }
 
     loadConfig() {
@@ -32,6 +33,7 @@ export class Config {
             this.custom_db_path = parsedData.db_location;
             this.scan_dir = parsedData.scan_dir;
             this.ignored_hashes = parsedData.ignored_hashes;
+            this.mirror = parsedData.mirror;
         })
         .catch((err) => console.error(err))
     }
