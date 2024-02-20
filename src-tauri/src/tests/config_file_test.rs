@@ -10,8 +10,6 @@ mod tests {
         assert_eq!(config.last_db_update, "Never");
         assert_eq!(config.logging_is_active, false);
         assert_eq!(config.obfuscated_is_active, true);
-        assert_eq!(config.db_update_weekday, -1);
-        assert_eq!(config.db_update_time, "22:00:00");
         assert_eq!(config.db_location, "");
         assert_eq!(config.scan_dir, true);
         assert_eq!(config.ignored_hashes, Vec::<String>::new());
@@ -26,8 +24,6 @@ mod tests {
         config_clean.last_db_update = "2023-06-05".to_string();
         config_clean.logging_is_active = true;
         config_clean.obfuscated_is_active = false;
-        config_clean.db_update_weekday = 2;
-        config_clean.db_update_time = "08:00:00".to_string();
         config_clean.db_location = "".to_string();
         config_clean.scan_dir = true;
         config_clean.ignored_hashes = Vec::new();
@@ -49,11 +45,6 @@ mod tests {
             loaded_config.obfuscated_is_active,
             config_clean.obfuscated_is_active
         );
-        assert_eq!(
-            loaded_config.db_update_weekday,
-            config_clean.db_update_weekday
-        );
-        assert_eq!(loaded_config.db_update_time, config_clean.db_update_time);
         assert_eq!(loaded_config.db_location, config_clean.db_location);
         assert_eq!(loaded_config.scan_dir, config_clean.scan_dir);
         assert_eq!(loaded_config.ignored_hashes, config_clean.ignored_hashes);
