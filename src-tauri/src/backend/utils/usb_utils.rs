@@ -8,36 +8,30 @@ struct UsbDevice {
     path: String,
 }
 
-// NOTE: We have two functions here, one for Windows and one for Unix-like OS
-// This is because Windows doesn't have a /run/media/username folder, so we need to iterate through all possible mount points
-
-/// Lists all USB drives connected to the computer
-/// Primarily works for Unix-like OS, the function for Windows is below
-/// Returns a JSON string with the USB drives for the GUI, the CLI doesn't use this function
+// Lists all the attached USBs for various platforms
 pub async fn list_usb_drives() -> Result<String, String> {
     let mut usb_drives: Vec<UsbDevice> = Vec::new();
 
-    #[cfg(any(target_os= "linux", target_os = "macos"))]
+    #[cfg(any(target_os = "linux", target_os = "macos"))]
     {
         info!("Trying to retrieve USB drives from Unix-like OS");
-        // Retrieve the username here
         let username = match std::env::var("USER") {
             Ok(val) => val,
             Err(_) => panic!("Could not get current username"),
         };
-        // Check for any folders inside /run/media/username
-        let dir_path = format!("/run/media/{}", username);
+
+        let dir_path = format!("/media/{}", username);
         let entries = match fs::read_dir(dir_path) {
-            // Assume each entry is a USB drive
             Ok(entries) => {
+                println!("{:#?}", entries);
                 entries
-            },
+            }
             Err(err) => {
+                println!("{err}");
                 return Err(format!("{err}"));
             }
         };
 
-        // Iterate through all entries and add them to the vector as a UsbDevice struct
         for entry in entries {
             let entry = entry.expect("I couldn't read something inside the directory");
             let path = entry.path();
@@ -55,26 +49,26 @@ pub async fn list_usb_drives() -> Result<String, String> {
             });
         }
     }
-    // If the OS is Windows, we call the function below
+
     #[cfg(target_os = "windows")]
     {
         let mut win_usb_drives = list_usb_windows();
         usb_drives.append(&mut win_usb_drives);
     }
-    // If the OS is not Windows, Linux or MacOS, we warn the user
-    #[cfg(all(not(target_os = "windows"), not(target_os = "linux"), not(target_os = "macos")))]
+
+    #[cfg(all(
+        not(target_os = "windows"),
+        not(target_os = "linux"),
+        not(target_os = "macos")
+    ))]
     warn!("Not retrieving USBs -> Wrong OS");
 
     Ok(serde_json::to_string(&usb_drives).expect("Couldnt convert usb drives to a Serde string"))
 }
 
-/// In Windows we need to iterate through all possible mount points and see what type of device is mounted
-/// Basically we check from A to Z if there is a removable drive mounted
-/// Its not the best solution, but it works
+// In Windows we need to iterate through all possible mount points and see what type of device is mounted
 #[cfg(windows)]
 fn list_usb_windows() -> Vec<UsbDevice> {
-    // We need to use the WinAPI to check if the drive is removable, but on LInux it causes problems
-    // So we only import it if we are on Windows
     use std::ffi::OsStr;
     use std::iter::once;
     use std::os::windows::prelude::OsStrExt;
@@ -95,7 +89,6 @@ fn list_usb_windows() -> Vec<UsbDevice> {
             .collect::<Vec<_>>();
         let drive_type = unsafe { GetDriveTypeW(wide_path.as_ptr()) };
 
-        // If the drive is a removable drive, we add it to the vector
         if let Ok(metadata) = fs::metadata(drive_path) {
             if metadata.is_dir() && drive_type == DRIVE_REMOVABLE {
                 info!("Found Drive: {}", drive_path);
@@ -106,6 +99,5 @@ fn list_usb_windows() -> Vec<UsbDevice> {
             }
         }
     }
-    // Return the vector
     usb_drives
 }
