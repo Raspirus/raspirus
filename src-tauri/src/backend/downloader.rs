@@ -13,9 +13,9 @@ use threadpool_rs::threadpool::pool::ThreadPool;
 
 use super::config_file::Config;
 
-pub static MAX_RETRY: usize = 5;
-static PARALLEL_DOWNLOADS: usize = 3;
-static MAX_TIMEOUT: u64 = 120;
+pub static MAX_RETRY: usize = 0;
+static PARALLEL_DOWNLOADS: usize = 12;
+static MAX_TIMEOUT: u64 = 12;
 
 #[derive(Clone, serde::Serialize)]
 struct TauriEvent {
@@ -25,8 +25,9 @@ struct TauriEvent {
 /// sends given percentage to the frontend
 pub fn send(window: &Option<tauri::Window>, event: &str, message: String) {
     if let Some(window) = window {
-        match window.emit_all(event, message.clone()) {
-            Ok(_) => trace!("Updated progress to: {message}"),
+        trace!("Sending {event}: {message}");
+        match window.emit_all(event, message) {
+            Ok(_) => {},
             Err(err) => warn!("Failed to send progress to frontend: {err}"),
         }
     }
@@ -128,13 +129,17 @@ pub fn download_all(total_files: usize, window: &Option<tauri::Window>) -> std::
     }
     fs::create_dir_all(cache_dir.clone())?;
 
+    // frontend channel
     let (tx, rx): (mpsc::Sender<bool>, mpsc::Receiver<bool>) = mpsc::channel();
+    // thread channel
+    //let ()
     let pool = ThreadPool::new(PARALLEL_DOWNLOADS)?;
     for file_id in 0..=total_files {
         let dir = cache_dir.clone();
         let mirror = config.mirror.clone();
         let tx = tx.clone();
         pool.execute(move || {
+            //match 
             let download_path = dir.join(format!("{:0>5}", file_id));
             let file_url = format!("{}/{:0>5}", mirror, file_id);
             match download_file(&download_path, file_url.clone()) {
