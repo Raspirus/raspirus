@@ -82,9 +82,9 @@ impl DBOps {
         info!("Updating database...");
         send(window, "idx", String::new());
         let max_file = index()?;
-        send(window, "dwld", String::from("0%"));
+        send(window, "dwld", String::from("0"));
         download_all(max_file, window)?;
-        send(window, "ins", String::from("0%"));
+        send(window, "ins", String::from("0"));
         insert_all(self, window)
             .map_err(|err| std::io::Error::new(std::io::ErrorKind::Other, err))?;
 
