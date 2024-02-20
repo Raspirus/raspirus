@@ -4,15 +4,12 @@ import { useRouter } from 'next/router';
 import { invoke } from "@tauri-apps/api/tauri";
 import { listen } from '@tauri-apps/api/event';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faFileLines, faUserNinja, faWrench, faHome, faClock, faDatabase, faFileZipper, faFingerprint, faL, faHistory } from '@fortawesome/free-solid-svg-icons';
+import { faFileLines, faUserNinja, faWrench, faHome, faLink, faDatabase, faFileZipper, faFingerprint, faHistory } from '@fortawesome/free-solid-svg-icons';
 import React, { useState, useEffect, useRef } from 'react';
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
-import moment from "moment";
 import { useTranslation } from 'next-i18next';
 import { getStaticPaths, makeStaticProps } from '../../lib/getStatic';
-import DateTimeSelector from '../../components/TimePicker';
-import WeekdaySelector from '../../components/WeekdaySelector';
 import { open } from '@tauri-apps/api/dialog';
 import IgnoredHashComp from '../../components/IgnoredHashes';
 
@@ -35,8 +32,6 @@ export default function Settings() {
   // Data for some of the settings is retrieved directly from the backend and saved back to it
   const [hash_count, setCount] = useState(0);
   const [updated_date, setDate] = useState(t('update_db_status_1'));
-  const [auto_time, setAutotime] = useState('22:00');
-  const [selectedWeekday, setSelectedWeekday] = useState(-1);
   const [logging, setLogging] = useState(false);
   const [obfuscated, setObfuscated] = useState(false);
   const [use_db_path, setUsedbPath] = useState(false);
@@ -107,8 +102,6 @@ export default function Settings() {
       last_db_update: updated_date,
       logging_is_active: logging,
       obfuscated_is_active: obfuscated,
-      db_update_weekday: selectedWeekday,
-      db_update_time: auto_time,
       db_location: custom_db_path,
       scan_dir: scan_dir,
       ignored_hashes: ignored_hashes,
@@ -279,7 +272,6 @@ export default function Settings() {
           ReactSwal.close(); // Close the SweetAlert
           console.log(message);
           setCount(Number(message));
-          setDate(moment().format("DD/MM/YYYY HH:mm:ss")); // Format it to be 24h instead of 12h
           Swal.fire(t('update_db_completed'), t('update_db_completed_val'), "success");
         })
         .catch((error) => {
@@ -309,26 +301,6 @@ export default function Settings() {
     // Update the mutable ref when we want to show the progress of the updater
     showProgRef.current = showProg;
   }, [showProg]);
-
-
-  /**
-   * CURRENTLY NOT FULLY WORKING
-   * Creates a Cronjob to update the database on a specific schedule.
-   */
-  const updateSchedule = () => {
-    const [hours, minutes] = auto_time.split(':');
-    const weekday = selectedWeekday;
-
-    if (typeof window !== "undefined") {
-      invoke("auto_update_scheduler", {
-        hour: hours,
-        weekday: weekday
-      }).catch((error) => {
-        console.error("Trying to invoke auto_update_scheduler: ", error);
-      })
-    }
-  }
-
 
 
   return (
@@ -415,16 +387,13 @@ export default function Settings() {
         isOn={false}
       />
 
-      {/* TODO: Replace with Mirror setting */}
-
       <SettingComp
-        title={t('auto_db')}
-        short={t('auto_db_val')}
-        short2={<><WeekdaySelector selectedWeekday={selectedWeekday} setSelectedWeekday={setSelectedWeekday} /><DateTimeSelector time={auto_time} setTime={setAutotime} /></>}
-        icon={faClock}
-        isOn={false}
-        action={updateSchedule}
-        action_val={t('auto_db_btn')}
+        title={"Mirror website"}
+        short={"Location where we download the signatures from"}
+        short2={mirror}
+        icon={faLink}
+        isOn={fetch(mirror, { mode: 'no-cors' }).then(() => true).catch(() => false)}
+        setIsOn={function () { }}
       />
     </>
   );

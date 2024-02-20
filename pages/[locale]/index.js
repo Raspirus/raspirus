@@ -43,6 +43,7 @@ export default function Home() {
   // Determines if an error occurred
   const [errorOccurred, setError] = useLocalStorage("errorOccurred", 'false');
   const {t} = useTranslation('common');
+  const [updateAvailable, setUpdateAvailable] = useState(false);
 
   /**
    * Function triggered when a directory was selected
@@ -72,12 +73,20 @@ export default function Home() {
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-
+      // Using the backend, check if a config file exists and load it
       invoke("create_config", {})
         .then((output) => {
           const parsedData = JSON.parse(output);
           console.log("Loaded config: ", parsedData);
           SetDirSelection(parsedData.scan_dir);
+          if (parsedData.last_db_update == "Never") {
+            Swal.fire({
+              title: "Welcome!",
+              text: "It seems like you are using the application for the first time. Please make sure to update the database before scanning. You can do this in the settings.",
+              icon: "info",
+              footer: "This message will go away after the first update."
+            });
+          }
         })
         .catch((error) => {
           SetDirSelection(true);
@@ -101,6 +110,16 @@ export default function Home() {
             t('usb_list_error_msg'),
             "error"
           );
+        });
+
+      // Using the backend, check if an update is available
+      invoke("check_update", {})
+        .then((output) => {
+          setUpdateAvailable(output);
+        })
+        .catch((error) => {
+          // Web request not successful, probably no internet connection
+          console.error(error);
         });
     }
   }, [t]);
@@ -172,6 +191,23 @@ export default function Home() {
       <main className="h-screen">
         <div className="flex justify-start">
         <SwitchLanguage />
+
+        {true && (
+          <button
+            onClick={() => router.push("/settings")}
+          type="button"
+          className="absolute top-10 right-10 px-6 py-2 border-2 m-2 border-maingreen text-maingreen bg-white 
+      font-medium text-xs leading-tight uppercase rounded"
+        >
+          <FontAwesomeIcon
+            icon={faGear}
+            size="1x"
+            className="pr-1"
+          />
+          {t('settings')}
+        </button>
+        )}
+
           <button
             onClick={openSettings}
             type="button"
