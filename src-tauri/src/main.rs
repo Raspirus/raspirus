@@ -108,7 +108,8 @@ fn main() -> Result<(), String> {
             update_database,
             check_raspberry,
             create_config,
-            download_logs
+            download_logs,
+            check_update
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
@@ -245,12 +246,6 @@ async fn check_update() -> Result<bool, String> {
         .await
         .map_err(|err| err.to_string())?
         .map_err(|err| err.to_string())
-}
-
-// Not yet implemented
-pub async fn auto_update_scheduler(tauri_win: tauri::Window, hour: i32, weekday: i32) {
-    // ISSUE: Needs to restart app to apply new update schedule
-    utils::update_utils::auto_update_scheduler(Some(tauri_win), hour, weekday).await
 }
 
 #[tauri::command]
