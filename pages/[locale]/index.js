@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import { invoke } from "@tauri-apps/api/tauri";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faGear } from '@fortawesome/free-solid-svg-icons';
+import { faGear, faWrench } from '@fortawesome/free-solid-svg-icons';
 import Swal from "sweetalert2";
 import Image from "next/image";
 import { useLocalStorage } from "../../services/useLocalStorage";
@@ -194,18 +194,19 @@ export default function Home() {
 
           <div className="flex justify-center absolute top-0 right-0">
 
-            {true && (
+            {updateAvailable && (
               <button
                 onClick={() => router.push("/settings")}
                 type="button"
-                className="px-6 py-2 border-2 m-2 border-mainred text-white bg-mainred 
+                className="px-2 py-2 border-2 m-2 border-mainred text-white bg-mainred 
       font-medium text-xs leading-tight uppercase rounded"
               >
                 <FontAwesomeIcon
-                  icon={faGear}
+                  icon={faWrench}
                   size="1x"
                   className="pr-1"
                 />
+                New DB Update!
               </button>
             )}
 
