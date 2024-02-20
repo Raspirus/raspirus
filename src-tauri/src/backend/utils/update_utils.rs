@@ -2,7 +2,7 @@ use log::{error, info, warn};
 use reqwest::StatusCode;
 use std::fs::{self, DirEntry};
 use std::io::{BufRead, BufReader};
-use std::{fs::File};
+use std::fs::File;
 use std::{path::Path, time};
 
 use crate::backend::config_file::Config;
