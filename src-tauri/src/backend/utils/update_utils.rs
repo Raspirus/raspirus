@@ -20,19 +20,12 @@ pub fn check_update_necessary() -> Result<bool, std::io::Error> {
         Config::new().map_err(|err| std::io::Error::new(std::io::ErrorKind::Other, err))?;
 
     // get local timestamp
-    let local_timestamp = match config.last_db_update.as_str() {
-        "Never" => "0".to_owned(),
-        timestamp => timestamp.to_owned(),
-    }
-    .parse::<u128>()
-    .map_err(|err| std::io::Error::new(std::io::ErrorKind::InvalidInput, err))?;
+    let local_timestamp = config.last_db_update;
 
     // fetch remote timestamp
-    let remote_timestamp = get_remote_timestamp()?
-        .parse::<u128>()
-        .map_err(|err| std::io::Error::new(std::io::ErrorKind::InvalidInput, err))?;
+    let remote_timestamp = get_remote_timestamp()?;
 
-    Ok(remote_timestamp > local_timestamp)
+    Ok(remote_timestamp != local_timestamp)
 }
 
 /// fetches remote timestamp from mirror

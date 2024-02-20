@@ -147,32 +147,42 @@ pub fn download_all(total_files: usize, window: &Option<tauri::Window>) -> std::
                 let download_path = dir.join(format!("{:0>5}", file_id));
                 let file_url = format!("{}/{:0>5}", mirror, file_id);
                 match download_file(&download_path, file_url.clone()) {
-                    Ok(_) => info!(
-                        "Downloaded {} to {}",
-                        download_path.display(),
-                        dir.clone().display()
-                    ),
+                    Ok(_) => {
+                        info!(
+                            "Downloaded {} to {}",
+                            download_path.display(),
+                            dir.clone().display()
+                        );
+                        tx.send(true)
+                            .expect("Download thread failed to send on channel")
+                    }
                     Err(err) => {
                         error!("Failed to download {file_url}: {err}");
                         should_continue_thread.store(false, std::sync::atomic::Ordering::Relaxed);
+                        tx.send(false)
+                            .expect("Download thread failed to send on channel")
                     }
                 };
             }
-            tx.send(true)
-                .expect("Download thread failed to send on channel")
         });
     }
 
     let mut p = 0.0;
+    let mut should_update = true;
     for current in 0..=total_files {
-        rx.recv().map_err(|err| {
+        // if we receive false, meaning a thread yielded to an error, we stop updating the progress
+        (!rx.try_recv().map_err(|err| {
             std::io::Error::new(
                 std::io::ErrorKind::Other,
                 format!("Thread failed to receive on channel: {}", err),
             )
-        })?;
-        p = calculate_progress(window, p, current, total_files, "dwld")
-            .map_err(|err| std::io::Error::new(std::io::ErrorKind::Other, err))?;
+        })?)
+        .then(|| should_update = false);
+
+        if should_update {
+            p = calculate_progress(window, p, current, total_files, "dwld")
+                .map_err(|err| std::io::Error::new(std::io::ErrorKind::Other, err))?;
+        }
     }
 
     if !should_continue.load(std::sync::atomic::Ordering::Relaxed) {
