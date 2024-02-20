@@ -86,7 +86,6 @@ impl Config {
     /// Will save the current configuration to the file
     /// WARNING! If the fields are blank, it will clear the current config
     pub fn save(&mut self) -> Result<(), String> {
-        println!("Loading");
         if !Path::new(&Self::get_config_path()).exists() {
             fs::create_dir_all(
                 Path::new(&Self::get_config_path())
@@ -102,7 +101,6 @@ impl Config {
 
     /// Loads the current config and returns it, or creates a new one if there is non yet
     pub fn load(&mut self) -> Result<(), String> {
-        println!("Loading");
         // Checks if the config file exists, else quickly creates it
         if !Path::new(&Self::get_config_path()).exists() {
             self.save()?;
