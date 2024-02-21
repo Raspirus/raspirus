@@ -18,7 +18,6 @@ pub fn check_update_necessary() -> Result<bool, std::io::Error> {
 
     // get local timestamp
     let local_timestamp = config.last_db_update;
-
     // fetch remote timestamp
     let remote_timestamp = get_remote_timestamp()?;
 
@@ -136,14 +135,11 @@ pub fn insert_all(db: &mut DBOps, window: &Option<tauri::Window>) -> Result<(), 
     let mut i = 0;
     let len = entries.len();
     for file in entries {
-        let mut lines: Vec<String> = Vec::new();
         let file = File::open(file.path()).map_err(|err| err.to_string())?;
         let reader = BufReader::new(file);
 
-        reader
-            .lines()
-            .map_while(Result::ok)
-            .for_each(|line| lines.push(line));
+        // add readers lines to lines vector
+        let lines = reader.lines().map_while(Result::ok).collect();
 
         match db.insert_hashes(&lines) {
             Ok(_) => {}
