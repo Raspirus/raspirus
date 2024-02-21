@@ -249,7 +249,7 @@ fn create_config(contents: Option<String>) -> Result<String, String> {
 
 #[tauri::command]
 async fn check_update() -> Result<bool, String> {
-    tokio::task::spawn_blocking(|| utils::update_utils::check_update_necessary())
+    tokio::task::spawn_blocking(utils::update_utils::check_update_necessary)
         .await
         .map_err(|err| err.to_string())?
         .map_err(|err| err.to_string())
