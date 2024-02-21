@@ -219,13 +219,7 @@ async fn start_scanner(window: tauri::Window, path: String) -> Result<String, St
 // because a couple options are not supported on that device and will be disabled on the GUI
 #[tauri::command]
 async fn check_raspberry() -> Result<bool, String> {
-    let arch = std::env::consts::ARCH;
-
-    if arch == "arm" {
-        Ok(true)
-    } else {
-        Ok(false)
-    }
+    Ok(std::env::consts::ARCH == "arm")
 }
 
 // Updates the database over the GUi
