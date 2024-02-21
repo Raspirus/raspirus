@@ -62,7 +62,10 @@ impl DBOps {
     pub fn init_table(&self) -> Result<(), rusqlite::Error> {
         debug!("Creating table if not present...");
         let _ = self.db_conn.execute(
-            "CREATE TABLE IF NOT EXISTS signatures (hash varchar(32))",
+            &format!(
+                "CREATE TABLE IF NOT EXISTS {} (hash varchar(32))",
+                crate::DB_TABLE
+            ),
             [],
         )?;
         Ok(())
@@ -110,8 +113,7 @@ impl DBOps {
         self.drop("old")
             .map_err(|err| std::io::Error::new(std::io::ErrorKind::Other, err))?;
         info!("Total hashes in DB: {}", self.count_hashes().unwrap_or(0));
-        self
-            .count_hashes()
+        self.count_hashes()
             .map_err(|err| std::io::Error::new(std::io::ErrorKind::Other, err.to_string()))
     }
 
@@ -156,7 +158,10 @@ impl DBOps {
         let mut inserted = 0;
         let mut skipped = 0;
         for hash in hashes {
-            match transact.execute("INSERT INTO signatures(hash) VALUES (?)", [hash.clone()]) {
+            match transact.execute(
+                &format!("INSERT INTO {}(hash) VALUES (?)", crate::DB_TABLE),
+                [hash.clone()],
+            ) {
                 Ok(_) => inserted += 1,
                 Err(err) => {
                     warn!("Got {err} when trying to insert {hash}. Skipping...");
@@ -188,9 +193,10 @@ impl DBOps {
     pub fn hash_exists(&self, hash_str: &str) -> Result<bool, rusqlite::Error> {
         info!("Searching hash: {}", hash_str);
 
-        let mut stmt = self
-            .db_conn
-            .prepare("SELECT COUNT(*) FROM signatures WHERE hash = ?")?;
+        let mut stmt = self.db_conn.prepare(&format!(
+            "SELECT COUNT(*) FROM {} WHERE hash = ?",
+            crate::DB_TABLE
+        ))?;
         let count: i64 = stmt.query_row(params![hash_str], |row| row.get(0))?;
 
         Ok(count > 0)
@@ -207,7 +213,9 @@ impl DBOps {
     /// assert_eq!(db_ops.count_hashes().unwrap(), 0);
     /// ```
     pub fn count_hashes(&self) -> Result<u64, rusqlite::Error> {
-        let mut stmt = self.db_conn.prepare("SELECT COUNT(*) FROM signatures")?;
+        let mut stmt = self
+            .db_conn
+            .prepare(&format!("SELECT COUNT(*) FROM {}", crate::DB_TABLE))?;
         let count: i64 = stmt.query_row([], |row| row.get(0))?;
         Ok(count as u64)
     }
@@ -223,8 +231,10 @@ impl DBOps {
     /// assert!(db_ops._remove_hash("abcd1234").is_ok());
     /// ```
     pub fn _remove_hash(&self, hash_str: &str) -> Result<(), rusqlite::Error> {
-        self.db_conn
-            .execute("DELETE FROM signatures WHERE hash = ?", [hash_str])?;
+        self.db_conn.execute(
+            &format!("DELETE FROM {} WHERE hash = ?", crate::DB_TABLE),
+            [hash_str],
+        )?;
         Ok(())
     }
 }
