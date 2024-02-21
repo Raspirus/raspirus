@@ -13,9 +13,9 @@ use threadpool_rs::threadpool::pool::ThreadPool;
 
 use super::config_file::Config;
 
-pub static MAX_RETRY: usize = 0;
-static PARALLEL_DOWNLOADS: usize = 12;
-static MAX_TIMEOUT: u64 = 12;
+pub static MAX_RETRY: usize = 5;
+static PARALLEL_DOWNLOADS: usize = 3;
+static MAX_TIMEOUT: u64 = 120;
 
 #[derive(Clone, serde::Serialize)]
 struct TauriEvent {
