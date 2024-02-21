@@ -6,7 +6,7 @@ use std::{
     time::Duration,
 };
 
-use log::{debug, error, info, trace, warn};
+use log::{error, info, trace, warn};
 use reqwest::StatusCode;
 use tauri::Manager;
 use threadpool_rs::threadpool::pool::ThreadPool;
@@ -127,7 +127,6 @@ pub fn download_all(total_files: usize, window: &Option<tauri::Window>) -> std::
     if cache_dir.exists() {
         fs::remove_dir_all(cache_dir.clone())?;
     }
-    fs::create_dir_all(cache_dir.clone())?;
 
     // frontend channel
     let (tx, rx): (mpsc::Sender<bool>, mpsc::Receiver<bool>) = mpsc::channel();
@@ -142,8 +141,12 @@ pub fn download_all(total_files: usize, window: &Option<tauri::Window>) -> std::
 
         let should_continue_thread = should_continue.clone();
 
+        let cdir = cache_dir.clone();
+
         pool.execute(move || {
             if should_continue_thread.load(std::sync::atomic::Ordering::Relaxed) {
+                let _ = fs::create_dir_all(cdir);
+
                 let download_path = dir.join(format!("{:0>5}", file_id));
                 let file_url = format!("{}/{:0>5}", mirror, file_id);
                 match download_file(&download_path, file_url.clone()) {
@@ -172,11 +175,9 @@ pub fn download_all(total_files: usize, window: &Option<tauri::Window>) -> std::
     for current in 0..=total_files {
         // if we receive false, meaning a thread yielded to an error, we stop updating the progress
         if rx.try_recv().map_err(|err| {
-            debug!("Clearing cache!");
-            let _ = fs::remove_dir_all(&cache_dir);
             std::io::Error::new(
                 std::io::ErrorKind::Other,
-                format!("Thread failed to receive on channel: {}", err),
+                format!("A download thread failed!: {}", err),
             )
         })? {
             if should_update {
@@ -189,11 +190,9 @@ pub fn download_all(total_files: usize, window: &Option<tauri::Window>) -> std::
     }
 
     if !should_continue.load(std::sync::atomic::Ordering::Relaxed) {
-        debug!("Clearing cache!");
-        let _ = fs::remove_dir_all(cache_dir);
         return Err(std::io::Error::new(
             std::io::ErrorKind::Other,
-            "A thread failed to download!",
+            "A download thread failed!",
         ));
     }
 
