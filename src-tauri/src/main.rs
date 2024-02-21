@@ -3,25 +3,32 @@
 
 use backend::config_file::Config;
 use backend::utils;
+use backend::utils::generic::{get_config, load_config, update_config};
 use directories_next::ProjectDirs;
 use log::{debug, error, info, warn, LevelFilter};
 use simplelog::{
     ColorChoice, CombinedLogger, ConfigBuilder, TermLogger, TerminalMode, WriteLogger,
 };
+use std::cell::RefCell;
 use std::fs;
 use std::fs::File;
+use std::sync::Arc;
 use tauri::api::cli::ArgData;
 
 mod backend;
 mod tests;
+
+// global config instance
+thread_local!(static CONFIG: RefCell<Arc<Config>> = RefCell::new(Arc::new(Config::default())));
 
 // NOTE: All functions with #[tauri::command] can and will be called from the GUI
 // Their name should not be changed and any new functions should return JSON data
 // using serde parsing
 
 fn main() -> Result<(), String> {
-    // We immediatley try to load the config at startup, or create a new one. The config defines the application states
-    let config = Config::new()?;
+    // We try to load the config, to make sure the rest of the programm will always have valid data to work with
+    load_config()?;
+    let config = get_config();
 
     // We check if we should log the application messages to a file or not, default is yes. Defined in the Config
     if config.logging_is_active {
@@ -228,14 +235,15 @@ async fn list_usb_drives() -> Result<String, String> {
 // Creates the config from the GUI
 #[tauri::command]
 fn create_config(contents: Option<String>) -> Result<String, String> {
-    let mut config = match contents {
+    let config = match contents {
         Some(contents) => serde_json::from_str(&contents).map_err(|err| err.to_string())?,
-        None => Config::new()?,
+        None => get_config(),
     };
 
-    config.save().map_err(|err| err.to_string())?;
+    update_config(config).map_err(|err| err.to_string())?;
+    
     let config_str =
-        serde_json::to_string(&config).expect("Issue with transforming config to Serde string");
+        serde_json::to_string(&get_config()).expect("Issue with transforming config to Serde string");
 
     Ok(config_str)
 }

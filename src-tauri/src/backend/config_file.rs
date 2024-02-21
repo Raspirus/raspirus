@@ -4,7 +4,7 @@ use std::fs::{self, File};
 use std::io::Read;
 use std::path::Path;
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(default)]
 pub struct Config {
     // Amount of hashes in the database
@@ -68,7 +68,7 @@ impl Config {
     }
 
     // OS compliant config path
-    pub fn get_config_path() -> String {
+    fn get_config_path() -> String {
         ProjectDirs::from("com", "Raspirus", "Raspirus")
             .expect("Failed to get project directories")
             .config_dir()
@@ -78,9 +78,10 @@ impl Config {
             .to_owned()
     }
 
+    
     /// Will save the current configuration to the file
     /// WARNING! If the fields are blank, it will clear the current config
-    pub fn save(&mut self) -> Result<(), String> {
+    pub fn save(&self) -> Result<(), String> {
         if !Path::new(&Self::get_config_path()).exists() {
             fs::create_dir_all(
                 Path::new(&Self::get_config_path())

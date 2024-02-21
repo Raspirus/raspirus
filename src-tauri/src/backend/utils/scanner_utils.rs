@@ -1,7 +1,7 @@
 use log::{debug, error, info, warn};
 use std::path::Path;
 
-use crate::backend::{config_file::Config, scanner};
+use crate::backend::{scanner, utils::generic::get_config};
 
 static DB_NAME: &str = "signatures.db";
 
@@ -10,7 +10,7 @@ static DB_NAME: &str = "signatures.db";
 
 pub async fn start_scanner(window: Option<tauri::Window>, path: String) -> Result<String, String> {
     // Define default values, will be overwritten later
-    let config = Config::new().expect("Failed to load config");
+    let config = get_config();
     let project_dir = config.program_path.expect("Failed to get program path");
     let program_dir = project_dir.data_dir();
 
@@ -51,7 +51,7 @@ pub async fn start_scanner(window: Option<tauri::Window>, path: String) -> Resul
 
 // Same as above, but in synchron (Should be rewritten to better suit the CLI, probably also renamed)
 pub fn sync_start_scanner(window: Option<tauri::Window>, path: String) -> Result<String, String> {
-    let config = Config::new()?;
+    let config = get_config();
     let project_dir = config.program_path.expect("Failed to get program path");
     let program_dir = project_dir.data_dir();
 

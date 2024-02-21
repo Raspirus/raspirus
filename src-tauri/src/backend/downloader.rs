@@ -8,53 +8,19 @@ use std::{
 
 use log::{error, info, trace, warn};
 use reqwest::StatusCode;
-use tauri::Manager;
 use threadpool_rs::threadpool::pool::ThreadPool;
 
-use super::config_file::Config;
+use crate::backend::utils::generic::send_progress;
+
+use super::utils::generic::get_config;
 
 pub static MAX_RETRY: usize = 5;
 static PARALLEL_DOWNLOADS: usize = 3;
 static MAX_TIMEOUT: u64 = 120;
 
-#[derive(Clone, serde::Serialize)]
-struct TauriEvent {
-    message: String,
-}
-
-/// sends given percentage to the frontend
-pub fn send(window: &Option<tauri::Window>, event: &str, message: String) {
-    if let Some(window) = window {
-        trace!("Sending {event}: {message}");
-        match window.emit_all(event, message) {
-            Ok(_) => {}
-            Err(err) => warn!("Failed to send progress to frontend: {err}"),
-        }
-    }
-}
-
-/// calculates progress and sends to frontend if changed. returns new percentage
-pub fn calculate_progress(
-    window: &Option<tauri::Window>,
-    last_percentage: f32,
-    current: usize,
-    total: usize,
-    event: &str,
-) -> Result<f32, String> {
-    let new_percentage = ((current as f32 / total as f32) * 100.0).round();
-    // if percentage has not changed return new percentage
-    if new_percentage == last_percentage {
-        return Ok(new_percentage);
-    }
-
-    send(window, event, format!("{new_percentage}"));
-    Ok(new_percentage)
-}
-
 /// Indexes the mirror and checks how many files exist
 pub fn index() -> Result<usize, std::io::Error> {
-    let config =
-        Config::new().map_err(|err| std::io::Error::new(std::io::ErrorKind::Other, err))?;
+    let config = get_config();
     let client = reqwest::blocking::Client::builder()
         .timeout(Duration::from_secs(MAX_TIMEOUT))
         .build()
@@ -117,8 +83,7 @@ pub fn index() -> Result<usize, std::io::Error> {
 /// Downloads all files from the mirror using a threadpool. sends true on tx if file finished downloading
 pub fn download_all(total_files: usize, window: &Option<tauri::Window>) -> std::io::Result<()> {
     let start_time = std::time::Instant::now();
-    let config =
-        Config::new().map_err(|err| std::io::Error::new(std::io::ErrorKind::Other, err))?;
+    let config = get_config();
     let project_dir = config
         .program_path
         .expect("Failed to get project directories");
@@ -181,7 +146,7 @@ pub fn download_all(total_files: usize, window: &Option<tauri::Window>) -> std::
             )
         })? {
             if should_update {
-                p = calculate_progress(window, p, current, total_files, "dwld")
+                p = send_progress(window, p, current, total_files, "dwld")
                     .map_err(|err| std::io::Error::new(std::io::ErrorKind::Other, err))?;
             }
         } else {
