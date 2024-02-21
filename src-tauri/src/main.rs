@@ -216,7 +216,6 @@ async fn update_database(window: tauri::Window) -> Result<String, String> {
     let msg = tokio::task::spawn_blocking(|| utils::update_utils::update(Some(window)))
         .await
         .map_err(|err| err.to_string())?;
-    println!("{:#?}", msg);
     msg
 }
 
@@ -228,7 +227,7 @@ async fn list_usb_drives() -> Result<String, String> {
 
 // Creates the config from the GUI
 #[tauri::command]
-async fn create_config(contents: Option<String>) -> Result<String, String> {
+fn create_config(contents: Option<String>) -> Result<String, String> {
     let mut config = match contents {
         Some(contents) => serde_json::from_str(&contents).map_err(|err| err.to_string())?,
         None => Config::new()?,
@@ -236,7 +235,7 @@ async fn create_config(contents: Option<String>) -> Result<String, String> {
 
     config.save().map_err(|err| err.to_string())?;
     let config_str =
-        serde_json::to_string(&config).expect("Issue with transforming congig to Serde string");
+        serde_json::to_string(&config).expect("Issue with transforming config to Serde string");
 
     Ok(config_str)
 }
