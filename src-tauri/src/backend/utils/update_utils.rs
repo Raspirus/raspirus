@@ -5,16 +5,16 @@ use std::fs::{self, DirEntry};
 use std::io::{BufRead, BufReader};
 use std::{path::Path, time};
 
-use crate::backend::config_file::Config;
 use crate::backend::db_ops::DBOps;
-use crate::backend::downloader::{calculate_progress, send};
+use crate::backend::utils::generic::{send, send_progress, update_config};
+
+use super::generic::get_config;
 
 static DB_NAME: &str = "signatures.db";
 
 /// Checks if local is running behind remote. Returns true if remote is newer
 pub fn check_update_necessary() -> Result<bool, std::io::Error> {
-    let config =
-        Config::new().map_err(|err| std::io::Error::new(std::io::ErrorKind::Other, err))?;
+    let config = get_config();
 
     // get local timestamp
     let local_timestamp = config.last_db_update;
@@ -27,8 +27,7 @@ pub fn check_update_necessary() -> Result<bool, std::io::Error> {
 
 /// fetches remote timestamp from mirror
 pub fn get_remote_timestamp() -> Result<String, std::io::Error> {
-    let config =
-        Config::new().map_err(|err| std::io::Error::new(std::io::ErrorKind::Other, err))?;
+    let config = get_config();
     let file_url = format!("{}/timestamp", config.mirror.clone());
 
     let client = reqwest::blocking::Client::new();
@@ -69,7 +68,7 @@ pub fn update(window: Option<tauri::Window>) -> Result<String, String> {
     }
 
     info!("Updating database...");
-    let mut config = Config::new()?;
+    let mut config = get_config();
     let project_dir = match config.program_path.as_ref() {
         Some(project_dir) => Ok(project_dir),
         None => Err(String::from("Failed to get project directories.")),
@@ -101,7 +100,7 @@ pub fn update(window: Option<tauri::Window>) -> Result<String, String> {
             // write remote timestamp to config
             let timestamp = get_remote_timestamp().map_err(|err| err.to_string())?;
             config.last_db_update = timestamp;
-            config.save().map_err(|err| err.to_string())?;
+            update_config(config)?;
 
             let big_toc = time::Instant::now();
             info!(
@@ -119,7 +118,7 @@ pub fn update(window: Option<tauri::Window>) -> Result<String, String> {
 
 pub fn insert_all(db: &mut DBOps, window: &Option<tauri::Window>) -> Result<(), String> {
     let start_time = std::time::Instant::now();
-    let config = Config::new()?;
+    let config = get_config();
     let project_dir = match config.program_path.as_ref() {
         Some(project_dir) => Ok(project_dir),
         None => Err(String::from("Failed to get project directories.")),
@@ -151,7 +150,7 @@ pub fn insert_all(db: &mut DBOps, window: &Option<tauri::Window>) -> Result<(), 
             Err(err) => warn!("Error inserting: {err}"),
         }
         i += 1;
-        p = calculate_progress(window, p, i, len, "ins")?;
+        p = send_progress(window, p, i, len, "ins")?;
     }
 
     info!(

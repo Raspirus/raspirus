@@ -11,7 +11,7 @@ use log::{debug, error, info, warn};
 use tauri::Manager;
 use zip::ZipArchive;
 
-use super::{config_file::Config, db_ops::DBOps, file_log::FileLog};
+use super::{db_ops::DBOps, file_log::FileLog, utils::generic::get_config};
 
 #[derive(Clone, serde::Serialize)]
 struct TauriEvent {
@@ -58,7 +58,7 @@ impl Scanner {
         let now_str = now.format("%Y_%m_%d_%H_%M_%S").to_string();
         let log_str = format!("{}.log", now_str);
 
-        let config = Config::new()?;
+        let config = get_config();
         // Add all false positives here
         let false_positive: Vec<String> = config.ignored_hashes;
 

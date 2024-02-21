@@ -4,8 +4,8 @@ use log::{debug, info, warn};
 use rusqlite::{params, Connection};
 
 use crate::backend::{
-    downloader::{download_all, index, send},
-    utils::update_utils::insert_all,
+    downloader::{download_all, index},
+    utils::{generic::send, update_utils::insert_all},
 };
 
 #[allow(unused)]
@@ -60,7 +60,7 @@ impl DBOps {
     /// assert!(db_ops.init_table().is_ok());
     /// ```
     pub fn init_table(&self) -> Result<(), rusqlite::Error> {
-        info!("Creating table if not present...");
+        debug!("Creating table if not present...");
         let _ = self.db_conn.execute(
             "CREATE TABLE IF NOT EXISTS signatures (hash varchar(32))",
             [],
