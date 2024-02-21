@@ -78,7 +78,6 @@ impl Config {
             .to_owned()
     }
 
-    
     /// Will save the current configuration to the file
     /// WARNING! If the fields are blank, it will clear the current config
     pub fn save(&self) -> Result<(), String> {

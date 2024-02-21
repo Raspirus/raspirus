@@ -220,10 +220,9 @@ async fn check_raspberry() -> Result<bool, String> {
 // Updates the database over the GUi
 #[tauri::command]
 async fn update_database(window: tauri::Window) -> Result<String, String> {
-    let msg = tokio::task::spawn_blocking(|| utils::update_utils::update(Some(window)))
+    tokio::task::spawn_blocking(|| utils::update_utils::update(Some(window)))
         .await
-        .map_err(|err| err.to_string())?;
-    msg
+        .map_err(|err| err.to_string())?
 }
 
 // Returns a vector of all attached removable storage drives (USB) -> Unnecessary for the CLI
@@ -241,9 +240,9 @@ fn create_config(contents: Option<String>) -> Result<String, String> {
     };
 
     update_config(config).map_err(|err| err.to_string())?;
-    
-    let config_str =
-        serde_json::to_string(&get_config()).expect("Issue with transforming config to Serde string");
+
+    let config_str = serde_json::to_string(&get_config())
+        .expect("Issue with transforming config to Serde string");
 
     Ok(config_str)
 }

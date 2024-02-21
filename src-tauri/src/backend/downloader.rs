@@ -116,11 +116,7 @@ pub fn download_all(total_files: usize, window: &Option<tauri::Window>) -> std::
                 let file_url = format!("{}/{:0>5}", mirror, file_id);
                 match download_file(&download_path, file_url.clone()) {
                     Ok(_) => {
-                        info!(
-                            "Downloaded {} to {}",
-                            file_url,
-                            dir.clone().display()
-                        );
+                        info!("Downloaded {} to {}", file_url, dir.clone().display());
                         tx.send(true)
                             .expect("Download thread failed to send on channel")
                     }
