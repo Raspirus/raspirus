@@ -176,7 +176,7 @@ fn cli_scanner(app: tauri::AppHandle, data: &ArgData) {
     if let Some(json_str) = data.value.as_str() {
         let unescaped_str = json_str.replace("\\n", "\n").replace("\\t", "\t");
         debug!("Data provided: {}", unescaped_str);
-        match utils::scanner_utils::sync_start_scanner(None, unescaped_str) {
+        match utils::scanner_utils::start_scanner(None, unescaped_str) {
             Ok(res) => {
                 info!("Result: {res}");
                 app.exit(0);
@@ -210,7 +210,9 @@ fn cli_dbupdate(app: tauri::AppHandle) {
 // Starts the scanner over the GUI
 #[tauri::command]
 async fn start_scanner(window: tauri::Window, path: String) -> Result<String, String> {
-    utils::scanner_utils::start_scanner(Some(window), path).await
+    tokio::task::spawn_blocking(|| utils::scanner_utils::start_scanner(Some(window), path))
+        .await
+        .map_err(|err| err.to_string())?
 }
 
 // Checks if we are currently on a Raspberry Pi,

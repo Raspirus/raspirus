@@ -7,7 +7,7 @@ use std::{
 };
 
 use chrono::{DateTime, Local};
-use log::{debug, error, info, warn};
+use log::{debug, error, info, trace, warn};
 use tauri::Manager;
 use zip::ZipArchive;
 
@@ -44,8 +44,7 @@ pub struct Scanner {
 impl Scanner {
     // Creates a FileScanner object
     pub fn new(db_file: &str, t_win: Option<tauri::Window>) -> Result<Self, String> {
-        //check if the path that should be scanned exists
-
+        // checks if database exists
         let tmpconf = match DBOps::new(db_file) {
             Ok(db_conn) => db_conn,
             Err(err) => {
@@ -124,6 +123,7 @@ impl Scanner {
 
     // gets the unpacked size of a zip file
     fn size_zip(path: &Path) -> Result<u64, std::io::Error> {
+        trace!("Calculating zip: {}", path.display());
         let file = File::open(path)?;
         let mut archive = ZipArchive::new(file)?;
         let mut archive_size = 0;
@@ -137,7 +137,7 @@ impl Scanner {
 
     // gets the size of a file
     fn size_file(path: &Path) -> Result<u64, std::io::Error> {
-        debug!("Calculating {}", path.to_str().unwrap_or_default());
+        trace!("Calculating file: {}", path.display());
         Ok(
             match path
                 .extension()
@@ -153,7 +153,7 @@ impl Scanner {
 
     // gets the size of a folder and its contents
     fn size_folder(path: &Path) -> Result<u64, std::io::Error> {
-        debug!("Entering {}", path.to_str().unwrap_or_default());
+        trace!("Calculating folder: {}", path.display());
         let mut size = 0;
 
         let entries = fs::read_dir(path)?;
@@ -172,23 +172,23 @@ impl Scanner {
 
     // gets the size for a given path
     fn size(path: &Path) -> Result<u64, String> {
-        Ok(if path.is_dir() {
+        if path.is_dir() {
             match Self::size_folder(path) {
-                Ok(size) => size,
+                Ok(size) => Ok(size),
                 Err(err) => {
                     warn!("Failed to get folder size for scanning: {err}");
-                    return Err(String::from("Failed to get folder size for scanning"));
+                    Err(String::from("Failed to get folder size for scanning"))
                 }
             }
         } else {
             match Self::size_file(path) {
-                Ok(size) => size,
+                Ok(size) => Ok(size),
                 Err(err) => {
                     warn!("Failed to get file size for scanning: {err}");
-                    return Ok(0);
+                    Ok(0)
                 }
             }
-        })
+        }
     }
 
     // scans a folder. returns true if infected
@@ -469,5 +469,3 @@ impl Scanner {
         Ok(scanned_percentage)
     }
 }
-
-// initializes the scan
