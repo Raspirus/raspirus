@@ -1,6 +1,6 @@
 use std::time;
 
-use log::{info, warn};
+use log::{debug, info, warn};
 use rusqlite::{params, Connection};
 
 use crate::backend::{
@@ -85,12 +85,43 @@ impl DBOps {
         send(window, "dwld", String::from("0"));
         download_all(max_file, window)?;
         send(window, "ins", String::from("0"));
+        debug!("Moving old dataset to backup before writing...");
+        // move table to backup
+        self.rename("signatures", "old").map_err(|err| std::io::Error::new(std::io::ErrorKind::Other, err))?;
         insert_all(self, window)
-            .map_err(|err| std::io::Error::new(std::io::ErrorKind::Other, err))?;
+            .map_err(|err_1| {
+                warn!("Failed to write, undoing backup...");
+                // undo table move
+                match self.drop("signatures").map_err(|err| err.to_string()) {
+                    Ok(_) => {},
+                    Err(err) => return std::io::Error::new(std::io::ErrorKind::Other, err)
+                }
+                match self.rename("old", "signatures").map_err(|err| err.to_string()) {
+                    Ok(_) => {},
+                    Err(err) => return std::io::Error::new(std::io::ErrorKind::Other, err)
+                }
+                std::io::Error::new(std::io::ErrorKind::Other, err_1)}
+            )?;
+        debug!("Removing old dataset...");
+        // drop old dataset
+        self.drop("old").map_err(|err| std::io::Error::new(std::io::ErrorKind::Other, err))?;
         info!("Total hashes in DB: {}", self.count_hashes().unwrap_or(0));
         Ok(self
             .count_hashes()
             .map_err(|err| std::io::Error::new(std::io::ErrorKind::Other, err.to_string()))?)
+    }
+    
+    /// Drops provided table and cleans database
+    pub fn drop(&mut self, tablename: &str) -> Result<(), rusqlite::Error> {
+        let _ = self.db_conn.execute(&format!("DROP TABLE {tablename}"), [])?;
+        let _ = self.db_conn.execute(&format!("VACUUM"), [])?;
+        Ok(())
+    }
+
+    /// Renames old table to new
+    pub fn rename(&mut self, old_tablename: &str, new_tablename: &str) -> Result<(), rusqlite::Error> {
+        let _ = self.db_conn.execute(&format!("ALTER TABLE {old_tablename} RENAME TO {new_tablename} "), [])?;
+        Ok(())
     }
 
     /// Inserts the given hashes into the signatures table.
@@ -104,6 +135,7 @@ impl DBOps {
     /// db_ops.insert_hashes(vec!["abcdef".to_owned()]).unwrap();
     /// ```
     pub fn insert_hashes(&mut self, hashes: &Vec<String>) -> Result<(), rusqlite::Error> {
+        self.init_table()?;
         info!("Inserting {} hashes...", hashes.len());
         let transact = self.db_conn.transaction()?;
 
