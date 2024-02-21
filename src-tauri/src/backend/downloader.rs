@@ -153,7 +153,7 @@ pub fn download_all(total_files: usize, window: &Option<tauri::Window>) -> std::
                     Ok(_) => {
                         info!(
                             "Downloaded {} to {}",
-                            download_path.display(),
+                            file_url,
                             dir.clone().display()
                         );
                         tx.send(true)
@@ -174,7 +174,7 @@ pub fn download_all(total_files: usize, window: &Option<tauri::Window>) -> std::
     let mut should_update = true;
     for current in 0..=total_files {
         // if we receive false, meaning a thread yielded to an error, we stop updating the progress
-        if rx.try_recv().map_err(|err| {
+        if rx.recv().map_err(|err| {
             std::io::Error::new(
                 std::io::ErrorKind::Other,
                 format!("A download thread failed!: {}", err),
