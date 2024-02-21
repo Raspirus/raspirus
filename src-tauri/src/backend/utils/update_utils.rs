@@ -10,8 +10,6 @@ use crate::backend::utils::generic::{send, send_progress, update_config};
 
 use super::generic::get_config;
 
-static DB_NAME: &str = "signatures.db";
-
 /// Checks if local is running behind remote. Returns true if remote is newer
 pub fn check_update_necessary() -> Result<bool, std::io::Error> {
     let config = get_config();
@@ -30,7 +28,7 @@ pub fn get_remote_timestamp() -> Result<String, std::io::Error> {
     let file_url = format!("{}/timestamp", config.mirror.clone());
 
     let client = reqwest::blocking::Client::new();
-    for current_retry in 0..=crate::backend::downloader::MAX_RETRY {
+    for current_retry in 0..=crate::MAX_RETRY {
         let response = match client.get(&file_url).send() {
             Ok(response) => response,
             Err(err) => {
@@ -75,15 +73,16 @@ pub fn update(window: Option<tauri::Window>) -> Result<String, String> {
     let program_dir = project_dir.data_dir();
 
     // try to get a usable database path
-    let db_file_str = if !config.db_location.is_empty()
-        && Path::new(&config.db_location).to_owned().exists()
-        && Path::new(&config.db_location).to_owned().is_file()
-    {
+    let db_path = Path::new(&config.db_location);
+    let db_file_str = if !config.db_location.is_empty() && db_path.exists() && db_path.is_file() {
         info!("Using specific DB path {}", config.db_location);
         config.db_location.clone()
     } else {
         // if not we use the default path
-        program_dir.join(DB_NAME).to_string_lossy().to_string()
+        program_dir
+            .join(crate::DB_NAME)
+            .to_string_lossy()
+            .to_string()
     };
 
     // connect to database
@@ -139,9 +138,7 @@ pub fn insert_all(db: &mut DBOps, window: &Option<tauri::Window>) -> Result<(), 
         let reader = BufReader::new(file);
 
         // add readers lines to lines vector
-        let lines = reader.lines().map_while(Result::ok).collect();
-
-        match db.insert_hashes(&lines) {
+        match db.insert_hashes(&reader.lines().map_while(Result::ok).collect()) {
             Ok(_) => {}
             Err(err) => warn!("Error inserting: {err}"),
         }
