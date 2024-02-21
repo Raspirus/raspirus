@@ -14,20 +14,16 @@ use crate::backend::utils::generic::send_progress;
 
 use super::utils::generic::get_config;
 
-pub static MAX_RETRY: usize = 5;
-static PARALLEL_DOWNLOADS: usize = 3;
-static MAX_TIMEOUT: u64 = 120;
-
 /// Indexes the mirror and checks how many files exist
 pub fn index() -> Result<usize, std::io::Error> {
     let config = get_config();
     let client = reqwest::blocking::Client::builder()
-        .timeout(Duration::from_secs(MAX_TIMEOUT))
+        .timeout(Duration::from_secs(crate::MAX_TIMEOUT))
         .build()
         .expect("Failed to build client");
 
     let mut total_files = 0;
-    let mut current_try = MAX_RETRY;
+    let mut current_try = crate::MAX_RETRY;
     loop {
         let file_url = format!("{}/{:0>5}", config.mirror, total_files);
         trace!("Indexing {file_url}");
@@ -46,14 +42,17 @@ pub fn index() -> Result<usize, std::io::Error> {
                 );
                 current_try -= 1;
                 if current_try == 0 {
-                    warn!("Failed {MAX_RETRY} times, aborting; Check your network?")
+                    warn!(
+                        "Failed {} times, aborting; Check your network?",
+                        crate::MAX_RETRY
+                    )
                 }
             }
         }
     }
 
     total_files -= 10;
-    current_try = MAX_RETRY;
+    current_try = crate::MAX_RETRY;
 
     loop {
         let file_url = format!("{}/{:0>5}", config.mirror, total_files);
@@ -72,7 +71,10 @@ pub fn index() -> Result<usize, std::io::Error> {
                 );
                 current_try -= 1;
                 if current_try == 0 {
-                    warn!("Failed {MAX_RETRY} times, aborting; Check your network?")
+                    warn!(
+                        "Failed {} times, aborting; Check your network?",
+                        crate::MAX_RETRY
+                    )
                 }
             }
         }
@@ -98,7 +100,7 @@ pub fn download_all(total_files: usize, window: &Option<tauri::Window>) -> std::
     // terminator
     let should_continue = Arc::new(AtomicBool::new(true));
 
-    let pool = ThreadPool::new(PARALLEL_DOWNLOADS)?;
+    let pool = ThreadPool::new(crate::PARALLEL_DOWNLOADS)?;
     for file_id in 0..=total_files {
         let dir = cache_dir.clone();
         let mirror = config.mirror.clone();
@@ -176,7 +178,7 @@ pub fn download_file(output_name: &Path, file_url: String) -> std::io::Result<()
                     std::io::ErrorKind::Other,
                     "Parent directory does not exist",
                 ));
-            }
+            };
         }
         None => {
             return Err(std::io::Error::new(
@@ -191,7 +193,7 @@ pub fn download_file(output_name: &Path, file_url: String) -> std::io::Result<()
     let mut file = File::create(output_name)?;
     let client = reqwest::blocking::Client::new();
 
-    for current_retry in 0..=MAX_RETRY {
+    for current_retry in 0..=crate::MAX_RETRY {
         let response = match client.get(file_url.clone()).send() {
             Ok(response) => response,
             Err(err) => {

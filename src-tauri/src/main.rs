@@ -18,6 +18,15 @@ use tauri::api::cli::ArgData;
 mod backend;
 mod tests;
 
+// database settings
+static DB_NAME: &str = "signatures.db";
+static DB_TABLE: &str = "signatures";
+
+// download settings
+static MAX_RETRY: usize = 5;
+static PARALLEL_DOWNLOADS: usize = 3;
+static MAX_TIMEOUT: u64 = 120;
+
 // global config instance
 thread_local!(static CONFIG: RefCell<Arc<Config>> = RefCell::new(Arc::new(Config::default())));
 
