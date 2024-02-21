@@ -46,6 +46,7 @@ impl Default for Config {
 
 /// The config file simply holds settings of the application that should perists during reboots
 /// The entire config is saved to a JSON file and loaded or created on the first start
+/// Default config gets created, then we try to load. If load fails we return default
 impl Config {
     pub fn new() -> Result<Self, String> {
         // creates instance of new config
@@ -93,20 +94,20 @@ impl Config {
         serde_json::to_writer_pretty(file, self).map_err(|err| err.to_string())
     }
 
-    /// Loads the current config and returns it, or creates a new one if there is non yet
+    /// Loads the current config and returns it, or creates a new one if there is none yet
     pub fn load(&mut self) -> Result<(), String> {
         // Checks if the config file exists, else quickly creates it
         if !Path::new(&Self::get_config_path()).exists() {
             self.save()?;
         };
 
-        let mut file = File::open(Self::get_config_path()).expect("Couldn't open file");
+        let mut file = File::open(Self::get_config_path()).map_err(|err| err.to_string())?;
         let mut contents = String::new();
         file.read_to_string(&mut contents)
-            .expect("Failed reading config to string");
+            .map_err(|err| format!("Failed to read config to string: {err}"))?;
         let mut config_from_str: Config = serde_json::from_str(&contents)
             .map_err(|err| err.to_string())
-            .expect("Failed deserializing config");
+            .map_err(|err| format!("Failed deserializing config: {err}"))?;
         config_from_str.set_program_path()?;
         *self = config_from_str;
         Ok(())
