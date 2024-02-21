@@ -20,10 +20,8 @@ pub fn load_config() -> Result<(), String> {
 
 #[allow(unused)]
 /// saves the global config
-pub fn save_config() -> Result<(), String>{
-    CONFIG.with(|config| {
-        config.borrow().save()
-    })
+pub fn save_config() -> Result<(), String> {
+    CONFIG.with(|config| config.borrow().save())
 }
 
 /// updates the global config to new_config and saves
