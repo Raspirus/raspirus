@@ -23,7 +23,7 @@ pub struct Config {
     pub ignored_hashes: Vec<String>,
     // mirror to folder with hashfiles for update
     pub mirror: String,
-    // various paths in an effor to unify them
+    // various paths in an effort to unify them. are folders expected to be used later
     #[serde(skip)]
     pub paths: Option<Paths>,
 }
@@ -91,6 +91,7 @@ impl Config {
     fn get_config_path(&self) -> Result<PathBuf, String> {
         Ok(self
             .paths
+            .clone()
             .ok_or("Failed to get project directories".to_owned())?
             .config)
     }
@@ -100,7 +101,7 @@ impl Config {
     pub fn save(&self) -> Result<(), String> {
         let path = self.get_config_path()?;
         if !path.exists() {
-            fs::create_dir_all(path)
+            fs::create_dir_all(&path)
                 .map_err(|err| format!("Failed to create config file: {err}"))?;
         }
 
