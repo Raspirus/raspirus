@@ -78,28 +78,30 @@ impl Config {
         let config = dirs.config_dir().to_owned();
         let cache = dirs.cache_dir().to_owned();
 
+        // create all paths
+        fs::create_dir_all(&data).map_err(|err| err.to_string())?;
+        fs::create_dir_all(&logs).map_err(|err| err.to_string())?;
+        fs::create_dir_all(&config).map_err(|err| err.to_string())?;
+        fs::create_dir_all(&cache).map_err(|err| err.to_string())?;
+
         self.paths = Some(Paths {
             data,
             config,
             logs,
             cache,
         });
+        println!("{:#?}", self.paths);
         Ok(())
-    }
-
-    // OS compliant config path
-    fn get_config_path(&self) -> Result<PathBuf, String> {
-        Ok(self
-            .paths
-            .clone()
-            .ok_or("No paths set. Is config initialized?".to_owned())?
-            .config)
     }
 
     /// Will save the current configuration to the file
     /// WARNING! If the fields are blank, it will clear the current config
     pub fn save(&self) -> Result<(), String> {
-        let path = self.get_config_path()?;
+        let path = self
+            .paths
+            .clone()
+            .ok_or("Could not get config path".to_owned())?
+            .config;
         if !path.exists() {
             fs::create_dir_all(&path)
                 .map_err(|err| format!("Failed to create config file: {err}"))?;
@@ -112,11 +114,17 @@ impl Config {
 
     /// Loads the current config and returns it, or creates a new one if there is none yet
     pub fn load(&mut self) -> Result<(), String> {
-        let path = self.get_config_path()?;
+        let path = self
+            .paths
+            .clone()
+            .ok_or("Could not get config path".to_owned())?
+            .config;
         // Checks if the config file exists, else quickly creates it
         if !path.exists() {
+            println!("Config does not exist, creating...");
             self.save()?;
         };
+        println!("Saved...");
 
         let mut file =
             File::open(path.join(crate::CONFIG_FILENAME)).map_err(|err| err.to_string())?;
