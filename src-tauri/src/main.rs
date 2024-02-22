@@ -20,7 +20,7 @@ mod backend;
 mod tests;
 
 // config
-static CONFIG_FILENAME: &str = "config.json";
+static CONFIG_FILENAME: &str = "Raspirus.json";
 
 // database settings
 static DB_NAME: &str = "signatures.db";
