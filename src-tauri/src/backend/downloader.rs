@@ -86,11 +86,15 @@ pub fn index() -> Result<usize, std::io::Error> {
 pub fn download_all(total_files: usize, window: &Option<tauri::Window>) -> std::io::Result<()> {
     let start_time = std::time::Instant::now();
     let config = get_config();
-    let project_dir = config
-        .program_path
-        .expect("Failed to get project directories");
-    let cache_dir = project_dir.cache_dir().to_owned();
+    let cache_dir = config
+        .paths
+        .ok_or(std::io::Error::new(
+            std::io::ErrorKind::Other,
+            "Failed to get project directories",
+        ))?
+        .cache;
 
+        // TODO: implement cache delete
     if cache_dir.exists() {
         fs::remove_dir_all(cache_dir.clone())?;
     }
