@@ -11,6 +11,7 @@ mod tests {
         assert!(db_ops.init_table().is_ok());
     }
 
+    // TODO: rewrite tests since code structure changed
     /*
     #[test]
     fn test_download_files() {
