@@ -1,7 +1,12 @@
-use std::sync::Arc;
+use std::{
+    fs::{self, File},
+    path::Path,
+    sync::Arc,
+};
 
 use log::{trace, warn};
 use tauri::Manager;
+use zip::ZipArchive;
 
 use crate::{backend::config_file::Config, CONFIG};
 
@@ -70,4 +75,91 @@ pub fn send_progress(
 
     send(window, event, format!("{new_percentage}"));
     Ok(new_percentage)
+}
+
+/// clears the cache directory
+pub fn clear_cache() -> std::io::Result<()> {
+    let cache_dir = get_config()
+        .paths
+        .ok_or(std::io::Error::new(
+            std::io::ErrorKind::NotFound,
+            "No paths set. Is config initialized?",
+        ))?
+        .cache;
+
+    cache_dir
+        .exists()
+        .then(|| fs::remove_dir_all(cache_dir))
+        .unwrap_or(Ok(()))?;
+    Ok(())
+}
+
+/// gets the unpacked size of a zip file
+pub fn size_zip(path: &Path) -> Result<u64, std::io::Error> {
+    trace!("Calculating zip: {}", path.display());
+    let file = File::open(path)?;
+    let mut archive = ZipArchive::new(file)?;
+    let mut archive_size = 0;
+
+    for i in 0..archive.len() {
+        let file = archive.by_index(i)?;
+        archive_size += file.size();
+    }
+    Ok(archive_size)
+}
+
+// gets the size of a file
+pub fn size_file(path: &Path) -> Result<u64, std::io::Error> {
+    trace!("Calculating file: {}", path.display());
+    Ok(
+        match path
+            .extension()
+            .unwrap_or_default()
+            .to_str()
+            .unwrap_or_default()
+        {
+            "zip" => size_zip(path)?,
+            _ => File::open(path)?.metadata()?.len(),
+        },
+    )
+}
+
+// gets the size of a folder and its contents
+pub fn size_folder(path: &Path) -> Result<u64, std::io::Error> {
+    trace!("Calculating folder: {}", path.display());
+    let mut size = 0;
+
+    let entries = fs::read_dir(path)?;
+    for entry in entries {
+        let entry_path = entry?.path();
+
+        if entry_path.is_dir() {
+            size += size_folder(&entry_path)?;
+        } else if entry_path.is_file() {
+            size += size_file(&entry_path)?;
+        }
+    }
+
+    Ok(size)
+}
+
+// gets the size for a given path
+pub fn size(path: &Path) -> Result<u64, String> {
+    if path.is_dir() {
+        match size_folder(path) {
+            Ok(size) => Ok(size),
+            Err(err) => {
+                warn!("Failed to get folder size for scanning: {err}");
+                Err(String::from("Failed to get folder size for scanning"))
+            }
+        }
+    } else {
+        match size_file(path) {
+            Ok(size) => Ok(size),
+            Err(err) => {
+                warn!("Failed to get file size for scanning: {err}");
+                Ok(0)
+            }
+        }
+    }
 }
