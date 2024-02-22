@@ -76,13 +76,24 @@ impl Config {
 
         // LocalData
         let config = dirs.config_dir().to_owned();
-        let cache = dirs.cache_dir().to_owned();
+        let cache = dirs.cache_dir().to_owned().join("raspirus-fetch");
 
         // create all paths
-        fs::create_dir_all(&data).map_err(|err| err.to_string())?;
-        fs::create_dir_all(&logs).map_err(|err| err.to_string())?;
-        fs::create_dir_all(&config).map_err(|err| err.to_string())?;
-        fs::create_dir_all(&cache).map_err(|err| err.to_string())?;
+        if !data.exists() {
+            fs::create_dir_all(&data).map_err(|err| err.to_string())?;
+        }
+
+        if !logs.exists() {
+            fs::create_dir_all(&logs).map_err(|err| err.to_string())?;
+        }
+
+        if !config.exists() {
+            fs::create_dir_all(&config).map_err(|err| err.to_string())?;
+        }
+
+        if !cache.exists() {
+            fs::create_dir_all(&cache).map_err(|err| err.to_string())?;
+        }
 
         self.paths = Some(Paths {
             data,
@@ -90,7 +101,6 @@ impl Config {
             logs,
             cache,
         });
-        println!("{:#?}", self.paths);
         Ok(())
     }
 
@@ -118,16 +128,15 @@ impl Config {
             .paths
             .clone()
             .ok_or("Could not get config path".to_owned())?
-            .config;
+            .config
+            .join(crate::CONFIG_FILENAME);
         // Checks if the config file exists, else quickly creates it
         if !path.exists() {
-            println!("Config does not exist, creating...");
             self.save()?;
         };
-        println!("Saved...");
 
         let mut file =
-            File::open(path.join(crate::CONFIG_FILENAME)).map_err(|err| err.to_string())?;
+            File::open(path).map_err(|err| err.to_string())?;
         let mut contents = String::new();
         file.read_to_string(&mut contents)
             .map_err(|err| format!("Failed to read config to string: {err}"))?;
