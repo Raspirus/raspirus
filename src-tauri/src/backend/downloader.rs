@@ -90,7 +90,7 @@ pub fn download_all(total_files: usize, window: &Option<tauri::Window>) -> std::
         .paths
         .ok_or(std::io::Error::new(
             std::io::ErrorKind::Other,
-            "Failed to get project directories",
+            "No paths set. Is config initialized?",
         ))?
         .cache;
 

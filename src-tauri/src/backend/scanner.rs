@@ -119,13 +119,19 @@ impl Scanner {
     pub fn scan_folder(&mut self, path: &Path, early_stop: bool) -> Result<bool, String> {
         debug!("Entering {}", path.to_str().unwrap_or_default());
         let mut found_total = false;
+        
+        let entries = fs::read_dir(path).map_err(|err| err.to_string())?;
 
-        let entries = fs::read_dir(path).unwrap();
-        let flattened = entries.flatten();
-        // add difference between original number of files found and files that can be aquired without error as skipped
-        self.skipped += (entries.count() - flattened.count()) as u64;
-
-        for entry in flattened {
+        for entry in entries {
+            // check if entry is readable
+            let entry = match entry.map_err(|err| err.to_string())  {
+                Ok(entry) => entry,
+                Err(err) => {
+                    warn!("Failed to get entry: {err}");
+                    self.skipped += 1;
+                    continue;
+                }
+            };
             let entry_path = entry.path();
             // if this returns something, it means we found something and are returning early
             if let Some(_) = match entry_path {
@@ -169,7 +175,7 @@ impl Scanner {
                 break;
             }
         }
-
+        
         Ok(found_total)
     }
 
@@ -221,7 +227,11 @@ impl Scanner {
                         continue;
                     }
 
-                    if self.db_conn.hash_exists(&hash).map_err(|err| format!("Failed to retrieve hash from db: {err}"))? {
+                    if self
+                        .db_conn
+                        .hash_exists(&hash)
+                        .map_err(|err| format!("Failed to retrieve hash from db: {err}"))?
+                    {
                         info!("Hash {hash} found");
                         // mark file path as infected
                         self.dirty_files.push(
@@ -232,8 +242,7 @@ impl Scanner {
                                 .to_owned(),
                         );
                         // log found file
-                        self.log
-                            .log(hash, path.display().to_string());
+                        self.log.log(hash, path.display().to_string());
 
                         found = true;
                         if early_stop {
@@ -244,13 +253,15 @@ impl Scanner {
             }
             // other files
             _ => {
-                let mut file = File::open(path).map_err(|err| {
-                    format!("Failed to get file: {err}")
-                })?;
+                let mut file =
+                    File::open(path).map_err(|err| format!("Failed to get file: {err}"))?;
 
-                self.calculate_progress(
-                    fs::metadata(path).map_err(|_| "Failed to get file size".to_owned())?.len(),
-                ).map_err(|err| warn!("Failed to calculate progress: {err}"));
+                let _ = self.calculate_progress(
+                    fs::metadata(path)
+                        .map_err(|_| "Failed to get file size".to_owned())?
+                        .len(),
+                )
+                .map_err(|err| warn!("Failed to calculate progress: {err}"));
 
                 let hash = Scanner::compute_hash(&mut file).map_err(|err| {
                     format!(
@@ -265,7 +276,11 @@ impl Scanner {
                     return Ok(found);
                 }
 
-                if self.db_conn.hash_exists(&hash).map_err(|err| format!("Failed to retrieve hash from db: {err}"))? {
+                if self
+                    .db_conn
+                    .hash_exists(&hash)
+                    .map_err(|err| format!("Failed to retrieve hash from db: {err}"))?
+                {
                     info!("Hash {hash} found");
                     // mark file path as infected
                     self.dirty_files.push(
@@ -276,8 +291,7 @@ impl Scanner {
                             .to_owned(),
                     );
                     // log found file
-                    self.log
-                        .log(hash, path.display().to_string());
+                    self.log.log(hash, path.display().to_string());
 
                     found = true;
                     if early_stop {
