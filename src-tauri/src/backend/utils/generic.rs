@@ -15,14 +15,6 @@ struct TauriEvent {
     message: String,
 }
 
-/// loads the global config
-pub fn load_config() -> Result<(), String> {
-    CONFIG.with(|config| {
-        *config.borrow_mut() = Arc::new(Config::new()?);
-        Ok(())
-    })
-}
-
 #[allow(unused)]
 /// saves the global config
 pub fn save_config() -> Result<(), String> {
@@ -33,18 +25,15 @@ pub fn save_config() -> Result<(), String> {
 pub fn update_config(new_config: Config) -> Result<(), String> {
     CONFIG.with(|config| {
         *config.borrow_mut() = Arc::new(new_config);
-        (*config.borrow_mut()).save()
+        save_config()
     })
 }
 
 /// returns the config struct
 pub fn get_config() -> Config {
     CONFIG.with(|config| {
-        // magic to get to the inner value
-        let refcell = config.clone();
-        let arc = refcell.borrow_mut();
-        let mut cloned_arc = Arc::clone(&arc);
-        Arc::make_mut(&mut cloned_arc).to_owned()
+        let clone = (&*config.borrow()).clone();
+        (&*clone).clone()
     })
 }
 
@@ -79,6 +68,7 @@ pub fn send_progress(
 
 /// clears the cache directory
 pub fn clear_cache() -> std::io::Result<()> {
+    trace!("Clearing caches...");
     let cache_dir = get_config()
         .paths
         .ok_or(std::io::Error::new(

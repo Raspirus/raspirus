@@ -10,7 +10,7 @@ use log::{error, info, trace, warn};
 use reqwest::StatusCode;
 use threadpool_rs::threadpool::pool::ThreadPool;
 
-use crate::backend::utils::generic::{clear_cache, send_progress};
+use crate::backend::utils::generic::send_progress;
 
 use super::utils::generic::get_config;
 
@@ -93,8 +93,6 @@ pub fn download_all(total_files: usize, window: &Option<tauri::Window>) -> std::
             "No paths set. Is config initialized?",
         ))?
         .cache;
-
-    clear_cache()?;
 
     // frontend channel
     let (tx, rx): (mpsc::Sender<bool>, mpsc::Receiver<bool>) = mpsc::channel();

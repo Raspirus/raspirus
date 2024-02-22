@@ -119,12 +119,12 @@ impl Scanner {
     pub fn scan_folder(&mut self, path: &Path, early_stop: bool) -> Result<bool, String> {
         debug!("Entering {}", path.to_str().unwrap_or_default());
         let mut found_total = false;
-        
+
         let entries = fs::read_dir(path).map_err(|err| err.to_string())?;
 
         for entry in entries {
             // check if entry is readable
-            let entry = match entry.map_err(|err| err.to_string())  {
+            let entry = match entry.map_err(|err| err.to_string()) {
                 Ok(entry) => entry,
                 Err(err) => {
                     warn!("Failed to get entry: {err}");
@@ -175,7 +175,7 @@ impl Scanner {
                 break;
             }
         }
-        
+
         Ok(found_total)
     }
 
@@ -256,12 +256,13 @@ impl Scanner {
                 let mut file =
                     File::open(path).map_err(|err| format!("Failed to get file: {err}"))?;
 
-                let _ = self.calculate_progress(
-                    fs::metadata(path)
-                        .map_err(|_| "Failed to get file size".to_owned())?
-                        .len(),
-                )
-                .map_err(|err| warn!("Failed to calculate progress: {err}"));
+                let _ = self
+                    .calculate_progress(
+                        fs::metadata(path)
+                            .map_err(|_| "Failed to get file size".to_owned())?
+                            .len(),
+                    )
+                    .map_err(|err| warn!("Failed to calculate progress: {err}"));
 
                 let hash = Scanner::compute_hash(&mut file).map_err(|err| {
                     format!(

@@ -80,7 +80,7 @@ impl FileLog {
             .paths
             .ok_or("No paths set. Is config initialized?".to_owned())?
             .logs
-            .join("Scan");
+            .join("scan");
 
         match fs::create_dir_all(&log_dir) {
             Ok(_) => {

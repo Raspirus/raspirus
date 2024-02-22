@@ -112,7 +112,7 @@ export default function Settings() {
 
     if (typeof window !== "undefined") {
 
-      invoke("create_config", { contents: jsonString })
+      invoke("save_config_fe", { contents: jsonString })
         .then((output) => {
           const parsedData = JSON.parse(output);
           console.log("Server answer: ", parsedData);
@@ -190,7 +190,7 @@ export default function Settings() {
     if (typeof window !== "undefined") {
       // Tries to create the config file on the backend, which returns the new created data
       // or the config found. This data then updates the frontend and is displayed
-      invoke("create_config", {})
+      invoke("load_config_fe", {})
         .then((output) => {
           const parsedData = JSON.parse(output);
           console.log("Loaded config: ", parsedData);
