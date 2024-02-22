@@ -68,7 +68,7 @@ impl Config {
     /// the path as a normal String
     fn set_paths(&mut self) -> Result<(), String> {
         let dirs =
-            ProjectDirs::from("com", "Raspirus", "").ok_or("Failed to get datadir".to_owned())?;
+            ProjectDirs::from("com", "Raspirus", "Raspirus").ok_or("Failed to get datadir".to_owned())?;
 
         // RoamingData
         let data = dirs.data_dir().to_owned();
@@ -76,7 +76,7 @@ impl Config {
 
         // LocalData
         let config = dirs.config_dir().to_owned();
-        let cache = dirs.cache_dir().to_owned().join("raspirus-fetch");
+        let cache = dirs.cache_dir().to_owned();
 
         // create all paths
         if !data.exists() {
