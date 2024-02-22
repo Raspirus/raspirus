@@ -75,10 +75,12 @@ impl FileLog {
     /// log.create_file("new_log.txt".to_owned());
     /// ```
     pub fn create_file(&mut self, fname: String) -> Result<(), String> {
+        // get log directory with Scan subdir
         let log_dir = get_config()
             .paths
             .ok_or("No paths set. Is config initialized?".to_owned())?
-            .logs;
+            .logs
+            .join("Scan");
 
         match fs::create_dir_all(&log_dir) {
             Ok(_) => {
