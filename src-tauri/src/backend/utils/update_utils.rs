@@ -6,7 +6,7 @@ use std::io::{BufRead, BufReader};
 use std::{path::Path, time};
 
 use crate::backend::db_ops::DBOps;
-use crate::backend::utils::generic::{send, send_progress, update_config};
+use crate::backend::utils::generic::{clear_cache, send, send_progress, update_config};
 
 use super::generic::get_config;
 
@@ -57,7 +57,7 @@ pub fn get_remote_timestamp() -> Result<String, std::io::Error> {
 pub fn update(window: Option<tauri::Window>) -> Result<String, String> {
     send(&window, "chck", String::new());
     // if remote is not newer than local we skip
-    if !check_update_necessary().map_err(|err| err.to_string())? {
+    if !check_update_necessary().map_err(|err| format!("Failed to check for updates: {err}"))? {
         info!("Database already up to date. Skipping...");
         return Ok("100".to_owned());
     }
@@ -93,6 +93,8 @@ pub fn update(window: Option<tauri::Window>) -> Result<String, String> {
             let timestamp = get_remote_timestamp().map_err(|err| err.to_string())?;
             config.last_db_update = timestamp;
             update_config(config)?;
+
+            clear_cache().map_err(|err| err.to_string())?;
 
             let big_toc = time::Instant::now();
             info!(
@@ -144,8 +146,5 @@ pub fn insert_all(db: &mut DBOps, window: &Option<tauri::Window>) -> Result<(), 
             .duration_since(start_time)
             .as_secs_f32()
     );
-
-    info!("Clearing cache...");
-    let _ = fs::remove_dir_all(cache_dir);
     Ok(())
 }

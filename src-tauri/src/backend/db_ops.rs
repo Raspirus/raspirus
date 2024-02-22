@@ -63,7 +63,7 @@ impl DBOps {
         debug!("Creating table if not present...");
         let _ = self.db_conn.execute(
             &format!(
-                "CREATE TABLE IF NOT EXISTS {} (hash varchar(32))",
+                "CREATE TABLE IF NOT EXISTS {} (idx INT IDENTITY(1,1) PRIMARY KEY, hash varchar(32) NOT NULL)",
                 crate::DB_TABLE
             ),
             [],

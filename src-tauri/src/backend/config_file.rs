@@ -67,12 +67,12 @@ impl Config {
     /// Finds the suitable path for the current system, creates a subfolder for the app and returns
     /// the path as a normal String
     fn set_paths(&mut self) -> Result<(), String> {
-        let dirs = ProjectDirs::from("com", "Raspirus", "Data")
+        let dirs = ProjectDirs::from("com", "Raspirus", "")
             .ok_or("Failed to get datadir".to_owned())?;
 
         // RoamingData
         let data = dirs.data_dir().to_owned();
-        let logs = data.to_owned();
+        let logs = data.to_owned().join("logs");
 
         // LocalData
         let config = dirs.config_dir().to_owned();
@@ -92,7 +92,7 @@ impl Config {
         Ok(self
             .paths
             .clone()
-            .ok_or("Failed to get project directories".to_owned())?
+            .ok_or("No paths set. Is config initialized?".to_owned())?
             .config)
     }
 
@@ -105,8 +105,8 @@ impl Config {
                 .map_err(|err| format!("Failed to create config file: {err}"))?;
         }
 
-        let file =
-            File::create(path).map_err(|err| format!("Failed to write config file: {err}"))?;
+        let file = File::create(path.join(crate::CONFIG_FILENAME))
+            .map_err(|err| format!("Failed to write config file: {err}"))?;
         serde_json::to_writer_pretty(file, self).map_err(|err| err.to_string())
     }
 
@@ -118,7 +118,8 @@ impl Config {
             self.save()?;
         };
 
-        let mut file = File::open(path).map_err(|err| err.to_string())?;
+        let mut file =
+            File::open(path.join(crate::CONFIG_FILENAME)).map_err(|err| err.to_string())?;
         let mut contents = String::new();
         file.read_to_string(&mut contents)
             .map_err(|err| format!("Failed to read config to string: {err}"))?;
