@@ -12,10 +12,8 @@ use super::generic::get_config;
 
 /// Checks if local is running behind remote. Returns true if remote is newer
 pub fn check_update_necessary() -> Result<bool, std::io::Error> {
-    let config = get_config();
-
     // get local timestamp
-    let local_timestamp = config.last_db_update;
+    let local_timestamp = get_config().last_db_update;
     // fetch remote timestamp
     let remote_timestamp = get_remote_timestamp()?;
 
@@ -65,24 +63,20 @@ pub fn update(window: Option<tauri::Window>) -> Result<String, String> {
     }
 
     info!("Updating database...");
-    let mut config = get_config();
-    let project_dir = match config.program_path.as_ref() {
-        Some(project_dir) => Ok(project_dir),
-        None => Err(String::from("Failed to get project directories.")),
-    }?;
-    let program_dir = project_dir.data_dir();
+    let data_dir = get_config()
+        .paths
+        .ok_or("No paths set. Is config initialized?".to_owned())?
+        .data;
 
     // try to get a usable database path
+    let mut config = get_config();
     let db_path = Path::new(&config.db_location);
     let db_file_str = if !config.db_location.is_empty() && db_path.exists() && db_path.is_file() {
         info!("Using specific DB path {}", config.db_location);
         config.db_location.clone()
     } else {
         // if not we use the default path
-        program_dir
-            .join(crate::DB_NAME)
-            .to_string_lossy()
-            .to_string()
+        data_dir.join(crate::DB_NAME).display().to_string()
     };
 
     // connect to database
@@ -116,15 +110,13 @@ pub fn update(window: Option<tauri::Window>) -> Result<String, String> {
 
 pub fn insert_all(db: &mut DBOps, window: &Option<tauri::Window>) -> Result<(), String> {
     let start_time = std::time::Instant::now();
-    let config = get_config();
-    let project_dir = match config.program_path.as_ref() {
-        Some(project_dir) => Ok(project_dir),
-        None => Err(String::from("Failed to get project directories.")),
-    }?;
-    let cache_dir = project_dir.cache_dir();
+    let cache_dir = get_config()
+        .paths
+        .ok_or("No paths set. Is config initialized?".to_owned())?
+        .cache;
 
     // get all files from a folder
-    let entries: Vec<DirEntry> = fs::read_dir(cache_dir)
+    let entries: Vec<DirEntry> = fs::read_dir(&cache_dir)
         .map_err(|err| err.to_string())?
         .filter_map(Result::ok)
         .collect();
