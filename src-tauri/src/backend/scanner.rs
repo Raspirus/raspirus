@@ -183,6 +183,7 @@ impl Scanner {
             .to_str()
             .unwrap_or_default()
         {
+            // zip files
             "zip" => {
                 let file = File::open(path).map_err(|err| format!("Failed to get file: {err}"))?;
 
@@ -190,7 +191,7 @@ impl Scanner {
                     .map_err(|err| format!("Failed top open archive: {err}"))?;
 
                 for i in 0..archive.len() {
-                    let file = archive
+                    let mut file = archive
                         .by_index(i)
                         .map_err(|err| format!("Failed to get file from archive: {err}"))?;
 
@@ -198,9 +199,14 @@ impl Scanner {
                     if !file.is_file() {
                         continue;
                     }
-                    
+
                     // compute hash
-                    let hash = match self.compute_hash(file).map_err(|err| format!("Encountered error while computing hash for {}: {err}", path.display()))?;
+                    let hash = Scanner::compute_hash(&mut file).map_err(|err| {
+                        format!(
+                            "Encountered error while computing hash for {}: {err}",
+                            path.display()
+                        )
+                    })?;
 
                     // update percentage
                     self.last_percentage =
@@ -215,69 +221,43 @@ impl Scanner {
                         continue;
                     }
 
-                    match self.db_conn.hash_exists(&hash) {
-                        Ok(exists) => {
-                            if exists {
-                                info!("Hash {hash} found");
-                                self.dirty_files.push(
-                                    path.file_name()
-                                        .unwrap_or_default()
-                                        .to_str()
-                                        .unwrap_or_default()
-                                        .to_owned(),
-                                );
-                                self.log
-                                    .log(hash, path.to_str().unwrap_or_default().to_owned());
-                                found = true;
-                                if early_stop {
-                                    return Ok(found);
-                                }
-                            }
-                            self.analysed += 1;
-                        }
-                        Err(err) => {
-                            self.skipped += 1;
-                            error!(
-                                "Could not retrieve hash from db for file {}: {err}",
-                                path.file_name()
-                                    .unwrap_or_default()
-                                    .to_str()
-                                    .unwrap_or_default()
-                            )
+                    if self.db_conn.hash_exists(&hash).map_err(|err| format!("Failed to retrieve hash from db: {err}"))? {
+                        info!("Hash {hash} found");
+                        // mark file path as infected
+                        self.dirty_files.push(
+                            path.file_name()
+                                .unwrap_or_default()
+                                .to_str()
+                                .unwrap_or_default()
+                                .to_owned(),
+                        );
+                        // log found file
+                        self.log
+                            .log(hash, path.display().to_string());
+
+                        found = true;
+                        if early_stop {
+                            return Ok(found);
                         }
                     }
                 }
             }
+            // other files
             _ => {
-                let file = match File::open(path) {
-                    Ok(file) => file,
-                    Err(err) => {
-                        error!("Failed to get file: {err}");
-                        self.skipped += 1;
-                        return Err(String::from("Failed to get file"));
-                    }
-                };
+                let mut file = File::open(path).map_err(|err| {
+                    format!("Failed to get file: {err}")
+                })?;
 
-                if Self::calculate_progress(
-                    self,
-                    fs::metadata(path).expect("Failed to get file size").len(),
-                )
-                .is_err()
-                {
-                    error!("Progress calculation is broken");
-                }
+                self.calculate_progress(
+                    fs::metadata(path).map_err(|_| "Failed to get file size".to_owned())?.len(),
+                ).map_err(|err| warn!("Failed to calculate progress: {err}"));
 
-                let hash = match Self::compute_hash(file) {
-                    Ok(hash) => hash,
-                    Err(err) => {
-                        error!(
-                            "Encountered error while computing hash for {}: {err}",
-                            path.to_str().unwrap_or_default()
-                        );
-                        self.skipped += 1;
-                        return Err(String::from("Encountered error while computing hash"));
-                    }
-                };
+                let hash = Scanner::compute_hash(&mut file).map_err(|err| {
+                    format!(
+                        "Encountered error while computing hash for {}: {err}",
+                        path.display()
+                    )
+                })?;
 
                 if self.false_positive.contains(&hash) {
                     info!("Found false postitive! Skipping...");
@@ -285,32 +265,23 @@ impl Scanner {
                     return Ok(found);
                 }
 
-                match self.db_conn.hash_exists(&hash) {
-                    Ok(exists) => {
-                        if exists {
-                            info!("Hash {hash} found");
-                            self.dirty_files.push(
-                                path.file_name()
-                                    .unwrap_or_default()
-                                    .to_str()
-                                    .unwrap_or_default()
-                                    .to_owned(),
-                            );
-                            self.log
-                                .log(hash, path.to_str().unwrap_or_default().to_owned());
-                            found = true;
-                        }
-                        self.analysed += 1;
-                    }
-                    Err(err) => {
-                        self.skipped += 1;
-                        error!(
-                            "Could not retrieve hash from db for file {}: {err}",
-                            path.file_name()
-                                .unwrap_or_default()
-                                .to_str()
-                                .unwrap_or_default()
-                        )
+                if self.db_conn.hash_exists(&hash).map_err(|err| format!("Failed to retrieve hash from db: {err}"))? {
+                    info!("Hash {hash} found");
+                    // mark file path as infected
+                    self.dirty_files.push(
+                        path.file_name()
+                            .unwrap_or_default()
+                            .to_str()
+                            .unwrap_or_default()
+                            .to_owned(),
+                    );
+                    // log found file
+                    self.log
+                        .log(hash, path.display().to_string());
+
+                    found = true;
+                    if early_stop {
+                        return Ok(found);
                     }
                 }
             }
