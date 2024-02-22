@@ -242,7 +242,8 @@ fn create_config(contents: Option<String>) -> Result<String, String> {
     update_config(match contents {
         Some(contents) => serde_json::from_str(&contents).map_err(|err| err.to_string())?,
         None => get_config(),
-    }).map_err(|err| err.to_string())?;
+    })
+    .map_err(|err| err.to_string())?;
 
     serde_json::to_string(&get_config())
         .map_err(|err| format!("Failed to convert config to json: {err}"))
