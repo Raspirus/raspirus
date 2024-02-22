@@ -128,12 +128,6 @@ export default function Settings() {
       setTitle("Checking for updates");
       setShowProg(false);
     };
-    // Event listener for the index state
-    const indexState = (event) => {
-      console.log("Index: ", event.payload);
-      setTitle("Indexing the database");
-      setShowProg(false);
-    };
     // Event listener for the download state
     const downloadState = (event) => {
       console.log("Download: ", event.payload);
@@ -147,6 +141,12 @@ export default function Settings() {
       setProgress(event.payload);
       setTitle("Installing updates");
       setShowProg(true);
+    };
+    // Event listener for the index state
+    const indexState = (event) => {
+      console.log("Index: ", event.payload);
+      setTitle("Indexing the database");
+      setShowProg(false);
     };
 
     // Backend can also send error instead of the progress
@@ -168,9 +168,9 @@ export default function Settings() {
     // err - Error State
     const startListening = async () => {
       await listen('chck', checkState);
-      await listen('idx', indexState);
       await listen('dwld', downloadState);
       await listen('ins', installState);
+      await listen('idx', indexState);
       await listen('err', errorState);
     };
 
