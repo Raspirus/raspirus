@@ -12,6 +12,18 @@ use super::generic::get_config;
 
 /// Checks if local is running behind remote. Returns true if remote is newer
 pub fn check_update_necessary() -> Result<bool, std::io::Error> {
+    if !get_config()
+        .paths
+        .ok_or(std::io::Error::new(
+            std::io::ErrorKind::Other,
+            "No paths set. Is config initialized?",
+        ))?
+        .data
+        .join(crate::DB_NAME)
+        .exists()
+    {
+        return Ok(true);
+    }
     // get local timestamp
     let local_timestamp = get_config().last_db_update;
     // fetch remote timestamp
@@ -98,7 +110,7 @@ pub fn update(window: Option<tauri::Window>) -> Result<String, String> {
 
             let big_toc = time::Instant::now();
             info!(
-                "Updated DB in {} seconds",
+                "Complete update took {} seconds",
                 big_toc.duration_since(big_tic).as_secs_f64()
             );
             Ok(res.to_string())

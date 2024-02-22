@@ -63,11 +63,26 @@ impl DBOps {
         debug!("Creating table if not present...");
         let _ = self.db_conn.execute(
             &format!(
-                "CREATE TABLE IF NOT EXISTS {} (idx INT IDENTITY(1,1) PRIMARY KEY, hash varchar(32) NOT NULL)",
+                "CREATE TABLE IF NOT EXISTS {} (hash varchar(32))",
                 crate::DB_TABLE
             ),
             [],
         )?;
+        Ok(())
+    }
+
+    /// Creates index
+    pub fn create_index(&self) -> Result<(), rusqlite::Error> {
+        let _ = self.db_conn.execute(
+            &format!("CREATE INDEX idx ON {} (hash)", crate::DB_TABLE),
+            [],
+        )?;
+        Ok(())
+    }
+
+    /// Drops index
+    pub fn drop_index(&self) -> Result<(), rusqlite::Error> {
+        let _ = self.db_conn.execute("DROP INDEX IF EXISTS idx", [])?;
         Ok(())
     }
 
@@ -83,7 +98,6 @@ impl DBOps {
     /// ```
     pub fn update_db(&mut self, window: &Option<tauri::Window>) -> Result<u64, std::io::Error> {
         info!("Updating database...");
-        send(window, "idx", String::new());
         let max_file = index()?;
         send(window, "dwld", String::from("0"));
         download_all(max_file, window)?;
@@ -108,20 +122,36 @@ impl DBOps {
             }
             std::io::Error::new(std::io::ErrorKind::Other, err_1)
         })?;
-        debug!("Removing old dataset...");
-        // drop old dataset
+
+        send(window, "idx", String::new());
+        debug!("Dropping old dataset...");
         self.drop("old")
             .map_err(|err| std::io::Error::new(std::io::ErrorKind::Other, err))?;
-        info!("Total hashes in DB: {}", self.count_hashes().unwrap_or(0));
-        self.count_hashes()
-            .map_err(|err| std::io::Error::new(std::io::ErrorKind::Other, err.to_string()))
+        debug!("Droping old index...");
+        self.drop_index()
+            .map_err(|err| std::io::Error::new(std::io::ErrorKind::Other, err))?;
+        debug!("Vacuuming...");
+        self.vacuum()
+            .map_err(|err| std::io::Error::new(std::io::ErrorKind::Other, err))?;
+        debug!("Creating index for {}...", crate::DB_TABLE);
+        self.create_index()
+            .map_err(|err| std::io::Error::new(std::io::ErrorKind::Other, err))?;
+        let hashes = self
+            .count_hashes()
+            .map_err(|err| std::io::Error::new(std::io::ErrorKind::Other, err.to_string()))?;
+        info!("Total hashes in DB: {}", hashes);
+        Ok(hashes)
     }
 
-    /// Drops provided table and cleans database
+    /// Drops provided table, removes index and cleans database
     pub fn drop(&mut self, tablename: &str) -> Result<(), rusqlite::Error> {
         let _ = self
             .db_conn
             .execute(&format!("DROP TABLE {tablename}"), [])?;
+        Ok(())
+    }
+
+    pub fn vacuum(&mut self) -> Result<(), rusqlite::Error> {
         let _ = self.db_conn.execute("VACUUM", [])?;
         Ok(())
     }
