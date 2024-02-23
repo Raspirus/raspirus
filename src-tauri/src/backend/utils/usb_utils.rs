@@ -1,4 +1,4 @@
-use log::{info, warn};
+use log::info;
 use serde::{Deserialize, Serialize};
 use std::fs;
 
@@ -24,7 +24,7 @@ pub async fn list_usb_drives() -> Result<String, String> {
         let entries = match fs::read_dir(dir_path) {
             Ok(entries) => entries,
             Err(err) => {
-                warn!("Error while fetching usbs in /media: {err}");
+                info!("Error while fetching usbs in /media: {err}");
                 return Err(format!("Error while fetching usbs in /media: {err}"));
             }
         };
