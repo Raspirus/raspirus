@@ -16,7 +16,7 @@
     "@fortawesome/react-fontawesome": "^0.2.0",
     "@tauri-apps/api": "^1.4.0",
     "@types/node": "20.11.20",
-    "@types/react": "18.2.59",
+    "@types/react": "18.2.60",
     "@types/react-dom": "18.2.19",
     "bootstrap": "^5.2.3",
     "date-fns": "^3.0.0",
