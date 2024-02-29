@@ -76,13 +76,25 @@
     "client_mode_error": "Window error",
     "client_mode_error_val": "Nextjs is not in client mode",
 
-    "weekday": "Settimanale",
-    "daily": "Giornalmente",
-    "monday": "Lunedì",
-    "tuesday": "Martedì",
-    "wednesday": "Mercoledì",
-    "thursday": "Giovedì",
-    "friday": "Venerdì",
-    "saturday": "Sabato",
-    "sunday": "Domenica"
+    "welcome_title": "Benvenuti a Raspirus",
+    "welcome_text": "Sembra che tu stia usando l'applicazione per la prima volta. Assicurati di aggiornare il database prima di eseguire la scansione. Puoi farlo nelle impostazioni.",
+    "welcome_footer": "Questo messaggio scomparirà dopo il primo aggiornamento.",
+    
+    "db_update_notif": "Nuovo aggiornamento del database!",
+    
+    "empty_db_dialog": "Vuoi continuare?",
+    "empty_db_dialog_text": "Il database è vuoto, probabilmente dovresti eseguire prima un aggiornamento.",
+    "empty_db_dialog_confirm": "Annulla",
+    "empty_db_dialog_cancel": "Continua comunque",
+    
+    "db_update_stage_check": "Controllo degli aggiornamenti...",
+    "db_update_stage_index": "Indicizzazione...",
+    "db_update_stage_download": "Download...",
+    "db_update_stage_install": "Installazione...",
+    
+    "logs_download_dialog": "Log scaricati",
+    "logs_download_dialog_text": "Posizione: ",
+    
+    "add_hash_placeholder": "Inserisci un hash"
+    
 }
