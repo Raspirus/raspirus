@@ -13,7 +13,7 @@ rust-version = "1.59"
 
 [dependencies]
 threadpool_rs = { git = "https://github.com/GamingGuy003/threadpool_rs.git"}
-log = "0.4.20"
+log = "0.4.21"
 winapi = "0.3.9"
 sysinfo = "0.30.5"
 reqwest = { version = "0.11.24", features = [ "blocking" ] }
@@ -32,7 +32,7 @@ windows-sys = { version = "0.52.0", features = [ "Win32_Foundation", "Win32_Syst
 md5 = "0.7.0"
 
 [dev-dependencies]
-ctor = "0.2.6"
+ctor = "0.2.7"
 regex = "1.10.3"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
