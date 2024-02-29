@@ -277,7 +277,7 @@ export default function Settings() {
           ReactSwal.close(); // Close the SweetAlert
           // On error, set the failed update status as Date
           setDate(t('update_db_status_2'));
-          Swal.fire(t('update_db_failed'), t('update_db_failed_val'), "error");
+          Swal.fire(t('update_db_failed'), t('update_db_failed_val') + ": " + error, "error");
         });
     } else {
       console.error("Nextjs not in client mode!");
