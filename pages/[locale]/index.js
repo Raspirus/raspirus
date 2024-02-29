@@ -74,7 +74,7 @@ export default function Home() {
   useEffect(() => {
     if (typeof window !== "undefined") {
       // Using the backend, check if a config file exists and load it
-      invoke("create_config", {})
+      invoke("load_config_fe", {})
         .then((output) => {
           const parsedData = JSON.parse(output);
           console.log("Loaded config: ", parsedData);

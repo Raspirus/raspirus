@@ -112,7 +112,7 @@ export default function Settings() {
 
     if (typeof window !== "undefined") {
 
-      invoke("create_config", { contents: jsonString })
+      invoke("save_config_fe", { contents: jsonString })
         .then((output) => {
           const parsedData = JSON.parse(output);
           console.log("Server answer: ", parsedData);
@@ -148,6 +148,12 @@ export default function Settings() {
       setTitle(t('db_update_stage_install'));
       setShowProg(true);
     };
+    // Event listener for the index state
+    const indexState = (event) => {
+      console.log("Index: ", event.payload);
+      setTitle("Indexing the database");
+      setShowProg(false);
+    };
 
     // Backend can also send error instead of the progress
     const errorState = (event) => {
@@ -168,9 +174,9 @@ export default function Settings() {
     // err - Error State
     const startListening = async () => {
       await listen('chck', checkState);
-      await listen('idx', indexState);
       await listen('dwld', downloadState);
       await listen('ins', installState);
+      await listen('idx', indexState);
       await listen('err', errorState);
     };
 
@@ -190,7 +196,7 @@ export default function Settings() {
     if (typeof window !== "undefined") {
       // Tries to create the config file on the backend, which returns the new created data
       // or the config found. This data then updates the frontend and is displayed
-      invoke("create_config", {})
+      invoke("load_config_fe", {})
         .then((output) => {
           const parsedData = JSON.parse(output);
           console.log("Loaded config: ", parsedData);

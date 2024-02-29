@@ -86,14 +86,13 @@ pub fn index() -> Result<usize, std::io::Error> {
 pub fn download_all(total_files: usize, window: &Option<tauri::Window>) -> std::io::Result<()> {
     let start_time = std::time::Instant::now();
     let config = get_config();
-    let project_dir = config
-        .program_path
-        .expect("Failed to get project directories");
-    let cache_dir = project_dir.cache_dir().to_owned();
-
-    if cache_dir.exists() {
-        fs::remove_dir_all(cache_dir.clone())?;
-    }
+    let cache_dir = config
+        .paths
+        .ok_or(std::io::Error::new(
+            std::io::ErrorKind::Other,
+            "No paths set. Is config initialized?",
+        ))?
+        .cache;
 
     // frontend channel
     let (tx, rx): (mpsc::Sender<bool>, mpsc::Receiver<bool>) = mpsc::channel();
@@ -133,7 +132,7 @@ pub fn download_all(total_files: usize, window: &Option<tauri::Window>) -> std::
         });
     }
 
-    let mut p = 0.0;
+    let mut previous_progress = 0.0;
     let mut should_update = true;
     for current in 0..=total_files {
         // if we receive false, meaning a thread yielded to an error, we stop updating the progress
@@ -144,8 +143,9 @@ pub fn download_all(total_files: usize, window: &Option<tauri::Window>) -> std::
             )
         })? {
             if should_update {
-                p = send_progress(window, p, current, total_files, "dwld")
-                    .map_err(|err| std::io::Error::new(std::io::ErrorKind::Other, err))?;
+                previous_progress =
+                    send_progress(window, previous_progress, current, total_files, "dwld")
+                        .map_err(|err| std::io::Error::new(std::io::ErrorKind::Other, err))?;
             }
         } else {
             should_update = false;
@@ -176,7 +176,7 @@ pub fn download_file(output_name: &Path, file_url: String) -> std::io::Result<()
             if !parent_dir.exists() {
                 return Err(std::io::Error::new(
                     std::io::ErrorKind::Other,
-                    "Parent directory does not exist",
+                    "No parent directory",
                 ));
             };
         }
@@ -188,7 +188,9 @@ pub fn download_file(output_name: &Path, file_url: String) -> std::io::Result<()
         }
     }
     // deletes output file if exist
-    output_name.exists().then(|| fs::remove_file(output_name));
+    output_name.exists().then(|| {
+        fs::remove_file(output_name).map_err(|err| warn!("Could not delete output file: {err}"))
+    });
 
     let mut file = File::create(output_name)?;
     let client = reqwest::blocking::Client::new();
