@@ -12,23 +12,23 @@ rust-version = "1.59"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+threadpool_rs = { git = "https://github.com/GamingGuy003/threadpool_rs.git"}
 log = "0.4.20"
-winapi = "0.3"
-sysinfo = "0.30"
+winapi = "0.3.9"
+sysinfo = "0.30.5"
 reqwest = { version = "0.11.24", features = ["blocking"] }
-rusqlite = { version = "0.30.0", features =  ["bundled"] }
+rusqlite = { version = "0.31.0", features =  ["bundled"] }
 terminal_size = "0.3.0"
-tokio = {version = "1.36.0", features = ["rt", "macros"] }
-#walkdir = "2.4.0"
-serde_json = "1.0"
-serde = { version = "1.0", features = ["derive"] }
-tauri = { version = "1.6.1", features = [ "cli", "dialog-open", "updater"] }
+tokio = "1.36.0"
+serde_json = "1.0.114"
+serde = { version = "1.0.197", features = ["derive"] }
+tauri = { version = "1.6.0", features = [ "cli", "dialog-open", "updater"] }
 chrono = "0.4.34"
 directories-next = "2.0.0"
 zip = "0.6.6"
 simplelog = "0.12.1"
 job_scheduler_ng = "2.0.4"
-windows-sys = {version="0.45.0", features = ["Win32", "Win32_System", "Win32_System_Console", "Win32_Foundation"] }
+windows-sys = "0.52.0"
 md5 = "0.7.0"
 
 [dev-dependencies]
