@@ -22,7 +22,7 @@ terminal_size = "0.3.0"
 tokio = "1.36.0"
 serde_json = "1.0.114"
 serde = { version = "1.0.197", features = [ "derive" ] }
-tauri = { version = "1.6.0", features = [ "cli", "dialog-open", "updater" ] }
+tauri = { version = "1.6.1", features = [ "cli", "dialog-open", "updater" ] }
 chrono = "0.4.34"
 directories-next = "2.0.0"
 zip = "0.6.6"
