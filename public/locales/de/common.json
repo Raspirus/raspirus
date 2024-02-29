@@ -35,7 +35,6 @@
     "update_db_1": "Hashes in DB",
     "update_db_2": "Letzte Aktualisierung",
     "update_db_btn": "AKTUALISIEREN",
-    "update_db_loading": "aktualisiere Datenbank...",
     "update_db_loading_val": "Bitte warten, dies kann einige Zeit brauchen",
     "update_db_completed": "Aktualisierung vollständig",
     "update_db_completed_val": "Datenbank ist aktuell",
