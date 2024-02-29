@@ -81,10 +81,10 @@ export default function Home() {
           SetDirSelection(parsedData.scan_dir);
           if (parsedData.last_db_update == "Never") {
             Swal.fire({
-              title: "Welcome!",
-              text: "It seems like you are using the application for the first time. Please make sure to update the database before scanning. You can do this in the settings.",
+              title: t('welcome'),
+              text: t('welcome_text'),
               icon: "info",
-              footer: "This message will go away after the first update."
+              footer: t('welcome_footer')
             });
           }
         })
@@ -206,7 +206,7 @@ export default function Home() {
                   size="1x"
                   className="pr-1"
                 />
-                New DB Update!
+                {t('db_update_notif')}
               </button>
             )}
 
