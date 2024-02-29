@@ -148,12 +148,6 @@ export default function Settings() {
       setTitle(t('db_update_stage_install'));
       setShowProg(true);
     };
-    // Event listener for the index state
-    const indexState = (event) => {
-      console.log("Index: ", event.payload);
-      setTitle("Indexing the database");
-      setShowProg(false);
-    };
 
     // Backend can also send error instead of the progress
     const errorState = (event) => {
@@ -250,10 +244,12 @@ export default function Settings() {
         didOpen: () => {
           const interval = setInterval(() => {
             const dynamicProgressElement = document.getElementById('dyna-prog');
-            if (dynamicProgressElement && !showProgRef.current && progressRef.current <= 0) {
+            if (dynamicProgressElement && !showProgRef.current) {
               // Hide the progress element if the updater is not running
               dynamicProgressElement.style.display = 'none';
             } else if (dynamicProgressElement) {
+              // Show the progress element if the updater is running
+              dynamicProgressElement.style.display = 'block';
               dynamicProgressElement.textContent = 'Progress: ' + progressRef.current + '%';
             }
             const dynamicTitleElement = document.getElementById('dyna-title');
@@ -276,12 +272,14 @@ export default function Settings() {
           ReactSwal.close(); // Close the SweetAlert
           console.log(message);
           setCount(Number(message));
+          // Set the date to the current date
+          setDate(getDate());
           Swal.fire(t('update_db_completed'), t('update_db_completed_val'), "success");
         })
         .catch((error) => {
           console.error(error);
           ReactSwal.close(); // Close the SweetAlert
-          // On error, set the failed update status as Date
+          // On error, set the failed update status
           setDate(t('update_db_status_2'));
           Swal.fire(t('update_db_failed'), t('update_db_failed_val') + ": " + error, "error");
         });
@@ -289,6 +287,16 @@ export default function Settings() {
       console.error("Nextjs not in client mode!");
       Swal.fire(t('client_mode_error'), t('client_mode_error_val'), "error");
     }
+  }
+
+  const getDate = () => {
+    const today = new Date();
+    const date = today.getDate() + '-' + (today.getMonth() + 1) + '-' + today.getFullYear();
+    const hours = today.getHours().toString().padStart(2, '0');
+    const minutes = today.getMinutes().toString().padStart(2, '0');
+    const time = hours + ":" + minutes;
+    const dateTime = date + ' ' + time;
+    return dateTime;
   }
 
   useEffect(() => {
