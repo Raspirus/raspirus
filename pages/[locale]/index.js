@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import { invoke } from "@tauri-apps/api/tauri";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faGear } from '@fortawesome/free-solid-svg-icons';
+import { faGear, faWrench } from '@fortawesome/free-solid-svg-icons';
 import Swal from "sweetalert2";
 import Image from "next/image";
 import { useLocalStorage } from "../../services/useLocalStorage";
@@ -42,7 +42,8 @@ export default function Home() {
   const [dir_selection, SetDirSelection] = useState(false);
   // Determines if an error occurred
   const [errorOccurred, setError] = useLocalStorage("errorOccurred", 'false');
-  const {t} = useTranslation('common');
+  const { t } = useTranslation('common');
+  const [updateAvailable, setUpdateAvailable] = useState(false);
 
   /**
    * Function triggered when a directory was selected
@@ -72,12 +73,20 @@ export default function Home() {
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-
-      invoke("create_config", {})
+      // Using the backend, check if a config file exists and load it
+      invoke("load_config_fe", {})
         .then((output) => {
           const parsedData = JSON.parse(output);
           console.log("Loaded config: ", parsedData);
           SetDirSelection(parsedData.scan_dir);
+          if (parsedData.last_db_update == "Never") {
+            Swal.fire({
+              title: t('welcome'),
+              text: t('welcome_text'),
+              icon: "info",
+              footer: t('welcome_footer')
+            });
+          }
         })
         .catch((error) => {
           SetDirSelection(true);
@@ -101,6 +110,16 @@ export default function Home() {
             t('usb_list_error_msg'),
             "error"
           );
+        });
+
+      // Using the backend, check if an update is available
+      invoke("check_update", {})
+        .then((output) => {
+          setUpdateAvailable(output);
+        })
+        .catch((error) => {
+          // Web request not successful, probably no internet connection
+          console.error(error);
         });
     }
   }, [t]);
@@ -171,20 +190,41 @@ export default function Home() {
       </Head>
       <main className="h-screen">
         <div className="flex justify-start">
-        <SwitchLanguage />
-          <button
-            onClick={openSettings}
-            type="button"
-            className="absolute top-0 right-0 px-6 py-2 border-2 m-2 border-maingreen text-maingreen bg-white 
+          <SwitchLanguage />
+
+          <div className="flex justify-center absolute top-0 right-0">
+
+            {updateAvailable && (
+              <button
+                onClick={() => router.push("/settings")}
+                type="button"
+                className="px-2 py-2 border-2 m-2 border-mainred text-white bg-mainred 
+      font-medium text-xs leading-tight uppercase rounded"
+              >
+                <FontAwesomeIcon
+                  icon={faWrench}
+                  size="1x"
+                  className="pr-1"
+                />
+                {t('db_update_notif')}
+              </button>
+            )}
+
+            <button
+              onClick={openSettings}
+              type="button"
+              className="px-6 py-2 border-2 m-2 border-maingreen text-maingreen bg-white 
         font-medium text-xs leading-tight uppercase rounded"
-          >
-            <FontAwesomeIcon
-              icon={faGear}
-              size="1x"
-              className="pr-1"
-            />
-            {t('settings')}
-          </button>
+            >
+              <FontAwesomeIcon
+                icon={faGear}
+                size="1x"
+                className="pr-1"
+              />
+              {t('settings')}
+            </button>
+
+          </div>
         </div>
 
         <div className="flex h-full justify-center p-12 text-center">

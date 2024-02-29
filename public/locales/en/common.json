@@ -40,7 +40,7 @@
     "update_db_completed": "Update completed",
     "update_db_completed_val": "Database is up-to-date",
     "update_db_failed": "Update error",
-    "update_db_failed_val": "Couldn't start the update",
+    "update_db_failed_val": "Got the following error",
 
     "custom_db": "Database path",
     "custom_db_val": "Set the path to the .db file",
@@ -59,10 +59,6 @@
 
     "settings_on": "ON",
     "settings_off": "OFF",
-
-    "auto_db": "Automatic update",
-    "auto_db_val": "Automatically starts db updates on set time and day",
-    "auto_db_btn": "SUBMIT",
 
     "ignore_sign_title": "Signatures to ignore",
     "ignore_sign_val": "The following signatures will be ignored during the scan",
@@ -83,13 +79,24 @@
     "client_mode_error": "Window error",
     "client_mode_error_val": "Nextjs is not in client mode",
 
-    "weekday": "Weekday",
-    "daily": "Daily",
-    "monday": "Monday",
-    "tuesday": "Tuesday",
-    "wednesday": "Wednesday",
-    "thursday": "Thursday",
-    "friday": "Friday",
-    "saturday": "Saturday",
-    "sunday": "Sunday"
+    "welcome_title": "Welcome to Raspirus",
+    "welcome_text": "It seems like you are using the application for the first time. Please make sure to update the database before scanning. You can do this in the settings.",
+    "welcome_footer": "This message will go away after the first update.",
+
+    "db_update_notif": "New DB update!",
+
+    "empty_db_dialog": "Do you want to continue?",
+    "empty_db_dialog_text": "The database is empty, you should probably perform an update first.",
+    "empty_db_dialog_confirm": "Cancel",
+    "empty_db_dialog_cancel": "Continue anyway",
+
+    "db_update_stage_check": "Checking for updates...",
+    "db_update_stage_index": "Indexing...",
+    "db_update_stage_download": "Downloading...",
+    "db_update_stage_install": "Installing...",
+
+    "logs_download_dialog": "Logs downloaded",
+    "logs_download_dialog_text": "Location: ",
+
+    "add_hash_placeholder": "Enter a hash"
 }
