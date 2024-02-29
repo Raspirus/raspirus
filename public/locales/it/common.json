@@ -35,7 +35,6 @@
     "update_db_1": "Hash nel DB",
     "update_db_2": "Ultimo aggiornamento",
     "update_db_btn": "AGGIORNA",
-    "update_db_loading": "Aggiorno la banca dati...",
     "update_db_loading_val": "Perfavore attendi, può volerci un'attimo",
     "update_db_completed": "Aggiornamento completato",
     "update_db_completed_val": "Banca dati è aggiornata",
