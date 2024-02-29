@@ -41,10 +41,13 @@
     "update_db_completed_val": "Datenbank ist aktuell",
     "update_db_failed": "Aktualisierung Fehlgeschlagen",
     "update_db_failed_val": "Konnte Aktualisierung nicht fertigstellen",
+    
     "activate_logs": "Aktiviert Logging",
     "activate_logs_val": "Aktiviert das Schreiben von Logs",
+    
     "obfuscated_mode": "Obfuscated Modus",
     "obfuscated_mode_val": "Wenn eingeschalten, blendet es den Pfad zu jeweiligen gefundenen Viren aus",
+    
     "settings_on": "EIN",
     "settings_off": "AUS",
 
@@ -76,13 +79,24 @@
     "client_mode_error": "Window error",
     "client_mode_error_val": "Nextjs is not in client mode",
 
-    "weekday": "Wochentag",
-    "daily": "Täglich",
-    "monday": "Montag",
-    "tuesday": "Dienstag",
-    "wednesday": "Mittwoch",
-    "thursday": "Donnerstag",
-    "friday": "Freitag",
-    "saturday": "Samstag",
-    "sunday": "Sonntag"
+    "welcome_title": "Willkommen zu Raspirus!",
+    "welcome_text": "Es scheint, dass du die Anwendung zum ersten Mal verwendest. Bitte stelle sicher, dass du die Datenbank vor dem Scannen aktualisierst. Du kannst dies in den Einstellungen tun.",
+    "welcome_footer": "Diese Nachricht verschwindet nach dem ersten Update.",
+
+    "db_update_notif": "Neues DB-Update!",
+
+    "empty_db_dialog": "Möchtest du fortfahren?",
+    "empty_db_dialog_text": "Die Datenbank ist leer, du solltest wahrscheinlich zuerst ein Update durchführen.",
+    "empty_db_dialog_confirm": "Abbrechen",
+    "empty_db_dialog_cancel": "Trotzdem fortfahren",
+
+    "db_update_stage_check": "Überprüfe auf Updates...",
+    "db_update_stage_index": "Indiziere...",
+    "db_update_stage_download": "Lade herunter...",
+    "db_update_stage_install": "Installiere...",
+
+    "logs_download_dialog": "Logs heruntergeladen",
+    "logs_download_dialog_text": "Speicherort: ",
+
+    "add_hash_placeholder": "Gib einen Hash ein"
 }
