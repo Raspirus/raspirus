@@ -75,23 +75,20 @@ export default function Loading() {
       // There are no signatures in the database, so the scanner cannot start
 
       const { isConfirmed } = await Swal.fire({
-        title: "Do you want to continue?",
-        text: "The database is empty, you should probably perform an update first.",
+        title: t('empty_db_dialog'),
+        text: t('empty_db_dialog_text'),
         icon: "warning",
         showCancelButton: true,
         confirmButtonColor: "#3085d6",
         cancelButtonColor: "#d33",
-        confirmButtonText: "Cancel",
-        cancelButtonText: "Continue anyway",
+        confirmButtonText: t('empty_db_dialog_confirm'),
+        cancelButtonText: t('empty_db_dialog_cancel'),
       })
       
       if (isConfirmed) {
         router.push("/");
-        console.log("Cancelled");
         return;
       } else {
-        console.log("Performing scan");
-
         try {
           // Start the function on the backend using Tauri
           const message = await invoke("start_scanner", {

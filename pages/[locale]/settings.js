@@ -4,15 +4,12 @@ import { useRouter } from 'next/router';
 import { invoke } from "@tauri-apps/api/tauri";
 import { listen } from '@tauri-apps/api/event';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faFileLines, faUserNinja, faWrench, faHome, faClock, faDatabase, faFileZipper, faFingerprint, faL, faHistory } from '@fortawesome/free-solid-svg-icons';
+import { faFileLines, faUserNinja, faWrench, faHome, faLink, faDatabase, faFileZipper, faFingerprint, faHistory } from '@fortawesome/free-solid-svg-icons';
 import React, { useState, useEffect, useRef } from 'react';
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
-import moment from "moment";
 import { useTranslation } from 'next-i18next';
 import { getStaticPaths, makeStaticProps } from '../../lib/getStatic';
-import DateTimeSelector from '../../components/TimePicker';
-import WeekdaySelector from '../../components/WeekdaySelector';
 import { open } from '@tauri-apps/api/dialog';
 import IgnoredHashComp from '../../components/IgnoredHashes';
 
@@ -35,17 +32,20 @@ export default function Settings() {
   // Data for some of the settings is retrieved directly from the backend and saved back to it
   const [hash_count, setCount] = useState(0);
   const [updated_date, setDate] = useState(t('update_db_status_1'));
-  const [auto_time, setAutotime] = useState('22:00');
-  const [selectedWeekday, setSelectedWeekday] = useState(-1);
   const [logging, setLogging] = useState(false);
   const [obfuscated, setObfuscated] = useState(false);
   const [use_db_path, setUsedbPath] = useState(false);
   const [custom_db_path, setCustomDbPath] = useState("");
   const [scan_dir, setScanDir] = useState(false);
   const [ignored_hashes, setIgnoredHashes] = useState([]);
+  const [mirror, setMirror] = useState("");
   // DB Update progress
   const [progress, setProgress] = useState(0);
   const progressRef = useRef(progress);
+  const [title, setTitle] = useState(t('loading_title'));
+  const titleRef = useRef(title);
+  const [showProg, setShowProg] = useState(false);
+  const showProgRef = useRef(showProg);
 
   // When the user goes back to the Home page, an update of the set settings
   // is sent to the backend, which then saves it in a local file
@@ -102,18 +102,17 @@ export default function Settings() {
       last_db_update: updated_date,
       logging_is_active: logging,
       obfuscated_is_active: obfuscated,
-      db_update_weekday: selectedWeekday,
-      db_update_time: auto_time,
       db_location: custom_db_path,
       scan_dir: scan_dir,
       ignored_hashes: ignored_hashes,
+      mirror: mirror
     }
     const jsonString = JSON.stringify(jsonData);
     console.log("Client sends: ", jsonData);
 
     if (typeof window !== "undefined") {
 
-      invoke("create_config", { contents: jsonString })
+      invoke("save_config_fe", { contents: jsonString })
         .then((output) => {
           const parsedData = JSON.parse(output);
           console.log("Server answer: ", parsedData);
@@ -123,44 +122,81 @@ export default function Settings() {
   }
 
   useEffect(() => {
-    // Reads the emited progress signal from the backend
-    const handleProgress = (event) => {
-      console.log("Progress: ", event.payload.message);
-      setProgress(event.payload.message);
+    // Event listener for the check state
+    const checkState = (event) => {
+      console.log("Check: ", event.payload);
+      setTitle(t('db_update_stage_check'));
+      setShowProg(false);
     };
+    // Event listener for the index state
+    const indexState = (event) => {
+      console.log("Index: ", event.payload);
+      setTitle(t('db_update_stage_index'));
+      setShowProg(false);
+    };
+    // Event listener for the download state
+    const downloadState = (event) => {
+      console.log("Download: ", event.payload);
+      setProgress(event.payload);
+      setTitle(t('db_update_stage_download'));
+      setShowProg(true);
+    };
+    // Event listener for the install state
+    const installState = (event) => {
+      console.log("Install: ", event.payload);
+      setProgress(event.payload);
+      setTitle(t('db_update_stage_install'));
+      setShowProg(true);
+    };
+    // Event listener for the index state
+    const indexState = (event) => {
+      console.log("Index: ", event.payload);
+      setTitle("Indexing the database");
+      setShowProg(false);
+    };
+
     // Backend can also send error instead of the progress
-    const handleProgressErr = (event) => {
-      console.error(error);
+    const errorState = (event) => {
+      console.error(event);
       localStorage.setItem("errorOccurred", 'true');
       // Returns to the Home page with an error statements that will be displayed there
       router.push({
         pathname: '/',
-        query: { scanner_error: event.payload.message }
+        query: { scanner_error: event.payload }
       })
-    }
+    };
 
     // Starts listening for incoming signals emited from the backend
+    // chck - Check State
+    // idx - Index State
+    // dwld - Download State
+    // ins - Install State 
+    // err - Error State
     const startListening = async () => {
-      await listen('progress', handleProgress);
-      await listen('progerror', handleProgressErr);
+      await listen('chck', checkState);
+      await listen('dwld', downloadState);
+      await listen('ins', installState);
+      await listen('idx', indexState);
+      await listen('err', errorState);
     };
 
     startListening();
 
     // Clean up function to remove the event listener when the component unmounts
     return () => {
-      removeEventListener('progress', handleProgress);
-      removeEventListener('progerror', handleProgressErr);
+      removeEventListener('chck', checkState);
+      removeEventListener('idx', indexState);
+      removeEventListener('dwld', downloadState);
+      removeEventListener('ins', installState);
+      removeEventListener('err', errorState);
     };
   }, [router])
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-
-
       // Tries to create the config file on the backend, which returns the new created data
       // or the config found. This data then updates the frontend and is displayed
-      invoke("create_config", {})
+      invoke("load_config_fe", {})
         .then((output) => {
           const parsedData = JSON.parse(output);
           console.log("Loaded config: ", parsedData);
@@ -170,12 +206,11 @@ export default function Settings() {
           }
           setLogging(parsedData.logging_is_active);
           setObfuscated(parsedData.obfuscated_is_active);
-          setSelectedWeekday(parsedData.db_update_weekday);
-          setAutotime(parsedData.db_update_time);
           setCustomDbPath(parsedData.db_location);
           setUsedbPath(parsedData.db_location.length > 0);
           setScanDir(parsedData.scan_dir);
           setIgnoredHashes(parsedData.ignored_hashes);
+          setMirror(parsedData.mirror);
         })
         .catch((err) => console.error(err))
     }
@@ -189,8 +224,8 @@ export default function Settings() {
           const ReactSwal = withReactContent(Swal);
           ReactSwal.fire({
             icon: "success",
-            title: "Logs downloaded",
-            text: "Location: " + output,
+            title: t('logs_download_dialog'),
+            text: t('logs_download_dialog_text') + output,
           })
         })
         .catch((err) => console.error(err))
@@ -204,7 +239,7 @@ export default function Settings() {
       // Creates a pop-up with an indefinite loading animation
       const ReactSwal = withReactContent(Swal);
       ReactSwal.fire({
-        title: t('update_db_loading'),
+        title: <p id="dyna-title" className="m-auto w-fit text-xl">{title}</p>,
         text: t('update_db_loading_val'),
         html: <div id="dyna-prog" className="m-auto w-fit">{progress}</div>,
         allowOutsideClick: false,
@@ -214,11 +249,20 @@ export default function Settings() {
         showCancelButton: false,
         didOpen: () => {
           const interval = setInterval(() => {
-            const dynamicTimeElement = document.getElementById('dyna-prog');
-            if (dynamicTimeElement) {
-              dynamicTimeElement.textContent = 'Progress: ' + progressRef.current + '%';
+            const dynamicProgressElement = document.getElementById('dyna-prog');
+            if (dynamicProgressElement && !showProgRef.current && progressRef.current <= 0) {
+              // Hide the progress element if the updater is not running
+              dynamicProgressElement.style.display = 'none';
+            } else if (dynamicProgressElement) {
+              dynamicProgressElement.textContent = 'Progress: ' + progressRef.current + '%';
             }
-          }, 1000);
+            const dynamicTitleElement = document.getElementById('dyna-title');
+            if (dynamicTitleElement) {
+              if (dynamicTitleElement.textContent != titleRef.current) {
+                dynamicTitleElement.textContent = titleRef.current;
+              }
+            }
+          }, 100);
 
           ReactSwal.getPopup().addEventListener('close', () => {
             clearInterval(interval);
@@ -232,7 +276,6 @@ export default function Settings() {
           ReactSwal.close(); // Close the SweetAlert
           console.log(message);
           setCount(Number(message));
-          setDate(moment().format("DD/MM/YYYY HH:mm:ss")); // Format it to be 24h instead of 12h
           Swal.fire(t('update_db_completed'), t('update_db_completed_val'), "success");
         })
         .catch((error) => {
@@ -240,7 +283,7 @@ export default function Settings() {
           ReactSwal.close(); // Close the SweetAlert
           // On error, set the failed update status as Date
           setDate(t('update_db_status_2'));
-          Swal.fire(t('update_db_failed'), t('update_db_failed_val'), "error");
+          Swal.fire(t('update_db_failed'), t('update_db_failed_val') + ": " + error, "error");
         });
     } else {
       console.error("Nextjs not in client mode!");
@@ -253,23 +296,16 @@ export default function Settings() {
     progressRef.current = progress;
   }, [progress]);
 
-  /**
-   * CURRENTLY NOT FULLY WORKING
-   * Creates a Cronjob to update the database on a specific schedule.
-   */
-  const updateSchedule = () => {
-    const [hours, minutes] = auto_time.split(':');
-    const weekday = selectedWeekday;
+  useEffect(() => {
+    // Update the mutable ref when the title changes
+    titleRef.current = title;
+  }, [title]);
 
-    if (typeof window !== "undefined") {
-      invoke("auto_update_scheduler", {
-        hour: hours,
-        weekday: weekday
-      }).catch((error) => {
-        console.error("Trying to invoke auto_update_scheduler: ", error);
-      })
-    }
-  }
+  useEffect(() => {
+    // Update the mutable ref when we want to show the progress of the updater
+    showProgRef.current = showProg;
+  }, [showProg]);
+
 
   return (
     <>
@@ -356,13 +392,12 @@ export default function Settings() {
       />
 
       <SettingComp
-        title={t('auto_db')}
-        short={t('auto_db_val')}
-        short2={<><WeekdaySelector selectedWeekday={selectedWeekday} setSelectedWeekday={setSelectedWeekday} /><DateTimeSelector time={auto_time} setTime={setAutotime} /></>}
-        icon={faClock}
-        isOn={false}
-        action={updateSchedule}
-        action_val={t('auto_db_btn')}
+        title={"Mirror website"}
+        short={"Location where we download the signatures from"}
+        short2={mirror}
+        icon={faLink}
+        isOn={fetch(mirror + '/timestamp', { mode: 'no-cors' }).then(() => true).catch(() => false)}
+        setIsOn={function () { }}
       />
     </>
   );
