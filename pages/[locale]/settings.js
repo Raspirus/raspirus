@@ -125,21 +125,27 @@ export default function Settings() {
     // Event listener for the check state
     const checkState = (event) => {
       console.log("Check: ", event.payload);
-      setTitle("Checking for updates");
+      setTitle(t('db_update_stage_check'));
+      setShowProg(false);
+    };
+    // Event listener for the index state
+    const indexState = (event) => {
+      console.log("Index: ", event.payload);
+      setTitle(t('db_update_stage_index'));
       setShowProg(false);
     };
     // Event listener for the download state
     const downloadState = (event) => {
       console.log("Download: ", event.payload);
       setProgress(event.payload);
-      setTitle("Downloading updates");
+      setTitle(t('db_update_stage_download'));
       setShowProg(true);
     };
     // Event listener for the install state
     const installState = (event) => {
       console.log("Install: ", event.payload);
       setProgress(event.payload);
-      setTitle("Installing updates");
+      setTitle(t('db_update_stage_install'));
       setShowProg(true);
     };
     // Event listener for the index state
@@ -218,8 +224,8 @@ export default function Settings() {
           const ReactSwal = withReactContent(Swal);
           ReactSwal.fire({
             icon: "success",
-            title: "Logs downloaded",
-            text: "Location: " + output,
+            title: t('logs_download_dialog'),
+            text: t('logs_download_dialog_text') + output,
           })
         })
         .catch((err) => console.error(err))
@@ -277,7 +283,7 @@ export default function Settings() {
           ReactSwal.close(); // Close the SweetAlert
           // On error, set the failed update status as Date
           setDate(t('update_db_status_2'));
-          Swal.fire(t('update_db_failed'), t('update_db_failed_val'), "error");
+          Swal.fire(t('update_db_failed'), t('update_db_failed_val') + ": " + error, "error");
         });
     } else {
       console.error("Nextjs not in client mode!");
