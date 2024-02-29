@@ -2,14 +2,15 @@ use std::{
     fs::{self, File},
     io::Read,
     path::Path,
-    process::exit,
     time,
 };
 
 use chrono::{DateTime, Local};
-use log::{debug, error, info, trace, warn};
+use log::{debug, error, info, warn};
 use tauri::Manager;
 use zip::ZipArchive;
+
+use crate::backend::utils::generic::size;
 
 use super::{db_ops::DBOps, file_log::FileLog, utils::generic::get_config};
 
@@ -45,26 +46,19 @@ impl Scanner {
     // Creates a FileScanner object
     pub fn new(db_file: &str, t_win: Option<tauri::Window>) -> Result<Self, String> {
         // checks if database exists
-        let tmpconf = match DBOps::new(db_file) {
-            Ok(db_conn) => db_conn,
-            Err(err) => {
-                error!("{err}");
-                exit(-1);
-            }
-        };
+        let tmpconf = DBOps::new(db_file).map_err(|err| err.to_string())?;
 
         let now: DateTime<Local> = Local::now();
         let now_str = now.format("%Y_%m_%d_%H_%M_%S").to_string();
         let log_str = format!("{}.log", now_str);
 
-        let config = get_config();
         // Add all false positives here
-        let false_positive: Vec<String> = config.ignored_hashes;
+        let false_positive: Vec<String> = get_config().ignored_hashes;
 
         Ok(Scanner {
             db_conn: tmpconf,
             dirty_files: Vec::new(),
-            log: FileLog::new(log_str),
+            log: FileLog::new(log_str)?,
             false_positive,
             folder_size: 0,
             scanned_size: 0,
@@ -82,7 +76,7 @@ impl Scanner {
             return Err("Invalid Path".to_owned());
         }
         let big_tic = time::Instant::now();
-        self.folder_size = match Self::size(path) {
+        self.folder_size = match size(path) {
             Ok(size) => size,
             Err(err) => {
                 error!("Failed to calculate folder size: {err}");
@@ -94,7 +88,7 @@ impl Scanner {
 
         debug!("Started scanning {}...", path_str);
         if path.is_dir() {
-            match Self::scan_folder(&mut self, path, early_stop) {
+            match self.scan_folder(path, early_stop) {
                 Ok(_) => {}
                 Err(err) => {
                     error!("Failed to scan folder: {err}");
@@ -102,7 +96,7 @@ impl Scanner {
                 }
             }
         } else {
-            match Self::scan_file(&mut self, path, early_stop) {
+            match self.scan_file(path, early_stop) {
                 Ok(_) => {}
                 Err(err) => {
                     error!("Failed to scan file: {err}");
@@ -121,137 +115,73 @@ impl Scanner {
         Ok(self.dirty_files.clone())
     }
 
-    // gets the unpacked size of a zip file
-    fn size_zip(path: &Path) -> Result<u64, std::io::Error> {
-        trace!("Calculating zip: {}", path.display());
-        let file = File::open(path)?;
-        let mut archive = ZipArchive::new(file)?;
-        let mut archive_size = 0;
-
-        for i in 0..archive.len() {
-            let file = archive.by_index(i)?;
-            archive_size += file.size();
-        }
-        Ok(archive_size)
-    }
-
-    // gets the size of a file
-    fn size_file(path: &Path) -> Result<u64, std::io::Error> {
-        trace!("Calculating file: {}", path.display());
-        Ok(
-            match path
-                .extension()
-                .unwrap_or_default()
-                .to_str()
-                .unwrap_or_default()
-            {
-                "zip" => Self::size_zip(path)?,
-                _ => File::open(path)?.metadata()?.len(),
-            },
-        )
-    }
-
-    // gets the size of a folder and its contents
-    fn size_folder(path: &Path) -> Result<u64, std::io::Error> {
-        trace!("Calculating folder: {}", path.display());
-        let mut size = 0;
-
-        let entries = fs::read_dir(path)?;
-        for entry in entries {
-            let entry_path = entry?.path();
-
-            if entry_path.is_dir() {
-                size += Self::size_folder(&entry_path)?;
-            } else if entry_path.is_file() {
-                size += Self::size_file(&entry_path)?;
-            }
-        }
-
-        Ok(size)
-    }
-
-    // gets the size for a given path
-    fn size(path: &Path) -> Result<u64, String> {
-        if path.is_dir() {
-            match Self::size_folder(path) {
-                Ok(size) => Ok(size),
-                Err(err) => {
-                    warn!("Failed to get folder size for scanning: {err}");
-                    Err(String::from("Failed to get folder size for scanning"))
-                }
-            }
-        } else {
-            match Self::size_file(path) {
-                Ok(size) => Ok(size),
-                Err(err) => {
-                    warn!("Failed to get file size for scanning: {err}");
-                    Ok(0)
-                }
-            }
-        }
-    }
-
     // scans a folder. returns true if infected
     pub fn scan_folder(&mut self, path: &Path, early_stop: bool) -> Result<bool, String> {
         debug!("Entering {}", path.to_str().unwrap_or_default());
-        let mut found = false;
+        let mut found_total = false;
 
-        let entries = fs::read_dir(path).unwrap();
+        let entries = fs::read_dir(path).map_err(|err| err.to_string())?;
+
         for entry in entries {
-            let entry_path = match entry {
-                Ok(entry) => entry.path(),
+            // check if entry is readable
+            let entry = match entry.map_err(|err| err.to_string()) {
+                Ok(entry) => entry,
                 Err(err) => {
-                    error!("Failed to get folder entry: {err}");
+                    warn!("Failed to get entry: {err}");
                     self.skipped += 1;
                     continue;
                 }
             };
-
-            if entry_path.is_dir() {
-                match self.scan_folder(Path::new(&entry_path), early_stop) {
-                    Ok(res) => {
-                        if res {
-                            found = true;
-                            if early_stop {
-                                return Ok(true);
-                            }
-                        }
+            let entry_path = entry.path();
+            // if this returns something, it means we found something and are returning early
+            if let Some(_) = match entry_path {
+                // scan directory
+                _ if entry_path.is_dir() => match self.scan_folder(&entry_path, early_stop) {
+                    Ok(found) => {
+                        self.analysed += 1;
+                        // if we find something, we set found_total to true
+                        found.then(|| found_total = true);
+                        // if we find something and early_stop is true, we return something, otherwise not
+                        (found && early_stop).then(|| Some(()))
                     }
                     Err(err) => {
-                        error!(
-                            "Encountered error while handling folder {}: {err}",
-                            entry_path.to_str().unwrap_or_default()
-                        );
+                        self.skipped += 1;
+                        error!("Error for folder {}: {err}", entry_path.display());
                         continue;
                     }
-                };
-            } else if entry_path.is_file() {
-                match self.scan_file(Path::new(&entry_path), early_stop) {
-                    Ok(res) => {
-                        if res {
-                            found = true;
-                            if early_stop {
-                                return Ok(true);
-                            }
-                        }
+                },
+                // scan file
+                _ if entry_path.is_file() => match self.scan_file(&entry_path, early_stop) {
+                    Ok(found) => {
+                        self.analysed += 1;
+                        // if we find something, we set found_total to true
+                        found.then(|| found_total = true);
+                        // if we find something and early_stop is true, we return something, otherwise not
+                        (found && early_stop).then(|| Some(()))
                     }
                     Err(err) => {
-                        error!(
-                            "Encountered error while handling file {}: {err}",
-                            entry_path.to_str().unwrap_or_default()
-                        );
+                        self.skipped += 1;
+                        error!("Error for file {}: {err}", entry_path.display());
                         continue;
                     }
+                },
+                // undefined path target
+                _ => {
+                    warn!("{} is not a file or folder? Skipping", entry_path.display());
+                    self.skipped += 1;
+                    continue;
                 }
+            } {
+                break;
             }
         }
 
-        Ok(found)
+        Ok(found_total)
     }
 
     // scans a file. returns true if infected
     pub fn scan_file(&mut self, path: &Path, early_stop: bool) -> Result<bool, String> {
-        debug!("Scanning {}", path.to_str().unwrap_or_default());
+        debug!("Scanning file: {}", path.display());
         let mut found = false;
         match path
             .extension()
@@ -259,122 +189,87 @@ impl Scanner {
             .to_str()
             .unwrap_or_default()
         {
+            // zip files
             "zip" => {
-                let file = match File::open(path) {
-                    Ok(file) => file,
-                    Err(err) => {
-                        error!("Failed to get file: {err}");
-                        self.skipped += 1;
-                        return Ok(false);
-                    }
-                };
+                let file = File::open(path).map_err(|err| format!("Failed to get file: {err}"))?;
 
-                let mut archive = match ZipArchive::new(file) {
-                    Ok(archive) => archive,
-                    Err(err) => {
-                        error!("Failed to open archive: {err}");
-                        self.skipped += 1;
-                        return Err(String::from("Failed to open archive"));
-                    }
-                };
+                let mut archive = ZipArchive::new(file)
+                    .map_err(|err| format!("Failed top open archive: {err}"))?;
 
                 for i in 0..archive.len() {
-                    let file = match archive.by_index(i) {
-                        Ok(file) => file,
-                        Err(err) => {
-                            error!("Failed to get file from archive: {err}");
-                            self.skipped += 1;
-                            continue;
-                        }
-                    };
+                    let mut file = archive
+                        .by_index(i)
+                        .map_err(|err| format!("Failed to get file from archive: {err}"))?;
 
-                    if file.is_file() {
-                        if Self::calculate_progress(self, file.size()).is_err() {
-                            error!("Progress calculation is broken");
-                        }
+                    // if file is not actually a file we skip
+                    if !file.is_file() {
+                        continue;
+                    }
 
-                        let hash = match Self::compute_hash(file) {
-                            Ok(hash) => hash,
-                            Err(err) => {
-                                error!(
-                                    "Encountered error while computing hash for {}: {err}",
-                                    path.to_str().unwrap_or_default()
-                                );
-                                self.skipped += 1;
-                                return Err(String::from("Encountered error while computing hash"));
-                            }
-                        };
+                    // compute hash
+                    let hash = Scanner::compute_hash(&mut file).map_err(|err| {
+                        format!(
+                            "Encountered error while computing hash for {}: {err}",
+                            path.display()
+                        )
+                    })?;
 
-                        if self.false_positive.contains(&hash) {
-                            info!("Found false postitive! Skipping...");
-                            self.skipped += 1;
-                            continue;
-                        }
+                    // update percentage
+                    self.last_percentage =
+                        self.calculate_progress(file.size()).unwrap_or_else(|err| {
+                            error!("{err}");
+                            self.last_percentage
+                        });
 
-                        match self.db_conn.hash_exists(&hash) {
-                            Ok(exists) => {
-                                if exists {
-                                    info!("Hash {hash} found");
-                                    self.dirty_files.push(
-                                        path.file_name()
-                                            .unwrap_or_default()
-                                            .to_str()
-                                            .unwrap_or_default()
-                                            .to_owned(),
-                                    );
-                                    self.log
-                                        .log(hash, path.to_str().unwrap_or_default().to_owned());
-                                    found = true;
-                                    if early_stop {
-                                        return Ok(found);
-                                    }
-                                }
-                                self.analysed += 1;
-                            }
-                            Err(err) => {
-                                self.skipped += 1;
-                                error!(
-                                    "Could not retrieve hash from db for file {}: {err}",
-                                    path.file_name()
-                                        .unwrap_or_default()
-                                        .to_str()
-                                        .unwrap_or_default()
-                                )
-                            }
+                    if self.false_positive.contains(&hash) {
+                        info!("Found false postitive! Skipping...");
+                        self.skipped += 1;
+                        continue;
+                    }
+
+                    if self
+                        .db_conn
+                        .hash_exists(&hash)
+                        .map_err(|err| format!("Failed to retrieve hash from db: {err}"))?
+                    {
+                        info!("Hash {hash} found");
+                        // mark file path as infected
+                        self.dirty_files.push(
+                            path.file_name()
+                                .unwrap_or_default()
+                                .to_str()
+                                .unwrap_or_default()
+                                .to_owned(),
+                        );
+                        // log found file
+                        self.log.log(hash, path.display().to_string());
+
+                        found = true;
+                        if early_stop {
+                            return Ok(found);
                         }
                     }
                 }
             }
+            // other files
             _ => {
-                let file = match File::open(path) {
-                    Ok(file) => file,
-                    Err(err) => {
-                        error!("Failed to get file: {err}");
-                        self.skipped += 1;
-                        return Err(String::from("Failed to get file"));
-                    }
-                };
+                let mut file =
+                    File::open(path).map_err(|err| format!("Failed to get file: {err}"))?;
 
-                if Self::calculate_progress(
-                    self,
-                    fs::metadata(path).expect("Failed to get file size").len(),
-                )
-                .is_err()
-                {
-                    error!("Progress calculation is broken");
-                }
+                let _ = self
+                    .calculate_progress(
+                        fs::metadata(path)
+                            .map_err(|_| "Failed to get file size".to_owned())?
+                            .len(),
+                    )
+                    .map_err(|err| warn!("Failed to calculate progress: {err}"));
 
-                let hash = match Self::compute_hash(file) {
-                    Ok(hash) => hash,
-                    Err(err) => {
-                        error!(
-                            "Encountered error while computing hash for {}: {err}",
-                            path.to_str().unwrap_or_default()
-                        );
-                        self.skipped += 1;
-                        return Err(String::from("Encountered error while computing hash"));
-                    }
-                };
+                let hash = Scanner::compute_hash(&mut file).map_err(|err| {
+                    format!(
+                        "Encountered error while computing hash for {}: {err}",
+                        path.display()
+                    )
+                })?;
 
                 if self.false_positive.contains(&hash) {
                     info!("Found false postitive! Skipping...");
@@ -382,32 +277,26 @@ impl Scanner {
                     return Ok(found);
                 }
 
-                match self.db_conn.hash_exists(&hash) {
-                    Ok(exists) => {
-                        if exists {
-                            info!("Hash {hash} found");
-                            self.dirty_files.push(
-                                path.file_name()
-                                    .unwrap_or_default()
-                                    .to_str()
-                                    .unwrap_or_default()
-                                    .to_owned(),
-                            );
-                            self.log
-                                .log(hash, path.to_str().unwrap_or_default().to_owned());
-                            found = true;
-                        }
-                        self.analysed += 1;
-                    }
-                    Err(err) => {
-                        self.skipped += 1;
-                        error!(
-                            "Could not retrieve hash from db for file {}: {err}",
-                            path.file_name()
-                                .unwrap_or_default()
-                                .to_str()
-                                .unwrap_or_default()
-                        )
+                if self
+                    .db_conn
+                    .hash_exists(&hash)
+                    .map_err(|err| format!("Failed to retrieve hash from db: {err}"))?
+                {
+                    info!("Hash {hash} found");
+                    // mark file path as infected
+                    self.dirty_files.push(
+                        path.file_name()
+                            .unwrap_or_default()
+                            .to_str()
+                            .unwrap_or_default()
+                            .to_owned(),
+                    );
+                    // log found file
+                    self.log.log(hash, path.display().to_string());
+
+                    found = true;
+                    if early_stop {
+                        return Ok(found);
                     }
                 }
             }
@@ -415,7 +304,7 @@ impl Scanner {
         Ok(found)
     }
 
-    fn compute_hash(mut file: impl Read) -> Result<String, std::io::Error> {
+    fn compute_hash(file: &mut impl Read) -> Result<String, std::io::Error> {
         let mut hasher = md5::Context::new();
 
         let mut buffer = [0; 1024];
@@ -430,41 +319,41 @@ impl Scanner {
 
     fn calculate_progress(&mut self, file_size: u64) -> Result<f64, String> {
         self.scanned_size += file_size;
-        let scanned_percentage =
-            (self.scanned_size as f64 / self.folder_size as f64 * 100.0).round();
         // Check if folder is empty, because that would return infinity percentage
         if self.folder_size == 0 {
-            if let Some(tauri_win) = &self.tauri_window {
-                if tauri_win
+            // return error and send to frontend, if it exists
+            if let Some(tauri_window) = &self.tauri_window {
+                tauri_window
                     .emit_all(
                         "progerror",
                         TauriEvent {
                             message: "Calculated foldersize is 0".to_string(),
                         },
                     )
-                    .is_err()
-                {
-                    return Err("Couldn't send progress update to frontend".to_string());
-                }
+                    .map_err(|err| format!("Could not send progress to frontend: {err}"))?;
             }
             return Err("Calculated foldersize is 0".to_string());
         }
+
+        let scanned_percentage =
+            (self.scanned_size as f64 / self.folder_size as f64 * 100.0).round();
+
         info!("Scanned: {}%", scanned_percentage);
-        if scanned_percentage != self.last_percentage {
-            if let Some(tauri_win) = &self.tauri_window {
-                if tauri_win
-                    .emit_all(
-                        "progress",
-                        TauriEvent {
-                            message: scanned_percentage.to_string(),
-                        },
-                    )
-                    .is_err()
-                {
-                    return Err("Couldn't send progress update to frontend".to_string());
-                };
-            }
-            self.last_percentage = scanned_percentage;
+        // nothing changed
+        if scanned_percentage == self.last_percentage {
+            return Ok(scanned_percentage);
+        }
+
+        // if there is a window, send percentage, otherwise ignore
+        if let Some(tauri_window) = &self.tauri_window {
+            tauri_window
+                .emit_all(
+                    "progress",
+                    TauriEvent {
+                        message: scanned_percentage.to_string(),
+                    },
+                )
+                .map_err(|err| format!("Could not send progress to frontend: {err}"))?;
         }
         Ok(scanned_percentage)
     }

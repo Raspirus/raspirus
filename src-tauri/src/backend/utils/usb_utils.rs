@@ -22,13 +22,10 @@ pub async fn list_usb_drives() -> Result<String, String> {
 
         let dir_path = format!("/media/{}", username);
         let entries = match fs::read_dir(dir_path) {
-            Ok(entries) => {
-                println!("{:#?}", entries);
-                entries
-            }
+            Ok(entries) => entries,
             Err(err) => {
-                println!("{err}");
-                return Err(format!("{err}"));
+                info!("Error while fetching usbs in /media: {err}");
+                return Err(format!("Error while fetching usbs in /media: {err}"));
             }
         };
 
