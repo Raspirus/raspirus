@@ -40,7 +40,7 @@ export default function Infected() {
         if (typeof window !== "undefined") {
 
             // We retrieve the set obfuscated mode from the backends config
-            invoke("create_config", {})
+            invoke("load_config_fe", {})
                 .then((output) => {
                     const parsedData = JSON.parse(output);
                     console.log("Parsed Config data: ", parsedData);
