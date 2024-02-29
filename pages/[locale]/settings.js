@@ -125,27 +125,27 @@ export default function Settings() {
     // Event listener for the check state
     const checkState = (event) => {
       console.log("Check: ", event.payload);
-      setTitle("Checking for updates");
+      setTitle(t('db_update_stage_check'));
       setShowProg(false);
     };
     // Event listener for the index state
     const indexState = (event) => {
       console.log("Index: ", event.payload);
-      setTitle("Indexing the database");
+      setTitle(t('db_update_stage_index'));
       setShowProg(false);
     };
     // Event listener for the download state
     const downloadState = (event) => {
       console.log("Download: ", event.payload);
       setProgress(event.payload);
-      setTitle("Downloading updates");
+      setTitle(t('db_update_stage_download'));
       setShowProg(true);
     };
     // Event listener for the install state
     const installState = (event) => {
       console.log("Install: ", event.payload);
       setProgress(event.payload);
-      setTitle("Installing updates");
+      setTitle(t('db_update_stage_install'));
       setShowProg(true);
     };
 
@@ -218,8 +218,8 @@ export default function Settings() {
           const ReactSwal = withReactContent(Swal);
           ReactSwal.fire({
             icon: "success",
-            title: "Logs downloaded",
-            text: "Location: " + output,
+            title: t('logs_download_dialog'),
+            text: t('logs_download_dialog_text') + output,
           })
         })
         .catch((err) => console.error(err))

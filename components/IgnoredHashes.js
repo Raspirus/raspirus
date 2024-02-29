@@ -76,7 +76,7 @@ export default function IgnoredHashComp({ title, short, hashes, icon, setHashes 
                                 <input
                                     type="text"
                                     className="flex-grow p-1 border border-gray-400 rounded"
-                                    placeholder="New Hash"
+                                    placeholder={t('add_hash_placeholder')}
                                     value={newHash}
                                     onChange={(e) => setNewHash(e.target.value)}
                                 />
