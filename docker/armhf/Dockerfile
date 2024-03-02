@@ -37,7 +37,7 @@ RUN mkdir out
 
 # Install app deps
 RUN cargo install --path src-tauri/
-RUN cargo install tauri-cli
+RUN cargo install tauri-cli --locked
 
 # Set environment variables
 ENV PKG_CONFIG_SYSROOT_DIR=/usr/arm-linux-gnueabihf/
