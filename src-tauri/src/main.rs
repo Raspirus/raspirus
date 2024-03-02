@@ -125,6 +125,7 @@ fn main() -> Result<(), String> {
             start_scanner,
             list_usb_drives,
             update_database,
+            patch,
             check_raspberry,
             load_config_fe,
             save_config_fe,
@@ -233,6 +234,14 @@ async fn update_database(window: tauri::Window) -> Result<String, String> {
     tokio::task::spawn_blocking(|| update_utils::update(Some(window)))
         .await
         .map_err(|err| err.to_string())?
+}
+
+#[tauri::command]
+async fn patch(patchfile: String) -> Result<(), String> {
+    tokio::task::spawn_blocking(move || update_utils::patch(&patchfile))
+        .await
+        .map_err(|err| err.to_string())?
+        .map_err(|err| err.to_string())
 }
 
 // Returns a vector of all attached removable storage drives (USB) -> Unnecessary for the CLI
