@@ -250,7 +250,7 @@ impl DBOps {
         Ok(count as u64)
     }
 
-    /// Removes the specified hash from the `signatures` table.
+    /// Removes a vec of specified hashes from the `signatures` table.
     ///
     /// # Examples
     ///
@@ -258,13 +258,36 @@ impl DBOps {
     /// use rusqlite::Connection;
     /// use virus_scanner::backend::db_ops::DBOps;
     /// let db_ops = DBOps::new("signatures.db").unwrap();
-    /// assert!(db_ops._remove_hash("abcd1234").is_ok());
+    /// assert!(db_ops._remove_hash(vec!["abcd1234".to_owned()]).is_ok());
     /// ```
-    pub fn _remove_hash(&self, hash_str: &str) -> Result<(), rusqlite::Error> {
-        self.db_conn.execute(
-            &format!("DELETE FROM {} WHERE hash = ?", crate::DB_TABLE),
-            [hash_str],
-        )?;
+    pub fn remove_hashes(&mut self, hashes: &Vec<String>) -> Result<(), rusqlite::Error> {
+        self.init_table()?;
+        info!("Removing {} hashes...", hashes.len());
+        let transact = self.db_conn.transaction()?;
+
+        let big_tic = time::Instant::now();
+        let mut removed = 0;
+        let mut skipped = 0;
+        for hash in hashes {
+            match transact.execute(
+                &format!("DELETE FROM {} WHERE hash = ?", crate::DB_TABLE),
+                [hash.clone()],
+            ) {
+                Ok(_) => removed += 1,
+                Err(err) => {
+                    warn!("Got {err} when trying to insert {hash}. Skipping...");
+                    skipped += 1;
+                }
+            }
+        }
+        transact.commit()?;
+        let big_toc = time::Instant::now();
+        info!(
+            "=> Removed: {}, Skipped: {}, Time: {} seconds",
+            removed,
+            skipped,
+            big_toc.duration_since(big_tic).as_secs_f64()
+        );
         Ok(())
     }
 }
