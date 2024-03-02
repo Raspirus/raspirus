@@ -78,11 +78,13 @@ mod tests {
 
     #[test]
     fn test_remove_hash() {
-        let db_ops = DBOps::new(DB_FILE_LOC).unwrap();
+        let mut db_ops = DBOps::new(DB_FILE_LOC).unwrap();
         let hash_to_remove = "93fe4fb85a682907137b0b1051991332";
 
         // Remove the hash from the database
-        db_ops._remove_hash(hash_to_remove).unwrap();
+        db_ops
+            .remove_hashes(&vec![hash_to_remove.to_owned()])
+            .unwrap();
 
         // Check if the hash exists in the database after removal
         let exists_after_removal = match db_ops.hash_exists(hash_to_remove) {

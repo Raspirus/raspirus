@@ -75,13 +75,14 @@ pub fn update(window: Option<tauri::Window>) -> Result<String, String> {
     }
 
     info!("Updating database...");
-    let data_dir = get_config()
-        .paths
-        .ok_or("No paths set. Is config initialized?".to_owned())?
-        .data;
 
     // try to get a usable database path
     let mut config = get_config();
+    let data_dir = config
+        .clone()
+        .paths
+        .ok_or("No paths set. Is config initialized?".to_owned())?
+        .data;
     let db_path = Path::new(&config.db_location);
     let db_file_str = if !config.db_location.is_empty() && db_path.exists() && db_path.is_file() {
         info!("Using specific DB path {}", config.db_location);
@@ -158,5 +159,64 @@ pub fn insert_all(db: &mut DBOps, window: &Option<tauri::Window>) -> Result<(), 
             .duration_since(start_time)
             .as_secs_f32()
     );
+    Ok(())
+}
+
+pub fn patch(patchfile: &str) -> Result<(), std::io::Error> {
+    let file_path = Path::new(patchfile);
+
+    if !file_path.exists() {
+        return Err(std::io::Error::new(
+            std::io::ErrorKind::NotFound,
+            "Path does not exist!",
+        ));
+    }
+    let mut add = Vec::new();
+    let mut remove = Vec::new();
+
+    let file = File::open(file_path)?;
+    let bufreader = BufReader::new(file);
+
+    for line in bufreader.lines().flatten() {
+        let line = line.trim().to_owned();
+        match line {
+            _ if line.starts_with('-') => {
+                remove.push(line.trim_start_matches('-').trim().to_owned())
+            }
+            _ if line.starts_with('+') => add.push(line.trim_start_matches('+').trim().to_owned()),
+            _ => warn!("Line does not match any prefix"),
+        }
+    }
+
+    // try to get a usable database path
+    let config = get_config();
+    let data_dir = config
+        .paths
+        .ok_or(std::io::Error::new(
+            std::io::ErrorKind::Other,
+            "No paths set. Is config initialized?",
+        ))?
+        .data;
+    let db_path = Path::new(&config.db_location);
+    let db_file_str = if !config.db_location.is_empty() && db_path.exists() && db_path.is_file() {
+        info!("Using specific DB path {}", config.db_location);
+        config.db_location.clone()
+    } else {
+        // if not we use the default path
+        data_dir.join(crate::DB_NAME).display().to_string()
+    };
+
+    // connect to database
+    let mut db_connection = DBOps::new(db_file_str.as_str())
+        .map_err(|err| std::io::Error::new(std::io::ErrorKind::NotConnected, err.to_string()))?;
+
+    db_connection
+        .remove_hashes(&remove)
+        .map_err(|err| std::io::Error::new(std::io::ErrorKind::Other, err.to_string()))?;
+
+    db_connection
+        .insert_hashes(&add)
+        .map_err(|err| std::io::Error::new(std::io::ErrorKind::Other, err.to_string()))?;
+
     Ok(())
 }
