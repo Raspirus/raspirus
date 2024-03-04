@@ -26,7 +26,7 @@ tauri = { version = "1.6.1", features = [ "cli", "dialog-open", "updater" ] }
 chrono = "0.4.34"
 directories-next = "2.0.0"
 zip = "0.6.6"
-simplelog = "0.12.1"
+simplelog = "0.12.2"
 job_scheduler_ng = "2.0.4"
 md5 = "0.7.0"
 
