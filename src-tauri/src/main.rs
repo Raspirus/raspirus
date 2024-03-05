@@ -3,7 +3,7 @@
 
 use backend::config_file::Config;
 use backend::utils::generic::{clear_cache, get_config};
-use frontend::main::init_tauri;
+use frontend::tauri::init_tauri;
 use log::{error, info, LevelFilter};
 use simplelog::{
     ColorChoice, CombinedLogger, ConfigBuilder, TermLogger, TerminalMode, WriteLogger,
@@ -16,7 +16,6 @@ use std::sync::Arc;
 mod backend;
 mod frontend;
 mod tests;
-mod benches;
 
 // config
 static CONFIG_FILENAME: &str = "Raspirus.json";
