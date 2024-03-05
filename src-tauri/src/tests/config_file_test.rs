@@ -8,10 +8,10 @@ mod tests {
 
         assert_eq!(config.hashes_in_db, 0);
         assert_eq!(config.last_db_update, "Never");
-        assert_eq!(config.logging_is_active, false);
-        assert_eq!(config.obfuscated_is_active, true);
+        assert!(!config.logging_is_active);
+        assert!(config.obfuscated_is_active);
         assert_eq!(config.db_location, "");
-        assert_eq!(config.scan_dir, true);
+        assert!(config.scan_dir);
         assert_eq!(config.ignored_hashes, Vec::<String>::new());
     }
 
