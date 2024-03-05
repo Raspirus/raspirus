@@ -17,7 +17,7 @@
     "@tauri-apps/api": "^1.4.0",
     "@types/node": "20.11.24",
     "@types/react": "18.2.63",
-    "@types/react-dom": "18.2.19",
+    "@types/react-dom": "18.2.20",
     "bootstrap": "^5.2.3",
     "date-fns": "^3.0.0",
     "eslint": "8.57.0",
