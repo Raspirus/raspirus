@@ -134,7 +134,7 @@ impl Scanner {
             };
             let entry_path = entry.path();
             // if this returns something, it means we found something and are returning early
-            if let Some(_) = match entry_path {
+            if (match entry_path {
                 // scan directory
                 _ if entry_path.is_dir() => match self.scan_folder(&entry_path, early_stop) {
                     Ok(found) => {
@@ -171,7 +171,9 @@ impl Scanner {
                     self.skipped += 1;
                     continue;
                 }
-            } {
+            })
+            .is_some()
+            {
                 break;
             }
         }

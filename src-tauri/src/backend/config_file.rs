@@ -68,12 +68,12 @@ impl Config {
     /// the path as a normal String
     fn set_paths(&mut self) -> Result<(), String> {
         #[cfg(any(target_os = "linux", target_os = "macos"))]
-        let dirs =
-            ProjectDirs::from("com", "Raspirus", "Raspirus").ok_or("Failed to get projectdir".to_owned())?;
+        let dirs = ProjectDirs::from("com", "Raspirus", "Raspirus")
+            .ok_or("Failed to get projectdir".to_owned())?;
         #[cfg(target_os = "windows")]
-        let dirs =
-            ProjectDirs::from("com", "Raspirus", "").ok_or("Failed to get projectdir".to_owned())?;
-            
+        let dirs = ProjectDirs::from("com", "Raspirus", "")
+            .ok_or("Failed to get projectdir".to_owned())?;
+
         // RoamingData
         let data = dirs.data_dir().to_owned();
         let logs = data.to_owned().join("logs");
@@ -139,8 +139,7 @@ impl Config {
             self.save()?;
         };
 
-        let mut file =
-            File::open(path).map_err(|err| err.to_string())?;
+        let mut file = File::open(path).map_err(|err| err.to_string())?;
         let mut contents = String::new();
         file.read_to_string(&mut contents)
             .map_err(|err| format!("Failed to read config to string: {err}"))?;
