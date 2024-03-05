@@ -1,6 +1,12 @@
 use log::error;
 
-use crate::backend::{config_file::Config, utils::{self, generic::{get_config, update_config}}};
+use crate::backend::{
+    config_file::Config,
+    utils::{
+        self,
+        generic::{get_config, update_config},
+    },
+};
 
 use super::functions::{cli_dbupdate, cli_gui, cli_scanner, not_implemented, print_data};
 
@@ -127,7 +133,7 @@ pub async fn download_logs() -> Result<String, String> {
     let app_log_path = log_dir.join("app.log");
 
     let downloads_dir =
-        tauri::api::path::download_dir().ok_or(format!("Failed to get download directory"))?;
+        tauri::api::path::download_dir().ok_or("Failed to get download directory".to_string())?;
 
     let destination_path = downloads_dir.join("log.txt");
 
