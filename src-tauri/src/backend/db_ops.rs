@@ -275,7 +275,7 @@ impl DBOps {
             ) {
                 Ok(_) => removed += 1,
                 Err(err) => {
-                    warn!("Got {err} when trying to insert {hash}. Skipping...");
+                    warn!("Got {err} when trying to delete {hash}. Skipping...");
                     skipped += 1;
                 }
             }
