@@ -32,8 +32,8 @@ pub fn update_config(new_config: Config) -> Result<(), String> {
 /// returns the config struct
 pub fn get_config() -> Config {
     CONFIG.with(|config| {
-        let clone = (&*config.borrow()).clone();
-        (&*clone).clone()
+        let clone = (*config.borrow()).clone();
+        (*clone).clone()
     })
 }
 
