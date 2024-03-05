@@ -131,7 +131,7 @@ pub fn insert_all(db: &mut DBOps, window: &Option<tauri::Window>) -> Result<(), 
         .cache;
 
     // get all files from a folder
-    let entries: Vec<DirEntry> = fs::read_dir(&cache_dir)
+    let entries: Vec<DirEntry> = fs::read_dir(cache_dir)
         .map_err(|err| err.to_string())?
         .filter_map(Result::ok)
         .collect();
@@ -177,7 +177,7 @@ pub fn patch(patchfile: &str) -> Result<(), std::io::Error> {
     let file = File::open(file_path)?;
     let bufreader = BufReader::new(file);
 
-    for line in bufreader.lines().flatten() {
+    for line in bufreader.lines().map_while(Result::ok) {
         let line = line.trim().to_owned();
         match line {
             _ if line.starts_with('-') => {

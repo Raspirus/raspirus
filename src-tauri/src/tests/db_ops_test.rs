@@ -68,6 +68,7 @@ mod tests {
         match hash_count {
             Ok(count) => {
                 info!("Hash count: {}", count);
+                // bruh
                 assert!(true);
             }
             Err(err) => {
@@ -87,13 +88,10 @@ mod tests {
             .unwrap();
 
         // Check if the hash exists in the database after removal
-        let exists_after_removal = match db_ops.hash_exists(hash_to_remove) {
-            Ok(exists) => exists,
-            Err(_) => false, // Hash not found
-        };
+        let exists_after_removal = db_ops.hash_exists(hash_to_remove).unwrap_or(false);
 
         // Assert the result
-        assert_eq!(exists_after_removal, false);
+        assert!(!exists_after_removal);
     }
 
     /*
