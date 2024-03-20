@@ -16,7 +16,7 @@ rust-version = "1.59"
 threadpool_rs = { git = "https://github.com/GamingGuy003/threadpool_rs.git"}
 log = "0.4.21"
 sysinfo = "0.30.7"
-reqwest = { version = "0.11.26", features = [ "blocking" ] }
+reqwest = { version = "0.12.0", features = [ "blocking" ] }
 rusqlite = { version = "0.31.0", features =  [ "bundled" ] }
 terminal_size = "0.3.0"
 tokio = "1.36.0"
