@@ -37,7 +37,7 @@ winapi = "0.3.9"
 
 [dev-dependencies]
 ctor = "0.2.7"
-regex = "1.10.3"
+regex = "1.10.4"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
