@@ -53,28 +53,3 @@ jobs:
       with:
         name: raspirus_1.1.3_armhf_${{ github.run_number }}.deb
         path: ./dist/raspirus_1.1.3_armhf.deb
-
-  build_elf:
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Build the binary Docker image
-      run: docker build -t raspirus-binary -f ./docker/binary/Dockerfile .
-
-    - name: Create the Docker container
-      run: docker create --name raspirus raspirus-binary
-
-    - name: Create dist folder
-      run: mkdir -p ./dist
-
-    - name: Copy file from docker
-      run: docker cp raspirus:/usr/app/raspirus/target/release/raspirus ./dist
-
-    - name: Upload file to artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: raspirus_1.1.3_elf_${{ github.run_number }}
-        path: ./dist/raspirus
