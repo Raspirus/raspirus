@@ -15,15 +15,15 @@ rust-version = "1.59"
 [dependencies]
 threadpool_rs = { git = "https://github.com/GamingGuy003/threadpool_rs.git"}
 log = "0.4.21"
-sysinfo = "0.30.10"
+sysinfo = "0.30.11"
 reqwest = { version = "0.12.3", features = [ "blocking" ] }
 rusqlite = { version = "0.31.0", features =  [ "bundled" ] }
 terminal_size = "0.3.0"
 tokio = "1.37.0"
-serde_json = "1.0.115"
-serde = { version = "1.0.197", features = [ "derive" ] }
+serde_json = "1.0.116"
+serde = { version = "1.0.198", features = [ "derive" ] }
 tauri = { version = "1.6.1", features = [ "cli", "dialog-open", "updater" ] }
-chrono = "0.4.37"
+chrono = "0.4.38"
 directories-next = "2.0.0"
 zip = "0.6.6"
 simplelog = "0.12.2"
@@ -37,7 +37,7 @@ winapi = "0.3.9"
 tauri-cli = "1.5.11"
 
 [dev-dependencies]
-ctor = "0.2.7"
+ctor = "0.2.8"
 regex = "1.10.4"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
