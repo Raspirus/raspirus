@@ -32,4 +32,4 @@ RUN cargo install --path src-tauri/
 RUN cargo install tauri-cli --locked
 
 # Build app
-RUN cargo tauri build --target aarch64-unknown-linux-gnu -b deb
+RUN cargo tauri build -b none
