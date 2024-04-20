@@ -6,7 +6,7 @@
     "back_btn": "STARTSEITE",
     "scanning_error": "Scanning Fehler",
     "usb_list_error": "USB-liste Fehler",
-    "usb-list_error_msg": "KOnnte auf diesem Gerät nicht nach USBs suchen",
+    "usb_list_error_msg": "KOnnte auf diesem Gerät nicht nach USBs suchen",
     "selection_warn": "Nichts ausgewählt",
     "selection_warn_msg": "Wähle vorher den Scanort aus",
     "selection_placeholder": "Wähle dein USB drive",
