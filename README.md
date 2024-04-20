@@ -33,6 +33,10 @@ Getting started with Raspirus is a breeze. Follow these simple steps:
 1. Visit our [website](https://raspirus.deno.dev) or head to the [GitHub release page](https://github.com/Raspirus/Raspirus/releases/latest).
 2. Download the executable that matches your operating system.
 
+**Alterantives:**
+
+- On Debian-based distros, using `apt`: https://github.com/Benji377/community-ppa
+
 ### For Developers
 
 Are you a developer looking to set up Raspirus? We've got you covered. Check out our comprehensive guides for various operating systems in the [Developers section](https://raspirus.github.io/docs/developers) on our docs.
