@@ -105,11 +105,11 @@ export default function Home() {
         .catch((error) => {
           // Catches possible errors and display them using an Alert
           console.error(error);
-          Swal.fire(
-            t('usb_list_error'),
-            t('usb_list_error_msg'),
-            "error"
-          );
+          Swal.fire({
+            title: t('usb_list_error'),
+            text: t('usb_list_error_msg'),
+            icon: "error"
+          });
         });
 
       // Using the backend, check if an update is available
