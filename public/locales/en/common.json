@@ -6,7 +6,7 @@
     "back_btn": "HOME",
     "scanning_error": "Scanning errors",
     "usb_list_error": "USB-list error",
-    "usb-list_error_msg": "Couldn't search for USBs on this device",
+    "usb_list_error_msg": "Couldn't search for USBs on this device",
     "selection_warn": "No selection",
     "selection_warn_msg": "Please select a driver first!",
     "selection_placeholder": "Select your USB drive",
