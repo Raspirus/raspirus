@@ -22,7 +22,7 @@ terminal_size = "0.3.0"
 tokio = "1.37.0"
 serde_json = "1.0.116"
 serde = { version = "1.0.198", features = [ "derive" ] }
-tauri = { version = "1.6.1", features = [ "cli", "dialog-open", "updater" ] }
+tauri = { version = "1.6.2", features = [ "cli", "dialog-open", "updater" ] }
 chrono = "0.4.38"
 directories-next = "2.0.0"
 zip = "1.1.1"
@@ -34,7 +34,7 @@ md5 = "0.7.0"
 [target.'cfg(target_os = "windows")'.dependencies]
 windows-sys = { version = "0.52.0", features = [ "Win32_Foundation", "Win32_System_Console" ] }
 winapi = "0.3.9"
-tauri-cli = "1.5.11"
+tauri-cli = "1.5.12"
 
 [dev-dependencies]
 ctor = "0.2.8"
