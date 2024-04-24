@@ -27,7 +27,6 @@ chrono = "0.4.38"
 directories-next = "2.0.0"
 zip = "1.1.1"
 simplelog = "0.12.2"
-job_scheduler_ng = "2.0.4"
 md5 = "0.7.0"
 
 # windows dependencies
