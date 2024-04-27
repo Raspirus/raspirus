@@ -2,6 +2,7 @@
 [![Test](https://github.com/Raspirus/Raspirus/actions/workflows/testproject.yml/badge.svg)](https://github.com/Raspirus/Raspirus/actions/workflows/testproject.yml)
 [![Codecov](https://codecov.io/gh/Raspirus/Raspirus/branch/main/graph/badge.svg?token=0GFFWY7YBP)](https://codecov.io/gh/Raspirus/Raspirus)
 ![GitHub downloads](https://img.shields.io/github/downloads/Raspirus/Raspirus/total?label=Downloads)
+[![Say Thanks!](https://img.shields.io/badge/Say%20Thanks-!-1EAEDB.svg)](https://saythanks.io/to/Benji377)
 
 # :rocket: Raspirus
 ![banner_logo](https://user-images.githubusercontent.com/50681275/223684389-ed0f104f-c183-4223-9723-c268e7cc5268.png)
@@ -23,8 +24,6 @@ Welcome to Raspirus, your lightweight signature-based malware scanner. Originall
 - **Sleek Modern Interface:** With user-friendliness at its core, Raspirus boasts a beautiful and intuitive UI.
 
 ## Getting Started
-[![Get it from the Snap Store](https://snapcraft.io/static/images/badges/en/snap-store-white.svg)](https://snapcraft.io/raspirus)
-[![Download Raspirus](https://a.fsdn.com/con/app/sf-download-button)](https://sourceforge.net/projects/raspirus/files/latest/download)
 
 ### For Regular Users
 
@@ -35,7 +34,11 @@ Getting started with Raspirus is a breeze. Follow these simple steps:
 
 **Alterantives:**
 
-- On Debian-based distros, using `apt`: https://github.com/Benji377/community-ppa
+- On Debian-based distros, [using `apt`](https://github.com/Benji377/community-ppa)
+- [Arch AUR](https://aur.archlinux.org/packages/raspirus/)
+- [Snap Store (Linux)](https://snapcraft.io/raspirus/)
+- [SourceForge](https://sourceforge.net/projects/raspirus/files/latest/download)
+- [Chocolatey (Windows)](https://community.chocolatey.org/packages/raspirus/)
 
 ### For Developers
 
