@@ -1,6 +1,8 @@
+use std::{any::Any, fs};
+
 use log::info;
+use rusb::UsbContext;
 use serde::{Deserialize, Serialize};
-use std::fs;
 
 #[derive(Serialize, Deserialize, Debug)]
 struct UsbDevice {
@@ -15,6 +17,17 @@ pub async fn list_usb_drives() -> Result<String, String> {
     #[cfg(any(target_os = "linux", target_os = "macos"))]
     {
         info!("Trying to retrieve USB drives from Unix-like OS");
+        let usb_context = rusb::Context::new().unwrap();
+        let devices = usb_context.devices().unwrap();
+        devices
+            .iter()
+            .filter(|device| {
+                let code = device.device_descriptor().unwrap().class_code();
+                todo!();
+                code == 0x08 // should yield true for usb mass storage devices, does not happen for some reason
+            })
+            .for_each(|usb| println!("usb: {usb:?}"));
+
         let username = match std::env::var("USER") {
             Ok(val) => val,
             Err(_) => panic!("Could not get current username"),
