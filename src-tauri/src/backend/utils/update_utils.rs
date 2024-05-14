@@ -67,14 +67,8 @@ pub fn get_remote_timestamp() -> Result<String, std::io::Error> {
 
 /// updates if update is necessary
 pub fn update(window: Option<tauri::Window>) -> Result<String, String> {
-    send(&window, "chck", String::new());
-    // if remote is not newer than local we skip
-    if !check_update_necessary().map_err(|err| format!("Failed to check for updates: {err}"))? {
-        info!("Database already up to date. Skipping...");
-        return Ok("100".to_owned());
-    }
-
     info!("Updating database...");
+    send(&window, "chck", String::new());
 
     // try to get a usable database path
     let mut config = get_config();
@@ -98,6 +92,12 @@ pub fn update(window: Option<tauri::Window>) -> Result<String, String> {
         err.to_string()
     })?;
 
+    // if remote is not newer than local we skip
+    if !check_update_necessary().map_err(|err| format!("Failed to check for updates: {err}"))? {
+        info!("Database already up to date. Skipping...");
+        return Ok(db_connection.count_hashes().map_err(|err| err.to_string())?.to_string());
+    }
+
     // Actually run the update
     let big_tic = time::Instant::now();
     match db_connection.update_db(&window) {
@@ -105,6 +105,7 @@ pub fn update(window: Option<tauri::Window>) -> Result<String, String> {
             // write remote timestamp to config
             let timestamp = get_remote_timestamp().map_err(|err| err.to_string())?;
             config.last_db_update = timestamp;
+            config.hashes_in_db = res;
             update_config(config)?;
 
             clear_cache().map_err(|err| err.to_string())?;
