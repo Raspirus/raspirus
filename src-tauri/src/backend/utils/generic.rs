@@ -10,11 +10,6 @@ use zip::ZipArchive;
 
 use crate::{backend::config_file::Config, CONFIG};
 
-#[derive(Clone, serde::Serialize)]
-struct TauriEvent {
-    message: String,
-}
-
 #[allow(unused)]
 /// saves the global config
 pub fn save_config() -> Result<(), String> {

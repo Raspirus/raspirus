@@ -96,7 +96,7 @@ impl DBOps {
     /// let mut db_ops = DBOps::new("signatures.db").unwrap();
     /// db_ops.update_db();
     /// ```
-    pub fn update_db(&mut self, window: &Option<tauri::Window>) -> Result<u64, std::io::Error> {
+    pub fn update_db(&mut self, window: &Option<tauri::Window>) -> Result<u32, std::io::Error> {
         info!("Updating database...");
         let max_file = index()?;
         send(window, "dwld", String::from("0"));
@@ -242,12 +242,12 @@ impl DBOps {
     /// let db_ops = DBOps::new("signatures.db").unwrap();
     /// assert_eq!(db_ops.count_hashes().unwrap(), 0);
     /// ```
-    pub fn count_hashes(&self) -> Result<u64, rusqlite::Error> {
+    pub fn count_hashes(&self) -> Result<u32, rusqlite::Error> {
         let mut stmt = self
             .db_conn
             .prepare(&format!("SELECT COUNT(*) FROM {}", crate::DB_TABLE))?;
-        let count: i64 = stmt.query_row([], |row| row.get(0))?;
-        Ok(count as u64)
+        let count: u32  = stmt.query_row([], |row| row.get(0))?;
+        Ok(count as u32)
     }
 
     /// Removes a vec of specified hashes from the `signatures` table.
