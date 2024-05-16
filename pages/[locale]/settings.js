@@ -457,7 +457,7 @@ export default function Settings() {
         short={"Location where we download the signatures from"}
         short2={mirror}
         icon={faLink}
-        isOn={fetch(mirror + '/timestamp', { mode: 'no-cors' }).then(() => true).catch(() => false)}
+        isOn={navigator.onLine}
         setIsOn={function () { }}
       />
     </>
