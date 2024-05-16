@@ -1,7 +1,10 @@
-use log::error;
+use std::path::Path;
+
+use log::{error, info};
 
 use crate::backend::{
     config_file::Config,
+    db_ops::DBOps,
     utils::{
         self,
         generic::{get_config, update_config},
@@ -57,7 +60,8 @@ pub fn init_tauri() {
             load_config_fe,
             save_config_fe,
             download_logs,
-            check_update
+            check_update,
+            get_hash_count_fe
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
@@ -87,7 +91,7 @@ pub async fn update_database(window: tauri::Window) -> Result<String, String> {
 }
 
 #[tauri::command]
-pub async fn patch(patchfile: String) -> Result<(), String> {
+pub async fn patch(patchfile: String) -> Result<(u32, u32, u32), String> {
     tokio::task::spawn_blocking(move || utils::update_utils::patch(&patchfile))
         .await
         .map_err(|err| err.to_string())?
@@ -142,4 +146,30 @@ pub async fn download_logs() -> Result<String, String> {
         .map_err(|err| format!("Error copying log file: {err}"))?;
     // If the copy operation is successful, return Ok indicating success
     Ok(destination_path.to_str().unwrap().to_string())
+}
+
+#[tauri::command]
+pub fn get_hash_count_fe() -> Result<String, String> {
+    // try to get a usable database path
+    let config = get_config();
+    let data_dir = config
+        .clone()
+        .paths
+        .ok_or("No paths set. Is config initialized?".to_owned())?
+        .data;
+    let db_path = Path::new(&config.db_location);
+    let db_file_str = if !config.db_location.is_empty() && db_path.exists() && db_path.is_file() {
+        info!("Using specific DB path {}", config.db_location);
+        config.db_location.clone()
+    } else {
+        // if not we use the default path
+        data_dir.join(crate::DB_NAME).display().to_string()
+    };
+
+    // connect to database
+    let db_connection = DBOps::new(db_file_str.as_str()).map_err(|err| {
+        error!("{err}");
+        err.to_string()
+    })?;
+    Ok(db_connection.count_hashes().map_err(|err| err.to_string())?.to_string())
 }

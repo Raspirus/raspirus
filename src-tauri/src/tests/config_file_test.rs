@@ -6,7 +6,6 @@ mod tests {
     fn test_new_config() {
         let config = Config::new().unwrap();
 
-        assert_eq!(config.hashes_in_db, 0);
         assert_eq!(config.last_db_update, "Never");
         assert!(!config.logging_is_active);
         assert!(config.obfuscated_is_active);
@@ -20,7 +19,6 @@ mod tests {
         let config = Config::new();
         assert!(config.is_ok());
         let mut config_clean = config.unwrap();
-        config_clean.hashes_in_db = 10;
         config_clean.last_db_update = "2023-06-05".to_string();
         config_clean.logging_is_active = true;
         config_clean.obfuscated_is_active = false;
@@ -35,7 +33,6 @@ mod tests {
         assert!(loaded_config.is_ok());
 
         let loaded_config = loaded_config.unwrap();
-        assert_eq!(loaded_config.hashes_in_db, config_clean.hashes_in_db);
         assert_eq!(loaded_config.last_db_update, config_clean.last_db_update);
         assert_eq!(
             loaded_config.logging_is_active,

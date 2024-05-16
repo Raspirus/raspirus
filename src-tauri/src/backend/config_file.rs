@@ -7,8 +7,6 @@ use std::path::PathBuf;
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(default)]
 pub struct Config {
-    // Amount of hashes in the database
-    pub hashes_in_db: u32,
     // Last time and date when the db was successfully updated
     pub last_db_update: String,
     // If we should log information to a file
@@ -39,7 +37,6 @@ pub struct Paths {
 impl Default for Config {
     fn default() -> Self {
         Self {
-            hashes_in_db: 0,
             last_db_update: "Never".to_string(),
             logging_is_active: false,
             obfuscated_is_active: true,
