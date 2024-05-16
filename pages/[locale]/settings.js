@@ -4,7 +4,8 @@ import { useRouter } from 'next/router';
 import { invoke } from "@tauri-apps/api/tauri";
 import { listen } from '@tauri-apps/api/event';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faFileLines, faUserNinja, faWrench, faHome, faLink, faDatabase, faFileZipper, faFingerprint, faHistory } from '@fortawesome/free-solid-svg-icons';
+import { faFileLines, faUserNinja, faWrench, faHome, faGears,
+        faLink, faDatabase, faFileZipper, faFingerprint, faHistory } from '@fortawesome/free-solid-svg-icons';
 import React, { useState, useEffect, useRef } from 'react';
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
@@ -39,6 +40,7 @@ export default function Settings() {
   const [scan_dir, setScanDir] = useState(false);
   const [ignored_hashes, setIgnoredHashes] = useState([]);
   const [mirror, setMirror] = useState("");
+  const [patch_result, setPatchResult] = useState("");
   // DB Update progress
   const [progress, setProgress] = useState(0);
   const progressRef = useRef(progress);
@@ -57,11 +59,13 @@ export default function Settings() {
     router.push('/');
   };
 
-  // This function allows users to use a custom path for the DB file.
-  // The default state of the button is OFF, once cliked, the user opens a file picker.
-  // In the file picker, the user can select the db path and the button switches to ON.
-  // If nothing is selected, the button remains OFF. Once the button is in the ON state,
-  // if clicked again it switches back to OFF.
+  /* 
+  * This function allows users to use a custom path for the DB file.
+  * The default state of the button is OFF, once cliked, the user opens a file picker.
+  * In the file picker, the user can select the db path and the button switches to ON.
+  * If nothing is selected, the button remains OFF. Once the button is in the ON state,
+  * if clicked again it switches back to OFF.
+  */
   async function handleSetCustomDBPath() {
     if (use_db_path) {
       setCustomDbPath('');
@@ -88,6 +92,39 @@ export default function Settings() {
       } catch (error) {
         console.error("Error with FilePicker: ", error);
       }
+    }
+  }
+
+  async function handleAddPatchFile() {
+    try {
+      const selected_file = await open({
+        directory: false,
+        multiple: false,
+        defaultPath: "/"
+      });
+
+      if (selected_file === null) {
+        console.log("Nothing selected");
+        // No dir selected
+      } else {
+        console.log("Selected file: ", selected_file);
+
+        if (typeof window !== "undefined") {
+          invoke("patch", { patchfile: selected_file })
+            .then((output) => {
+              console.log("OUTPUT: ", output);
+              const ReactSwal = withReactContent(Swal);
+              ReactSwal.fire({
+                icon: "success",
+                title: "Patch file applied",
+                text: "Inserted: " + output[0] + " | Removed: " + output[1] + " | Skipped: " + output[2],
+              })
+            })
+            .catch((err) => console.error(err))
+        }
+      }
+    } catch (error) {
+      console.error("Error with FilePicker: ", error);
     }
   }
 
@@ -188,13 +225,19 @@ export default function Settings() {
 
   useEffect(() => {
     if (typeof window !== "undefined") {
+      invoke("get_hash_count_fe", {})
+        .then((output) => {
+          console.log("Hash count: ", output);
+          setCount(output);
+        })
+        .catch((err) => console.error(err))
+
       // Tries to create the config file on the backend, which returns the new created data
       // or the config found. This data then updates the frontend and is displayed
       invoke("load_config_fe", {})
         .then((output) => {
           const parsedData = JSON.parse(output);
           console.log("Loaded config: ", parsedData);
-          setCount(parsedData.hashes_in_db);
           if (parsedData.last_db_update != "Never") {
             setDate(parsedData.last_db_update);
           }
@@ -388,6 +431,16 @@ export default function Settings() {
         hashes={ignored_hashes}
         icon={faFingerprint}
         setHashes={setIgnoredHashes}
+      />
+
+      <SettingComp
+        title={'Add patch file'}
+        short={'Allows to patch the DB with custom data'}
+        short2={'Use: https://github.com/Raspirus/signature-builder'}
+        icon={faGears}
+        isOn={false}
+        action={handleAddPatchFile}
+        action_val={'Add Patch'}
       />
 
       <SettingComp
