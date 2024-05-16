@@ -38,7 +38,7 @@ impl Default for Config {
     fn default() -> Self {
         Self {
             last_db_update: "Never".to_string(),
-            logging_is_active: false,
+            logging_is_active: true,
             obfuscated_is_active: true,
             db_location: "".to_string(),
             scan_dir: true,
