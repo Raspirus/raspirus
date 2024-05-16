@@ -17,11 +17,17 @@ export class Config {
     }
 
     loadConfig() {
-        invoke("create_config", {})
+        invoke("get_hash_count_fe", {})
+        .then((output) => {
+          const parsedData = JSON.parse(output);
+          this.hash_count = parsedData.hashes_in_db;
+        })
+        .catch((err) => console.error(err))
+
+        invoke("load_config_fe", {})
         .then((output) => {
           const parsedData = JSON.parse(output);
           console.log("Loaded config: ", parsedData);
-          this.hash_count = parsedData.hashes_in_db;
           if (parsedData.last_db_update != "Never") {
             this.updated_date = parsedData.last_db_update;
           }
