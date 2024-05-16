@@ -95,7 +95,10 @@ pub fn update(window: Option<tauri::Window>) -> Result<String, String> {
     // if remote is not newer than local we skip
     if !check_update_necessary().map_err(|err| format!("Failed to check for updates: {err}"))? {
         info!("Database already up to date. Skipping...");
-        return Ok(db_connection.count_hashes().map_err(|err| err.to_string())?.to_string());
+        return Ok(db_connection
+            .count_hashes()
+            .map_err(|err| err.to_string())?
+            .to_string());
     }
 
     // Actually run the update
@@ -105,7 +108,7 @@ pub fn update(window: Option<tauri::Window>) -> Result<String, String> {
             // write remote timestamp to config
             let timestamp = get_remote_timestamp().map_err(|err| err.to_string())?;
             config.last_db_update = timestamp;
-            config.hashes_in_db = res;
+            info!("Hashes in db after update: {res}");
             update_config(config)?;
 
             clear_cache().map_err(|err| err.to_string())?;
@@ -163,7 +166,7 @@ pub fn insert_all(db: &mut DBOps, window: &Option<tauri::Window>) -> Result<(), 
     Ok(())
 }
 
-pub fn patch(patchfile: &str) -> Result<(), std::io::Error> {
+pub fn patch(patchfile: &str) -> Result<(u32, u32, u32), std::io::Error> {
     let file_path = Path::new(patchfile);
 
     if !file_path.exists() {
@@ -219,5 +222,5 @@ pub fn patch(patchfile: &str) -> Result<(), std::io::Error> {
         .insert_hashes(&add)
         .map_err(|err| std::io::Error::new(std::io::ErrorKind::Other, err.to_string()))?;
 
-    Ok(())
+    Ok((0, 0, 0))
 }

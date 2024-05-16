@@ -246,7 +246,7 @@ impl DBOps {
         let mut stmt = self
             .db_conn
             .prepare(&format!("SELECT COUNT(*) FROM {}", crate::DB_TABLE))?;
-        let count: u32  = stmt.query_row([], |row| row.get(0))?;
+        let count: u32 = stmt.query_row([], |row| row.get(0))?;
         Ok(count as u32)
     }
 
