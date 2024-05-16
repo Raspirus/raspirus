@@ -179,7 +179,7 @@ impl DBOps {
     /// let mut db_ops = DBOps::new("signatures.db").unwrap();
     /// db_ops.insert_hashes(vec!["abcdef".to_owned()]).unwrap();
     /// ```
-    pub fn insert_hashes(&mut self, hashes: &Vec<String>) -> Result<(), rusqlite::Error> {
+    pub fn insert_hashes(&mut self, hashes: &Vec<String>) -> Result<usize, rusqlite::Error> {
         self.init_table()?;
         info!("Inserting {} hashes...", hashes.len());
         let transact = self.db_conn.transaction()?;
@@ -207,7 +207,7 @@ impl DBOps {
             skipped,
             big_toc.duration_since(big_tic).as_secs_f64()
         );
-        Ok(())
+        Ok(inserted)
     }
 
     /// Returns true or false depending on if the given hash gets found in the database
@@ -260,7 +260,7 @@ impl DBOps {
     /// let db_ops = DBOps::new("signatures.db").unwrap();
     /// assert!(db_ops._remove_hash(vec!["abcd1234".to_owned()]).is_ok());
     /// ```
-    pub fn remove_hashes(&mut self, hashes: &Vec<String>) -> Result<(), rusqlite::Error> {
+    pub fn remove_hashes(&mut self, hashes: &Vec<String>) -> Result<usize, rusqlite::Error> {
         self.init_table()?;
         info!("Removing {} hashes...", hashes.len());
         let transact = self.db_conn.transaction()?;
@@ -288,6 +288,6 @@ impl DBOps {
             skipped,
             big_toc.duration_since(big_tic).as_secs_f64()
         );
-        Ok(())
+        Ok(removed)
     }
 }

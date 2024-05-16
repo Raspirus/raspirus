@@ -91,7 +91,7 @@ pub async fn update_database(window: tauri::Window) -> Result<String, String> {
 }
 
 #[tauri::command]
-pub async fn patch(patchfile: String) -> Result<(u32, u32, u32), String> {
+pub async fn patch(patchfile: String) -> Result<(usize, usize, usize), String> {
     tokio::task::spawn_blocking(move || utils::update_utils::patch(&patchfile))
         .await
         .map_err(|err| err.to_string())?

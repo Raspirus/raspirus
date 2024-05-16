@@ -166,7 +166,7 @@ pub fn insert_all(db: &mut DBOps, window: &Option<tauri::Window>) -> Result<(), 
     Ok(())
 }
 
-pub fn patch(patchfile: &str) -> Result<(u32, u32, u32), std::io::Error> {
+pub fn patch(patchfile: &str) -> Result<(usize, usize, usize), std::io::Error> {
     let file_path = Path::new(patchfile);
 
     if !file_path.exists() {
@@ -214,13 +214,13 @@ pub fn patch(patchfile: &str) -> Result<(u32, u32, u32), std::io::Error> {
     let mut db_connection = DBOps::new(db_file_str.as_str())
         .map_err(|err| std::io::Error::new(std::io::ErrorKind::NotConnected, err.to_string()))?;
 
-    db_connection
+    let removed = db_connection
         .remove_hashes(&remove)
         .map_err(|err| std::io::Error::new(std::io::ErrorKind::Other, err.to_string()))?;
 
-    db_connection
+    let inserted = db_connection
         .insert_hashes(&add)
         .map_err(|err| std::io::Error::new(std::io::ErrorKind::Other, err.to_string()))?;
 
-    Ok((0, 0, 0))
+    Ok((inserted, removed, (add.len() + remove.len()).checked_sub(inserted + removed).unwrap_or_default()))
 }
