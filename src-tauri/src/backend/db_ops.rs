@@ -96,7 +96,7 @@ impl DBOps {
     /// let mut db_ops = DBOps::new("signatures.db").unwrap();
     /// db_ops.update_db();
     /// ```
-    pub fn update_db(&mut self, window: &Option<tauri::Window>) -> Result<u64, std::io::Error> {
+    pub fn update_db(&mut self, window: &Option<tauri::Window>) -> Result<u32, std::io::Error> {
         info!("Updating database...");
         let max_file = index()?;
         send(window, "dwld", String::from("0"));
@@ -179,7 +179,7 @@ impl DBOps {
     /// let mut db_ops = DBOps::new("signatures.db").unwrap();
     /// db_ops.insert_hashes(vec!["abcdef".to_owned()]).unwrap();
     /// ```
-    pub fn insert_hashes(&mut self, hashes: &Vec<String>) -> Result<(), rusqlite::Error> {
+    pub fn insert_hashes(&mut self, hashes: &Vec<String>) -> Result<usize, rusqlite::Error> {
         self.init_table()?;
         info!("Inserting {} hashes...", hashes.len());
         let transact = self.db_conn.transaction()?;
@@ -207,7 +207,7 @@ impl DBOps {
             skipped,
             big_toc.duration_since(big_tic).as_secs_f64()
         );
-        Ok(())
+        Ok(inserted)
     }
 
     /// Returns true or false depending on if the given hash gets found in the database
@@ -242,12 +242,12 @@ impl DBOps {
     /// let db_ops = DBOps::new("signatures.db").unwrap();
     /// assert_eq!(db_ops.count_hashes().unwrap(), 0);
     /// ```
-    pub fn count_hashes(&self) -> Result<u64, rusqlite::Error> {
+    pub fn count_hashes(&self) -> Result<u32, rusqlite::Error> {
         let mut stmt = self
             .db_conn
             .prepare(&format!("SELECT COUNT(*) FROM {}", crate::DB_TABLE))?;
-        let count: i64 = stmt.query_row([], |row| row.get(0))?;
-        Ok(count as u64)
+        let count: u32 = stmt.query_row([], |row| row.get(0))?;
+        Ok(count as u32)
     }
 
     /// Removes a vec of specified hashes from the `signatures` table.
@@ -260,7 +260,7 @@ impl DBOps {
     /// let db_ops = DBOps::new("signatures.db").unwrap();
     /// assert!(db_ops._remove_hash(vec!["abcd1234".to_owned()]).is_ok());
     /// ```
-    pub fn remove_hashes(&mut self, hashes: &Vec<String>) -> Result<(), rusqlite::Error> {
+    pub fn remove_hashes(&mut self, hashes: &Vec<String>) -> Result<usize, rusqlite::Error> {
         self.init_table()?;
         info!("Removing {} hashes...", hashes.len());
         let transact = self.db_conn.transaction()?;
@@ -288,6 +288,6 @@ impl DBOps {
             skipped,
             big_toc.duration_since(big_tic).as_secs_f64()
         );
-        Ok(())
+        Ok(removed)
     }
 }
