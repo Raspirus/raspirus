@@ -13,26 +13,29 @@ rust-version = "1.59"
 
 # generic dependencies
 [dependencies]
-threadpool_rs = { git = "https://github.com/GamingGuy003/threadpool_rs.git"}
+threadpool_rs = { git = "https://github.com/GamingGuy003/threadpool_rs.git" }
 log = "0.4.21"
 sysinfo = "0.30.11"
-reqwest = { version = "0.12.4", features = [ "blocking" ] }
-rusqlite = { version = "0.31.0", features =  [ "bundled" ] }
+reqwest = { version = "0.12.4", features = ["blocking"] }
+rusqlite = { version = "0.31.0", features = ["bundled"] }
 terminal_size = "0.3.0"
 tokio = "1.37.0"
 serde_json = "1.0.116"
-serde = { version = "1.0.200", features = [ "derive" ] }
-tauri = { version = "1.6.2", features = [ "cli", "dialog-open", "updater" ] }
+serde = { version = "1.0.200", features = ["derive"] }
+tauri = { version = "1.6.2", features = ["cli", "dialog-open", "updater"] }
 chrono = "0.4.38"
 directories-next = "2.0.0"
 zip = "1.1.4"
 simplelog = "0.12.2"
 md5 = "0.7.0"
-rusb = "0.9.4"
+lfs-core = "0.11.2"
 
 # windows dependencies
 [target.'cfg(target_os = "windows")'.dependencies]
-windows-sys = { version = "0.52.0", features = [ "Win32_Foundation", "Win32_System_Console" ] }
+windows-sys = { version = "0.52.0", features = [
+    "Win32_Foundation",
+    "Win32_System_Console",
+] }
 winapi = "0.3.9"
 tauri-cli = "1.5.12"
 

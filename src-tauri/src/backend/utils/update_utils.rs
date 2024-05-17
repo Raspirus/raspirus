@@ -6,7 +6,9 @@ use std::io::{BufRead, BufReader};
 use std::{path::Path, time};
 
 use crate::backend::db_ops::DBOps;
-use crate::backend::utils::generic::{clear_cache, send, send_progress, update_config};
+use crate::backend::utils::generic::{
+    clear_cache, save_config, send, send_progress, update_config,
+};
 
 use super::generic::get_config;
 
@@ -108,8 +110,9 @@ pub fn update(window: Option<tauri::Window>) -> Result<String, String> {
             // write remote timestamp to config
             let timestamp = get_remote_timestamp().map_err(|err| err.to_string())?;
             config.last_db_update = timestamp;
-            info!("Hashes in db after update: {res}");
             update_config(config)?;
+            save_config()?;
+            info!("Hashes in db after update: {res}");
 
             clear_cache().map_err(|err| err.to_string())?;
 
@@ -222,5 +225,11 @@ pub fn patch(patchfile: &str) -> Result<(usize, usize, usize), std::io::Error> {
         .insert_hashes(&add)
         .map_err(|err| std::io::Error::new(std::io::ErrorKind::Other, err.to_string()))?;
 
-    Ok((inserted, removed, (add.len() + remove.len()).checked_sub(inserted + removed).unwrap_or_default()))
+    Ok((
+        inserted,
+        removed,
+        (add.len() + remove.len())
+            .checked_sub(inserted + removed)
+            .unwrap_or_default(),
+    ))
 }
