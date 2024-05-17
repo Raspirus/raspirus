@@ -171,5 +171,8 @@ pub fn get_hash_count_fe() -> Result<String, String> {
         error!("{err}");
         err.to_string()
     })?;
-    Ok(db_connection.count_hashes().map_err(|err| err.to_string())?.to_string())
+    Ok(db_connection
+        .count_hashes()
+        .map_err(|err| err.to_string())?
+        .to_string())
 }
