@@ -81,7 +81,7 @@ export default function Home() {
           SetDirSelection(parsedData.scan_dir);
           if (parsedData.last_db_update == "Never") {
             Swal.fire({
-              title: t('welcome'),
+              title: t('welcome_title'),
               text: t('welcome_text'),
               icon: "info",
               footer: t('welcome_footer')
