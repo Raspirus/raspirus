@@ -1,7 +1,4 @@
-use std::{any::Any, fs};
-
 use log::info;
-use rusb::UsbContext;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -17,45 +14,38 @@ pub async fn list_usb_drives() -> Result<String, String> {
     #[cfg(any(target_os = "linux", target_os = "macos"))]
     {
         info!("Trying to retrieve USB drives from Unix-like OS");
-        let usb_context = rusb::Context::new().unwrap();
-        let devices = usb_context.devices().unwrap();
-        devices
-            .iter()
-            .filter(|device| {
-                let code = device.device_descriptor().unwrap().class_code();
-                todo!();
-                code == 0x08 // should yield true for usb mass storage devices, does not happen for some reason
-            })
-            .for_each(|usb| println!("usb: {usb:?}"));
 
-        let username = match std::env::var("USER") {
-            Ok(val) => val,
-            Err(_) => panic!("Could not get current username"),
-        };
+        let options = lfs_core::ReadOptions::default();
+        let mut mounts = lfs_core::read_mounts(&options).unwrap();
+        // filter not ok / non removable drives
+        mounts.retain(|m| {
+            m.stats.is_ok()
+                && match m.disk.clone() {
+                    Some(disk) => disk.removable.unwrap_or_default(),
+                    None => false,
+                }
+        });
 
-        let dir_path = format!("/media/{}", username);
-        let entries = match fs::read_dir(dir_path) {
-            Ok(entries) => entries,
-            Err(err) => {
-                info!("Error while fetching usbs in /media: {err}");
-                return Err(format!("Error while fetching usbs in /media: {err}"));
-            }
-        };
-
-        for entry in entries {
-            let entry = entry.expect("I couldn't read something inside the directory");
-            let path = entry.path();
-
+        for entry in mounts {
             usb_drives.push(UsbDevice {
-                name: entry
-                    .file_name()
-                    .into_string()
-                    .expect("File name is strange"),
-                path: path
-                    .as_path()
+                name: format!(
+                    "{} ({})",
+                    entry
+                        .clone()
+                        .fs_label
+                        .expect(&format!("Broken fs label for usb {entry:?}")),
+                    entry
+                        .clone()
+                        .disk
+                        .expect(&format!("Broken disk data for usb {entry:?}"))
+                        .name
+                ),
+                path: entry
+                    .info
+                    .mount_point
                     .to_str()
-                    .expect("Path is strange")
-                    .to_string(),
+                    .expect(&format!("Broken mount point for usb {entry:?}"))
+                    .to_owned(),
             });
         }
     }
