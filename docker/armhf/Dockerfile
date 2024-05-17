@@ -7,6 +7,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get clean && apt-get update && apt-get upgrade -y
 RUN apt-get update && apt-get install -y build-essential \
+    cmake \
     libsqlite3-0 \
     libsqlite3-dev \
     wget \
