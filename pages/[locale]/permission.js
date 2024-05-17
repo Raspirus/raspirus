@@ -23,10 +23,10 @@ export default function Permission() {
 
   // When the user accepts the agreement, a redirect takes place with the path to scan retrieved from the Home page
   function startScanner() {
-    let { query: { scan_path }, } = router;
+    let { query: { scan_path , hashcount}, } = router;
     router.push({
       pathname: '/loading',
-      query: { scan_path: scan_path }
+      query: { scan_path: scan_path, hashcount: hashcount }
     })
   }
 
