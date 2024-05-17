@@ -165,7 +165,7 @@ impl DBOps {
         // remove possible conflict
         let _ = self
             .db_conn
-            .execute(&format!("DROP TABLE {new_tablename} "), [])?;
+            .execute(&format!("DROP TABLE IF EXISTS {new_tablename} "), [])?;
         let _ = self.db_conn.execute(
             &format!("ALTER TABLE {old_tablename} RENAME TO {new_tablename} "),
             [],
