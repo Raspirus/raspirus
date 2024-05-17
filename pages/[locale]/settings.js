@@ -6,7 +6,7 @@ import { listen } from '@tauri-apps/api/event';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faFileLines, faUserNinja, faWrench, faHome, faGears,
         faLink, faDatabase, faFileZipper, faFingerprint, faHistory } from '@fortawesome/free-solid-svg-icons';
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, use } from 'react';
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
 import { useTranslation } from 'next-i18next';
@@ -33,6 +33,7 @@ export default function Settings() {
   // Data for some of the settings is retrieved directly from the backend and saved back to it
   const [hash_count, setCount] = useState(0);
   const [updated_date, setDate] = useState(t('update_db_status_1'));
+  const [unformatted_date, setUnformattedDate] = useState("");
   const [logging, setLogging] = useState(false);
   const [obfuscated, setObfuscated] = useState(false);
   const [use_db_path, setUsedbPath] = useState(false);
@@ -135,7 +136,7 @@ export default function Settings() {
   const saveSettings = () => {
     const jsonData = {
       hashes_in_db: hash_count,
-      last_db_update: updated_date,
+      last_db_update: unformatted_date,
       logging_is_active: logging,
       obfuscated_is_active: obfuscated,
       db_location: custom_db_path,
@@ -238,7 +239,8 @@ export default function Settings() {
           const parsedData = JSON.parse(output);
           console.log("Loaded config: ", parsedData);
           if (parsedData.last_db_update != "Never") {
-            setDate(parsedData.last_db_update);
+            setUnformattedDate(parsedData.last_db_update);
+            setDate(getDate(parseInt(parsedData.last_db_update)));
           }
           setLogging(parsedData.logging_is_active);
           setObfuscated(parsedData.obfuscated_is_active);
@@ -314,15 +316,11 @@ export default function Settings() {
           ReactSwal.close(); // Close the SweetAlert
           console.log(message);
           setCount(Number(message));
-          // Set the date to the current date
-          setDate(getDate());
           Swal.fire(t('update_db_completed'), t('update_db_completed_val'), "success");
         })
         .catch((error) => {
           console.error(error);
           ReactSwal.close(); // Close the SweetAlert
-          // On error, set the failed update status
-          setDate(t('update_db_status_2'));
           Swal.fire(t('update_db_failed'), t('update_db_failed_val') + ": " + error, "error");
         });
     } else {
@@ -331,8 +329,9 @@ export default function Settings() {
     }
   }
 
-  const getDate = () => {
-    const today = new Date();
+  const getDate = (unformatted_date) => {
+    const today = new Date(unformatted_date);
+    console.log("Today: ", today);
     const date = today.getDate() + '-' + (today.getMonth() + 1) + '-' + today.getFullYear();
     const hours = today.getHours().toString().padStart(2, '0');
     const minutes = today.getMinutes().toString().padStart(2, '0');
