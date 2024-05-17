@@ -33,18 +33,18 @@ pub async fn list_usb_drives() -> Result<String, String> {
                     entry
                         .clone()
                         .fs_label
-                        .expect(&format!("Broken fs label for usb {entry:?}")),
+                        .unwrap_or_else(|| panic!("Broken fs label for usb {entry:?}")),
                     entry
                         .clone()
                         .disk
-                        .expect(&format!("Broken disk data for usb {entry:?}"))
+                        .unwrap_or_else(|| panic!("Broken disk data for usb {entry:?}"))
                         .name
                 ),
                 path: entry
                     .info
                     .mount_point
                     .to_str()
-                    .expect(&format!("Broken mount point for usb {entry:?}"))
+                    .unwrap_or_else(|| panic!("Broken mount point for usb {entry:?}"))
                     .to_owned(),
             });
         }
