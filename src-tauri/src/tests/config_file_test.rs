@@ -7,7 +7,7 @@ mod tests {
         let config = Config::new().unwrap();
 
         assert_eq!(config.last_db_update, "Never");
-        assert!(!config.logging_is_active);
+        assert!(config.logging_is_active);
         assert!(config.obfuscated_is_active);
         assert_eq!(config.db_location, "");
         assert!(config.scan_dir);
