@@ -40,7 +40,6 @@ export default function Settings() {
   const [scan_dir, setScanDir] = useState(false);
   const [ignored_hashes, setIgnoredHashes] = useState([]);
   const [mirror, setMirror] = useState("");
-  const [patch_result, setPatchResult] = useState("");
   // DB Update progress
   const [progress, setProgress] = useState(0);
   const progressRef = useRef(progress);
