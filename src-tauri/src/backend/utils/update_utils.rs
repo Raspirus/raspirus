@@ -67,14 +67,8 @@ pub fn get_remote_timestamp() -> Result<String, std::io::Error> {
 
 /// updates if update is necessary
 pub fn update(window: Option<tauri::Window>) -> Result<String, String> {
-    send(&window, "chck", String::new());
-    // if remote is not newer than local we skip
-    if !check_update_necessary().map_err(|err| format!("Failed to check for updates: {err}"))? {
-        info!("Database already up to date. Skipping...");
-        return Ok("100".to_owned());
-    }
-
     info!("Updating database...");
+    send(&window, "chck", String::new());
 
     // try to get a usable database path
     let mut config = get_config();
@@ -98,6 +92,15 @@ pub fn update(window: Option<tauri::Window>) -> Result<String, String> {
         err.to_string()
     })?;
 
+    // if remote is not newer than local we skip
+    if !check_update_necessary().map_err(|err| format!("Failed to check for updates: {err}"))? {
+        info!("Database already up to date. Skipping...");
+        return Ok(db_connection
+            .count_hashes()
+            .map_err(|err| err.to_string())?
+            .to_string());
+    }
+
     // Actually run the update
     let big_tic = time::Instant::now();
     match db_connection.update_db(&window) {
@@ -105,6 +108,7 @@ pub fn update(window: Option<tauri::Window>) -> Result<String, String> {
             // write remote timestamp to config
             let timestamp = get_remote_timestamp().map_err(|err| err.to_string())?;
             config.last_db_update = timestamp;
+            info!("Hashes in db after update: {res}");
             update_config(config)?;
 
             clear_cache().map_err(|err| err.to_string())?;
@@ -162,7 +166,7 @@ pub fn insert_all(db: &mut DBOps, window: &Option<tauri::Window>) -> Result<(), 
     Ok(())
 }
 
-pub fn patch(patchfile: &str) -> Result<(), std::io::Error> {
+pub fn patch(patchfile: &str) -> Result<(usize, usize, usize), std::io::Error> {
     let file_path = Path::new(patchfile);
 
     if !file_path.exists() {
@@ -210,13 +214,13 @@ pub fn patch(patchfile: &str) -> Result<(), std::io::Error> {
     let mut db_connection = DBOps::new(db_file_str.as_str())
         .map_err(|err| std::io::Error::new(std::io::ErrorKind::NotConnected, err.to_string()))?;
 
-    db_connection
+    let removed = db_connection
         .remove_hashes(&remove)
         .map_err(|err| std::io::Error::new(std::io::ErrorKind::Other, err.to_string()))?;
 
-    db_connection
+    let inserted = db_connection
         .insert_hashes(&add)
         .map_err(|err| std::io::Error::new(std::io::ErrorKind::Other, err.to_string()))?;
 
-    Ok(())
+    Ok((inserted, removed, (add.len() + remove.len()).checked_sub(inserted + removed).unwrap_or_default()))
 }
