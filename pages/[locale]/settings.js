@@ -432,27 +432,27 @@ export default function Settings() {
       />
 
       <SettingComp
-        title={'Add patch file'}
-        short={'Allows to patch the DB with custom data'}
-        short2={'Use: https://github.com/Raspirus/signature-builder'}
+        title={t('add_patch_title')}
+        short={t('add_patch_desc')}
+        short2={t('add_patch_desc2')}
         icon={faGears}
         isOn={false}
         action={handleAddPatchFile}
-        action_val={'Add Patch'}
+        action_val={t('add_patch_action')}
       />
 
       <SettingComp
-        title={"Download logs"}
-        short={"Download logs from the backend"}
+        title={t('download_logs')}
+        short={t('download_logs_desc')}
         icon={faHistory}
         action={download_log_file}
-        action_val={"Download"}
+        action_val={t('download_logs_action')}
         isOn={false}
       />
 
       <SettingComp
-        title={"Mirror website"}
-        short={"Location where we download the signatures from"}
+        title={t('mirror_website')}
+        short={t('mirror_website_desc')}
         short2={mirror}
         icon={faLink}
         isOn={navigator.onLine}
