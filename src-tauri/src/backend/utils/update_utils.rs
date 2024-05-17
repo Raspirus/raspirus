@@ -14,6 +14,7 @@ use super::generic::get_config;
 
 /// Checks if local is running behind remote. Returns true if remote is newer
 pub fn check_update_necessary() -> Result<bool, std::io::Error> {
+    // does the db even exist?
     if !get_config()
         .paths
         .ok_or(std::io::Error::new(
