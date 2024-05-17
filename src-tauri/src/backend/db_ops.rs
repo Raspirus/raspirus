@@ -162,6 +162,10 @@ impl DBOps {
         old_tablename: &str,
         new_tablename: &str,
     ) -> Result<(), rusqlite::Error> {
+        // remove possible conflict
+        let _ = self
+            .db_conn
+            .execute(&format!("DROP TABLE {new_tablename} "), [])?;
         let _ = self.db_conn.execute(
             &format!("ALTER TABLE {old_tablename} RENAME TO {new_tablename} "),
             [],
