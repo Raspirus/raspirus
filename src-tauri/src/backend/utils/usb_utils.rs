@@ -70,6 +70,7 @@ pub async fn list_usb_drives() -> Result<String, String> {
 #[cfg(windows)]
 fn list_usb_windows() -> Vec<UsbDevice> {
     use std::ffi::OsStr;
+    use std::fs;
     use std::iter::once;
     use std::os::windows::prelude::OsStrExt;
     use winapi::um::fileapi::GetDriveTypeW;
