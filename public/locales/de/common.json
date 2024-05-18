@@ -33,7 +33,7 @@
     "update_db_status_1": "Nie",
     "update_db_status_2": "Fehlgeschlagen",
     "update_db_1": "Hashes in DB",
-    "update_db_2": "Letzte Aktualisierung",
+    "update_db_2": "Datum der Datenbank",
     "update_db_btn": "AKTUALISIEREN",
     "update_db_loading_val": "Bitte warten, dies kann einige Zeit brauchen",
     "update_db_completed": "Aktualisierung vollständig",
@@ -97,5 +97,17 @@
     "logs_download_dialog": "Logs heruntergeladen",
     "logs_download_dialog_text": "Speicherort: ",
 
-    "add_hash_placeholder": "Gib einen Hash ein"
+    "add_hash_placeholder": "Gib einen Hash ein",
+    
+    "add_patch_title": "Füge einen Patch hinzu",
+    "add_patch_desc": "Füge einen Patch hinzu, um eine Signatur zu überschreiben",
+    "add_patch_desc2": "Siehe: https://github.com/Raspirus/signature-builder",
+    "add_patch_action": "Hinzufügen",
+
+    "download_logs": "Logs herunterladen",
+    "download_logs_desc": "Lade die Logs als .txt Datei herunter",
+    "download_logs_action": "Herunterladen",
+
+    "mirror_website": "Mirror Webseite",
+    "mirror_website_desc": "Ort wo wir die hash Datenbank hosten"
 }
