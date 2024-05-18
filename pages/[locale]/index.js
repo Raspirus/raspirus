@@ -44,6 +44,7 @@ export default function Home() {
   const [errorOccurred, setError] = useLocalStorage("errorOccurred", 'false');
   const { t } = useTranslation('common');
   const [updateAvailable, setUpdateAvailable] = useState(false);
+  const [hash_count, setHashCount] = useState(0);
 
   /**
    * Function triggered when a directory was selected
@@ -91,11 +92,11 @@ export default function Home() {
         .catch((error) => {
           SetDirSelection(true);
           console.error("Couldn't retrieve settings: ", error);
-        })
+        }); 
 
       // Using the backend, check if the app is running on the Raspberry Pi
       invoke("check_raspberry", {})
-        .then((output) => setIsRaspberryPi(output))
+        .then((output) => setIsRaspberryPi(output));
 
       // Using the backend, ask for a list of connected USB drives
       invoke("list_usb_drives", {})
@@ -112,9 +113,18 @@ export default function Home() {
           });
         });
 
+        invoke("get_hash_count_fe", {}).then((count) => {
+          console.log("SET Hash count: ", count);
+          setHashCount(count);
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+
       // Using the backend, check if an update is available
       invoke("check_update", {})
         .then((output) => {
+          console.log("Update available: ", output);
           setUpdateAvailable(output);
         })
         .catch((error) => {
@@ -137,7 +147,7 @@ export default function Home() {
     } else {
       router.push({
         pathname: "/permission",
-        query: { scan_path: value },
+        query: { scan_path: value, hashcount: hash_count },
       });
     }
   };
