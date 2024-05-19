@@ -17,8 +17,6 @@ pub struct Config {
     pub db_location: String,
     // If we should scan direcories instead of files (You can only choose one on the current file picker dialog)
     pub scan_dir: bool,
-    // List of hashes that should be ignored during scans
-    pub ignored_hashes: Vec<String>,
     // mirror to folder with hashfiles for update
     pub mirror: String,
     // various paths in an effort to unify them. are folders expected to be used later
@@ -34,6 +32,15 @@ pub struct Paths {
     pub cache: PathBuf,
 }
 
+/// Struct for which fields the frontend has access to
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct ConfigFrontend {
+    pub logging_is_active: Option<bool>,
+    pub obfuscated_is_active: Option<bool>,
+    pub db_location: Option<String>,
+    pub scan_dir: Option<bool>,
+}
+
 impl Default for Config {
     fn default() -> Self {
         Self {
@@ -42,7 +49,6 @@ impl Default for Config {
             obfuscated_is_active: true,
             db_location: "".to_string(),
             scan_dir: true,
-            ignored_hashes: Vec::new(),
             mirror: "https://raw.githubusercontent.com/Raspirus/signatures/main/hashes".to_string(),
             paths: None,
         }

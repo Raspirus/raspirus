@@ -12,7 +12,7 @@ use zip::ZipArchive;
 
 use crate::backend::utils::generic::size;
 
-use super::{db_ops::DBOps, file_log::FileLog, utils::generic::get_config};
+use super::{db_ops::DBOps, file_log::FileLog};
 
 #[derive(Clone, serde::Serialize)]
 struct TauriEvent {
@@ -27,8 +27,6 @@ pub struct Scanner {
     pub dirty_files: Vec<String>,
     /// A `FileLog` object that the `FileScanner` can use to log information about the search process.
     pub log: FileLog,
-    /// An array containing false positives MD5 Hashes
-    pub false_positive: Vec<String>,
     /// Defines the scanning size in bytes
     folder_size: u64,
     /// Amount scanned in bytes
@@ -52,14 +50,10 @@ impl Scanner {
         let now_str = now.format("%Y_%m_%d_%H_%M_%S").to_string();
         let log_str = format!("{}.log", now_str);
 
-        // Add all false positives here
-        let false_positive: Vec<String> = get_config().ignored_hashes;
-
         Ok(Scanner {
             db_conn: tmpconf,
             dirty_files: Vec::new(),
             log: FileLog::new(log_str)?,
-            false_positive,
             folder_size: 0,
             scanned_size: 0,
             tauri_window: t_win,
@@ -223,12 +217,6 @@ impl Scanner {
                             self.last_percentage
                         });
 
-                    if self.false_positive.contains(&hash) {
-                        info!("Found false postitive! Skipping...");
-                        self.skipped += 1;
-                        continue;
-                    }
-
                     if self
                         .db_conn
                         .hash_exists(&hash)
@@ -272,12 +260,6 @@ impl Scanner {
                         path.display()
                     )
                 })?;
-
-                if self.false_positive.contains(&hash) {
-                    info!("Found false postitive! Skipping...");
-                    self.skipped += 1;
-                    return Ok(found);
-                }
 
                 if self
                     .db_conn

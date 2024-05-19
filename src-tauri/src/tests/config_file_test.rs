@@ -11,7 +11,6 @@ mod tests {
         assert!(config.obfuscated_is_active);
         assert_eq!(config.db_location, "");
         assert!(config.scan_dir);
-        assert_eq!(config.ignored_hashes, Vec::<String>::new());
     }
 
     #[test]
@@ -24,7 +23,6 @@ mod tests {
         config_clean.obfuscated_is_active = false;
         config_clean.db_location = "".to_string();
         config_clean.scan_dir = true;
-        config_clean.ignored_hashes = Vec::new();
 
         let result_save = config_clean.save();
         assert!(result_save.is_ok());
@@ -44,6 +42,5 @@ mod tests {
         );
         assert_eq!(loaded_config.db_location, config_clean.db_location);
         assert_eq!(loaded_config.scan_dir, config_clean.scan_dir);
-        assert_eq!(loaded_config.ignored_hashes, config_clean.ignored_hashes);
     }
 }
