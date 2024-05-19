@@ -1,26 +1,35 @@
-import Head from 'next/head';
-import SettingComp from '../../components/SettingsCard';
-import { useRouter } from 'next/router';
+import Head from "next/head";
+import SettingComp from "../../components/SettingsCard";
+import { useRouter } from "next/router";
 import { invoke } from "@tauri-apps/api/tauri";
-import { listen } from '@tauri-apps/api/event';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faFileLines, faUserNinja, faWrench, faHome, faGears,
-        faLink, faDatabase, faFileZipper, faFingerprint, faHistory } from '@fortawesome/free-solid-svg-icons';
-import React, { useState, useEffect, useRef, use } from 'react';
-import Swal from 'sweetalert2';
-import withReactContent from 'sweetalert2-react-content';
-import { useTranslation } from 'next-i18next';
-import { getStaticPaths, makeStaticProps } from '../../lib/getStatic';
-import { open } from '@tauri-apps/api/dialog';
-import IgnoredHashComp from '../../components/IgnoredHashes';
-
+import { listen } from "@tauri-apps/api/event";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faFileLines,
+  faUserNinja,
+  faWrench,
+  faHome,
+  faGears,
+  faLink,
+  faDatabase,
+  faFileZipper,
+  faFingerprint,
+  faHistory,
+} from "@fortawesome/free-solid-svg-icons";
+import React, { useState, useEffect, useRef, use } from "react";
+import Swal from "sweetalert2";
+import withReactContent from "sweetalert2-react-content";
+import { useTranslation } from "next-i18next";
+import { getStaticPaths, makeStaticProps } from "../../lib/getStatic";
+import { open } from "@tauri-apps/api/dialog";
+import IgnoredHashComp from "../../components/IgnoredHashes";
 
 /**
  * Function that generates the necessary static paths and props manually
  * This is to fix an issue with next18 translations
  */
-const getStaticProps = makeStaticProps('common')
-export { getStaticPaths, getStaticProps }
+const getStaticProps = makeStaticProps("common");
+export { getStaticPaths, getStaticProps };
 
 /**
  * Represents the settings page, a list of Material cards where the user can manage some simple settings
@@ -29,10 +38,10 @@ export { getStaticPaths, getStaticProps }
  */
 export default function Settings() {
   const router = useRouter();
-  const { t } = useTranslation('common');
+  const { t } = useTranslation("common");
   // Data for some of the settings is retrieved directly from the backend and saved back to it
   const [hash_count, setCount] = useState(0);
-  const [updated_date, setDate] = useState(t('update_db_status_1'));
+  const [updated_date, setDate] = useState(t("update_db_status_1"));
   const [unformatted_date, setUnformattedDate] = useState("");
   const [logging, setLogging] = useState(false);
   const [obfuscated, setObfuscated] = useState(false);
@@ -44,7 +53,7 @@ export default function Settings() {
   // DB Update progress
   const [progress, setProgress] = useState(0);
   const progressRef = useRef(progress);
-  const [title, setTitle] = useState(t('loading_title'));
+  const [title, setTitle] = useState(t("loading_title"));
   const titleRef = useRef(title);
   const [showProg, setShowProg] = useState(false);
   const showProgRef = useRef(showProg);
@@ -52,23 +61,23 @@ export default function Settings() {
   // When the user goes back to the Home page, an update of the set settings
   // is sent to the backend, which then saves it in a local file
   const backHome = () => {
-    if (updated_date == t('update_db_status_1')) {
+    if (updated_date == t("update_db_status_1")) {
       setDate("Never");
     }
     saveSettings();
-    router.push('/');
+    router.push("/");
   };
 
-  /* 
-  * This function allows users to use a custom path for the DB file.
-  * The default state of the button is OFF, once cliked, the user opens a file picker.
-  * In the file picker, the user can select the db path and the button switches to ON.
-  * If nothing is selected, the button remains OFF. Once the button is in the ON state,
-  * if clicked again it switches back to OFF.
-  */
+  /*
+   * This function allows users to use a custom path for the DB file.
+   * The default state of the button is OFF, once cliked, the user opens a file picker.
+   * In the file picker, the user can select the db path and the button switches to ON.
+   * If nothing is selected, the button remains OFF. Once the button is in the ON state,
+   * if clicked again it switches back to OFF.
+   */
   async function handleSetCustomDBPath() {
     if (use_db_path) {
-      setCustomDbPath('');
+      setCustomDbPath("");
       setUsedbPath(false);
     } else {
       try {
@@ -76,10 +85,12 @@ export default function Settings() {
           directory: false,
           multiple: false,
           defaultPath: "/",
-          filters: [{
-            name: "Database",
-            extensions: ["db"]
-          }]
+          filters: [
+            {
+              name: "Database",
+              extensions: ["db"],
+            },
+          ],
         });
 
         if (selected === null) {
@@ -100,7 +111,7 @@ export default function Settings() {
       const selected_file = await open({
         directory: false,
         multiple: false,
-        defaultPath: "/"
+        defaultPath: "/",
       });
 
       if (selected_file === null) {
@@ -117,10 +128,16 @@ export default function Settings() {
               ReactSwal.fire({
                 icon: "success",
                 title: "Patch file applied",
-                text: "Inserted: " + output[0] + " | Removed: " + output[1] + " | Skipped: " + output[2],
-              })
+                text:
+                  "Inserted: " +
+                  output[0] +
+                  " | Removed: " +
+                  output[1] +
+                  " | Skipped: " +
+                  output[2],
+              });
             })
-            .catch((err) => console.error(err))
+            .catch((err) => console.error(err));
         }
       }
     } catch (error) {
@@ -135,93 +152,91 @@ export default function Settings() {
    */
   const saveSettings = () => {
     const jsonData = {
-      hashes_in_db: hash_count,
       last_db_update: unformatted_date,
       logging_is_active: logging,
       obfuscated_is_active: obfuscated,
       db_location: custom_db_path,
       scan_dir: scan_dir,
       ignored_hashes: ignored_hashes,
-      mirror: mirror
-    }
+      mirror: mirror,
+    };
     const jsonString = JSON.stringify(jsonData);
     console.log("Client sends: ", jsonData);
 
     if (typeof window !== "undefined") {
-
       invoke("save_config_fe", { contents: jsonString })
         .then((output) => {
           const parsedData = JSON.parse(output);
           console.log("Server answer: ", parsedData);
         })
-        .catch((err) => console.error(err))
+        .catch((err) => console.error(err));
     }
-  }
+  };
 
   useEffect(() => {
     // Event listener for the check state
     const checkState = (event) => {
       console.log("Check: ", event.payload);
-      setTitle(t('db_update_stage_check'));
+      setTitle(t("db_update_stage_check"));
       setShowProg(false);
     };
     // Event listener for the index state
     const indexState = (event) => {
       console.log("Index: ", event.payload);
-      setTitle(t('db_update_stage_index'));
+      setTitle(t("db_update_stage_index"));
       setShowProg(false);
     };
     // Event listener for the download state
     const downloadState = (event) => {
       console.log("Download: ", event.payload);
       setProgress(event.payload);
-      setTitle(t('db_update_stage_download'));
+      setTitle(t("db_update_stage_download"));
       setShowProg(true);
     };
     // Event listener for the install state
     const installState = (event) => {
       console.log("Install: ", event.payload);
       setProgress(event.payload);
-      setTitle(t('db_update_stage_install'));
+      setTitle(t("db_update_stage_install"));
       setShowProg(true);
     };
 
     // Backend can also send error instead of the progress
     const errorState = (event) => {
       console.error(event);
-      localStorage.setItem("errorOccurred", 'true');
+      localStorage.setItem("errorOccurred", "true");
       // Returns to the Home page with an error statements that will be displayed there
       router.push({
-        pathname: '/',
-        query: { scanner_error: event.payload }
-      })
+        pathname: "/",
+        query: { scanner_error: event.payload },
+      });
     };
 
     // Starts listening for incoming signals emited from the backend
     // chck - Check State
     // idx - Index State
     // dwld - Download State
-    // ins - Install State 
+    // ins - Install State
     // err - Error State
     const startListening = async () => {
-      await listen('chck', checkState);
-      await listen('dwld', downloadState);
-      await listen('ins', installState);
-      await listen('idx', indexState);
-      await listen('err', errorState);
+      await listen("chck", checkState);
+      await listen("dwld", downloadState);
+      await listen("ins", installState);
+      await listen("idx", indexState);
+      await listen("err", errorState);
     };
 
     startListening();
 
     // Clean up function to remove the event listener when the component unmounts
     return () => {
-      removeEventListener('chck', checkState);
-      removeEventListener('idx', indexState);
-      removeEventListener('dwld', downloadState);
-      removeEventListener('ins', installState);
-      removeEventListener('err', errorState);
+      removeEventListener("chck", checkState);
+      removeEventListener("idx", indexState);
+      removeEventListener("dwld", downloadState);
+      removeEventListener("ins", installState);
+      removeEventListener("err", errorState);
     };
-  }, [router])
+  }, [router]);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -230,7 +245,7 @@ export default function Settings() {
           console.log("Hash count: ", output);
           setCount(output);
         })
-        .catch((err) => console.error(err))
+        .catch((err) => console.error(err));
 
       // Tries to create the config file on the backend, which returns the new created data
       // or the config found. This data then updates the frontend and is displayed
@@ -238,7 +253,10 @@ export default function Settings() {
         .then((output) => {
           const parsedData = JSON.parse(output);
           console.log("Loaded config: ", parsedData);
-          if (parsedData.last_db_update != "Never" && parsedData.last_db_update != "") {
+          if (
+            parsedData.last_db_update != "Never" &&
+            parsedData.last_db_update != ""
+          ) {
             setUnformattedDate(parsedData.last_db_update);
             setDate(getDate(parseInt(parsedData.last_db_update)));
           }
@@ -250,7 +268,7 @@ export default function Settings() {
           setIgnoredHashes(parsedData.ignored_hashes);
           setMirror(parsedData.mirror);
         })
-        .catch((err) => console.error(err))
+        .catch((err) => console.error(err));
     }
   }, []);
 
@@ -262,24 +280,32 @@ export default function Settings() {
           const ReactSwal = withReactContent(Swal);
           ReactSwal.fire({
             icon: "success",
-            title: t('logs_download_dialog'),
-            text: t('logs_download_dialog_text') + output,
-          })
+            title: t("logs_download_dialog"),
+            text: t("logs_download_dialog_text") + output,
+          });
         })
-        .catch((err) => console.error(err))
+        .catch((err) => console.error(err));
     }
-  }
+  };
   /**
-   * Function to update the DB from the Settings page. 
+   * Function to update the DB from the Settings page.
    */
   const updating = async () => {
     if (typeof window !== "undefined") {
       // Creates a pop-up with an indefinite loading animation
       const ReactSwal = withReactContent(Swal);
       ReactSwal.fire({
-        title: <p id="dyna-title" className="m-auto w-fit text-xl">{title}</p>,
-        text: t('update_db_loading_val'),
-        html: <div id="dyna-prog" className="m-auto w-fit">{progress}</div>,
+        title: (
+          <p id="dyna-title" className="m-auto w-fit text-xl">
+            {title}
+          </p>
+        ),
+        text: t("update_db_loading_val"),
+        html: (
+          <div id="dyna-prog" className="m-auto w-fit">
+            {progress}
+          </div>
+        ),
         allowOutsideClick: false,
         showConfirmButton: false,
         allowEscapeKey: false,
@@ -287,16 +313,17 @@ export default function Settings() {
         showCancelButton: false,
         didOpen: () => {
           const interval = setInterval(() => {
-            const dynamicProgressElement = document.getElementById('dyna-prog');
+            const dynamicProgressElement = document.getElementById("dyna-prog");
             if (dynamicProgressElement && !showProgRef.current) {
               // Hide the progress element if the updater is not running
-              dynamicProgressElement.style.display = 'none';
+              dynamicProgressElement.style.display = "none";
             } else if (dynamicProgressElement) {
               // Show the progress element if the updater is running
-              dynamicProgressElement.style.display = 'block';
-              dynamicProgressElement.textContent = 'Progress: ' + progressRef.current + '%';
+              dynamicProgressElement.style.display = "block";
+              dynamicProgressElement.textContent =
+                "Progress: " + progressRef.current + "%";
             }
-            const dynamicTitleElement = document.getElementById('dyna-title');
+            const dynamicTitleElement = document.getElementById("dyna-title");
             if (dynamicTitleElement) {
               if (dynamicTitleElement.textContent != titleRef.current) {
                 dynamicTitleElement.textContent = titleRef.current;
@@ -304,11 +331,11 @@ export default function Settings() {
             }
           }, 100);
 
-          ReactSwal.getPopup().addEventListener('close', () => {
+          ReactSwal.getPopup().addEventListener("close", () => {
             clearInterval(interval);
           });
         },
-      })
+      });
 
       invoke("update_database")
         .then((message) => {
@@ -316,29 +343,42 @@ export default function Settings() {
           ReactSwal.close(); // Close the SweetAlert
           console.log(message);
           setCount(Number(message));
-          Swal.fire(t('update_db_completed'), t('update_db_completed_val'), "success");
+          Swal.fire(
+            t("update_db_completed"),
+            t("update_db_completed_val"),
+            "success",
+          );
         })
         .catch((error) => {
           console.error(error);
           ReactSwal.close(); // Close the SweetAlert
-          Swal.fire(t('update_db_failed'), t('update_db_failed_val') + ": " + error, "error");
+          Swal.fire(
+            t("update_db_failed"),
+            t("update_db_failed_val") + ": " + error,
+            "error",
+          );
         });
     } else {
       console.error("Nextjs not in client mode!");
-      Swal.fire(t('client_mode_error'), t('client_mode_error_val'), "error");
+      Swal.fire(t("client_mode_error"), t("client_mode_error_val"), "error");
     }
-  }
+  };
 
   const getDate = (unformatted_date) => {
     const today = new Date(unformatted_date);
     console.log("Today: ", today);
-    const date = today.getDate() + '-' + (today.getMonth() + 1) + '-' + today.getFullYear();
-    const hours = today.getHours().toString().padStart(2, '0');
-    const minutes = today.getMinutes().toString().padStart(2, '0');
+    const date =
+      today.getDate() +
+      "-" +
+      (today.getMonth() + 1) +
+      "-" +
+      today.getFullYear();
+    const hours = today.getHours().toString().padStart(2, "0");
+    const minutes = today.getMinutes().toString().padStart(2, "0");
     const time = hours + ":" + minutes;
-    const dateTime = date + ' ' + time;
+    const dateTime = date + " " + time;
     return dateTime;
-  }
+  };
 
   useEffect(() => {
     // Update the mutable ref when the progress state changes
@@ -355,11 +395,10 @@ export default function Settings() {
     showProgRef.current = showProg;
   }, [showProg]);
 
-
   return (
     <>
       <Head>
-        <title>{t('settings_title')}</title>
+        <title>{t("settings_title")}</title>
       </Head>
       <div className="align-middle">
         <button
@@ -367,96 +406,92 @@ export default function Settings() {
           type="button"
           className="inline-block align-middle px-6 py-2.5 m-2 bg-mainred text-white font-medium text-xs leading-tight uppercase rounded shadow-md"
         >
-          <FontAwesomeIcon
-            icon={faHome}
-            size="1x"
-            className="pr-1"
-          />
-          {t('back_btn')}
+          <FontAwesomeIcon icon={faHome} size="1x" className="pr-1" />
+          {t("back_btn")}
         </button>
         <h1 className="inline-block align-middle p-2 font-medium leading-tight text-5xl mt-0 mb-2 text-mainred">
-          {t('settings_title')}
+          {t("settings_title")}
         </h1>
       </div>
 
       <SettingComp
-        title={t('update_db')}
-        short={t('update_db_val')}
-        short2={`${t('update_db_1')}: ${hash_count} | ${t('update_db_2')}: ${updated_date}`}
+        title={t("update_db")}
+        short={t("update_db_val")}
+        short2={`${t("update_db_1")}: ${hash_count} | ${t("update_db_2")}: ${updated_date}`}
         icon={faWrench}
         action={updating}
-        action_val={t('update_db_btn')}
+        action_val={t("update_db_btn")}
         isOn={false}
       />
 
       <SettingComp
-        title={t('activate_logs')}
-        short={t('activate_logs_val')}
+        title={t("activate_logs")}
+        short={t("activate_logs_val")}
         icon={faFileLines}
         isOn={logging}
         setIsOn={setLogging}
       />
 
       <SettingComp
-        title={t('obfuscated_mode')}
-        short={t('obfuscated_mode_val')}
+        title={t("obfuscated_mode")}
+        short={t("obfuscated_mode_val")}
         icon={faUserNinja}
         isOn={obfuscated}
         setIsOn={setObfuscated}
       />
 
       <SettingComp
-        title={t('custom_db')}
-        short={t('custom_db_val')}
-        short2={`${t('custom_db_1')}: ${use_db_path ? custom_db_path : `${t('custom_db_2')}`}`}
+        title={t("custom_db")}
+        short={t("custom_db_val")}
+        short2={`${t("custom_db_1")}: ${use_db_path ? custom_db_path : `${t("custom_db_2")}`}`}
         icon={faDatabase}
         isOn={use_db_path}
         setIsOn={handleSetCustomDBPath}
       />
 
       <SettingComp
-        title={t('file_dialog_opt')}
-        short={t('file_dialog_opt_val')}
-        short2={t('file_dialog_opt_val2')}
+        title={t("file_dialog_opt")}
+        short={t("file_dialog_opt_val")}
+        short2={t("file_dialog_opt_val2")}
         icon={faFileZipper}
         isOn={scan_dir}
         setIsOn={setScanDir}
       />
 
       <IgnoredHashComp
-        title={t('ignore_sign_title')}
-        short={t('ignore_sign_val')}
+        title={t("ignore_sign_title")}
+        short={t("ignore_sign_val")}
         hashes={ignored_hashes}
         icon={faFingerprint}
         setHashes={setIgnoredHashes}
       />
 
       <SettingComp
-        title={t('add_patch_title')}
-        short={t('add_patch_desc')}
-        short2={t('add_patch_desc2')}
+        title={t("add_patch_title")}
+        short={t("add_patch_desc")}
+        short2={t("add_patch_desc2")}
         icon={faGears}
         isOn={false}
         action={handleAddPatchFile}
-        action_val={t('add_patch_action')}
+        action_val={t("add_patch_action")}
       />
 
       <SettingComp
-        title={t('download_logs')}
-        short={t('download_logs_desc')}
+        title={t("download_logs")}
+        short={t("download_logs_desc")}
         icon={faHistory}
         action={download_log_file}
-        action_val={t('download_logs_action')}
+        action_val={t("download_logs_action")}
         isOn={false}
       />
 
       <SettingComp
-        title={t('mirror_website')}
-        short={t('mirror_website_desc')}
+        title={t("mirror_website")}
+        short={t("mirror_website_desc")}
         short2={mirror}
         icon={faLink}
         isOn={navigator.onLine}
-        setIsOn={function () { }}
+        setIsOn={function () {}}
       />
     </>
   );
