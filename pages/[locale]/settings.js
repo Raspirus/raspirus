@@ -238,7 +238,7 @@ export default function Settings() {
         .then((output) => {
           const parsedData = JSON.parse(output);
           console.log("Loaded config: ", parsedData);
-          if (parsedData.last_db_update != "Never") {
+          if (parsedData.last_db_update != "Never" && parsedData.last_db_update != "") {
             setUnformattedDate(parsedData.last_db_update);
             setDate(getDate(parseInt(parsedData.last_db_update)));
           }
