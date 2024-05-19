@@ -12,11 +12,6 @@
     "selection_placeholder": "Wähle dein USB drive",
     "selection_empty_placeholder": "Keine Geräte gefunden, lade diese Seite neu.",
 
-    "add": "Hinzufügen",
-    "remove": "Entfernen",
-    "cancel": "Abbrechen",
-    "confirm": "Bestätigen",
-
     "info_title": "Information",
     "app_name": "App Name",
     "description": "Beschreibung",
@@ -43,9 +38,6 @@
     
     "activate_logs": "Aktiviert Logging",
     "activate_logs_val": "Aktiviert das Schreiben von Logs",
-    
-    "obfuscated_mode": "Obfuscated Modus",
-    "obfuscated_mode_val": "Wenn eingeschalten, blendet es den Pfad zu jeweiligen gefundenen Viren aus",
     
     "settings_on": "EIN",
     "settings_off": "AUS",
@@ -96,8 +88,6 @@
 
     "logs_download_dialog": "Logs heruntergeladen",
     "logs_download_dialog_text": "Speicherort: ",
-
-    "add_hash_placeholder": "Gib einen Hash ein",
     
     "add_patch_title": "Füge einen Patch hinzu",
     "add_patch_desc": "Füge einen Patch hinzu, um eine Signatur zu überschreiben",
