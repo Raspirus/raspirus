@@ -3,7 +3,7 @@ use std::path::Path;
 use log::{error, info};
 
 use crate::backend::{
-    config_file::ConfigFrontend,
+    config_file::{Config, ConfigFrontend},
     db_ops::DBOps,
     utils::{
         self,
@@ -106,32 +106,40 @@ pub async fn list_usb_drives() -> Result<String, String> {
 
 // Creates the config from the GUI
 #[tauri::command]
-pub fn save_config_fe(contents: Option<String>) -> Result<(), String> {
-    let config_received =
-        serde_json::from_str::<ConfigFrontend>(&contents.ok_or("Json was none".to_owned())?)
-            .map_err(|err| err.to_string())?;
-    let mut config = get_config();
-    // update received fields
-    config_received
-        .logging_is_active
-        .inspect(|val| config.logging_is_active = *val);
-    config_received
-        .obfuscated_is_active
-        .inspect(|val| config.obfuscated_is_active = *val);
-    config_received
-        .db_location
-        .inspect(|val| config.db_location = val.clone());
-    config_received
-        .scan_dir
-        .inspect(|val| config.scan_dir = *val);
-    // save updated config
-    update_config(config)
+pub async fn save_config_fe(contents: Option<String>) -> Result<(), String> {
+    tokio::task::spawn_blocking(move || {
+        let config_received =
+            serde_json::from_str::<ConfigFrontend>(&contents.ok_or("Json was none".to_owned())?)
+                .map_err(|err| err.to_string())?;
+        let mut config = get_config();
+        // update received fields
+        config_received
+            .logging_is_active
+            .inspect(|val| config.logging_is_active = *val);
+        config_received
+            .obfuscated_is_active
+            .inspect(|val| config.obfuscated_is_active = *val);
+        config_received
+            .db_location
+            .inspect(|val| config.db_location = val.clone());
+        config_received
+            .scan_dir
+            .inspect(|val| config.scan_dir = *val);
+        // save updated config
+        update_config(config)
+    })
+    .await
+    .map_err(|err| err.to_string())?
 }
 
 #[tauri::command]
-pub fn load_config_fe() -> Result<String, String> {
-    serde_json::to_string(&get_config())
-        .map_err(|err| format!("Failed to convert config to json: {err}"))
+pub async fn load_config_fe() -> Result<String, String> {
+    tokio::task::spawn_blocking(move || {
+        serde_json::to_string(&get_config())
+            .map_err(|err| format!("Failed to convert config to json: {err}"))
+    })
+    .await
+    .map_err(|err| err.to_string())?
 }
 
 #[tauri::command]
@@ -164,30 +172,35 @@ pub async fn download_logs() -> Result<String, String> {
 }
 
 #[tauri::command]
-pub fn get_hash_count_fe() -> Result<String, String> {
-    // try to get a usable database path
-    let config = get_config();
-    let data_dir = config
-        .clone()
-        .paths
-        .ok_or("No paths set. Is config initialized?".to_owned())?
-        .data;
-    let db_path = Path::new(&config.db_location);
-    let db_file_str = if !config.db_location.is_empty() && db_path.exists() && db_path.is_file() {
-        info!("Using specific DB path {}", config.db_location);
-        config.db_location.clone()
-    } else {
-        // if not we use the default path
-        data_dir.join(crate::DB_NAME).display().to_string()
-    };
+pub async fn get_hash_count_fe() -> Result<String, String> {
+    tokio::task::spawn_blocking(move || {
+        // try to get a usable database path
+        let config = get_config();
+        let data_dir = config
+            .clone()
+            .paths
+            .ok_or("No paths set. Is config initialized?".to_owned())?
+            .data;
+        let db_path = Path::new(&config.db_location);
+        let db_file_str = if !config.db_location.is_empty() && db_path.exists() && db_path.is_file()
+        {
+            info!("Using specific DB path {}", config.db_location);
+            config.db_location.clone()
+        } else {
+            // if not we use the default path
+            data_dir.join(crate::DB_NAME).display().to_string()
+        };
 
-    // connect to database
-    let db_connection = DBOps::new(db_file_str.as_str()).map_err(|err| {
-        error!("{err}");
-        err.to_string()
-    })?;
-    Ok(db_connection
-        .count_hashes()
-        .map_err(|err| err.to_string())?
-        .to_string())
+        // connect to database
+        let db_connection = DBOps::new(db_file_str.as_str()).map_err(|err| {
+            error!("{err}");
+            err.to_string()
+        })?;
+        Ok(db_connection
+            .count_hashes()
+            .map_err(|err| err.to_string())?
+            .to_string())
+    })
+    .await
+    .map_err(|err| err.to_string())?
 }
