@@ -13,16 +13,14 @@ import {
   faLink,
   faDatabase,
   faFileZipper,
-  faFingerprint,
   faHistory,
 } from "@fortawesome/free-solid-svg-icons";
-import React, { useState, useEffect, useRef, use } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 import { useTranslation } from "next-i18next";
 import { getStaticPaths, makeStaticProps } from "../../lib/getStatic";
 import { open } from "@tauri-apps/api/dialog";
-import IgnoredHashComp from "../../components/IgnoredHashes";
 
 /**
  * Function that generates the necessary static paths and props manually
@@ -42,13 +40,11 @@ export default function Settings() {
   // Data for some of the settings is retrieved directly from the backend and saved back to it
   const [hash_count, setCount] = useState(0);
   const [updated_date, setDate] = useState(t("update_db_status_1"));
-  const [unformatted_date, setUnformattedDate] = useState("");
   const [logging, setLogging] = useState(false);
   const [obfuscated, setObfuscated] = useState(false);
   const [use_db_path, setUsedbPath] = useState(false);
   const [custom_db_path, setCustomDbPath] = useState("");
   const [scan_dir, setScanDir] = useState(false);
-  const [ignored_hashes, setIgnoredHashes] = useState([]);
   const [mirror, setMirror] = useState("");
   // DB Update progress
   const [progress, setProgress] = useState(0);
@@ -152,13 +148,10 @@ export default function Settings() {
    */
   const saveSettings = () => {
     const jsonData = {
-      last_db_update: unformatted_date,
       logging_is_active: logging,
       obfuscated_is_active: obfuscated,
       db_location: custom_db_path,
       scan_dir: scan_dir,
-      ignored_hashes: ignored_hashes,
-      mirror: mirror,
     };
     const jsonString = JSON.stringify(jsonData);
     console.log("Client sends: ", jsonData);
@@ -176,26 +169,22 @@ export default function Settings() {
   useEffect(() => {
     // Event listener for the check state
     const checkState = (event) => {
-      console.log("Check: ", event.payload);
       setTitle(t("db_update_stage_check"));
       setShowProg(false);
     };
     // Event listener for the index state
     const indexState = (event) => {
-      console.log("Index: ", event.payload);
       setTitle(t("db_update_stage_index"));
       setShowProg(false);
     };
     // Event listener for the download state
     const downloadState = (event) => {
-      console.log("Download: ", event.payload);
       setProgress(event.payload);
       setTitle(t("db_update_stage_download"));
       setShowProg(true);
     };
     // Event listener for the install state
     const installState = (event) => {
-      console.log("Install: ", event.payload);
       setProgress(event.payload);
       setTitle(t("db_update_stage_install"));
       setShowProg(true);
@@ -257,7 +246,6 @@ export default function Settings() {
             parsedData.last_db_update != "Never" &&
             parsedData.last_db_update != ""
           ) {
-            setUnformattedDate(parsedData.last_db_update);
             setDate(getDate(parseInt(parsedData.last_db_update)));
           }
           setLogging(parsedData.logging_is_active);
@@ -265,7 +253,6 @@ export default function Settings() {
           setCustomDbPath(parsedData.db_location);
           setUsedbPath(parsedData.db_location.length > 0);
           setScanDir(parsedData.scan_dir);
-          setIgnoredHashes(parsedData.ignored_hashes);
           setMirror(parsedData.mirror);
         })
         .catch((err) => console.error(err));
@@ -456,14 +443,6 @@ export default function Settings() {
         icon={faFileZipper}
         isOn={scan_dir}
         setIsOn={setScanDir}
-      />
-
-      <IgnoredHashComp
-        title={t("ignore_sign_title")}
-        short={t("ignore_sign_val")}
-        hashes={ignored_hashes}
-        icon={faFingerprint}
-        setHashes={setIgnoredHashes}
       />
 
       <SettingComp

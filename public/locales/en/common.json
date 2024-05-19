@@ -12,11 +12,6 @@
     "selection_placeholder": "Select your USB drive",
     "selection_empty_placeholder": "No drives found. Insert a drive and refresh this page",
 
-    "add": "Add",
-    "remove": "Remove",
-    "cancel": "Cancel",
-    "confirm": "Confirm",
-
     "info_title": "Information",
     "app_name": "App Name",
     "description": "Description",
@@ -59,9 +54,6 @@
     "settings_on": "ON",
     "settings_off": "OFF",
 
-    "ignore_sign_title": "Signatures to ignore",
-    "ignore_sign_val": "The following signatures will be ignored during the scan",
-
     "permissions_title": "User Agreement",
     "permissions_text": "This program is designed to scan for malicious software on USB drives that are inserted into your computer. By using this program, you acknowledge that you are responsible for the content of the USB drive and any potential damage it may cause to your computer system. You also acknowledge that the program is not guaranteed to detect all malware and cannot be held responsible for any malware that may go undetected. By inserting a USB drive into your computer and running the program, you are giving your consent to have the drive scanned for malware. If you do not consent to this, do not insert the USB drive or run the program. The results of the scan are for informational purposes only and should be carefully reviewed by the user. The program does not make any guarantees regarding the accuracy or completeness of the scan results. It is the user's responsibility to ensure that they are aware of any potential risks associated with using a USB drive, including the risk of malware infection. Users should only use USB drives from trusted sources and exercise caution when inserting unknown drives into their computer. The Raspirus program is provided on an 'as-is' basis and cannot be held liable for any damages, including but not limited to, data loss, system crashes, or any other damages resulting from the use of the program. By using the Raspirus program, you agree to these terms and conditions. If you do not agree to these terms and conditions, do not use the program.",
     "perms_accept": "Accept",
@@ -96,8 +88,6 @@
 
     "logs_download_dialog": "Logs downloaded",
     "logs_download_dialog_text": "Location: ",
-
-    "add_hash_placeholder": "Enter a hash",
 
     "add_patch_title": "Add a patch",
     "add_patch_desc": "Allows to patch the DB with custom data",

@@ -12,11 +12,6 @@
     "selection_placeholder": "Seleziona il tuo USB drive",
     "selection_empty_placeholder": "Nessun drive trovato, ricarica questa pagina",
 
-    "add": "Aggiungi",
-    "remove": "Rimuovi",
-    "cancel": "Cancella",
-    "confirm": "Conferma",
-
     "info_title": "Informazione",
     "app_name": "Nome App",
     "description": "Descrizione",
@@ -61,9 +56,6 @@
     "perms_accept": "Accetta",
     "perms_decline": "Rifiuta",
 
-    "ignore_sign_title": "Firme da ignorare",
-    "ignore_sign_val": "Le firme segnate di seguito verrano ignorate durante lo scan",
-
     "loading_title": "Caricamento...",
     "loading_text": "Caricamento... Perfavore attendere",
 
@@ -93,8 +85,6 @@
     
     "logs_download_dialog": "Log scaricati",
     "logs_download_dialog_text": "Posizione: ",
-    
-    "add_hash_placeholder": "Inserisci un hash",
     
     "add_patch_title": "Aggiungi Patch",
     "add_patch_desc": "Aggiungi una patch al database",
