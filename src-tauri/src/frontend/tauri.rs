@@ -3,7 +3,7 @@ use std::path::Path;
 use log::{error, info};
 
 use crate::backend::{
-    config_file::{Config, ConfigFrontend},
+    config_file::ConfigFrontend,
     db_ops::DBOps,
     utils::{
         self,
