@@ -3,7 +3,7 @@ use std::path::Path;
 use log::{error, info};
 
 use crate::backend::{
-    config_file::Config,
+    config_file::ConfigFrontend,
     db_ops::DBOps,
     utils::{
         self,
@@ -107,9 +107,24 @@ pub async fn list_usb_drives() -> Result<String, String> {
 // Creates the config from the GUI
 #[tauri::command]
 pub fn save_config_fe(contents: Option<String>) -> Result<(), String> {
-    let mut config = serde_json::from_str::<Config>(&contents.ok_or("Json was none".to_owned())?)
-        .map_err(|err| err.to_string())?;
-    config.paths = get_config().paths;
+    let config_received =
+        serde_json::from_str::<ConfigFrontend>(&contents.ok_or("Json was none".to_owned())?)
+            .map_err(|err| err.to_string())?;
+    let mut config = get_config();
+    // update received fields
+    config_received
+        .logging_is_active
+        .inspect(|val| config.logging_is_active = *val);
+    config_received
+        .obfuscated_is_active
+        .inspect(|val| config.obfuscated_is_active = *val);
+    config_received
+        .db_location
+        .inspect(|val| config.db_location = val.clone());
+    config_received
+        .scan_dir
+        .inspect(|val| config.scan_dir = *val);
+    // save updated config
     update_config(config)
 }
 
