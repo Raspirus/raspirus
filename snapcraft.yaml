@@ -1,6 +1,6 @@
 name: raspirus
 base: core18
-version: 1.1.4
+version: 1.2.0
 summary: A resource- and human-friendly malware scanner
 description: Raspirus is your cost-free, versatile malware scanner. Tailored signature detection, comprehensive file scans, and privacy prioritized for swift, reliable protection.
 grade: stable
