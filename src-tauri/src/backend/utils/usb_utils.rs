@@ -1,4 +1,4 @@
-use log::info;
+use log::{debug, info};
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -30,10 +30,7 @@ pub async fn list_usb_drives() -> Result<String, String> {
             usb_drives.push(UsbDevice {
                 name: format!(
                     "{} ({})",
-                    entry
-                        .clone()
-                        .fs_label
-                        .unwrap_or_else(|| panic!("Broken fs label for usb {entry:?}")),
+                    entry.clone().fs_label.unwrap_or("No Label".to_owned()),
                     entry
                         .clone()
                         .disk
@@ -48,6 +45,7 @@ pub async fn list_usb_drives() -> Result<String, String> {
                     .to_owned(),
             });
         }
+        debug!("Found: {usb_drives:?}")
     }
 
     #[cfg(target_os = "windows")]
