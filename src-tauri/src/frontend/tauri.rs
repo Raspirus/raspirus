@@ -174,32 +174,9 @@ pub async fn download_logs() -> Result<String, String> {
 #[tauri::command]
 pub async fn get_hash_count_fe() -> Result<String, String> {
     tokio::task::spawn_blocking(move || {
-        // try to get a usable database path
+        // read hash count from config to avoid long waits on count
         let config = get_config();
-        let data_dir = config
-            .clone()
-            .paths
-            .ok_or("No paths set. Is config initialized?".to_owned())?
-            .data;
-        let db_path = Path::new(&config.db_location);
-        let db_file_str = if !config.db_location.is_empty() && db_path.exists() && db_path.is_file()
-        {
-            info!("Using specific DB path {}", config.db_location);
-            config.db_location.clone()
-        } else {
-            // if not we use the default path
-            data_dir.join(crate::DB_NAME).display().to_string()
-        };
-
-        // connect to database
-        let db_connection = DBOps::new(db_file_str.as_str()).map_err(|err| {
-            error!("{err}");
-            err.to_string()
-        })?;
-        Ok(db_connection
-            .count_hashes()
-            .map_err(|err| err.to_string())?
-            .to_string())
+        Ok(config.hash_count.to_string())
     })
     .await
     .map_err(|err| err.to_string())?
