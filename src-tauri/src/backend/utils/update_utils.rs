@@ -1,4 +1,4 @@
-use log::{error, info, warn};
+use log::{debug, error, info, warn};
 use reqwest::StatusCode;
 use std::fs::File;
 use std::fs::{self, DirEntry};
@@ -96,6 +96,12 @@ pub fn update(window: Option<tauri::Window>) -> Result<String, String> {
     // if remote is not newer than local we skip
     if !check_update_necessary().map_err(|err| format!("Failed to check for updates: {err}"))? {
         info!("Database already up to date. Skipping...");
+        debug!("Adding new hash count to config...");
+        config.hash_count = db_connection.count_hashes().map_err(|err| {
+            error!("{err}");
+            err.to_string()
+        })?;
+        update_config(config)?;
         return Ok(db_connection
             .count_hashes()
             .map_err(|err| err.to_string())?
@@ -109,6 +115,7 @@ pub fn update(window: Option<tauri::Window>) -> Result<String, String> {
             // write remote timestamp to config
             let timestamp = get_remote_timestamp().map_err(|err| err.to_string())?;
             config.last_db_update = timestamp;
+            config.hash_count = res;
             update_config(config)?;
 
             info!("Hashes in db after update: {res}");
