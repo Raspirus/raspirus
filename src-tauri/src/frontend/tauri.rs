@@ -1,10 +1,7 @@
-use std::path::Path;
-
-use log::{error, info};
+use log::error;
 
 use crate::backend::{
     config_file::ConfigFrontend,
-    db_ops::DBOps,
     utils::{
         self,
         generic::{get_config, update_config},
