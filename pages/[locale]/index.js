@@ -2,7 +2,7 @@ import Head from "next/head";
 import styles from "../../styles/refresh.module.css";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
-import { invoke } from "core";
+import { invoke } from "@tauri-apps/api/core"
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faGear, faWrench } from '@fortawesome/free-solid-svg-icons';
 import Swal from "sweetalert2";
