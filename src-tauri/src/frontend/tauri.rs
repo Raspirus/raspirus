@@ -8,9 +8,8 @@ use crate::backend::{
     },
 };
 use tauri_plugin_cli::CliExt;
-use tauri::Manager;
 
-use super::functions::{cli_dbupdate, cli_gui, cli_scanner, not_implemented, print_data};
+use super::functions::{cli_dbupdate, cli_gui, not_implemented};
 
 pub fn init_tauri() {
     // Builds the Tauri connection
@@ -23,13 +22,17 @@ pub fn init_tauri() {
             }
             // Else, we start in CLI mode and parse the given parameters
             let matches = match app.cli().matches() {
-                Ok(matches) => matches,
+                Ok(matches) => {
+                    println!("{matches:?}");
+                    matches
+                }
                 Err(err) => {
                     error!("{}", err);
                     app.handle().exit(1);
                     return Ok(());
                 }
             };
+            /*
             // Iterate over each key and execute functions based on them
             matches.args.iter().for_each(|(key, data)| {
                 if data.occurrences > 0 || key.as_str() == "help" || key.as_str() == "version" {
@@ -49,6 +52,7 @@ pub fn init_tauri() {
                     }
                 }
             });
+            */
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
@@ -159,16 +163,22 @@ pub async fn download_logs() -> Result<String, String> {
         .join("main");
     let app_log_path = log_dir.join("app.log");
 
-    let downloads_dir = 
-                Manager::path().download_dir().expect("Failed to get download directory");
-
-    let destination_path = downloads_dir.join("log.txt");
+    /*
+    let downloads_dir = Manager::path(Path::new("."))
+        .download_dir()
+        .expect("Failed to get download directory");
+        */
+    let log_path = get_config()
+        .paths
+        .ok_or("No paths set. Is config initialized?".to_owned())?
+        .downloads
+        .join("log.txt");
 
     // If there's an error during copying, return an error message
-    std::fs::copy(app_log_path, &destination_path)
+    std::fs::copy(app_log_path, &log_path)
         .map_err(|err| format!("Error copying log file: {err}"))?;
     // If the copy operation is successful, return Ok indicating success
-    Ok(destination_path.to_str().unwrap().to_string())
+    Ok(log_path.to_str().unwrap().to_string())
 }
 
 #[tauri::command]
