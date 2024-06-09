@@ -308,7 +308,7 @@ impl Scanner {
             // return error and send to frontend, if it exists
             if let Some(tauri_window) = &self.tauri_window {
                 tauri_window
-                    .emit_all(
+                    .emit(
                         "progerror",
                         TauriEvent {
                             message: "Calculated foldersize is 0".to_string(),
@@ -331,7 +331,7 @@ impl Scanner {
         // if there is a window, send percentage, otherwise ignore
         if let Some(tauri_window) = &self.tauri_window {
             tauri_window
-                .emit_all(
+                .emit(
                     "progress",
                     TauriEvent {
                         message: scanned_percentage.to_string(),

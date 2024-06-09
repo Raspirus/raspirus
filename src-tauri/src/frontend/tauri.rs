@@ -7,19 +7,22 @@ use crate::backend::{
         generic::{get_config, update_config},
     },
 };
+use tauri_plugin_cli::CliExt;
+use tauri::Manager;
 
 use super::functions::{cli_dbupdate, cli_gui, cli_scanner, not_implemented, print_data};
 
 pub fn init_tauri() {
     // Builds the Tauri connection
     tauri::Builder::default()
+        .plugin(tauri_plugin_cli::init())
         .setup(|app| {
             // Default to GUI if the app was opened with no CLI args.
             if std::env::args_os().count() <= 1 {
-                cli_gui(app.handle())?;
+                cli_gui(app.handle().clone())?;
             }
             // Else, we start in CLI mode and parse the given parameters
-            let matches = match app.get_cli_matches() {
+            let matches = match app.cli().matches() {
                 Ok(matches) => matches,
                 Err(err) => {
                     error!("{}", err);
@@ -34,15 +37,15 @@ pub fn init_tauri() {
                     // WARNING: If the commmand is not defined in the tauri.conf.json file, it can't be used here
                     match key.as_str() {
                         "gui" => {
-                            if let Err(err) = cli_gui(app.handle()) {
+                            if let Err(err) = cli_gui(app.handle().clone()) {
                                 error!("GUI Error: {}", err);
                             }
                         }
-                        "scan" => cli_scanner(app.handle(), data),
-                        "update-db" => cli_dbupdate(app.handle()),
-                        "help" => print_data(app.handle(), data),
-                        "version" => print_data(app.handle(), data),
-                        _ => not_implemented(app.handle()),
+                        "scan" => cli_scanner(app.handle().clone(), data),
+                        "update-db" => cli_dbupdate(app.handle().clone()),
+                        "help" => print_data(app.handle().clone(), data),
+                        "version" => print_data(app.handle().clone(), data),
+                        _ => not_implemented(app.handle().clone()),
                     }
                 }
             });
@@ -156,8 +159,8 @@ pub async fn download_logs() -> Result<String, String> {
         .join("main");
     let app_log_path = log_dir.join("app.log");
 
-    let downloads_dir =
-        tauri::api::path::download_dir().ok_or("Failed to get download directory".to_string())?;
+    let downloads_dir = 
+                Manager::path().download_dir().expect("Failed to get download directory");
 
     let destination_path = downloads_dir.join("log.txt");
 
