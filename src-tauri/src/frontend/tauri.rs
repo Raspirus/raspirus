@@ -1,11 +1,14 @@
-use log::error;
+use log::{debug, error};
 
-use crate::backend::{
-    config_file::ConfigFrontend,
-    utils::{
-        self,
-        generic::{get_config, update_config},
+use crate::{
+    backend::{
+        config_file::ConfigFrontend,
+        utils::{
+            self,
+            generic::{get_config, update_config},
+        },
     },
+    frontend::functions::cli_scanner,
 };
 use tauri_plugin_cli::CliExt;
 
@@ -24,7 +27,7 @@ pub fn init_tauri() {
             // Else, we start in CLI mode and parse the given parameters
             let matches = match app.cli().matches() {
                 Ok(matches) => {
-                    println!("{matches:?}");
+                    debug!("CLI matches state: {matches:?}");
                     matches
                 }
                 Err(err) => {
@@ -33,10 +36,11 @@ pub fn init_tauri() {
                     return Ok(());
                 }
             };
-            /*
+
             // Iterate over each key and execute functions based on them
             matches.args.iter().for_each(|(key, data)| {
-                if data.occurrences > 0 || key.as_str() == "help" || key.as_str() == "version" {
+                println!("{}, {:?}", key, data);
+                if data.occurrences > 0 && key.as_str() != "help" && key.as_str() != "version" {
                     // Define all CLI commands/arguments here and in the tauri.conf.json file
                     // WARNING: If the commmand is not defined in the tauri.conf.json file, it can't be used here
                     match key.as_str() {
@@ -45,15 +49,22 @@ pub fn init_tauri() {
                                 error!("GUI Error: {}", err);
                             }
                         }
-                        "scan" => cli_scanner(app.handle().clone(), data),
-                        "update-db" => cli_dbupdate(app.handle().clone()),
-                        "help" => print_data(app.handle().clone(), data),
-                        "version" => print_data(app.handle().clone(), data),
+                        "scan" => cli_scanner(
+                            app.handle().clone(),
+                            match data.value.clone() {
+                                serde_json::Value::String(data) => data,
+                                _ => {
+                                    error!("Received invalid data {data:?} for 'scan'");
+                                    app.handle().exit(-1);
+                                    return;
+                                }
+                            },
+                        ),
+                        "db-update" => cli_dbupdate(app.handle().clone()),
                         _ => not_implemented(app.handle().clone()),
                     }
                 }
             });
-            */
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![

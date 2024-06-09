@@ -68,6 +68,11 @@
           "name": "db-setpath",
           "short": "p",
           "takesValue": true
+        },
+        {
+          "name": "gui",
+          "short": "g",
+          "takesValue": false
         }
       ],
       "subcommands": {}
