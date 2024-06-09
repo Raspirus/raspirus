@@ -9,21 +9,6 @@ pub fn remove_windows_console() {
     }
 }
 
-// Basically prints the given data with \n and \t correctly formatted
-/*
-pub fn print_data(app: tauri::AppHandle, data: &ArgData) {
-    if let Some(json_str) = data.value.as_str() {
-        let unescaped_str = json_str.replace("\\n", "\n").replace("\\t", "\t");
-        debug!("{}", unescaped_str);
-        app.exit(0);
-    } else {
-        // Handle the case where data.value is not a string
-        error!("data.value is not a string");
-        app.exit(1);
-    }
-}
-*/
-
 // If a command is not yet implemented
 pub fn not_implemented(app: tauri::AppHandle) {
     warn!("Function not implemented yet");
@@ -49,28 +34,20 @@ pub fn cli_gui(app: tauri::AppHandle) -> Result<(), tauri::Error> {
 }
 
 // Starts the scanner on the CLI
-/*
-pub fn cli_scanner(app: tauri::AppHandle, data: &ArgData) {
-    if let Some(json_str) = data.value.as_str() {
-        let unescaped_str = json_str.replace("\\n", "\n").replace("\\t", "\t");
-        debug!("Data provided: {}", unescaped_str);
-        match utils::scanner_utils::start_scanner(None, unescaped_str) {
-            Ok(res) => {
-                info!("Result: {res}");
-                app.exit(0);
-            }
-            Err(err) => {
-                error!("Error: {err}");
-                app.exit(-1);
-            }
+pub fn cli_scanner(app: tauri::AppHandle, data: String) {
+    let unescaped_str = data.replace("\\n", "\n").replace("\\t", "\t");
+    debug!("Data provided: {}", unescaped_str);
+    match utils::scanner_utils::start_scanner(None, unescaped_str) {
+        Ok(res) => {
+            info!("Result: {res}");
+            app.exit(0);
         }
-    } else {
-        // Handle the case where data.value is not a string
-        error!("data.value is not a string");
-        app.exit(-1);
+        Err(err) => {
+            error!("Error: {err}");
+            app.exit(-1);
+        }
     }
 }
-*/
 
 // Updates the DB over the CLI
 pub fn cli_dbupdate(app: tauri::AppHandle) {
