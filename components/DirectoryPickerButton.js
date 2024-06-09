@@ -10,7 +10,7 @@ export default function DirectoryPickerButton({ onSelectDirectory, scanDirectory
 
   /** Handles the button click */
   const handleButtonClick = async () => {
-    const { open } = await import('@tauri-apps/api/dialog');
+    const { open } = await import('@tauri-apps/plugin-dialog');
     // Set user selection restrictions
     const selected = await open({
       directory: scanDirectory,

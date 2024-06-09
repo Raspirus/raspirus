@@ -30,7 +30,7 @@ static PARALLEL_DOWNLOADS: usize = 3;
 static MAX_TIMEOUT: u64 = 120;
 
 // global config instance
-thread_local!(static CONFIG: RefCell<Arc<Config>> = 
+thread_local!(static CONFIG: RefCell<Arc<Config>> =
     RefCell::new(Arc::new(Config::new().expect("Failed to get paths"))));
 
 // NOTE: All functions with #[tauri::command] can and will be called from the GUI

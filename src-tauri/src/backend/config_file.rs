@@ -2,11 +2,13 @@ use directories_next::ProjectDirs;
 use serde::{Deserialize, Serialize};
 use std::fs::{self, File};
 use std::io::Read;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(default)]
 pub struct Config {
+    // Saves hash count after update in order to avoid having to recount
+    pub hash_count: u32,
     // Last time and date when the db was successfully updated
     pub last_db_update: String,
     // If we should log information to a file
@@ -30,6 +32,7 @@ pub struct Paths {
     pub config: PathBuf,
     pub logs: PathBuf,
     pub cache: PathBuf,
+    pub downloads: PathBuf,
 }
 
 /// Struct for which fields the frontend has access to
@@ -44,6 +47,7 @@ pub struct ConfigFrontend {
 impl Default for Config {
     fn default() -> Self {
         Self {
+            hash_count: 0,
             last_db_update: "Never".to_string(),
             logging_is_active: true,
             obfuscated_is_active: true,
@@ -70,6 +74,8 @@ impl Config {
     /// Finds the suitable path for the current system, creates a subfolder for the app and returns
     /// the path as a normal String
     fn set_paths(&mut self) -> Result<(), String> {
+        let downloads = dirs::download_dir().unwrap_or(Path::new(".").to_path_buf());
+
         #[cfg(any(target_os = "linux", target_os = "macos"))]
         let dirs = ProjectDirs::from("com", "Raspirus", "Raspirus")
             .ok_or("Failed to get projectdir".to_owned())?;
@@ -107,6 +113,7 @@ impl Config {
             config,
             logs,
             cache,
+            downloads,
         });
         Ok(())
     }

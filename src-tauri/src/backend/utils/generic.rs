@@ -36,7 +36,7 @@ pub fn get_config() -> Config {
 pub fn send(window: &Option<tauri::Window>, event: &str, message: String) {
     if let Some(window) = window {
         trace!("Sending {event}: {message}");
-        match window.emit_all(event, message) {
+        match window.emit(event, message) {
             Ok(_) => {}
             Err(err) => warn!("Failed to send progress to frontend: {err}"),
         }

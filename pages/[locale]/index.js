@@ -2,7 +2,7 @@ import Head from "next/head";
 import styles from "../../styles/refresh.module.css";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
-import { invoke } from "@tauri-apps/api/tauri";
+import { invoke } from "@tauri-apps/api/core"
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faGear, faWrench } from '@fortawesome/free-solid-svg-icons';
 import Swal from "sweetalert2";
@@ -51,6 +51,13 @@ export default function Home() {
    * @param {Path} directory Path to that directory as a string
    */
   const handleSelectDirectory = (directory) => {
+    // If directory is a single string, it's a path
+    // If instead its a JSON object, it's a file and we need to extract the path
+    if (typeof directory === "object") {
+      console.log("Directory is object: ", directory);
+      directory = directory.path;
+    }
+
     setValue(directory);
     setSelectedDirectory(true)
   }
@@ -96,7 +103,7 @@ export default function Home() {
 
       // Using the backend, check if the app is running on the Raspberry Pi
       invoke("check_raspberry", {})
-        .then((output) => setIsRaspberryPi(output));
+        .then((output) => {console.log("Is RaspberryPi: ", output); setIsRaspberryPi(output)});
 
       // Using the backend, ask for a list of connected USB drives
       invoke("list_usb_drives", {})
