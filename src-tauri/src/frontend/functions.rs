@@ -1,7 +1,7 @@
 use log::{debug, error, info, warn};
-use tauri::api::cli::ArgData;
 
 use crate::backend::utils;
+use tauri_plugin_cli::parser::ArgData;
 
 #[cfg(all(not(debug_assertions), windows))]
 pub fn remove_windows_console() {
@@ -34,7 +34,7 @@ pub fn cli_gui(app: tauri::AppHandle) -> Result<(), tauri::Error> {
     debug!("Showing GUI...");
     #[cfg(all(not(debug_assertions), windows))]
     remove_windows_console();
-    tauri::WindowBuilder::new(&app, "raspirus", tauri::WindowUrl::App("index.html".into()))
+    tauri::WebviewWindowBuilder::new(&app, "raspirus", tauri::WebviewUrl::App("index.html".into()))
         .title("Raspirus")
         .inner_size(800., 480.)
         .resizable(true)
