@@ -15,6 +15,7 @@ pub fn init_tauri() {
     // Builds the Tauri connection
     tauri::Builder::default()
         .plugin(tauri_plugin_cli::init())
+        .plugin(tauri_plugin_dialog::init())
         .setup(|app| {
             // Default to GUI if the app was opened with no CLI args.
             if std::env::args_os().count() <= 1 {

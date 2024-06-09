@@ -1,7 +1,7 @@
 import Head from "next/head";
 import SettingComp from "../../components/SettingsCard";
 import { useRouter } from "next/router";
-import { invoke } from "core";
+import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {

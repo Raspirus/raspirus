@@ -81,7 +81,7 @@
   },
   "app": {
     "security": {
-      "csp": null
+      "capabilities": ["main-capability"]
     }
   }
 }
