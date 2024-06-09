@@ -1,7 +1,7 @@
 import Head from "next/head";
 import SettingComp from "../../components/SettingsCard";
 import { useRouter } from "next/router";
-import { invoke } from "@tauri-apps/api/tauri";
+import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -20,7 +20,7 @@ import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 import { useTranslation } from "next-i18next";
 import { getStaticPaths, makeStaticProps } from "../../lib/getStatic";
-import { open } from "@tauri-apps/api/dialog";
+import { open } from "@tauri-apps/plugin-dialog";
 
 /**
  * Function that generates the necessary static paths and props manually
