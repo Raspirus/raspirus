@@ -1,51 +1,67 @@
-use std::path::Path;
+use log::{debug, error};
 
-use log::{error, info};
-
-use crate::backend::{
-    config_file::ConfigFrontend,
-    db_ops::DBOps,
-    utils::{
-        self,
-        generic::{get_config, update_config},
+use crate::{
+    backend::{
+        config_file::ConfigFrontend,
+        utils::{
+            self,
+            generic::{get_config, update_config},
+        },
     },
+    frontend::functions::cli_scanner,
 };
+use tauri_plugin_cli::CliExt;
 
-use super::functions::{cli_dbupdate, cli_gui, cli_scanner, not_implemented, print_data};
+use super::functions::{cli_dbupdate, cli_gui, not_implemented};
 
 pub fn init_tauri() {
     // Builds the Tauri connection
     tauri::Builder::default()
+        .plugin(tauri_plugin_cli::init())
+        .plugin(tauri_plugin_dialog::init())
         .setup(|app| {
             // Default to GUI if the app was opened with no CLI args.
             if std::env::args_os().count() <= 1 {
-                cli_gui(app.handle())?;
+                cli_gui(app.handle().clone())?;
             }
             // Else, we start in CLI mode and parse the given parameters
-            let matches = match app.get_cli_matches() {
-                Ok(matches) => matches,
+            let matches = match app.cli().matches() {
+                Ok(matches) => {
+                    debug!("CLI matches state: {matches:?}");
+                    matches
+                }
                 Err(err) => {
                     error!("{}", err);
                     app.handle().exit(1);
                     return Ok(());
                 }
             };
+
             // Iterate over each key and execute functions based on them
             matches.args.iter().for_each(|(key, data)| {
-                if data.occurrences > 0 || key.as_str() == "help" || key.as_str() == "version" {
+                println!("{}, {:?}", key, data);
+                if data.occurrences > 0 && key.as_str() != "help" && key.as_str() != "version" {
                     // Define all CLI commands/arguments here and in the tauri.conf.json file
                     // WARNING: If the commmand is not defined in the tauri.conf.json file, it can't be used here
                     match key.as_str() {
                         "gui" => {
-                            if let Err(err) = cli_gui(app.handle()) {
+                            if let Err(err) = cli_gui(app.handle().clone()) {
                                 error!("GUI Error: {}", err);
                             }
                         }
-                        "scan" => cli_scanner(app.handle(), data),
-                        "update-db" => cli_dbupdate(app.handle()),
-                        "help" => print_data(app.handle(), data),
-                        "version" => print_data(app.handle(), data),
-                        _ => not_implemented(app.handle()),
+                        "scan" => cli_scanner(
+                            app.handle().clone(),
+                            match data.value.clone() {
+                                serde_json::Value::String(data) => data,
+                                _ => {
+                                    error!("Received invalid data {data:?} for 'scan'");
+                                    app.handle().exit(-1);
+                                    return;
+                                }
+                            },
+                        ),
+                        "db-update" => cli_dbupdate(app.handle().clone()),
+                        _ => not_implemented(app.handle().clone()),
                     }
                 }
             });
@@ -159,47 +175,30 @@ pub async fn download_logs() -> Result<String, String> {
         .join("main");
     let app_log_path = log_dir.join("app.log");
 
-    let downloads_dir =
-        tauri::api::path::download_dir().ok_or("Failed to get download directory".to_string())?;
-
-    let destination_path = downloads_dir.join("log.txt");
+    /*
+    let downloads_dir = Manager::path(Path::new("."))
+        .download_dir()
+        .expect("Failed to get download directory");
+        */
+    let log_path = get_config()
+        .paths
+        .ok_or("No paths set. Is config initialized?".to_owned())?
+        .downloads
+        .join("log.txt");
 
     // If there's an error during copying, return an error message
-    std::fs::copy(app_log_path, &destination_path)
+    std::fs::copy(app_log_path, &log_path)
         .map_err(|err| format!("Error copying log file: {err}"))?;
     // If the copy operation is successful, return Ok indicating success
-    Ok(destination_path.to_str().unwrap().to_string())
+    Ok(log_path.to_str().unwrap().to_string())
 }
 
 #[tauri::command]
 pub async fn get_hash_count_fe() -> Result<String, String> {
     tokio::task::spawn_blocking(move || {
-        // try to get a usable database path
+        // read hash count from config to avoid long waits on count
         let config = get_config();
-        let data_dir = config
-            .clone()
-            .paths
-            .ok_or("No paths set. Is config initialized?".to_owned())?
-            .data;
-        let db_path = Path::new(&config.db_location);
-        let db_file_str = if !config.db_location.is_empty() && db_path.exists() && db_path.is_file()
-        {
-            info!("Using specific DB path {}", config.db_location);
-            config.db_location.clone()
-        } else {
-            // if not we use the default path
-            data_dir.join(crate::DB_NAME).display().to_string()
-        };
-
-        // connect to database
-        let db_connection = DBOps::new(db_file_str.as_str()).map_err(|err| {
-            error!("{err}");
-            err.to_string()
-        })?;
-        Ok(db_connection
-            .count_hashes()
-            .map_err(|err| err.to_string())?
-            .to_string())
+        Ok(config.hash_count.to_string())
     })
     .await
     .map_err(|err| err.to_string())?

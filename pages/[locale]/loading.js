@@ -1,7 +1,7 @@
 import Head from "next/head";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from 'react';
-import { invoke } from "@tauri-apps/api/tauri";
+import { invoke } from "@tauri-apps/api/core";
 import { listen } from '@tauri-apps/api/event';
 import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
@@ -70,7 +70,7 @@ export default function Loading() {
   const scanning = async () => {
     if (parseInt(hashcount) <= 0) {
       // There are no signatures in the database, so the scanner cannot start
-      isConfirmed = await Swal.fire({
+      let isConfirmed = await Swal.fire({
         title: t('empty_db_dialog'),
         text: t('empty_db_dialog_text'),
         icon: "warning",
@@ -81,7 +81,7 @@ export default function Loading() {
         cancelButtonText: t('empty_db_dialog_cancel'),
       })
 
-      if (isConfirmed) {
+      if (!isConfirmed) {
         router.push("/");
         return;
       }

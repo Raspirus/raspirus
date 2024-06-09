@@ -1,6 +1,6 @@
 import Head from "next/head";
 import VirusComp from "../../components/VirusCard";
-import { invoke } from "@tauri-apps/api/tauri";
+import { invoke } from "@tauri-apps/api/core";
 import { useRouter } from "next/router";
 import { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
