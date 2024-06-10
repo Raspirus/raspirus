@@ -1,8 +1,6 @@
-# This is needed to fix codecoverage workflow errors
-
 [workspace]
-resolver = "1"
-members = ["src-tauri"]
+resolver = "2"
+members = ["src-tauri", "src-ui"]
 
 [profile.release]
 incremental = false

@@ -1,9 +1,9 @@
 {
   "build": {
-    "beforeBuildCommand": "npm run build",
-    "beforeDevCommand": "npm run dev",
-    "frontendDist": "../out",
-    "devUrl": "http://localhost:3000"
+    "beforeDevCommand": "trunk serve",
+    "devUrl": "http://localhost:1420",
+    "beforeBuildCommand": "trunk build",
+    "frontendDist": "../src-ui/dist"
   },
   "bundle": {
     "active": true,
@@ -87,6 +87,7 @@
   "app": {
     "security": {
       "capabilities": ["main-capability"]
-    }
+    },
+    "withGlobalTauri": true
   }
 }
