@@ -5,5 +5,7 @@ edition = "2021"
 
 [dependencies]
 console_error_panic_hook = "0.1.7"
-leptos = { version = "0.6.12", features = ["csr"] }
+leptos = "0.6.12"
+leptos_router = "0.6.12"
 leptos_sweetalert = "1.0.2"
+serde = { version = "1.0.203", features = ["derive"] }
