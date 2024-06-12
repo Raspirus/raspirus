@@ -1,5 +1,5 @@
 [build]
-target = "./src-ui/index.html"
+target = "./index.html"
 
 [watch]
 ignore = ["./src-tauri"]
