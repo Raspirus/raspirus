@@ -1,6 +1,24 @@
+[package]
+name = "raspirus-ui"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+console_error_panic_hook = "0.1.7"
+leptos = { version = "0.6.12", features = ["csr"] }
+leptos_router = { version = "0.6.12", features = ["csr"] }
+leptos_sweetalert = "1.0.2"
+serde = { version = "1.0.203", features = ["derive"] }
+serde_json = "1.0.117"
+serde-wasm-bindgen = "0.6"
+wasm-bindgen = "0.2"
+wasm-bindgen-futures = "0.4"
+js-sys = "0.3"
+log = "0.4.21"
+
+
 [workspace]
-resolver = "2"
-members = ["src-tauri", "src-ui"]
+members = ["src-tauri"]
 
 [profile.release]
 incremental = false
