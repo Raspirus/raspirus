@@ -4,7 +4,7 @@ use leptonic::components::icon::Icon;
 
 
 #[component]
-pub fn InfoComp(
+pub fn InfoCard (
     title: String,
     value: String,
     icon: icondata::Icon
