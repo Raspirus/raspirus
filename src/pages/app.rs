@@ -1,6 +1,7 @@
+use leptonic::components::root::Root;
+use leptonic::components::theme::LeptonicTheme;
 use leptos::*;
-use leptos::wasm_bindgen::JsValue;
-use leptos::wasm_bindgen::prelude::wasm_bindgen;
+use crate::i18n::provide_i18n_context;
 use leptos_router::*;
 use crate::pages::{
     index::Index,
@@ -13,52 +14,56 @@ use crate::pages::{
 
 #[component]
 pub fn App() -> impl IntoView {
+    provide_i18n_context();
+
     view! {
-        <Router>
-            <Routes>
-                <StaticRoute
-                    mode=StaticMode::Incremental
-                    path="/"
-                    view=Index
-                    static_params=|| Box::pin(async { StaticParamsMap::default() })
-                />
-                <StaticRoute
-                    mode=StaticMode::Incremental
-                    path="/settings"
-                    view=Settings
-                    static_params=|| Box::pin(async { StaticParamsMap::default() })
-                />
-                <StaticRoute
-                    mode=StaticMode::Incremental
-                    path="/information"
-                    view=Information
-                    static_params=|| Box::pin(async { StaticParamsMap::default() })
-                />
-                <StaticRoute
-                    mode=StaticMode::Incremental
-                    path="/loading"
-                    view=Loading
-                    static_params=|| Box::pin(async { StaticParamsMap::default() })
-                />
-                <StaticRoute
-                    mode=StaticMode::Incremental
-                    path="/clean"
-                    view=Clean
-                    static_params=|| Box::pin(async { StaticParamsMap::default() })
-                />
-                <StaticRoute
-                    mode=StaticMode::Incremental
-                    path="/infected"
-                    view=Infected
-                    static_params=|| Box::pin(async { StaticParamsMap::default() })
-                />
-                <StaticRoute
-                    mode=StaticMode::Incremental
-                    path="/*any"
-                    view=|| view! { <h1>"Not Found"</h1> }
-                    static_params=|| Box::pin(async { StaticParamsMap::default() })
-                />
-            </Routes>
-        </Router>
+        <Root default_theme=LeptonicTheme::default()>
+            <Router>
+                <Routes>
+                    <StaticRoute
+                        mode=StaticMode::Incremental
+                        path="/"
+                        view=Index
+                        static_params=|| Box::pin(async { StaticParamsMap::default() })
+                    />
+                    <StaticRoute
+                        mode=StaticMode::Incremental
+                        path="/settings"
+                        view=Settings
+                        static_params=|| Box::pin(async { StaticParamsMap::default() })
+                    />
+                    <StaticRoute
+                        mode=StaticMode::Incremental
+                        path="/information"
+                        view=Information
+                        static_params=|| Box::pin(async { StaticParamsMap::default() })
+                    />
+                    <StaticRoute
+                        mode=StaticMode::Incremental
+                        path="/loading"
+                        view=Loading
+                        static_params=|| Box::pin(async { StaticParamsMap::default() })
+                    />
+                    <StaticRoute
+                        mode=StaticMode::Incremental
+                        path="/clean"
+                        view=Clean
+                        static_params=|| Box::pin(async { StaticParamsMap::default() })
+                    />
+                    <StaticRoute
+                        mode=StaticMode::Incremental
+                        path="/infected"
+                        view=Infected
+                        static_params=|| Box::pin(async { StaticParamsMap::default() })
+                    />
+                    <StaticRoute
+                        mode=StaticMode::Incremental
+                        path="/*any"
+                        view=|| view! { <h1>"Not Found"</h1> }
+                        static_params=|| Box::pin(async { StaticParamsMap::default() })
+                    />
+                </Routes>
+            </Router>
+        </Root>
     }
 }
