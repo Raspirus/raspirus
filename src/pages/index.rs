@@ -1,6 +1,7 @@
 use leptonic::components::button::{Button, LinkButton};
 use leptonic::components::icon::Icon;
 use leptonic::components::select::Select;
+use leptonic::components::theme::{LeptonicTheme, ThemeToggle};
 use leptos::*;
 use leptonic::prelude::*;
 use log::{debug, error};
@@ -9,7 +10,10 @@ use leptos::wasm_bindgen::JsValue;
 use leptos::wasm_bindgen::prelude::wasm_bindgen;
 use crate::i18n::use_i18n;
 use leptos_i18n::t;
-use crate::components::directory_picker_button::DirectoryPickerButton;
+use crate::components::{
+    directory_picker_button::DirectoryPickerButton,
+    language_switch::LanguageSwitch,
+};
 
 #[wasm_bindgen]
 extern "C" {
@@ -64,7 +68,7 @@ pub fn Index() -> impl IntoView {
     view! {
         <main class="h-screen">
         <div class="flex justify-start">
-
+            <LanguageSwitch />
           <div class="flex justify-center absolute top-0 right-0">
 
             <Show when=move || {is_update_available.get()}>
@@ -86,6 +90,7 @@ pub fn Index() -> impl IntoView {
               />
               {t!(i18n, settings)}
             </LinkButton>
+            <ThemeToggle off=LeptonicTheme::Light on=LeptonicTheme::Dark/>
 
           </div>
         </div>
