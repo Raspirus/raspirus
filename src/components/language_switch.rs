@@ -16,7 +16,7 @@ pub fn LanguageSwitch() -> impl IntoView {
         Locale::de => "DE".to_string(),
         Locale::it => "IT".to_string(),
     };
-    let (current_locale_string, set_current_locale_string) = create_signal(current_locale_string);
+    let (current_locale_string, _) = create_signal(current_locale_string);
     // We want to create a vector of locales that are available in the i18n context
     // but the i18n context does not provide a method to get all available locales
     // it only provides an enum that represents the available locales,
