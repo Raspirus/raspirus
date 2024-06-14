@@ -128,14 +128,7 @@ pub fn Index() -> impl IntoView {
                 <Button on_press=move |_| update_usb_devices()
                   class="inline-block p-3 ml-1 bg-maingreen rounded shadow-md"
                 >
-                  <image
-                    id="refresh-icon"
-                    class="h-full w-4"
-                    src="images/refresh.svg"
-                    alt="Refresh"
-                    width="500"
-                    height="500"
-                  />
+                    <Icon icon=icondata::TbReload class="h-full w-4" />
                 </Button>
               </div>
               <div class="mt-2">
