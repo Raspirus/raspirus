@@ -1,55 +1,15 @@
-@import "https://cdn.jsdelivr.net/npm/bulma@1.0.0/css/bulma.min.css";
 @import "./leptonic/leptonic-themes.scss";
 
-html, body {
-    background-color: #E5E7EB;
-    height: 100%;
-    width: 100%;
+[data-theme="light"] {
+    --brand-color: #e66956;
+
+    --drawer-background-color: none;
+    --drawer-box-shadow: none;
 }
 
-.alert-warning {
-    color: #856404;
-    background-color: #fff3cd;
-    border-color: #ffeeba;
-}
+[data-theme="dark"] {
+    --brand-color: #e66956;
 
-.alert-info {
-    color: #0c5460;
-    background-color: #d1ecf1;
-    border-color: #bee5eb;
-}
-
-.alert-success {
-    color: #155724;
-    background-color: #d4edda;
-    border-color: #c3e6cb;
-}
-
-.alert-danger {
-    color: #721c24;
-    background-color: #f8d7da;
-    border-color: #f5c6cb;
-}
-
-.alert {
-    position: relative;
-    padding: .75rem 1.25rem;
-    margin-bottom: 1rem;
-    border: 1px solid transparent;
-    border-radius: .25rem;
-}
-
-.close {
-    float: right;
-    font-size: 1.5rem;
-    font-weight: 700;
-    line-height: 1;
-    color: #000;
-    text-shadow: 0 1px 0 #fff;
-    opacity: .5;
-    cursor: pointer;
-}
-
-.dropdown-menu {
-    min-width: 0 !important;
+    --drawer-background-color: none;
+    --drawer-box-shadow: none;
 }
