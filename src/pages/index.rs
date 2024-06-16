@@ -3,9 +3,11 @@ use leptonic::components::icon::Icon;
 use leptonic::components::select::Select;
 use leptonic::components::theme::{LeptonicTheme, ThemeToggle};
 use leptos::*;
+use leptos::logging::{log, error};
 use leptonic::prelude::*;
-use log::{debug, error};
 use serde::{Deserialize, Serialize};
+use tauri_wasm::api::core::invoke;
+use tauri_wasm::Error;
 use leptos::wasm_bindgen::JsValue;
 use leptos::wasm_bindgen::prelude::wasm_bindgen;
 use crate::i18n::use_i18n;
@@ -14,12 +16,6 @@ use crate::components::{
     directory_picker_button::DirectoryPickerButton,
     language_switch::LanguageSwitch,
 };
-
-#[wasm_bindgen]
-extern "C" {
-    #[wasm_bindgen(js_namespace = ["window", "__TAURI__", "core"])]
-    async fn invoke(cmd: &str, args: JsValue) -> JsValue;
-}
 
 #[derive(Serialize, Deserialize, Debug)]
 struct UsbDevice {
@@ -48,19 +44,19 @@ pub fn Index() -> impl IntoView {
 
     let update_usb_devices = move || {
         spawn_local(async move {
-            let usb_devices = match invoke("list_usb_drives", JsValue::NULL).await.as_string() {
-                Some(data) => {
-                    // Log the received data
-                    debug!("Received USB devices: {}", data);
-                    let devices: Vec<UsbDevice> = serde_json::from_str(&data).unwrap();
-                    devices.iter().map(|d| d.name.clone()).collect()
+            let usb_devices: Result<String, Error> = invoke("list_usb_drives", &String::new()).await;
+            match usb_devices {
+                Ok(usb_devices_string) => {
+                    // We will get a JSON string with the USB devices
+                    let usb_devices_list: Vec<UsbDevice> = serde_json::from_str(&usb_devices_string).unwrap();
+                    // Then we create a vector with the names of the USB devices
+                    let usb_names: Vec<String> = usb_devices_list.iter().map(|d| d.name.clone()).collect();
+                    setUsbDevices.set(usb_names);
                 }
-                None => {
-                    error!("Failed to receive USB devices");
-                    vec![]
+                Err(e) => {
+                    error!("Error listing USB devices: {:?}", e);
                 }
-            };
-            setUsbDevices.set(usb_devices);
+            }
         });
     };
 
@@ -137,7 +133,7 @@ pub fn Index() -> impl IntoView {
                 >
                   {t!(i18n, info)}
                 </LinkButton>
-                <LinkButton href="/loading"
+                <LinkButton href="/loading?target=hello"
                   class="ml-2 inline-block px-7 py-3 bg-mainred text-white font-medium text-sm uppercase rounded shadow-md"
                 >
                   {t!(i18n, start)}

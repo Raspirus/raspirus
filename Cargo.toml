@@ -5,7 +5,7 @@ edition = "2021"
 
 [dependencies]
 console_error_panic_hook = "0.1.7"
-leptonic = { git = "https://github.com/lpotthast/leptonic.git", features = ["csr"] }
+leptonic = { git = "https://github.com/lpotthast/leptonic", features = ["csr"] }
 leptos = { version = "0.6.12", features = ["csr"] }
 leptos_router = { version = "0.6.12", features = ["csr"] }
 leptos_sweetalert = "1.0.2"
@@ -16,8 +16,9 @@ wasm-bindgen = "0.2"
 wasm-bindgen-futures = "0.4"
 js-sys = "0.3"
 log = "0.4.21"
-rfd = { version = "0.14.1", features = ["file-handle-inner"] }
 leptos_i18n = "0.3.3"
+tauri-wasm = { git = "https://github.com/Benji377/tauri-wasm", features = ["dialog", "core", "event"] }
+futures-util = "0.3.30"
 
 [package.metadata.leptonic]
 # REQUIRED: Leptonic's build-script will copy the Leptonic themes to this directory.
