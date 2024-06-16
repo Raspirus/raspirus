@@ -1,28 +1,11 @@
+use std::path::PathBuf;
 use leptonic::components::button::Button;
 use leptonic::components::icon::Icon;
 use leptonic::prelude::icondata;
 use leptos::*;
-use log::info;
-use wasm_bindgen::JsValue;
-use wasm_bindgen::prelude::wasm_bindgen;
+use leptos::logging::log;
+use tauri_wasm::plugin::dialog::FileDialogBuilder;
 
-
-/*
-    const { open } = await import('@tauri-apps/plugin-dialog');
-    // Set user selection restrictions
-    const selected = await open({
-      directory: scanDirectory,
-      multiple: false,
-      defaultPath: "/",
-    })
-    if (selected === null) {
-      // No dir selected
-    } else {
-      onSelectDirectory(selected);
-    }
-  }
-
-*/
 
 #[component]
 pub fn DirectoryPickerButton(
@@ -30,7 +13,23 @@ pub fn DirectoryPickerButton(
     can_select_directories: ReadSignal<bool>
 ) -> impl IntoView {
     let handle_button_click = move || {
-        info!("DirectoryPickerButton clicked");
+        spawn_local(async move {
+            let path_buffer: PathBuf;
+            if can_select_directories.get() {
+                let folder = FileDialogBuilder::new().pick_folder().await;
+                log!("Selected folder: {:?}", folder);
+                path_buffer = folder.expect("Folder selection error")
+                    .expect("Path conversion error");
+            } else {
+                let file = FileDialogBuilder::new().pick_file().await;
+                log!("Selected file: {:?}", file);
+                // It returns a FileResponse object, which contains the file path and the file name
+                path_buffer = file.expect("File selection error")
+                    .expect("Path conversion error").path;
+            }
+            let path_string = path_buffer.into_os_string().into_string().unwrap_or_default();
+            scan_target.set(path_string);
+        });
     };
 
     view! {
