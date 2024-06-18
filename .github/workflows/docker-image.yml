@@ -2,7 +2,8 @@ name: Docker Image CI
 
 on:
   workflow_dispatch:
-
+env:
+  VERSION: 1.2.3
 jobs:
   build_arm64:
     runs-on: ubuntu-latest
@@ -21,13 +22,13 @@ jobs:
       run: mkdir -p ./dist
 
     - name: Copy file from docker
-      run: docker cp raspirus:/usr/app/raspirus/target/aarch64-unknown-linux-gnu/release/bundle/deb/raspirus_1.2.1_arm64.deb ./dist
+      run: docker cp raspirus:/usr/app/raspirus/target/aarch64-unknown-linux-gnu/release/bundle/deb/raspirus_${{ env.VERSION }}_arm64.deb ./dist
 
     - name: Upload file to artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: raspirus_1.2.1_arm64_${{ github.run_number }}.deb
-        path: ./dist/raspirus_1.2.1_arm64.deb
+        name: raspirus_${{ env.VERSION }}_arm64_${{ github.run_number }}.deb
+        path: ./dist/raspirus_${{ env.VERSION }}_arm64.deb
 
   build_armhf:
     runs-on: ubuntu-latest
@@ -46,10 +47,10 @@ jobs:
       run: mkdir -p ./dist
 
     - name: Copy file from docker
-      run: docker cp raspirus:/usr/app/raspirus/target/armv7-unknown-linux-gnueabihf/release/bundle/deb/raspirus_1.2.1_armhf.deb ./dist
+      run: docker cp raspirus:/usr/app/raspirus/target/armv7-unknown-linux-gnueabihf/release/bundle/deb/raspirus_${{ env.VERSION }}_armhf.deb ./dist
 
     - name: Upload file to artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: raspirus_1.2.1_armhf_${{ github.run_number }}.deb
-        path: ./dist/raspirus_1.2.1_armhf.deb
+        name: raspirus_${{ env.VERSION }}_armhf_${{ github.run_number }}.deb
+        path: ./dist/raspirus_${{ env.VERSION }}_armhf.deb
