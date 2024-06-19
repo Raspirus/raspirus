@@ -6,6 +6,15 @@ env:
   VERSION: 1.2.1
 jobs:
   build_arm64:
+    strategy:
+      matrix:
+        include:
+          - arch: arm64
+            triple: aarch64-unknown-linux-gnu
+            dir: arm
+          - arch: armhf
+            triple: armv7-unknown-linux-gnueabihf
+            dir: armhf
     runs-on: ubuntu-latest
 
     steps:
@@ -13,22 +22,22 @@ jobs:
       uses: actions/checkout@v4
 
     - name: Build the arm64 Docker image
-      run: docker build -t raspirus-arm -f ./docker/arm/Dockerfile .
+      run: docker build -t raspirus-${{ matrix.dir }} -f ./docker/${{ matrix.dir }}/Dockerfile .
 
     - name: Create the Docker container
-      run: docker create --name raspirus raspirus-arm
+      run: docker create --name raspirus raspirus-${{ matrix.dir }}
 
     - name: Create dist folder
       run: mkdir -p ./dist
 
     - name: Copy file from docker
-      run: docker cp raspirus:/usr/app/raspirus/target/aarch64-unknown-linux-gnu/release/bundle/deb/raspirus_${{ env.VERSION }}_arm64.deb ./dist
+      run: docker cp raspirus:/usr/app/raspirus/target/${{ matrix.triple }}/release/bundle/deb/raspirus_${{ env.VERSION }}_${{ matrix.arch }}.deb ./dist
 
     - name: Upload file to artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: raspirus_${{ env.VERSION }}_arm64_${{ github.run_number }}.deb
-        path: ./dist/raspirus_${{ env.VERSION }}_arm64.deb
+        name: raspirus_${{ env.VERSION }}_${{ matrix.arch}}_${{ github.run_number }}.deb
+        path: ./dist/raspirus_${{ env.VERSION }}_${{ matrix.arch }}.deb
 
   build_armhf:
     runs-on: ubuntu-latest
