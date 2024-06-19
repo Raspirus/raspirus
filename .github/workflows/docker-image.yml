@@ -39,27 +39,27 @@ jobs:
         name: raspirus_${{ env.VERSION }}_${{ matrix.arch}}_${{ github.run_number }}.deb
         path: ./dist/raspirus_${{ env.VERSION }}_${{ matrix.arch }}.deb
 
-  build_armhf:
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Build the armhf Docker image
-      run: docker build -t raspirus-armhf -f ./docker/armhf/Dockerfile .
-
-    - name: Create the Docker container
-      run: docker create --name raspirus raspirus-armhf
-
-    - name: Create dist folder
-      run: mkdir -p ./dist
-
-    - name: Copy file from docker
-      run: docker cp raspirus:/usr/app/raspirus/target/armv7-unknown-linux-gnueabihf/release/bundle/deb/raspirus_${{ env.VERSION }}_armhf.deb ./dist
-
-    - name: Upload file to artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: raspirus_${{ env.VERSION }}_armhf_${{ github.run_number }}.deb
-        path: ./dist/raspirus_${{ env.VERSION }}_armhf.deb
+  # build_armhf:
+  #   runs-on: ubuntu-latest
+  #
+  #   steps:
+  #   - name: Checkout code
+  #     uses: actions/checkout@v4
+  #
+  #   - name: Build the armhf Docker image
+  #     run: docker build -t raspirus-armhf -f ./docker/armhf/Dockerfile .
+  #
+  #   - name: Create the Docker container
+  #     run: docker create --name raspirus raspirus-armhf
+  #
+  #   - name: Create dist folder
+  #     run: mkdir -p ./dist
+  #
+  #   - name: Copy file from docker
+  #     run: docker cp raspirus:/usr/app/raspirus/target/armv7-unknown-linux-gnueabihf/release/bundle/deb/raspirus_${{ env.VERSION }}_armhf.deb ./dist
+  #
+  #   - name: Upload file to artifacts
+  #     uses: actions/upload-artifact@v4
+  #     with:
+  #       name: raspirus_${{ env.VERSION }}_armhf_.deb
+  #       path: ./dist/raspirus_${{ env.VERSION }}_armhf.deb
