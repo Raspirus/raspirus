@@ -15,17 +15,26 @@ pub fn DirectoryPickerButton(
     let handle_button_click = move || {
         spawn_local(async move {
             let path_buffer: PathBuf;
-            if can_select_directories.get() {
+            if (move || can_select_directories.get())() {
                 let folder = FileDialogBuilder::new().pick_folder().await;
                 log!("Selected folder: {:?}", folder);
-                path_buffer = folder.expect("Folder selection error")
-                    .expect("Path conversion error");
+                // If the folder is ok, we parse the path, else we just don't do anything
+                match folder {
+                    Ok(Some(path)) => {
+                        path_buffer = path;
+                    }
+                    _ => return,
+                }
             } else {
                 let file = FileDialogBuilder::new().pick_file().await;
                 log!("Selected file: {:?}", file);
-                // It returns a FileResponse object, which contains the file path and the file name
-                path_buffer = file.expect("File selection error")
-                    .expect("Path conversion error").path;
+                // Same as with the folder, if the file is ok, we parse the path, else we don't do anything
+                match file {
+                    Ok(Some(path)) => {
+                        path_buffer = path.path;
+                    }
+                    _ => return,
+                }
             }
             let path_string = path_buffer.into_os_string().into_string().unwrap_or_default();
             scan_target.set(path_string);

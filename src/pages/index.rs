@@ -8,39 +8,51 @@ use leptonic::prelude::*;
 use serde::{Deserialize, Serialize};
 use tauri_wasm::api::core::invoke;
 use tauri_wasm::Error;
-use leptos::wasm_bindgen::JsValue;
-use leptos::wasm_bindgen::prelude::wasm_bindgen;
 use crate::i18n::use_i18n;
 use leptos_i18n::t;
 use crate::components::{
     directory_picker_button::DirectoryPickerButton,
     language_switch::LanguageSwitch,
 };
-
-#[derive(Serialize, Deserialize, Debug)]
-struct UsbDevice {
-    name: String,
-    path: String,
-}
+use crate::generic::{Config, UsbDevice};
 
 #[component]
 pub fn Index() -> impl IntoView {
     let i18n = use_i18n();
     let (scan_target, setScanTarget) = create_signal(String::new());
     let (usb_devices, setUsbDevices) = create_signal(Vec::<String>::new());
-    // TODO: The Raspberry Pi option has not been implemented yet
-    let (is_raspberrypi, setIsRaspberrypi) = create_signal(false);
-    // Flag to indicate if the selected target is a directory
-    let (is_directory, setIsDirectory) = create_signal(false);
     // Flag to indicate if the file picker can select files or directories
-    let (can_select_directories, setCanSelectDirectories) = create_signal(false);
+    let (can_select_directories, setCanSelectDirectories) = create_signal(true);
     let (is_update_available, setIsUpdateAvailable) = create_signal(false);
-    let (hash_count, setHashCount) = create_signal(0);
 
-//    let update_selection = move |ev: &T| {
-//        let target = event_target_value(ev);
-//        setScanTarget.set(target);
-//    };
+    // We have to call a couple invoke commands to set the initial state of the app
+    spawn_local(async move {
+        // First we load the config
+        let config: Result<String, Error> = invoke("load_config_fe", &String::new()).await;
+        match config {
+            Ok(config_string) => {
+                let config: Config = serde_json::from_str(&config_string).unwrap();
+                // We set the flag to indicate if the file picker can select directories
+                setCanSelectDirectories.set(config.scan_dir);
+            }
+            Err(e) => {
+                error!("Error loading config: {:?}", e);
+            }
+        }
+    });
+
+    // We check if there is an update available
+    spawn_local(async move {
+        let update_available: Result<bool, Error> = invoke("check_update", &String::new()).await;
+        match update_available {
+            Ok(update_available) => {
+                setIsUpdateAvailable.set(update_available);
+            }
+            Err(e) => {
+                error!("Error checking for update: {:?}", e);
+            }
+        }
+    });
 
     let update_usb_devices = move || {
         spawn_local(async move {
@@ -99,23 +111,14 @@ pub fn Index() -> impl IntoView {
               </h1>
 
               <div class="flex justify-center">
-                <Show when=move || {!is_directory.get()}
-                    fallback=move || {view! {
-                        <div class="m-auto px-3 py-1.5 text-gray-700 bg-white inline-block w-full
-                                    border border-solid border-maingreen-light rounded overflow-hidden
-                                    max-w-lg max-h-9">
-                            {move || scan_target.get()}
-                        </div>
-                    }}
-                    >
-                    <Select
-                        options=usb_devices.get()
+                // TODO: The select below is not being updated with the new USB devices
+                <Select
+                        options=usb_devices
                         search_text_provider=move |o| format!("{o}")
                         render_option=move |o| format!("{o:?}")
                         selected=scan_target
                         set_selected=move |v| setScanTarget.set(v)
                     />
-                </Show>
 
                 <DirectoryPickerButton
                     scan_target=setScanTarget
@@ -133,7 +136,7 @@ pub fn Index() -> impl IntoView {
                 >
                   {t!(i18n, info)}
                 </LinkButton>
-                <LinkButton href="/loading?target=hello"
+                <LinkButton href= move || format!("/loading?target={}", scan_target.get())
                   class="ml-2 inline-block px-7 py-3 bg-mainred text-white font-medium text-sm uppercase rounded shadow-md"
                 >
                   {t!(i18n, start)}
