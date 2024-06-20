@@ -2,6 +2,7 @@ use leptos::*;
 
 mod pages;
 mod components;
+mod generic;
 
 use pages::app::App;
 

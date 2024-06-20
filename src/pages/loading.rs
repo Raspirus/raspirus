@@ -1,17 +1,23 @@
 use leptos::*;
 use leptos::logging::log;
 use leptonic::components::progress_bar::ProgressBar;
-use leptos_router::use_query_map;
+use leptos_router::{use_query_map, use_navigate};
 use tauri_wasm::api::event::listen;
 use tauri_wasm::api::core::invoke;
+use tauri_wasm::Error;
 use futures_util::StreamExt;
+use serde::{Deserialize, Serialize};
+
+#[derive(Serialize, Deserialize)]
+struct ScannerArgs<> {
+    path: String,
+}
 
 #[component]
 pub fn Loading() -> impl IntoView {
     let (progress, set_progress) = create_signal(Some(0.0));
-    let query = use_query_map();
-    let target_map = query.get_untracked();
-    let target= target_map.get("target");
+    let target = use_query_map().get_untracked().get("target").cloned();
+    let navigate = use_navigate();
     log!("Target: {:?}", target);
 
     spawn_local(async move {
@@ -32,6 +38,29 @@ pub fn Loading() -> impl IntoView {
             let payload : String = event.payload;
             let message = format!("payload: {}", payload);
             log!("Error: {}", message);
+        }
+    });
+
+    // We start the scanning process
+    spawn_local(async move {
+        log!("Starting scanner with target: {:?}", target);
+        let result: Result<String, Error> = invoke("start_scanner", &ScannerArgs{path: target.unwrap()}).await;
+        match &result {
+            Ok(result) => {
+                log!("Result: {}", result);
+                let infected_files: Vec<String> = serde_json::from_str(&result).unwrap();
+                let count = infected_files.len();
+                log!("Infected files: {:?}", count);
+                if count > 0 {
+                    navigate(&format!("/infected?result={}", result), Default::default());
+                } else {
+                    navigate("/clean", Default::default());
+                }
+            }
+            Err(e) => {
+                log!("Error: {:?}", e);
+                navigate("/", Default::default());
+            }
         }
     });
 

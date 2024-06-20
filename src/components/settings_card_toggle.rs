@@ -13,7 +13,6 @@ pub fn SettingsToggleCard(
     is_on: ReadSignal<bool>,
     toggle_function: WriteSignal<bool>,
 ) -> impl IntoView {
-    let i18n = use_i18n();
     let button_class = if is_on.get() {
         "bg-green-500 border-green-500"
     } else {

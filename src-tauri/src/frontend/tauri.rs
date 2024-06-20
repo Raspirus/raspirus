@@ -72,7 +72,6 @@ pub fn init_tauri() {
             list_usb_drives,
             update_database,
             patch,
-            check_raspberry,
             load_config_fe,
             save_config_fe,
             download_logs,
@@ -89,13 +88,6 @@ pub async fn start_scanner(window: tauri::Window, path: String) -> Result<String
     tokio::task::spawn_blocking(|| utils::scanner_utils::start_scanner(Some(window), path))
         .await
         .map_err(|err| err.to_string())?
-}
-
-// Checks if we are currently on a Raspberry Pi,
-// because a couple options are not supported on that device and will be disabled on the GUI
-#[tauri::command]
-pub async fn check_raspberry() -> Result<bool, String> {
-    Ok(std::env::consts::ARCH == "arm")
 }
 
 // Updates the database over the GUi
