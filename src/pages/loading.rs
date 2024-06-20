@@ -8,6 +8,10 @@ use tauri_wasm::Error;
 use futures_util::StreamExt;
 use serde::{Deserialize, Serialize};
 
+// TODO:
+// - Styling
+// - If possible, add a "STOP" button to stop the scanning process
+
 #[derive(Serialize, Deserialize)]
 struct ScannerArgs<> {
     path: String,
@@ -59,7 +63,7 @@ pub fn Loading() -> impl IntoView {
             }
             Err(e) => {
                 log!("Error: {:?}", e);
-                navigate("/", Default::default());
+                navigate(&format!("?error={}", e.to_string()), Default::default());
             }
         }
     });

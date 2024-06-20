@@ -5,6 +5,10 @@ use leptos_i18n::t;
 use crate::components::home_button::HomeButton;
 use crate::components::info_card::InfoCard;
 
+// TODO:
+// - Styling
+// - Add status of the mirror website (Online/Offline)
+// - Add Agreement and Privacy Policy Links (?)
 
 #[component]
 pub fn Information() -> impl IntoView {

@@ -10,20 +10,45 @@ use tauri_wasm::api::core::invoke;
 use tauri_wasm::Error;
 use crate::i18n::use_i18n;
 use leptos_i18n::t;
+use leptos_router::{use_navigate, use_query_map};
 use crate::components::{
     directory_picker_button::DirectoryPickerButton,
     language_switch::LanguageSwitch,
 };
+use crate::components::modals::error_modal::ErrorModal;
 use crate::generic::{Config, UsbDevice};
+
+// TODO:
+// - Styling
+// - Add welcome pop-up
+// - Add error pop-up when trying to scan without selecting a target
+// - Add error pop-up for generic backend errors
+// - Move the Permission text to the website and link to it in the welcome pop-up and information page
 
 #[component]
 pub fn Index() -> impl IntoView {
     let i18n = use_i18n();
+    let error = use_query_map().get_untracked().get("error").cloned();
+    let (error_title, setErrorTitle) = create_signal(String::new());
+    let (error_message, setErrorMessage) = create_signal(String::new());
     let (scan_target, setScanTarget) = create_signal(String::new());
     let (usb_devices, setUsbDevices) = create_signal(Vec::<String>::new());
     // Flag to indicate if the file picker can select files or directories
     let (can_select_directories, setCanSelectDirectories) = create_signal(true);
     let (is_update_available, setIsUpdateAvailable) = create_signal(false);
+    let (show_error_modal, setShowErrorModal) = create_signal(false);
+
+    let navigate = use_navigate();
+
+    // If the error is not empty, we show the error modal
+    if let Some(error) = error {
+        log!("Index Error: {:?}", error);
+        setErrorTitle.set("Unexpected Error".to_string());
+        setErrorMessage.set(error);
+        setShowErrorModal.set(true);
+        // Then we remove the error from the query params
+        navigate("/", Default::default());
+    }
 
     // We have to call a couple invoke commands to set the initial state of the app
     spawn_local(async move {
@@ -69,7 +94,17 @@ pub fn Index() -> impl IntoView {
                     error!("Error listing USB devices: {:?}", e);
                 }
             }
+            // We also reset the selected target
+            setScanTarget.set(String::new());
         });
+    };
+
+    // A function that programmatically navigates to the loading page if the selected target is not empty
+    let navigate_to_loading = move || {
+        let target = scan_target.get();
+        if !target.is_empty() {
+            navigate(&format!("/loading?target={}", target), Default::default());
+        }
     };
 
 
@@ -77,6 +112,12 @@ pub fn Index() -> impl IntoView {
         <main class="h-screen">
         <div class="flex justify-start">
             <LanguageSwitch />
+        <ErrorModal
+            show_modal=show_error_modal
+            set_show_modal=setShowErrorModal
+            title=error_title
+            body=error_message
+            />
           <div class="flex justify-center absolute top-0 right-0">
 
             <Show when=move || {is_update_available.get()}>
@@ -136,11 +177,11 @@ pub fn Index() -> impl IntoView {
                 >
                   {t!(i18n, info)}
                 </LinkButton>
-                <LinkButton href= move || format!("/loading?target={}", scan_target.get())
+                <Button on_press=move |_| navigate_to_loading()
                   class="ml-2 inline-block px-7 py-3 bg-mainred text-white font-medium text-sm uppercase rounded shadow-md"
                 >
                   {t!(i18n, start)}
-                </LinkButton>
+                </Button>
               </div>
             </div>
           </div>
