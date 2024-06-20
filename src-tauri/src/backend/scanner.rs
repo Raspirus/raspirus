@@ -14,10 +14,6 @@ use crate::backend::utils::generic::size;
 
 use super::{db_ops::DBOps, file_log::FileLog};
 
-#[derive(Clone, serde::Serialize)]
-struct TauriEvent {
-    message: String,
-}
 
 /// Struct representing a file scanner that is capable of searching through a specified directory and its subdirectories for malicious files.
 pub struct Scanner {
@@ -310,9 +306,7 @@ impl Scanner {
                 tauri_window
                     .emit(
                         "progerror",
-                        TauriEvent {
-                            message: "Calculated foldersize is 0".to_string(),
-                        },
+                        "Calculated foldersize is 0".to_string(),
                     )
                     .map_err(|err| format!("Could not send progress to frontend: {err}"))?;
             }
@@ -333,9 +327,7 @@ impl Scanner {
             tauri_window
                 .emit(
                     "progress",
-                    TauriEvent {
-                        message: scanned_percentage.to_string(),
-                    },
+                    scanned_percentage.to_string(),
                 )
                 .map_err(|err| format!("Could not send progress to frontend: {err}"))?;
         }
