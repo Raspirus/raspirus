@@ -5,6 +5,15 @@ use leptonic::prelude::icondata;
 use crate::components::home_button::HomeButton;
 use crate::components::settings_card_toggle::SettingsToggleCard;
 
+// TODO:
+// - Styling
+// - Add Update, CustomDB, PatchFile, DownloadLogs component
+// - Move the Mirror status to the info page
+// - Remove the obfuscated mode
+// - Add a "Reset to Default" button
+// - Add a "Save" button
+// - Add confirmation and update popups
+
 #[component]
 pub fn Settings() -> impl IntoView {
     let i18n = use_i18n();
