@@ -3,6 +3,8 @@ use leptos_i18n::t;
 use crate::components::home_button::HomeButton;
 use crate::i18n::use_i18n;
 
+// TODO: Styling
+
 #[component]
 pub fn Clean() -> impl IntoView {
     let i18n = use_i18n();
