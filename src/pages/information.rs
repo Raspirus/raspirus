@@ -8,12 +8,12 @@ use crate::components::info_card::InfoCard;
 // TODO:
 // - Styling
 // - Add status of the mirror website (Online/Offline)
-// - Add Agreement and Privacy Policy Links (?)
 
 #[component]
 pub fn Information() -> impl IntoView {
     let i18n = use_i18n();
     let appVersion = env!("CARGO_PKG_VERSION");
+
     view! {
         <div>
             <div class="align-middle">
@@ -55,6 +55,12 @@ pub fn Information() -> impl IntoView {
                 title=t!(i18n, license)().to_string()
                 value=t!(i18n, license_val)().to_string()
                 icon=icondata::TbLicense
+            />
+
+            <InfoCard
+                title="Website".to_string()
+                value="https://raspirus.deno.dev".to_string()
+                icon=icondata::TbGlobe
             />
 
         </div>

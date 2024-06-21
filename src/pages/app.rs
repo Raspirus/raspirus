@@ -11,6 +11,7 @@ use crate::pages::{
     clean::Clean,
     infected::Infected,
 };
+use crate::pages::agreement::Agreement;
 
 #[component]
 pub fn App() -> impl IntoView {
@@ -56,6 +57,13 @@ pub fn App() -> impl IntoView {
                         view=Infected
                         static_params=|| Box::pin(async { StaticParamsMap::default() })
                     />
+                    <StaticRoute
+                        mode=StaticMode::Incremental
+                        path="/agreement"
+                        view=Agreement
+                        static_params=|| Box::pin(async { StaticParamsMap::default() })
+                    />
+
                     <StaticRoute
                         mode=StaticMode::Incremental
                         path="/*any"
