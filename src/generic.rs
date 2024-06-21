@@ -10,7 +10,7 @@ pub struct UsbDevice {
 pub struct Config {
     // Saves hash count after update in order to avoid having to recount
     pub hash_count: u32,
-    // Last time and date when the db was successfully updated
+    // Last time and date when the db was successfully updated. Is a number we need to format
     pub last_db_update: String,
     // If we should log information to a file
     pub logging_is_active: bool,

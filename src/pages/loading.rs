@@ -13,7 +13,7 @@ use serde::{Deserialize, Serialize};
 // - If possible, add a "STOP" button to stop the scanning process
 
 #[derive(Serialize, Deserialize)]
-struct ScannerArgs<> {
+struct ScannerArgs {
     path: String,
 }
 
