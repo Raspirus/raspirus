@@ -2,7 +2,6 @@ use leptonic::components::icon::Icon;
 use leptonic::components::toggle::Toggle;
 use leptonic::prelude::icondata;
 use leptos::*;
-use crate::i18n::use_i18n;
 
 #[component]
 pub fn SettingsToggleCard(
