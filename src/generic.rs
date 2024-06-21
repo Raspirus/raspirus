@@ -1,3 +1,4 @@
+use chrono::DateTime;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -22,4 +23,27 @@ pub struct Config {
     pub scan_dir: bool,
     // mirror to folder with hash files for update
     pub mirror: String,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct SettingsPatchArgs {
+    pub patchfile: String,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct SettingsStruct {
+    pub logging_is_active: bool,
+    pub db_location: String,
+    pub scan_dir: bool,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct SettingsArgs {
+    pub contents: String
+}
+
+// A function to convert a big integer to a date string in the format of "DD-MM-YYYY HH:MM:SS"
+pub fn int_to_date_string(date_int: i64) -> String {
+    let date_time = DateTime::from_timestamp(date_int, 0);
+    date_time.unwrap_or_default().format("%d-%m-%Y %H:%M:%S").to_string()
 }

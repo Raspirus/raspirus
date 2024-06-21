@@ -6,3 +6,7 @@ pub mod home_button;
 pub mod settings_card_toggle;
 pub mod modals;
 pub mod virus_card;
+pub mod settings_card_input;
+pub mod settings_card_patch;
+pub mod settings_card_download;
+pub mod settings_card_update;
