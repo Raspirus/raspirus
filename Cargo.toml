@@ -19,6 +19,13 @@ log = "0.4.21"
 leptos_i18n = "0.3.3"
 tauri-wasm = { git = "https://github.com/Benji377/tauri-wasm", features = ["dialog", "core", "event"] }
 futures-util = "0.3.30"
+uuid = { version = "1.8.0", features = ["v4"] }
+time = { version = "0.3.34", features = [
+    "wasm-bindgen",
+    "macros",
+    "serde",
+    "serde-well-known",
+] }
 
 [package.metadata.leptonic]
 # REQUIRED: Leptonic's build-script will copy the Leptonic themes to this directory.

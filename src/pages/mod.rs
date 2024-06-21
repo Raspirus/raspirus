@@ -5,3 +5,4 @@ mod infected;
 mod information;
 mod loading;
 mod settings;
+mod agreement;

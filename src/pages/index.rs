@@ -1,5 +1,6 @@
 use leptonic::components::button::{Button, LinkButton};
 use leptonic::components::icon::Icon;
+use leptonic::components::link::Link;
 use leptonic::components::select::Select;
 use leptonic::components::theme::{LeptonicTheme, ThemeToggle};
 use leptos::*;
@@ -23,7 +24,6 @@ use crate::generic::{Config, UsbDevice};
 // - Add welcome pop-up
 // - Add error pop-up when trying to scan without selecting a target
 // - Add error pop-up for generic backend errors
-// - Move the Permission text to the website and link to it in the welcome pop-up and information page
 
 #[component]
 pub fn Index() -> impl IntoView {
@@ -112,12 +112,12 @@ pub fn Index() -> impl IntoView {
         <main class="h-screen">
         <div class="flex justify-start">
             <LanguageSwitch />
-        <ErrorModal
-            show_modal=show_error_modal
-            set_show_modal=setShowErrorModal
-            title=error_title
-            body=error_message
-            />
+            <ErrorModal
+                show_modal=show_error_modal
+                set_show_modal=setShowErrorModal
+                title=error_title
+                body=error_message
+                />
           <div class="flex justify-center absolute top-0 right-0">
 
             <Show when=move || {is_update_available.get()}>
@@ -139,8 +139,6 @@ pub fn Index() -> impl IntoView {
               />
               {t!(i18n, settings)}
             </LinkButton>
-            <ThemeToggle off=LeptonicTheme::Light on=LeptonicTheme::Dark/>
-
           </div>
         </div>
 
@@ -152,7 +150,6 @@ pub fn Index() -> impl IntoView {
               </h1>
 
               <div class="flex justify-center">
-                // TODO: The select below is not being updated with the new USB devices
                 <Select
                         options=usb_devices
                         search_text_provider=move |o| format!("{o}")
@@ -183,6 +180,7 @@ pub fn Index() -> impl IntoView {
                   {t!(i18n, start)}
                 </Button>
               </div>
+        <p>"By using this app, you accept our " <Link href="/agreement">"Terms and Conditions."</Link></p>
             </div>
           </div>
         </div>
