@@ -1,6 +1,7 @@
 use leptonic::components::button::{Button, LinkButton};
 use leptonic::components::icon::Icon;
 use leptonic::components::link::Link;
+use leptonic::components::prelude::{Toast, Toasts, ToastTimeout, ToastVariant};
 use leptonic::components::select::Select;
 use leptos::*;
 use leptos::logging::{log, error};
@@ -10,18 +11,17 @@ use tauri_wasm::Error;
 use crate::i18n::use_i18n;
 use leptos_i18n::t;
 use leptos_router::{use_navigate, use_query_map};
+use uuid::Uuid;
 use crate::components::{
     directory_picker_button::DirectoryPickerButton,
     language_switch::LanguageSwitch,
 };
 use crate::components::modals::error_modal::ErrorModal;
+use crate::components::modals::welcome_modal::WelcomeModal;
 use crate::generic::{Config, UsbDevice};
 
 // TODO:
 // - Styling
-// - Add welcome pop-up
-// - Add error pop-up when trying to scan without selecting a target
-// - Add error pop-up for generic backend errors
 
 #[component]
 pub fn Index() -> impl IntoView {
@@ -35,6 +35,8 @@ pub fn Index() -> impl IntoView {
     let (can_select_directories, setCanSelectDirectories) = create_signal(true);
     let (is_update_available, setIsUpdateAvailable) = create_signal(false);
     let (show_error_modal, setShowErrorModal) = create_signal(false);
+    let (show_welcome_modal, setShowWelcomeModal) = create_signal(false);
+    let toasts = expect_context::<Toasts>();
 
     let navigate = use_navigate();
 
@@ -57,6 +59,9 @@ pub fn Index() -> impl IntoView {
                 let config: Config = serde_json::from_str(&config_string).unwrap();
                 // We set the flag to indicate if the file picker can select directories
                 setCanSelectDirectories.set(config.scan_dir);
+                if config.hash_count <= 0 {
+                    setShowWelcomeModal.set(true);
+                }
             }
             Err(e) => {
                 error!("Error loading config: {:?}", e);
@@ -87,9 +92,29 @@ pub fn Index() -> impl IntoView {
                     // Then we create a vector with the names of the USB devices
                     let usb_names: Vec<String> = usb_devices_list.iter().map(|d| d.name.clone()).collect();
                     setUsbDevices.set(usb_names);
+                    toasts.push(
+                        Toast {
+                            id: Uuid::new_v4(),
+                            created_at: time::OffsetDateTime::now_utc(),
+                            variant: ToastVariant::Info,
+                            header: "UI updated".into_view(),
+                            body: "USB drives reloaded".into_view(),
+                            timeout: ToastTimeout::DefaultDelay,
+                        }
+                    );
                 }
                 Err(e) => {
                     error!("Error listing USB devices: {:?}", e);
+                    toasts.push(
+                        Toast {
+                            id: Uuid::new_v4(),
+                            created_at: time::OffsetDateTime::now_utc(),
+                            variant: ToastVariant::Error,
+                            header: "Error listing USB devices".into_view(),
+                            body: format!("Error: {}", e.to_string()).into_view(),
+                            timeout: ToastTimeout::DefaultDelay,
+                        }
+                    );
                 }
             }
             // We also reset the selected target
@@ -102,6 +127,17 @@ pub fn Index() -> impl IntoView {
         let target = scan_target.get();
         if !target.is_empty() {
             navigate(&format!("/loading?target={}", target), Default::default());
+        } else {
+            toasts.push(
+                Toast {
+                    id: Uuid::new_v4(),
+                    created_at: time::OffsetDateTime::now_utc(),
+                    variant: ToastVariant::Warn,
+                    header: "No target selected".into_view(),
+                    body: "Please select something to scan".into_view(),
+                    timeout: ToastTimeout::DefaultDelay,
+                }
+            );
         }
     };
 
@@ -115,6 +151,10 @@ pub fn Index() -> impl IntoView {
                 set_show_modal=setShowErrorModal
                 title=error_title
                 body=error_message
+                />
+            <WelcomeModal
+                show_modal=show_welcome_modal
+                set_show_modal=setShowWelcomeModal
                 />
           <div class="flex justify-center absolute top-0 right-0">
 
