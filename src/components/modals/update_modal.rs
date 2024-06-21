@@ -9,19 +9,23 @@ pub fn UpdateModal(
     title: ReadSignal<String>,
     progress: ReadSignal<f64>,
     show_progress: ReadSignal<bool>,
+    is_error_state: ReadSignal<bool>,
 ) -> impl IntoView {
 
     view! {
-    <Modal show_when=show_modal>
+    <Modal
+        show_when=show_modal
+        on_escape=move || ()
+        on_backdrop_interaction=move || ()
+        >
         <ModalHeader><ModalTitle>{title.get()}</ModalTitle></ModalHeader>
-        <ModalBody>{format!("{}%", if show_progress.get() {progress.get().to_string()} else {"".to_string()})}</ModalBody>
+        <ModalBody>{if show_progress.get() {format!("{}%", progress.get().to_string())} else {"".to_string()}}</ModalBody>
         <ModalFooter>
+        <Show when=move || is_error_state.get()>
             <ButtonWrapper>
-        // TODO: Only show button when an error state occurs
-        // Add constraints to lock the user in the pop-up, not allowing him to leave until completed or error
-        // Add a "STOP" button to stop the process
-                <Button on_press=move |_| set_show_modal.set(false) color=ButtonColor::Secondary>"Cancel"</Button>
+                <Button on_press=move |_| set_show_modal.set(false) color=ButtonColor::Secondary>"Return"</Button>
             </ButtonWrapper>
+        </Show>
         </ModalFooter>
     </Modal>
     }

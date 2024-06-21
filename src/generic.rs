@@ -42,6 +42,11 @@ pub struct SettingsArgs {
     pub contents: String
 }
 
+#[derive(Serialize, Deserialize)]
+pub struct ScannerArgs {
+    pub path: String,
+}
+
 // A function to convert a big integer to a date string in the format of "DD-MM-YYYY HH:MM:SS"
 pub fn int_to_date_string(date_int: i64) -> String {
     let date_time = DateTime::from_timestamp(date_int, 0);

@@ -6,16 +6,11 @@ use tauri_wasm::api::event::listen;
 use tauri_wasm::api::core::invoke;
 use tauri_wasm::Error;
 use futures_util::StreamExt;
-use serde::{Deserialize, Serialize};
+use crate::generic::ScannerArgs;
 
 // TODO:
 // - Styling
 // - If possible, add a "STOP" button to stop the scanning process
-
-#[derive(Serialize, Deserialize)]
-struct ScannerArgs {
-    path: String,
-}
 
 #[component]
 pub fn Loading() -> impl IntoView {
