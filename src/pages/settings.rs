@@ -19,7 +19,6 @@ use crate::i18n::use_i18n;
 
 // TODO:
 // - Styling
-// - Add Update
 
 #[component]
 pub fn Settings() -> impl IntoView {
@@ -31,7 +30,7 @@ pub fn Settings() -> impl IntoView {
     let (hash_count, setHashCount) = create_signal(0);
     let (updated_date, setUpdatedDate) = create_signal(String::new());
     let navigate = use_navigate();
-    let formatted_updated_date = int_to_date_string(updated_date.get().parse::<i64>().unwrap_or_default());
+    let formatted_updated_date = int_to_date_string((move || updated_date.get().parse::<i64>().unwrap_or_default())());
 
     spawn_local(async move {
         let config: Result<String, Error> = invoke("load_config_fe", &String::new()).await;
@@ -93,7 +92,7 @@ pub fn Settings() -> impl IntoView {
                 title=t!(i18n, update_db)().to_string()
                 short_description=t!(i18n, update_db_val)().to_string()
                 short_description_2=format!("{}: {} | {}: {}",
-                        t!(i18n, update_db_1)(), hash_count.get(),
+                        t!(i18n, update_db_1)(), (move || hash_count.get())(),
                         t!(i18n, update_db_2)(), formatted_updated_date)
                 icon=icondata::IoCloudDownload
             />
