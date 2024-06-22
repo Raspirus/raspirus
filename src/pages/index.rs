@@ -1,11 +1,6 @@
-use leptonic::components::button::{Button, LinkButton};
-use leptonic::components::icon::Icon;
-use leptonic::components::link::Link;
-use leptonic::components::prelude::{Toast, Toasts, ToastTimeout, ToastVariant};
-use leptonic::components::select::Select;
+use leptonic::{components::prelude::*, prelude::*};
 use leptos::*;
 use leptos::logging::{log, error};
-use leptonic::prelude::*;
 use tauri_wasm::api::core::invoke;
 use tauri_wasm::Error;
 use crate::i18n::use_i18n;
@@ -169,7 +164,8 @@ pub fn Index() -> impl IntoView {
                   </LinkButton>
             </Show>
 
-            <LinkButton href="/settings" class="px-6 py-2 border-2 m-2 border-maingreen
+            <LinkButton href="/settings" variant=ButtonVariant::Outlined
+            class="px-6 py-2 border-2 m-2 border-maingreen
             text-maingreen bg-white font-medium text-xs leading-tight uppercase rounded">
               <Icon
                 icon=icondata::OcGearLg
@@ -207,12 +203,13 @@ pub fn Index() -> impl IntoView {
                 </Button>
               </div>
               <div class="mt-2">
-                <LinkButton href="/information" class="mr-2 inline-block px-7 py-3 border-2
+                <LinkButton href="/information" variant=ButtonVariant::Outlined color=ButtonColor::Secondary
+                class="mr-2 inline-block px-7 py-3 border-2
                 border-maingreen text-maingreen bg-white font-medium text-sm uppercase rounded"
                 >
                   {t!(i18n, info)}
                 </LinkButton>
-                <Button on_press=move |_| navigate_to_loading()
+                <Button on_press=move |_| navigate_to_loading() color=ButtonColor::Primary
                   class="ml-2 inline-block px-7 py-3 bg-mainred text-white font-medium text-sm uppercase rounded shadow-md"
                 >
                   {t!(i18n, start)}
