@@ -37,6 +37,8 @@ pub fn LanguageSwitch() -> impl IntoView {
         i18n.set_locale(locale);
     };
 
+    // TODO: When changing the locale, the page should be reloaded because the translations
+    // icons are not updated
 
     view! {
         <div class="absolute top-0 left-0 m-2">

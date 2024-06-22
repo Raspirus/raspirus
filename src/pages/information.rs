@@ -1,4 +1,4 @@
-use leptonic::prelude::icondata;
+use leptonic::{components::prelude::*, prelude::*};
 use leptos::*;
 use crate::i18n::use_i18n;
 use leptos_i18n::t;
