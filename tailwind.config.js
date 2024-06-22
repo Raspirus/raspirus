@@ -2,7 +2,7 @@
 module.exports = {
   mode: "jit",
   content: {
-    files: ["*.html", "./src/**/*.rs", "./input.css"],
+    files: ["index.html", "./src/**/*.rs"],
   },
   darkMode: "class", // 'media' or 'class'
   theme: {
