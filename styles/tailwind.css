@@ -16,6 +16,7 @@ html {
     width: 100%;
 }
 
+/* Makes the language flags circular */
 .fiCircle {
     width: 24px !important;
     height: 24px !important;
@@ -26,16 +27,12 @@ html {
     background: white;
 }
 
-/* Provided by: https://gedkirkham.dev/blog/post/loading-icon-button-tutorial.html */
-@keyframes rotate {
-    from {transform: rotate(0deg)}
-    to {transform: rotate(360deg)}
+/* Overwriting the Leptos Modal alignment */
+leptonic-modal-footer {
+    justify-content: flex-start !important;
 }
 
-.refreshStart {
-    animation-name: rotate;
-    animation-duration: 1s;
-    animation-iteration-count: infinite;
-    animation-timing-function: linear;
-    animation-play-state: running;
+/* Overwriting Leptonic Selector width */
+.leptonic-select-wrapper {
+    width: 100%;
 }

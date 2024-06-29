@@ -7,6 +7,7 @@ use crate::i18n::{Locale, use_i18n};
 #[component]
 pub fn LanguageSwitch() -> impl IntoView {
     let i18n = use_i18n();
+    let (current_selected_locale, setCurrentSelectedLocale) = create_signal(String::new());
     // We need to get the current locale from the i18n context as a string
     let current_locale = i18n.get_locale();
     let current_locale_string = match {
@@ -16,7 +17,7 @@ pub fn LanguageSwitch() -> impl IntoView {
         Locale::de => "DE".to_string(),
         Locale::it => "IT".to_string(),
     };
-    let (current_locale_string, _) = create_signal(current_locale_string);
+    setCurrentSelectedLocale.set(current_locale_string);
     // We want to create a vector of locales that are available in the i18n context
     // but the i18n context does not provide a method to get all available locales
     // it only provides an enum that represents the available locales,
@@ -35,10 +36,8 @@ pub fn LanguageSwitch() -> impl IntoView {
             _ => Locale::en,
         };
         i18n.set_locale(locale);
+        setCurrentSelectedLocale.set(v);
     };
-
-    // TODO: When changing the locale, the page should be reloaded because the translations
-    // icons are not updated
 
     view! {
         <div class="absolute top-0 left-0 m-2">
@@ -49,7 +48,7 @@ pub fn LanguageSwitch() -> impl IntoView {
                 render_option=move |o| view! {
                     <FlagIcon country_code={o} />
                 }
-                selected=current_locale_string
+                selected=current_selected_locale
                 set_selected=move |v| set_locale(v)
             />
         </div>

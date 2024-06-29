@@ -1,5 +1,6 @@
 use leptonic::components::button::LinkButton;
 use leptonic::components::icon::Icon;
+use leptonic::components::prelude::ButtonColor;
 use leptonic::prelude::icondata;
 use leptos::*;
 
@@ -24,7 +25,7 @@ pub fn SettingsUpdateCard(
                         <p class="text-sm text-gray-600 leading-none mt-1">{short_description_2}</p>
                     </div>
                 </div>
-                <LinkButton href="/update">"Update"</LinkButton>
+                <LinkButton href="/update" color=ButtonColor::Info>"Update"</LinkButton>
             </div>
         </div>
     }
