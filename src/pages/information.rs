@@ -15,7 +15,7 @@ pub fn Information() -> impl IntoView {
     let appVersion = env!("CARGO_PKG_VERSION");
 
     view! {
-        <div>
+        <div class="pb-4">
             <div class="align-middle">
                 <HomeButton />
                 <h1 class="inline-block align-middle p-2 font-medium leading-tight text-5xl mt-0 mb-2 text-mainred">

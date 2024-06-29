@@ -24,7 +24,7 @@ pub fn Index() -> impl IntoView {
     let error = use_query_map().get_untracked().get("error").cloned();
     let (error_title, setErrorTitle) = create_signal(String::new());
     let (error_message, setErrorMessage) = create_signal(String::new());
-    let (scan_target, setScanTarget) = create_signal(String::new());
+    let (scan_target, setScanTarget) = create_signal(Option::<String>::None);
     let (usb_devices, setUsbDevices) = create_signal(Vec::<String>::new());
     // Flag to indicate if the file picker can select files or directories
     let (can_select_directories, setCanSelectDirectories) = create_signal(true);
@@ -113,15 +113,15 @@ pub fn Index() -> impl IntoView {
                 }
             }
             // We also reset the selected target
-            setScanTarget.set(String::new());
+            setScanTarget.set(Option::None);
         });
     };
 
     // A function that programmatically navigates to the loading page if the selected target is not empty
     let navigate_to_loading = move || {
         let target = scan_target.get();
-        if !target.is_empty() {
-            navigate(&format!("/loading?target={}", target), Default::default());
+        if target.is_some() && !target.clone().unwrap_or_default().is_empty() {
+            navigate(&format!("/loading?target={}", target.unwrap_or_default()), Default::default());
         } else {
             toasts.push(
                 Toast {
@@ -154,22 +154,22 @@ pub fn Index() -> impl IntoView {
           <div class="flex justify-center absolute top-0 right-0">
 
             <Show when=move || {is_update_available.get()}>
-                <LinkButton href="/settings" class="px-2 py-2 border-2 m-2 border-mainred
-                  text-white bg-mainred font-medium text-xs leading-tight uppercase rounded">
+                <LinkButton href="/settings" class="px-2 py-2 border-2 m-2
+                  font-medium text-sm leading-tight uppercase rounded">
                     <Icon
                       icon=icondata::FaWrenchSolid
                       class="pr-1"
+                      style="font-size: 1.25rem;"
                     />
                     {t!(i18n, db_update_notif)}
                   </LinkButton>
             </Show>
 
             <LinkButton href="/settings" variant=ButtonVariant::Outlined
-            class="px-6 py-2 border-2 m-2 border-maingreen
-            text-maingreen bg-white font-medium text-xs leading-tight uppercase rounded">
+            class="px-6 py-2 border-2 m-2 font-medium text-sm leading-tight uppercase rounded">
               <Icon
                 icon=icondata::OcGearLg
-                class="pr-1"
+                style="font-size: 1.25rem;"
               />
               {t!(i18n, settings)}
             </LinkButton>
@@ -184,12 +184,13 @@ pub fn Index() -> impl IntoView {
               </h1>
 
               <div class="flex justify-center">
-                <Select
+                <OptionalSelect
                         options=usb_devices
                         search_text_provider=move |o| format!("{o}")
                         render_option=move |o| format!("{o:?}")
                         selected=scan_target
                         set_selected=move |v| setScanTarget.set(v)
+                        allow_deselect=true
                     />
 
                 <DirectoryPickerButton
@@ -197,13 +198,14 @@ pub fn Index() -> impl IntoView {
                     can_select_directories=can_select_directories />
 
                 <Button on_press=move |_| update_usb_devices()
+                    color=ButtonColor::Info
                   class="inline-block p-3 ml-1 bg-maingreen rounded shadow-md"
                 >
                     <Icon icon=icondata::TbReload class="h-full w-4" />
                 </Button>
               </div>
               <div class="mt-2">
-                <LinkButton href="/information" variant=ButtonVariant::Outlined color=ButtonColor::Secondary
+                <LinkButton href="/information" variant=ButtonVariant::Outlined
                 class="mr-2 inline-block px-7 py-3 border-2
                 border-maingreen text-maingreen bg-white font-medium text-sm uppercase rounded"
                 >
@@ -215,7 +217,7 @@ pub fn Index() -> impl IntoView {
                   {t!(i18n, start)}
                 </Button>
               </div>
-        <p>"By using this app, you accept our " <Link href="/agreement">"Terms and Conditions."</Link></p>
+                <p class="mt-5">"By using this app, you accept our " <Link href="/agreement">"Terms and Conditions."</Link></p>
             </div>
           </div>
         </div>

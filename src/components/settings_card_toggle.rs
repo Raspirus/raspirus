@@ -3,6 +3,9 @@ use leptonic::components::toggle::Toggle;
 use leptonic::prelude::icondata;
 use leptos::*;
 
+// format!("flex-no-shrink px-5 ml-4 py-2 text-sm shadow-sm font-medium border-2 text-white rounded-full {}", button_class)
+
+
 #[component]
 pub fn SettingsToggleCard(
     title: String,
@@ -12,11 +15,6 @@ pub fn SettingsToggleCard(
     is_on: ReadSignal<bool>,
     toggle_function: WriteSignal<bool>,
 ) -> impl IntoView {
-    let button_class = if is_on.get() {
-        "bg-green-500 border-green-500"
-    } else {
-        "bg-red-500 border-red-500"
-    };
 
     view! {
         <div class="flex flex-col m-6 p-2 bg-white rounded-2xl shadow-md">
@@ -40,7 +38,7 @@ pub fn SettingsToggleCard(
                         }}
                     </div>
                 </div>
-                <Toggle class=format!("flex-no-shrink px-5 ml-4 py-2 text-sm shadow-sm font-medium border-2 text-white rounded-full {}", button_class)
+                <Toggle class="flex-no-shrink ml-4 py-2"
                     state=is_on set_state=toggle_function />
             </div>
         </div>
