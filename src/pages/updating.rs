@@ -70,6 +70,7 @@ pub fn Updating() -> impl IntoView {
             setStatus.set("Error".to_string());
             setShowProgress.set(false);
             setErrorState.set(true);
+            setCompletedState.set(true);
         }
     });
 /*
