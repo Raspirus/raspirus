@@ -7,6 +7,8 @@ use tauri_wasm::api::core::invoke;
 use tauri_wasm::Error;
 use futures_util::StreamExt;
 use crate::generic::ScannerArgs;
+use crate::i18n::use_i18n;
+use leptos_i18n::t;
 
 // TODO:
 // - Styling
@@ -17,6 +19,7 @@ pub fn Loading() -> impl IntoView {
     let (progress, set_progress) = create_signal(Some(0.0));
     let target = use_query_map().get_untracked().get("target").cloned();
     let navigate = use_navigate();
+    let i18n = use_i18n();
     log!("Target: {:?}", target);
 
     spawn_local(async move {
@@ -66,9 +69,19 @@ pub fn Loading() -> impl IntoView {
 
 
     view! {
-        <div>
-            <h1>{"Loading Page"}</h1>
-            <ProgressBar progress=progress/>
+        <div class="h-screen">
+            <div class="flex h-full justify-center p-6 text-center">
+                <div class="w-full flex justify-center items-center h-full">
+                    <div class="w-full">
+                        <h1 class="inline-block align-middle p-2 font-medium leading-tight text-5xl mt-0 mb-2 text-mainred">
+                            {t!(i18n, loading_title)}
+                        </h1>
+                        <div class="flex justify-center">
+                            <ProgressBar progress=progress/>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     }
 }

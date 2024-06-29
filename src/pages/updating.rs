@@ -1,19 +1,18 @@
 use futures_util::StreamExt;
-use leptonic::components::skeleton::Skeleton;
-use leptonic::components::stack::Stack;
-use leptonic::Size;
+use leptonic::components::prelude::ProgressBar;
 use leptos::*;
 use leptos::leptos_dom::log;
 use tauri_wasm::api::core::invoke;
 use tauri_wasm::api::event::listen;
 use tauri_wasm::Error;
+use crate::components::home_button::HomeButton;
 use crate::i18n::{t, use_i18n};
 
 #[component]
 pub fn Updating() -> impl IntoView {
     let (error_state, setErrorState) = create_signal(false);
     let (completed_state, setCompletedState) = create_signal(false);
-    let (progress, setProgress) = create_signal(0.0);
+    let (progress, setProgress) = create_signal(Some(0.0));
     let (show_progress, setShowProgress) = create_signal(false);
     let (status, setStatus) = create_signal("".to_string());
     let i18n = use_i18n();
@@ -48,7 +47,7 @@ pub fn Updating() -> impl IntoView {
             log!("Download event received with payload: {}", event.payload);
             setStatus.set(t!(i18n, db_update_stage_download)().to_string());
             setShowProgress.set(true);
-            setProgress.set(event.payload.parse::<f64>().unwrap_or(0.0));
+            setProgress.set(Option::from(event.payload.parse::<f64>().unwrap_or(0.0)));
         }
     });
 
@@ -59,7 +58,7 @@ pub fn Updating() -> impl IntoView {
             log!("Install event received with payload: {}", event.payload);
             setStatus.set(t!(i18n, db_update_stage_install)().to_string());
             setShowProgress.set(true);
-            setProgress.set(event.payload.parse::<f64>().unwrap_or(0.0));
+            setProgress.set(Option::from(event.payload.parse::<f64>().unwrap_or(0.0)));
         }
     });
 
@@ -73,32 +72,41 @@ pub fn Updating() -> impl IntoView {
             setErrorState.set(true);
         }
     });
-
-    let handle_button_click = move || {
-        log!("Button clicked!");
-
-        spawn_local(async move {
-            let return_value: Result<String, Error> = invoke("update_database", &String::new()).await;
-            match return_value {
-                Ok(_) => {
-                    log!("Database update successful");
-                    setCompletedState.set(true);
-                }
-                Err(e) => {
-                    log!("Database update failed: {:?}", e);
-                    setErrorState.set(true);
-                }
+/*
+    spawn_local(async move {
+        let return_value: Result<String, Error> = invoke("update_database", &String::new()).await;
+        match return_value {
+            Ok(_) => {
+                log!("Database update successful");
+                setCompletedState.set(true);
             }
-        })
-
-    };
-
+            Err(e) => {
+                log!("Database update failed: {:?}", e);
+                setErrorState.set(true);
+            }
+        }
+    });
+*/
 
     view! {
-        <Stack spacing=Size::Em(0.6)>
-            <Skeleton animated=false>"Item 1"</Skeleton>
-            <Skeleton animated=false>"Item 2"</Skeleton>
-            <Skeleton animated=false>"Item 3"</Skeleton>
-        </Stack>
+        <div class="h-screen">
+            <div class="flex h-full justify-center p-6 text-center">
+                <div class="w-full flex justify-center items-center h-full">
+                    <div class="w-full">
+                        <h1 class="inline-block align-middle p-2 font-medium leading-tight text-5xl mt-0 mb-2 text-mainred">
+                            {move || status.get()}
+                        </h1>
+                        <div class="flex justify-center">
+                            <ProgressBar progress=progress/>
+                        </div>
+                            <Show when=move || completed_state.get()>
+                                <div class="pt-6">
+                                    <HomeButton />
+                                </div>
+                            </Show>
+                    </div>
+                </div>
+            </div>
+        </div>
     }
 }
