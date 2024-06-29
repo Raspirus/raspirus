@@ -11,12 +11,11 @@ use crate::components::{
     directory_picker_button::DirectoryPickerButton,
     language_switch::LanguageSwitch,
 };
-use crate::components::modals::error_modal::ErrorModal;
-use crate::components::modals::welcome_modal::WelcomeModal;
+use crate::components::modals::{
+    error_modal::ErrorModal,
+    welcome_modal::WelcomeModal,
+};
 use crate::generic::{Config, UsbDevice};
-
-// TODO:
-// - Styling
 
 #[component]
 pub fn Index() -> impl IntoView {
