@@ -1,5 +1,6 @@
 use leptonic::components::button::Button;
 use leptonic::components::icon::Icon;
+use leptonic::components::prelude::ButtonColor;
 use leptonic::prelude::icondata;
 use leptos::*;
 use leptos::logging::log;
@@ -43,7 +44,7 @@ pub fn SettingsInputCard(
                         <p class="text-sm text-gray-600 leading-none mt-1">{short_description_2}</p>
                     </div>
                 </div>
-                <Button on_press=move |_| handle_button_click()> "Change" </Button>
+                <Button on_press=move |_| handle_button_click() color=ButtonColor::Info> "Change" </Button>
             </div>
         </div>
     }

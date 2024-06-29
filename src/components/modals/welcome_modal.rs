@@ -13,12 +13,18 @@ pub fn WelcomeModal(
 
     view! {
         <Modal show_when=show_modal>
-            <ModalHeader><ModalTitle>{t!(i18n, welcome_title)}</ModalTitle></ModalHeader>
-            <ModalBody>{t!(i18n, welcome_text)}</ModalBody>
+            <ModalHeader>
+                <ModalTitle>{t!(i18n, welcome_title)}</ModalTitle>
+            </ModalHeader>
+            <ModalBody>
+                <p>{t!(i18n, welcome_text)}</p>
+            </ModalBody>
             <ModalFooter>
-                <p>{t!(i18n, welcome_footer)}</p>
+                <p class="pr-2">{t!(i18n, welcome_footer)}</p>
                 <ButtonWrapper>
-                    <Button on_press=move |_| set_show_modal.set(false) color=ButtonColor::Primary>"Hello!"</Button>
+                    <Button on_press=move |_| set_show_modal.set(false) color=ButtonColor::Primary>
+                        "Ok!"
+                    </Button>
                 </ButtonWrapper>
             </ModalFooter>
         </Modal>

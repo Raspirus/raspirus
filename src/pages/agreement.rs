@@ -18,7 +18,7 @@ pub fn Agreement() -> impl IntoView {
                     {t!(i18n, permissions_title)}
                 </h1>
             </div>
-                <p class="text-justify text-lg p-4">
+                <p class="text-justify text-lg px-16 pb-4">
                     {t!(i18n, permissions_text)}
                 </p>
         </div>

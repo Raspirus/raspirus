@@ -1,6 +1,6 @@
 use leptonic::components::button::Button;
 use leptonic::components::icon::Icon;
-use leptonic::components::prelude::{Toast, Toasts, ToastTimeout, ToastVariant};
+use leptonic::components::prelude::{ButtonColor, Toast, Toasts, ToastTimeout, ToastVariant};
 use leptonic::prelude::icondata;
 use leptos::*;
 use leptos::logging::log;
@@ -65,7 +65,7 @@ pub fn SettingsDownloadCard(
                         <p class="text-sm text-gray-600 leading-none mt-1">{short_description}</p>
                     </div>
                 </div>
-                <Button on_press=move |_| handle_button_click()> "Download" </Button>
+                <Button on_press=move |_| handle_button_click() color=ButtonColor::Info> "Download" </Button>
             </div>
         </div>
     }
