@@ -17,8 +17,6 @@ use crate::components::settings_card_update::SettingsUpdateCard;
 use crate::generic::{Config, int_to_date_string, SettingsArgs, SettingsStruct};
 use crate::i18n::use_i18n;
 
-// TODO:
-// - Styling
 
 #[component]
 pub fn Settings() -> impl IntoView {
