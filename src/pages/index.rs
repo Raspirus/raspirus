@@ -17,6 +17,7 @@ use crate::components::modals::{
 };
 use crate::generic::{Config, UsbDevice};
 
+
 #[component]
 pub fn Index() -> impl IntoView {
     let i18n = use_i18n();
