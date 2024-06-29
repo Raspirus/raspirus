@@ -23,7 +23,7 @@ pub fn Infected() -> impl IntoView {
             <div class="align-middle">
                 <HomeButton />
                 <h1 class="inline-block align-middle p-2 font-medium leading-tight text-5xl mt-0 mb-2 text-mainred">
-                    {t!(i18n, info_title)}
+                    {t!(i18n, infected_title)}
                 </h1>
             </div>
                 <div>

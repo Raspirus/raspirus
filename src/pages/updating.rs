@@ -6,19 +6,24 @@ use tauri_wasm::api::core::invoke;
 use tauri_wasm::api::event::listen;
 use tauri_wasm::Error;
 use crate::components::home_button::HomeButton;
+use crate::components::modals::{
+    error_modal::ErrorModal,
+    success_modal::SuccessModal,
+};
+
 use crate::i18n::{t, use_i18n};
 
 #[component]
 pub fn Updating() -> impl IntoView {
     let (error_state, setErrorState) = create_signal(false);
     let (completed_state, setCompletedState) = create_signal(false);
+    let (show_success_modal, setShowSuccessModal) = create_signal(false);
+    let (show_error_modal, setShowErrorModal) = create_signal(false);
     let (progress, setProgress) = create_signal(Some(0.0));
     let (show_progress, setShowProgress) = create_signal(false);
-    let (status, setStatus) = create_signal("".to_string());
+    let (status, setStatus) = create_signal(String::new());
+    let (error_message, setErrorMessage) = create_signal(String::new());
     let i18n = use_i18n();
-
-    // TODO: It seems like the progress listeners are working, but the modal is not updating
-    // In fact it seems like its displayed completely empty
 
     // Progress listener for the Check state
     spawn_local(async move {
@@ -65,32 +70,50 @@ pub fn Updating() -> impl IntoView {
     // Progress listener for the Error state
     spawn_local(async move {
         let mut progress_event = listen::<String>("err").await.expect("event listen error");
-        while let Some(_) = progress_event.next().await {
-            log!("Error event received");
-            setStatus.set("Error".to_string());
+        while let Some(event) = progress_event.next().await {
+            log!("Error event received: {}", event.payload);
+            setStatus.set(t!(i18n, update_db_failed)().to_string());
+            setErrorMessage.set(event.payload);
             setShowProgress.set(false);
             setErrorState.set(true);
             setCompletedState.set(true);
+            setShowErrorModal.set(true);
         }
     });
-/*
+
     spawn_local(async move {
         let return_value: Result<String, Error> = invoke("update_database", &String::new()).await;
         match return_value {
             Ok(_) => {
                 log!("Database update successful");
                 setCompletedState.set(true);
+                setShowSuccessModal.set(true);
             }
             Err(e) => {
                 log!("Database update failed: {:?}", e);
+                setErrorMessage.set(e.to_string());
                 setErrorState.set(true);
+                setShowErrorModal.set(true);
             }
         }
     });
-*/
+
 
     view! {
         <div class="h-screen">
+            <SuccessModal
+                show_modal=show_success_modal
+                set_show_modal=setShowSuccessModal
+                title=t!(i18n, update_db_completed)().to_string()
+                body=t!(i18n, update_db_completed_val)().to_string()
+            />
+            <ErrorModal
+                show_modal=show_error_modal
+                set_show_modal=setShowErrorModal
+                title=create_signal(t!(i18n, update_db_failed)().to_string()).0
+                body=error_message
+            />
+
             <div class="flex h-full justify-center p-6 text-center">
                 <div class="w-full flex justify-center items-center h-full">
                     <div class="w-full">

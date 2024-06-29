@@ -10,9 +10,6 @@ use crate::generic::ScannerArgs;
 use crate::i18n::use_i18n;
 use leptos_i18n::t;
 
-// TODO:
-// - Styling
-// - If possible, add a "STOP" button to stop the scanning process
 
 #[component]
 pub fn Loading() -> impl IntoView {

@@ -14,6 +14,7 @@ use crate::pages::{
     agreement::Agreement
 };
 
+
 #[component]
 pub fn App() -> impl IntoView {
     provide_i18n_context();
