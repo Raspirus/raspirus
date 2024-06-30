@@ -33,48 +33,41 @@ pub fn SettingsPatchCard(
             let file = FileDialogBuilder::new().pick_file().await;
             log!("Selected file: {:?}", file);
             // Same as with the folder, if the file is ok, we parse the path, else we don't do anything
-            match file {
-                Ok(Some(path)) => {
-                    let path_buffer = path.path;
-                    let path_string = path_buffer.into_os_string().into_string().unwrap_or_default();
-                    log!("Selected file path: {:?}", path_string);
+            if let Ok(Some(path)) = file {
+                let path_string = path.path.into_os_string().into_string().unwrap_or_default();
+                log!("Selected file path: {:?}", path_string);
 
-                    // Here we send the path to the backend
-                    let result: Result<(usize, usize, usize), Error> = invoke("patch_settings", &SettingsPatchArgs{patchfile: path_string}).await;
-                    match result {
-                        Ok(result_tuple) => {
-                            log!("Patch successful");
-                            toasts.push(
-                                Toast {
-                                    id: Uuid::new_v4(),
-                                    created_at: time::OffsetDateTime::now_utc(),
-                                    variant: ToastVariant::Success,
-                                    header: t!(i18n, add_patch_success).into_view(),
-                                    body: format!("{}: {} | {}: {} | {}: {}",
-                                        t!(i18n, add_patch_result_inserted)(), result_tuple.0,
-                                        t!(i18n, add_patch_result_removed)(), result_tuple.1,
-                                        t!(i18n, add_patch_result_skipped)(), result_tuple.2
-                                    ).into_view(),
-                                    timeout: ToastTimeout::DefaultDelay,
-                                }
-                            );
+                // Here we send the path to the backend
+                let result: Result<(usize, usize, usize), Error> = invoke("patch_settings", &SettingsPatchArgs{patchfile: path_string}).await;
+                if let Ok(result_tuple) = result {
+                    log!("Patch successful");
+                    toasts.push(
+                        Toast {
+                            id: Uuid::new_v4(),
+                            created_at: time::OffsetDateTime::now_utc(),
+                            variant: ToastVariant::Success,
+                            header: t!(i18n, add_patch_success).into_view(),
+                            body: format!("{}: {} | {}: {} | {}: {}",
+                                          t!(i18n, add_patch_result_inserted)(), result_tuple.0,
+                                          t!(i18n, add_patch_result_removed)(), result_tuple.1,
+                                          t!(i18n, add_patch_result_skipped)(), result_tuple.2
+                            ).into_view(),
+                            timeout: ToastTimeout::DefaultDelay,
                         }
-                        Err(e) => {
-                            log!("Patch failed: {:?}", e);
-                            toasts.push(
-                                Toast {
-                                    id: Uuid::new_v4(),
-                                    created_at: time::OffsetDateTime::now_utc(),
-                                    variant: ToastVariant::Error,
-                                    header: t!(i18n, add_patch_failed).into_view(),
-                                    body: format!("Error: {:?}", e).into_view(),
-                                    timeout: ToastTimeout::DefaultDelay,
-                                }
-                            );
+                    );
+                } else if let Err(e) = result {
+                    log!("Patch failed: {:?}", e);
+                    toasts.push(
+                        Toast {
+                            id: Uuid::new_v4(),
+                            created_at: time::OffsetDateTime::now_utc(),
+                            variant: ToastVariant::Error,
+                            header: t!(i18n, add_patch_failed).into_view(),
+                            body: format!("Error: {:?}", e).into_view(),
+                            timeout: ToastTimeout::DefaultDelay,
                         }
-                    }
+                    );
                 }
-                _ => {}
             }
         });
     };
