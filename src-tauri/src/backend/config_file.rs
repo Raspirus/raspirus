@@ -2,7 +2,7 @@ use directories_next::ProjectDirs;
 use serde::{Deserialize, Serialize};
 use std::fs::{self, File};
 use std::io::Read;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(default)]
@@ -32,6 +32,7 @@ pub struct Paths {
     pub config: PathBuf,
     pub logs: PathBuf,
     pub cache: PathBuf,
+    pub downloads: PathBuf,
 }
 
 /// Struct for which fields the frontend has access to
@@ -73,6 +74,8 @@ impl Config {
     /// Finds the suitable path for the current system, creates a subfolder for the app and returns
     /// the path as a normal String
     fn set_paths(&mut self) -> Result<(), String> {
+        let downloads = dirs::download_dir().unwrap_or(Path::new(".").to_path_buf());
+
         #[cfg(any(target_os = "linux", target_os = "macos"))]
         let dirs = ProjectDirs::from("com", "Raspirus", "Raspirus")
             .ok_or("Failed to get projectdir".to_owned())?;
@@ -110,6 +113,7 @@ impl Config {
             config,
             logs,
             cache,
+            downloads,
         });
         Ok(())
     }
