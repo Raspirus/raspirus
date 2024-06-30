@@ -32,7 +32,7 @@ pub fn Updating() -> impl IntoView {
     spawn_local(async move {
         let mut progress_event = listen::<String>("chck")
             .await.expect("event listen error");
-        while let Some(_) = progress_event.next().await {
+        while progress_event.next().await.is_some() {
             log!("Check event received");
             setShowProgress.set(false);
             setStatus.set(t!(i18n, db_update_stage_check)().to_string());
@@ -43,7 +43,7 @@ pub fn Updating() -> impl IntoView {
     spawn_local(async move {
         let mut progress_event = listen::<String>("idx")
             .await.expect("event listen error");
-        while let Some(_) = progress_event.next().await {
+        while progress_event.next().await.is_some() {
             log!("Index event received");
             setShowProgress.set(false);
             setStatus.set(t!(i18n, db_update_stage_index)().to_string());

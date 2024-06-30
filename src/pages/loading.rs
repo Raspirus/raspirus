@@ -54,7 +54,7 @@ pub fn Loading() -> impl IntoView {
         match &result {
             Ok(result) => {
                 log!("Result: {}", result);
-                let infected_files: Vec<String> = serde_json::from_str(&result).unwrap();
+                let infected_files: Vec<String> = serde_json::from_str(result).unwrap();
                 let count = infected_files.len();
                 log!("Infected files: {:?}", count);
                 if count > 0 {
@@ -65,7 +65,7 @@ pub fn Loading() -> impl IntoView {
             }
             Err(e) => {
                 log!("Error: {:?}", e);
-                navigate(&format!("?error={}", e.to_string()), Default::default());
+                navigate(&format!("?error={:?}", e), Default::default());
             }
         }
     });
