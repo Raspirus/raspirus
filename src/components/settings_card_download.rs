@@ -43,7 +43,7 @@ pub fn SettingsDownloadCard(
                             id: Uuid::new_v4(),
                             created_at: time::OffsetDateTime::now_utc(),
                             variant: ToastVariant::Error,
-                            header: "Download failed".into_view(),
+                            header: t!(i18n, logs_download_failed).into_view(),
                             body: format!("Error: {}", e.to_string()).into_view(),
                             timeout: ToastTimeout::DefaultDelay,
                         }
@@ -65,7 +65,7 @@ pub fn SettingsDownloadCard(
                         <p class="text-sm text-gray-600 leading-none mt-1">{short_description}</p>
                     </div>
                 </div>
-                <Button on_press=move |_| handle_button_click() color=ButtonColor::Info> "Download" </Button>
+                <Button on_press=move |_| handle_button_click() color=ButtonColor::Info> {t!(i18n, download_logs_action)} </Button>
             </div>
         </div>
     }

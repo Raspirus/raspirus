@@ -1,4 +1,4 @@
-use leptonic::{components::prelude::*, prelude::*};
+use leptonic::prelude::*;
 use leptos::*;
 use crate::i18n::use_i18n;
 use leptos_i18n::t;
@@ -30,7 +30,7 @@ pub fn Information() -> impl IntoView {
 
             <InfoCard
                 title=t!(i18n, app_name)().to_string()
-                value=t!(i18n, title)().to_string()
+                value=t!(i18n, app_title)().to_string()
                 icon=icondata::TbHexagonLetterR
             />
         <InfoCard
@@ -40,7 +40,7 @@ pub fn Information() -> impl IntoView {
             />
             <InfoCard
                 title=t!(i18n, maintainers)().to_string()
-                value=t!(i18n, maintainers_val)().to_string()
+                value="Demetz Benjamin, Hell Björn Felix".to_string()
                 icon=icondata::AiUserOutlined
             />
             <InfoCard
@@ -55,7 +55,7 @@ pub fn Information() -> impl IntoView {
             />
 
             <InfoCard
-                title="Website".to_string()
+                title=t!(i18n, website)().to_string()
                 value="https://raspirus.deno.dev".to_string()
                 icon=icondata::TbGlobe
             />

@@ -7,18 +7,18 @@ use leptonic::components::button::{Button, ButtonColor, ButtonWrapper};
 pub fn SuccessModal (
     show_modal: ReadSignal<bool>,
     set_show_modal: WriteSignal<bool>,
-    title: String,
-    body: String
+    title: ReadSignal<String>,
+    body: ReadSignal<String>
 ) -> impl IntoView {
 
     view! {
         <Modal show_when=show_modal>
             <Alert variant=AlertVariant::Success>
-                    <AlertTitle slot>|| move title</AlertTitle>
-                    <AlertContent slot>|| move body</AlertContent>
+                    <AlertTitle slot>{move || title.get()}</AlertTitle>
+                    <AlertContent slot>{move || body.get()}</AlertContent>
                 </Alert>
             <ButtonWrapper>
-                <Button on_press=move |_| set_show_modal.set(false) color=ButtonColor::Secondary>"Ok"</Button>
+                <Button on_press=move |_| set_show_modal.set(false) color=ButtonColor::Danger>"Ok"</Button>
             </ButtonWrapper>
         </Modal>
     }

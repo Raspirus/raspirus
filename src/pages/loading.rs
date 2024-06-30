@@ -20,7 +20,8 @@ pub fn Loading() -> impl IntoView {
     log!("Target: {:?}", target);
 
     spawn_local(async move {
-        let mut progress_event = listen::<String>("progress").await.expect("event listen error");
+        let mut progress_event = listen::<String>("progress")
+            .await.expect("event listen error");
         while let Some(event) = progress_event.next().await {
             let payload : String = event.payload;
             let message = format!("payload: {}", payload);
@@ -32,7 +33,8 @@ pub fn Loading() -> impl IntoView {
     });
 
     spawn_local(async move {
-        let mut error_event = listen::<String>("progerror").await.expect("event listen error");
+        let mut error_event = listen::<String>("progerror")
+            .await.expect("event listen error");
         while let Some(event) = error_event.next().await {
             let payload : String = event.payload;
             let message = format!("payload: {}", payload);
@@ -71,7 +73,7 @@ pub fn Loading() -> impl IntoView {
                 <div class="w-full flex justify-center items-center h-full">
                     <div class="w-full">
                         <h1 class="inline-block align-middle p-2 font-medium leading-tight text-5xl mt-0 mb-2 text-mainred">
-                            {t!(i18n, loading_title)}
+                            {t!(i18n, loading_text)}
                         </h1>
                         <div class="flex justify-center">
                             <ProgressBar progress=progress/>

@@ -1,10 +1,8 @@
 # Same syntax as .gitignore
 # Ignores files from being counted with tokei line counter
 
-package.json
-package-lock.json
-
 Cargo.lock
 Cargo.toml
 src-tauri/Cargo.toml
 src-tauri/Cargo.lock
+dist/

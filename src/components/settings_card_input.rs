@@ -5,6 +5,8 @@ use leptonic::prelude::icondata;
 use leptos::*;
 use leptos::logging::log;
 use tauri_wasm::plugin::dialog::FileDialogBuilder;
+use crate::i18n::use_i18n;
+use leptos_i18n::t;
 
 #[component]
 pub fn SettingsInputCard(
@@ -14,6 +16,7 @@ pub fn SettingsInputCard(
     icon: icondata::Icon,
     set_value: WriteSignal<String>,
 ) -> impl IntoView {
+    let i18n = use_i18n();
 
     let handle_button_click = move || {
         spawn_local(async move {
@@ -44,7 +47,7 @@ pub fn SettingsInputCard(
                         <p class="text-sm text-gray-600 leading-none mt-1">{short_description_2}</p>
                     </div>
                 </div>
-                <Button on_press=move |_| handle_button_click() color=ButtonColor::Info> "Change" </Button>
+                <Button on_press=move |_| handle_button_click() color=ButtonColor::Info>{t!(i18n, custom_db_action)}</Button>
             </div>
         </div>
     }
