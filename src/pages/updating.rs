@@ -15,7 +15,6 @@ use crate::i18n::{t, use_i18n};
 
 #[component]
 pub fn Updating() -> impl IntoView {
-    let (error_state, setErrorState) = create_signal(false);
     let (completed_state, setCompletedState) = create_signal(false);
     let (show_success_modal, setShowSuccessModal) = create_signal(false);
     let (show_error_modal, setShowErrorModal) = create_signal(false);
@@ -27,7 +26,8 @@ pub fn Updating() -> impl IntoView {
 
     // Progress listener for the Check state
     spawn_local(async move {
-        let mut progress_event = listen::<String>("chck").await.expect("event listen error");
+        let mut progress_event = listen::<String>("chck")
+            .await.expect("event listen error");
         while let Some(_) = progress_event.next().await {
             log!("Check event received");
             setShowProgress.set(false);
@@ -37,7 +37,8 @@ pub fn Updating() -> impl IntoView {
 
     // Progress listener for the Index state
     spawn_local(async move {
-        let mut progress_event = listen::<String>("idx").await.expect("event listen error");
+        let mut progress_event = listen::<String>("idx")
+            .await.expect("event listen error");
         while let Some(_) = progress_event.next().await {
             log!("Index event received");
             setShowProgress.set(false);
@@ -47,7 +48,8 @@ pub fn Updating() -> impl IntoView {
 
     // Progress listener for the Download state
     spawn_local(async move {
-        let mut progress_event = listen::<String>("dwld").await.expect("event listen error");
+        let mut progress_event = listen::<String>("dwld")
+            .await.expect("event listen error");
         while let Some(event) = progress_event.next().await {
             log!("Download event received with payload: {}", event.payload);
             setStatus.set(t!(i18n, db_update_stage_download)().to_string());
@@ -58,7 +60,8 @@ pub fn Updating() -> impl IntoView {
 
     // Progress listener for the Install state
     spawn_local(async move {
-        let mut progress_event = listen::<String>("ins").await.expect("event listen error");
+        let mut progress_event = listen::<String>("ins")
+            .await.expect("event listen error");
         while let Some(event) = progress_event.next().await {
             log!("Install event received with payload: {}", event.payload);
             setStatus.set(t!(i18n, db_update_stage_install)().to_string());
@@ -69,13 +72,13 @@ pub fn Updating() -> impl IntoView {
 
     // Progress listener for the Error state
     spawn_local(async move {
-        let mut progress_event = listen::<String>("err").await.expect("event listen error");
+        let mut progress_event = listen::<String>("err")
+            .await.expect("event listen error");
         while let Some(event) = progress_event.next().await {
             log!("Error event received: {}", event.payload);
             setStatus.set(t!(i18n, update_db_failed)().to_string());
             setErrorMessage.set(event.payload);
             setShowProgress.set(false);
-            setErrorState.set(true);
             setCompletedState.set(true);
             setShowErrorModal.set(true);
         }
@@ -92,7 +95,6 @@ pub fn Updating() -> impl IntoView {
             Err(e) => {
                 log!("Database update failed: {:?}", e);
                 setErrorMessage.set(e.to_string());
-                setErrorState.set(true);
                 setShowErrorModal.set(true);
             }
         }
@@ -104,8 +106,8 @@ pub fn Updating() -> impl IntoView {
             <SuccessModal
                 show_modal=show_success_modal
                 set_show_modal=setShowSuccessModal
-                title=t!(i18n, update_db_completed)().to_string()
-                body=t!(i18n, update_db_completed_val)().to_string()
+                title=create_signal(t!(i18n, update_db_completed)().to_string()).0
+                body=create_signal(t!(i18n, update_db_completed_val)().to_string()).0
             />
             <ErrorModal
                 show_modal=show_error_modal
@@ -120,14 +122,17 @@ pub fn Updating() -> impl IntoView {
                         <h1 class="inline-block align-middle p-2 font-medium leading-tight text-5xl mt-0 mb-2 text-mainred">
                             {move || status.get()}
                         </h1>
-                        <div class="flex justify-center">
-                            <ProgressBar progress=progress/>
-                        </div>
-                            <Show when=move || completed_state.get()>
-                                <div class="pt-6">
-                                    <HomeButton />
-                                </div>
-                            </Show>
+                        <Show when=move || show_progress.get()>
+                            <div class="flex justify-center">
+                                <ProgressBar progress=progress/>
+                            </div>
+                        </Show>
+
+                        <Show when=move || completed_state.get()>
+                            <div class="pt-6">
+                                <HomeButton />
+                            </div>
+                        </Show>
                     </div>
                 </div>
             </div>

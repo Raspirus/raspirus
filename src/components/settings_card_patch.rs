@@ -10,6 +10,8 @@ use tauri_wasm::Error;
 use crate::generic::SettingsPatchArgs;
 use tauri_wasm::plugin::dialog::FileDialogBuilder;
 use uuid::Uuid;
+use crate::i18n::use_i18n;
+use leptos_i18n::t;
 
 #[component]
 pub fn SettingsPatchCard(
@@ -18,6 +20,7 @@ pub fn SettingsPatchCard(
     short_description_2: String,
     icon: icondata::Icon,
 ) -> impl IntoView {
+    let i18n = use_i18n();
     let toasts = expect_context::<Toasts>();
 
     let handle_button_click = move || {
@@ -41,9 +44,12 @@ pub fn SettingsPatchCard(
                                     id: Uuid::new_v4(),
                                     created_at: time::OffsetDateTime::now_utc(),
                                     variant: ToastVariant::Success,
-                                    header: "Patch successful".into_view(),
-                                    body: format!("Inserted: {} | Removed: {} | Skipped: {}",
-                                                  result_tuple.0, result_tuple.1, result_tuple.2).into_view(),
+                                    header: t!(i18n, add_patch_success).into_view(),
+                                    body: format!("{}: {} | {}: {} | {}: {}",
+                                        t!(i18n, add_patch_result_inserted)().to_string(), result_tuple.0,
+                                        t!(i18n, add_patch_result_removed)().to_string(), result_tuple.1,
+                                        t!(i18n, add_patch_result_skipped)().to_string(), result_tuple.2
+                                    ).into_view(),
                                     timeout: ToastTimeout::DefaultDelay,
                                 }
                             );
@@ -55,7 +61,7 @@ pub fn SettingsPatchCard(
                                     id: Uuid::new_v4(),
                                     created_at: time::OffsetDateTime::now_utc(),
                                     variant: ToastVariant::Error,
-                                    header: "Patch failed".into_view(),
+                                    header: t!(i18n, add_patch_failed).into_view(),
                                     body: format!("Error: {}", e.to_string()).into_view(),
                                     timeout: ToastTimeout::DefaultDelay,
                                 }
@@ -81,7 +87,7 @@ pub fn SettingsPatchCard(
                         <p class="text-sm text-gray-600 leading-none mt-1">{short_description_2}</p>
                     </div>
                 </div>
-                <Button on_press=move |_| handle_button_click() color=ButtonColor::Info> "Patch" </Button>
+                <Button on_press=move |_| handle_button_click() color=ButtonColor::Info> {t!(i18n, add_patch_action)} </Button>
             </div>
         </div>
     }

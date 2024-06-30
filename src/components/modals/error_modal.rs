@@ -18,7 +18,7 @@ pub fn ErrorModal (
                     <AlertContent slot>{body}</AlertContent>
                 </Alert>
             <ButtonWrapper>
-                <Button on_press=move |_| set_show_modal.set(false) color=ButtonColor::Secondary>"Ok"</Button>
+                <Button on_press=move |_| set_show_modal.set(false) color=ButtonColor::Warn>"Ok"</Button>
             </ButtonWrapper>
         </Modal>
     }

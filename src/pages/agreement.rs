@@ -3,7 +3,9 @@ use crate::components::home_button::HomeButton;
 use crate::i18n::use_i18n;
 use leptos_i18n::t;
 
-
+/// The agreement page.
+/// It simply displays a text with the permissions required by the app and
+/// a button to go back to the home page.
 #[component]
 pub fn Agreement() -> impl IntoView {
     let i18n = use_i18n();

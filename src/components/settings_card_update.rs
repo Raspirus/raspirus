@@ -3,6 +3,8 @@ use leptonic::components::icon::Icon;
 use leptonic::components::prelude::ButtonColor;
 use leptonic::prelude::icondata;
 use leptos::*;
+use crate::i18n::use_i18n;
+use leptos_i18n::t;
 
 #[component]
 pub fn SettingsUpdateCard(
@@ -11,6 +13,7 @@ pub fn SettingsUpdateCard(
     short_description_2: String,
     icon: icondata::Icon,
 ) -> impl IntoView {
+    let i18n = use_i18n();
 
     view! {
         <div class="flex flex-col m-6 p-2 bg-white rounded-2xl shadow-md">
@@ -25,7 +28,7 @@ pub fn SettingsUpdateCard(
                         <p class="text-sm text-gray-600 leading-none mt-1">{short_description_2}</p>
                     </div>
                 </div>
-                <LinkButton href="/update" color=ButtonColor::Info>"Update"</LinkButton>
+                <LinkButton href="/update" color=ButtonColor::Info>{t!(i18n, update_db_action)}</LinkButton>
             </div>
         </div>
     }

@@ -15,8 +15,17 @@ use crate::pages::{
 };
 
 
+/// Defines the routes of the application. We use the `StaticRoute` component to define the routes.
+/// The `StaticRoute` component is a wrapper around the `Route` component that provides a static
+/// way to define the routes of the application. This is useful when we want to define the routes
+/// of the application in a static way, without the need to use the `Route` component.
+///
+/// This is also the entry point of the application. The `App` component is the root component of
+/// the application. It defines the routes of the application and the components that will be
+/// rendered when the user navigates to a specific route.
 #[component]
 pub fn App() -> impl IntoView {
+    // We only need to call this once, it will provide the i18n context to the application
     provide_i18n_context();
 
     view! {
