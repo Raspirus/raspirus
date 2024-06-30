@@ -46,7 +46,7 @@ pub fn SettingsDownloadCard(
                             id: Uuid::new_v4(),
                             created_at: time::OffsetDateTime::now_utc(),
                             variant: ToastVariant::Error,
-                            header: t!(i18n, logs_download_failed).into_view(),
+                            header: t!(i18n, logs_download_dialog_failed).into_view(),
                             body: format!("Error: {}", e.to_string()).into_view(),
                             timeout: ToastTimeout::DefaultDelay,
                         }
