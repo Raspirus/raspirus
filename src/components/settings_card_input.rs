@@ -27,13 +27,9 @@ pub fn SettingsInputCard(
             let file = FileDialogBuilder::new().pick_file().await;
             log!("Selected file: {:?}", file);
             // Same as with the folder, if the file is ok, we parse the path, else we don't do anything
-            match file {
-                Ok(Some(path)) => {
-                    let path_buffer = path.path;
-                    let path_string = path_buffer.into_os_string().into_string().unwrap_or_default();
-                    set_value.set(path_string);
-                }
-                _ => {}
+            if let Ok(Some(path)) = file {
+                let path_string = path.path.into_os_string().into_string().unwrap_or_default();
+                set_value.set(path_string);
             }
         });
     };
