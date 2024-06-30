@@ -12,7 +12,7 @@ pub fn VirusCard(
         <div className="flex mb-4 items-center shadow-md p-2 bg-white rounded-xl">
             <p className="whitespace-nowrap text-grey-darkest w-1/5 overflow-hidden">{title}</p>
             <div className="inline-block min-h-[1em] w-0.5 self-stretch bg-maingreen opacity-100 mx-2"></div>
-            <p className="w-full text-grey-darkest overflow-x-auto">{text}</p>
+            <p className="w-full text-grey-darkest overflow-x-auto">{&text}</p>
             <LinkExt href=format!("www.virustotal.com/gui/search/{}", text) target=LinkExtTarget::Blank>
                 <Icon icon=icondata::SiVirustotal style="font-size: 3em;"/>
             </LinkExt>
