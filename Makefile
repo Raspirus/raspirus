@@ -30,23 +30,26 @@ install:
 	    echo "source \$$HOME/.cargo/env" >> $(HOME)/.bashrc; \
 	    echo "Appended source to ~/.bashrc"; \
 	fi
-	@printf "$(TEXT)🌔 >>>> Installing Nodejs$(RESET)"
-	sudo apt-get update && sudo apt-get install -y ca-certificates gnupg
-	sudo mkdir -p /etc/apt/keyrings
-	curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | sudo gpg --yes --dearmor -o /etc/apt/keyrings/nodesource.gpg
-	echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_18.x nodistro main" | sudo tee /etc/apt/sources.list.d/nodesource.list
-	sudo apt-get update
-	sudo apt-get install nodejs -y
-	@printf "$(TEXT)🌕 >>>> Installing Nextjs and EsLint$(RESET)"
-	npm install next@latest react@latest react-dom@latest eslint-config-next@latest
-	@printf "$(TEXT)🌖 >>>> Installing Tauri deps$(RESET)"
-	sudo apt-get install -y libwebkit2gtk-4.0-dev build-essential wget libssl-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev
-	@printf "$(TEXT)🌗 >>>> Installing Tauri$(RESET)"
+	@printf "$(TEXT)🌔 >>>> Installing Tauri deps$(RESET)"
+	sudo apt-get install -y libwebkit2gtk-4.1-dev \
+                              build-essential \
+                              curl \
+                              wget \
+                              file \
+                              libxdo-dev \
+                              libssl-dev \
+                              libayatana-appindicator3-dev \
+                              librsvg2-dev
+	@printf "$(TEXT)🌕 >>>> Installing Tauri$(RESET)"
 	source $(HOME)/.cargo/env && cargo install tauri-cli
-	@printf "$(TEXT)🌘 >>>> Installing npm deps$(RESET)"
-	npm install
-	@printf "$(TEXT)🌘 >>>> Setting up required folders$(RESET)"
-	mkdir -p out
+	@printf "$(TEXT)🌖 >>>> Adding WASM target$(RESET)"
+	rustup target add wasm32-unknown-unknown
+	@printf "$(TEXT)🌗 >>>> Installing Trunk$(RESET)"
+    source $(HOME)/.cargo/env && cargo install trunk
+	@printf "$(TEXT)🌗 >>>> Setting up required folders$(RESET)"
+	mkdir -p dist
+	@printf "$(TEXT)🌘 >>>> Compiling src-tauri module$(RESET)"
+    source $(HOME)/.cargo/env && cargo install --path src-tauri/
 	@printf "$(TEXT)🎉 >>>> Done!$(RESET)"
 
 build:
@@ -57,7 +60,6 @@ build:
 
 test:
 	@printf "$(TEXT)>>>> Executing cargo tests$(RESET)"
-	cd src-tauri/ && \
 	cargo test
 	@printf "$(TEXT)>>>> Done!$(RESET)"
 check:
@@ -68,3 +70,7 @@ clean:
 	@printf "$(TEXT)>>>> Cleaning cwd$(RESET)"
 	cargo clean -v -v
 	@printf "$(TEXT)>>>> Done!$(RESET)"
+docs:
+    @printf "$(TEXT)>>>> Generating docs$(RESET)"
+    cargo doc --no-deps --workspace --open
+    @printf "$(TEXT)>>>> Done!$(RESET)"

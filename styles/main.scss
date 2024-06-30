@@ -1,0 +1,29 @@
+@import "./leptonic/leptonic-themes.scss";
+
+/*
+$maingreen-light: #35c091;
+$maingreen: #207357;
+$maingreen-dark: #175440;
+
+$mainred-light: #ff5a83;
+$mainred: #ff3366;
+$mainred-dark: #ff0c49;
+*/
+
+
+[data-theme="light"] {
+    --brand-color: #ff3366;
+    --secondary-color: #207357;
+    --drawer-background-color: none;
+    --drawer-box-shadow: none;
+
+    --button-filled-primary-background-color: #ff3366;
+
+    --button-outlined-primary-text-color: #207357;
+    --button-outlined-primary-text-color-hover: #175440;
+    --button-outlined-primary-border-color: #207357;
+    --button-outlined-primary-border-color-hover: #175440;
+
+    --toggle-slider-off-background-color: red;
+    --toggle-slider-on-background-color: green;
+}
