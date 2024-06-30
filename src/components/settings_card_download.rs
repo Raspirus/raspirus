@@ -10,6 +10,9 @@ use uuid::Uuid;
 use crate::i18n::use_i18n;
 use leptos_i18n::t;
 
+
+/// A card that allows the user to download logs
+/// On click, we call the download function from the backend and display the output in a toast.
 #[component]
 pub fn SettingsDownloadCard(
     title: String,

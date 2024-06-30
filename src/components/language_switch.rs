@@ -4,6 +4,11 @@ use crate::components::flag_icon::FlagIcon;
 use crate::i18n::{Locale, use_i18n};
 
 
+/// This component is a language switcher that allows the user to change the language of the app.
+/// It uses the i18n context to set the locale of the app. The language switcher is a select
+/// component that contains the available locales in the i18n context. We have to create a vector
+/// of locales manually because the i18n context does not provide a method to get all available
+/// locales. The language switcher also displays a flag icon for each locale.
 #[component]
 pub fn LanguageSwitch() -> impl IntoView {
     let i18n = use_i18n();

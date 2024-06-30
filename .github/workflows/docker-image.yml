@@ -2,54 +2,39 @@ name: Docker Image CI
 
 on:
   workflow_dispatch:
-
+env:
+  VERSION: 1.2.1
 jobs:
   build_arm64:
+    strategy:
+      matrix:
+        include:
+          - arch: arm64
+            triple: aarch64-unknown-linux-gnu
+            dir: arm
+          - arch: armhf
+            triple: armv7-unknown-linux-gnueabihf
+            dir: armhf
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Build the arm64 Docker image
-      run: docker build -t raspirus-arm -f ./docker/arm/Dockerfile .
+      - name: Build the arm64 Docker image
+        run: docker build -t raspirus-${{ matrix.dir }} -f ./docker/${{ matrix.dir }}/Dockerfile .
 
-    - name: Create the Docker container
-      run: docker create --name raspirus raspirus-arm
+      - name: Create the Docker container
+        run: docker create --name raspirus raspirus-${{ matrix.dir }}
 
-    - name: Create dist folder
-      run: mkdir -p ./dist
+      - name: Create dist folder
+        run: mkdir -p ./output
 
-    - name: Copy file from docker
-      run: docker cp raspirus:/usr/app/raspirus/target/aarch64-unknown-linux-gnu/release/bundle/deb/raspirus_1.2.0_arm64.deb ./dist
+      - name: Copy file from docker
+        run: docker cp raspirus:/usr/app/raspirus/target/${{ matrix.triple }}/release/bundle/deb/raspirus_${{ env.VERSION }}_${{ matrix.arch }}.deb ./output
 
-    - name: Upload file to artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: raspirus_1.2.0_arm64_${{ github.run_number }}.deb
-        path: ./dist/raspirus_1.2.0_arm64.deb
-
-  build_armhf:
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Build the armhf Docker image
-      run: docker build -t raspirus-armhf -f ./docker/armhf/Dockerfile .
-
-    - name: Create the Docker container
-      run: docker create --name raspirus raspirus-armhf
-
-    - name: Create dist folder
-      run: mkdir -p ./dist
-
-    - name: Copy file from docker
-      run: docker cp raspirus:/usr/app/raspirus/target/armv7-unknown-linux-gnueabihf/release/bundle/deb/raspirus_1.2.0_armhf.deb ./dist
-
-    - name: Upload file to artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: raspirus_1.2.0_armhf_${{ github.run_number }}.deb
-        path: ./dist/raspirus_1.2.0_armhf.deb
+      - name: Upload file to artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: raspirus_${{ env.VERSION }}_${{ matrix.arch}}_${{ github.run_number }}.deb
+          path: ./output/raspirus_${{ env.VERSION }}_${{ matrix.arch }}.deb

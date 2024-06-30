@@ -11,6 +11,11 @@ use crate::i18n::use_i18n;
 use leptos_i18n::t;
 
 
+/// The loading page is responsible for starting the scanning process and displaying the progress
+/// of the scan. It listens for progress events and updates the progress bar accordingly.
+/// If the scan is successful and infected files are found, it navigates to the infected page.
+/// If the scan is successful and no infected files are found, it navigates to the clean page.
+/// If the scan fails, it navigates back to the home page with an error message.
 #[component]
 pub fn Loading() -> impl IntoView {
     let (progress, set_progress) = create_signal(Some(0.0));
@@ -64,8 +69,6 @@ pub fn Loading() -> impl IntoView {
             }
         }
     });
-
-
 
     view! {
         <div class="h-screen">

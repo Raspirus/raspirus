@@ -8,6 +8,8 @@ use leptos::logging::log;
 use tauri_wasm::plugin::dialog::FileDialogBuilder;
 
 
+/// A button that opens a file dialog to select a directory or file
+/// and sets the selected path as the scan target. We open the dialog through the WebAssembly API
 #[component]
 pub fn DirectoryPickerButton(
     scan_target: WriteSignal<Option<String>>,
