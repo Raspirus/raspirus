@@ -22,8 +22,8 @@ pub fn WelcomeModal(
             <ModalFooter>
                 <p class="pr-2">{t!(i18n, welcome_footer)}</p>
                 <ButtonWrapper>
-                    <Button on_press=move |_| set_show_modal.set(false) color=ButtonColor::Primary>
-                        "Ok!"
+                    <Button on_press=move |_| set_show_modal.set(false) color=ButtonColor::Info>
+                        "Ok"
                     </Button>
                 </ButtonWrapper>
             </ModalFooter>

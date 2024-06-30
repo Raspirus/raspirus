@@ -82,7 +82,7 @@ pub fn Settings() -> impl IntoView {
                             {t!(i18n, back_btn)}
                         </Button>
                 <h1 class="inline-block align-middle p-2 font-medium leading-tight text-5xl mt-0 mb-2 text-mainred">
-                  {t!(i18n, settings_title)}
+                  {t!(i18n, settings)}
                 </h1>
             </div>
 
@@ -107,7 +107,9 @@ pub fn Settings() -> impl IntoView {
         <SettingsInputCard
             title=t!(i18n, custom_db)().to_string()
             short_description=t!(i18n, custom_db_val)().to_string()
-            short_description_2=if use_db_path.get() {format!("{}: {}", t!(i18n, custom_db_1)(), custom_db_path.get())} else {t!(i18n, custom_db_2)().to_string()}
+            short_description_2=if use_db_path.get() {
+                format!("{}: {}", t!(i18n, custom_db_1)(), custom_db_path.get())}
+                    else {t!(i18n, custom_db_2)().to_string()}
             icon=icondata::FaDatabaseSolid
             set_value=setCustomDbPath
         />

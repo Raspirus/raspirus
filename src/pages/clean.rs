@@ -4,6 +4,9 @@ use crate::components::home_button::HomeButton;
 use crate::i18n::use_i18n;
 
 
+/// Clean page
+/// The page that shows if no threat was found on the scanned target. It simply contains an image
+/// that shows a success message and a button to go back to the home page.
 #[component]
 pub fn Clean() -> impl IntoView {
     let i18n = use_i18n();
@@ -20,6 +23,8 @@ pub fn Clean() -> impl IntoView {
                                 src="/images/success_image.png"
                                 alt="Success"
                                 class="h-auto max-w-[60%]"
+                                width="500"
+                                height="500"
                             />
                         </div>
                         <HomeButton />

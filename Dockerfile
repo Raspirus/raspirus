@@ -6,26 +6,26 @@ COPY . .
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get clean && apt-get update && apt-get upgrade -y
-RUN apt-get update && apt-get install -y build-essential \
-    libsqlite3-0 \
-    libsqlite3-dev \
-    wget \
-    npm \
-    libgtk-3-dev \
-    libayatana-appindicator3-dev \
-    librsvg2-dev \
-    libssl-dev \
-    libwebkit2gtk-4.0-dev
-
-# Perform npm install
-RUN npm install
+RUN apt-get update && apt-get install -y libwebkit2gtk-4.1-dev \
+                                           build-essential \
+                                           curl \
+                                           wget \
+                                           file \
+                                           libxdo-dev \
+                                           libssl-dev \
+                                           libayatana-appindicator3-dev \
+                                           librsvg2-dev
 
 # Create the out directory
-RUN mkdir out
+RUN mkdir dist
+
+# Add the rust toolchain
+RUN rustup target add wasm32-unknown-unknown
 
 # Install app deps
-RUN cargo install --path src-tauri/
 RUN cargo install tauri-cli
+RUN cargo install trunk
+RUN cargo install --path src-tauri/
 
 # Build app
 RUN cargo tauri build -b deb
