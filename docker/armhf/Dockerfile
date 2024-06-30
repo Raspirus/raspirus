@@ -6,37 +6,31 @@ COPY . .
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get clean && apt-get update && apt-get upgrade -y
-RUN apt-get update && apt-get install -y build-essential \
-    cmake \
-    libsqlite3-0 \
-    libsqlite3-dev \
-    wget \
-    npm \
-    libgtk-3-dev \
-    libayatana-appindicator3-dev \
-    librsvg2-dev \
-    gcc-arm-linux-gnueabihf \
-    libssl-dev \
-    libwebkit2gtk-4.0-dev
+RUN apt-get update && apt-get install -y libwebkit2gtk-4.1-dev \
+                                           build-essential \
+                                           curl \
+                                           wget \
+                                           file \
+                                           libxdo-dev \
+                                           libssl-dev \
+                                           libayatana-appindicator3-dev \
+                                           librsvg2-dev \
+                                           gcc-aarch64-linux-gnu \
 
 # Add architecture
 RUN dpkg --add-architecture armhf \
     && apt-get -qq update \
-    && apt-get -qq install -y libwebkit2gtk-4.0-dev:armhf libssl-dev:armhf
+    && apt-get -qq install -y libwebkit2gtk-4.1-dev:armhf libssl-dev:armhf
 
 # Add Rust target
 RUN rustup target add armv7-unknown-linux-gnueabihf
-
-# Use latest npm version
-RUN npm install -g npm@latest
-
-# Perform npm install
-RUN npm install
+RUN rustup target add wasm32-unknown-unknown
 
 # Create the out directory
-RUN mkdir out
+RUN mkdir dist
 
 # Install app deps
+RUN cargo install trunk
 RUN cargo install --path src-tauri/
 RUN cargo install tauri-cli --locked
 
