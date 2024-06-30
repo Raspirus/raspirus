@@ -15,9 +15,8 @@ pub fn LanguageSwitch() -> impl IntoView {
     let (current_selected_locale, setCurrentSelectedLocale) = create_signal(String::new());
     // We need to get the current locale from the i18n context as a string
     let current_locale = i18n.get_locale();
-    let current_locale_string = match {
-        current_locale
-    } {
+    let current_locale_string = match current_locale
+     {
         Locale::en => "EN".to_string(),
         Locale::de => "DE".to_string(),
         Locale::it => "IT".to_string(),
@@ -32,9 +31,8 @@ pub fn LanguageSwitch() -> impl IntoView {
     // Now we need a function that converts the string to a Locale enum and sets the locale
     // in the i18n context
     let set_locale = move |v: String| {
-        let locale: Locale = match {
-            v.to_uppercase().as_str()
-        } {
+        let locale: Locale = match v.to_uppercase().as_str()
+        {
             "EN" => Locale::en,
             "DE" => Locale::de,
             "IT" => Locale::it,
@@ -49,12 +47,12 @@ pub fn LanguageSwitch() -> impl IntoView {
             <Select
                 class="uppercase bg-white w-fit"
                 options=available_locales
-                search_text_provider=move |o| format!("{o}")
+                search_text_provider=move |o| o
                 render_option=move |o| view! {
                     <FlagIcon country_code={o} />
                 }
                 selected=current_selected_locale
-                set_selected=move |v| set_locale(v)
+                set_selected=set_locale
             />
         </div>
 }

@@ -51,9 +51,9 @@ pub fn SettingsPatchCard(
                                     variant: ToastVariant::Success,
                                     header: t!(i18n, add_patch_success).into_view(),
                                     body: format!("{}: {} | {}: {} | {}: {}",
-                                        t!(i18n, add_patch_result_inserted)().to_string(), result_tuple.0,
-                                        t!(i18n, add_patch_result_removed)().to_string(), result_tuple.1,
-                                        t!(i18n, add_patch_result_skipped)().to_string(), result_tuple.2
+                                        t!(i18n, add_patch_result_inserted)(), result_tuple.0,
+                                        t!(i18n, add_patch_result_removed)(), result_tuple.1,
+                                        t!(i18n, add_patch_result_skipped)(), result_tuple.2
                                     ).into_view(),
                                     timeout: ToastTimeout::DefaultDelay,
                                 }
@@ -67,14 +67,14 @@ pub fn SettingsPatchCard(
                                     created_at: time::OffsetDateTime::now_utc(),
                                     variant: ToastVariant::Error,
                                     header: t!(i18n, add_patch_failed).into_view(),
-                                    body: format!("Error: {}", e.to_string()).into_view(),
+                                    body: format!("Error: {:?}", e).into_view(),
                                     timeout: ToastTimeout::DefaultDelay,
                                 }
                             );
                         }
                     }
                 }
-                _ => return,
+                _ => {}
             }
         });
     };

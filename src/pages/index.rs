@@ -62,7 +62,7 @@ pub fn Index() -> impl IntoView {
                 let config: Config = serde_json::from_str(&config_string).unwrap();
                 // We set the flag to indicate if the file picker can select directories
                 setCanSelectDirectories.set(config.scan_dir);
-                if config.hash_count <= 0 {
+                if config.hash_count == 0 {
                     setShowWelcomeModal.set(true);
                 }
                 log!("Config loaded")
@@ -118,7 +118,7 @@ pub fn Index() -> impl IntoView {
                             created_at: time::OffsetDateTime::now_utc(),
                             variant: ToastVariant::Error,
                             header: t!(i18n, usb_list_error).into_view(),
-                            body: format!("Error: {}", e.to_string()).into_view(),
+                            body: format!("Error: {:?}", e).into_view(),
                             timeout: ToastTimeout::DefaultDelay,
                         }
                     );
@@ -199,7 +199,7 @@ pub fn Index() -> impl IntoView {
               <div class="flex justify-center">
                 <OptionalSelect
                         options=usb_devices
-                        search_text_provider=move |o| format!("{o}")
+                        search_text_provider=move |o| o
                         render_option=move |o| format!("{o:?}")
                         selected=scan_target
                         set_selected=move |v| setScanTarget.set(v)
