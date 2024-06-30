@@ -5,7 +5,8 @@ dist/
 target/
 
 # Styling
-
+styles/leptonic/**/*.css
+styles/leptonic/**/*.scss
 
 # testing
 coverage
