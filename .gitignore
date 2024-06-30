@@ -1,7 +1,11 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
-# Trunk
+# Rust
 dist/
+target/
+
+# Styling
+
 
 # testing
 coverage
@@ -18,7 +22,6 @@ build
 .env*.local
 
 # Custom
-target/
 .bash.example
 .lines
 Cargo.lock
