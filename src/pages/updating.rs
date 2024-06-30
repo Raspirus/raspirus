@@ -13,6 +13,10 @@ use crate::components::modals::{
 
 use crate::i18n::{t, use_i18n};
 
+/// The Updating page component.
+/// This component is responsible for updating the database. It listens for events from the backend
+/// and updates the UI accordingly. When opened, it will trigger the `update_database` command.
+/// Depending on the events received, it will show a progress bar, success modal or error modal.
 #[component]
 pub fn Updating() -> impl IntoView {
     let (completed_state, setCompletedState) = create_signal(false);

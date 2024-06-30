@@ -3,6 +3,9 @@ use leptos::*;
 use leptonic::components::modal::Modal;
 use leptonic::components::button::{Button, ButtonColor, ButtonWrapper};
 
+
+/// A modal that shows a success message
+/// Similar to the error modal, but with a different color
 #[component]
 pub fn SuccessModal (
     show_modal: ReadSignal<bool>,

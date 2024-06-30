@@ -3,6 +3,9 @@ use leptonic::prelude::*;
 use leptonic::components::icon::Icon;
 
 
+/// InfoCard component
+/// Standardizes the look of a card that displays information. It has a title, a value, and an icon.
+/// The user should not be able to interact with this component.
 #[component]
 pub fn InfoCard (
     title: String,

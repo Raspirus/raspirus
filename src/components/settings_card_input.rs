@@ -8,6 +8,10 @@ use tauri_wasm::plugin::dialog::FileDialogBuilder;
 use crate::i18n::use_i18n;
 use leptos_i18n::t;
 
+
+/// A card where the user can select a file from the file system
+/// The file path is then stored in the provided signal for further processing. This
+/// makes the selection of a file a reusable component.
 #[component]
 pub fn SettingsInputCard(
     title: String,
