@@ -1,5 +1,5 @@
 {
-    "rust-analyzer.linkedProjects": [
-        "./src-tauri/Cargo.toml"
-    ]
+  "emmet.includeLanguages": {
+    "rust": "html"
+  }
 }
