@@ -18,9 +18,16 @@ use crate::generic::{Config, int_to_date_string, SettingsArgs, SettingsStruct};
 use crate::i18n::use_i18n;
 
 
+/// The settings page
+/// This page allows the user to change the settings of the application
+/// The settings are saved in a config file which is managed by the backend
+/// The settings are loaded when the page is opened and saved when the user navigates back to the home page
+/// The settings are saved in a struct and then converted to a string in order to send it to the backend
+/// We always save the settings, even when the user doesn't change anything
 #[component]
 pub fn Settings() -> impl IntoView {
     let i18n = use_i18n();
+    // We have a signal for each changeable setting
     let (logging, setLogging) = create_signal(false);
     let (use_db_path, setUseDbPath) = create_signal(false);
     let (custom_db_path, setCustomDbPath) = create_signal(String::new());
@@ -28,11 +35,13 @@ pub fn Settings() -> impl IntoView {
     let (hash_count, setHashCount) = create_signal(0);
     let (updated_date, setUpdatedDate) = create_signal(String::new());
     let navigate = use_navigate();
+    // A formatted string for the updated date
     let formatted_updated_date = int_to_date_string((move || updated_date.get().parse::<i64>().unwrap_or_default())());
 
     spawn_local(async move {
         let config: Result<String, Error> = invoke("load_config_fe", &String::new()).await;
         match config {
+            // We load the config and set the signals
             Ok(config_string) => {
                 let config: Config = serde_json::from_str(&config_string).unwrap();
                 setLogging.set(config.logging_is_active);

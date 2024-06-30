@@ -6,17 +6,20 @@ use leptos_router::use_query_map;
 use crate::components::home_button::HomeButton;
 use crate::components::virus_card::VirusCard;
 use crate::i18n::use_i18n;
+use crate::generic::VirusFile;
 
 // TODO:
 // - Styling
-// - Fix the text in the VirusCard component
 
+/// Infected page
+/// The page that is shown if after the scan the user has infected files
+/// It shows a list of all infected files with their path and the signature of the virus
+/// The user can further analyze the file by clicking on it
 #[component]
 pub fn Infected() -> impl IntoView {
     let i18n = use_i18n();
     let infected = use_query_map().get_untracked().get("result").cloned();
-    // Convert the string to a vector of strings
-    let infected_files: Vec<String> = serde_json::from_str(&infected.unwrap()).unwrap();
+    let infected_files: Vec<VirusFile> = serde_json::from_str(&infected.unwrap()).unwrap();
 
     view! {
         <div>
@@ -31,7 +34,7 @@ pub fn Infected() -> impl IntoView {
                         {infected_files.into_iter()
                             .map(|file| {
                                 view! {
-                                    <VirusCard title=file text="This is a virus".to_string() />
+                                    <VirusCard title=file.path text=file.signature />
                                 }
                             }).collect::<Vec<_>>()
                         }

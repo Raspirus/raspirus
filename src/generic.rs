@@ -7,6 +7,12 @@ pub struct UsbDevice {
     pub path: String,
 }
 
+#[derive(Serialize, Deserialize, Debug)]
+pub struct VirusFile {
+    pub path: String,
+    pub signature: String,
+}
+
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Config {
     // Saves hash count after update in order to avoid having to recount

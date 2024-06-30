@@ -3,6 +3,10 @@ use leptos::*;
 use leptonic::components::modal::Modal;
 use leptonic::components::button::{Button, ButtonColor, ButtonWrapper};
 
+
+/// ErrorModal component
+/// A modal showing an error message. We have to use signals for reactive programming.
+/// The user can then close this modal either by clicking the button or by clicking outside the modal.
 #[component]
 pub fn ErrorModal (
     show_modal: ReadSignal<bool>,

@@ -13,6 +13,11 @@ use uuid::Uuid;
 use crate::i18n::use_i18n;
 use leptos_i18n::t;
 
+
+/// A card that allows the user to patch the database with a file
+/// The card opens a file picker where the user can choose a file they want to patch the database
+/// with. The file is then sent to the backend where it is processed and the database is updated.
+/// The card displays a success or error message in a toast.
 #[component]
 pub fn SettingsPatchCard(
     title: String,

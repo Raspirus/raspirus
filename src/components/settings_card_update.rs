@@ -6,6 +6,10 @@ use leptos::*;
 use crate::i18n::use_i18n;
 use leptos_i18n::t;
 
+
+/// A card that displays the current version of the database and allows the user to update it.
+/// The update does not happen in this component, but is triggered by the user clicking the button.
+/// The update happens on a separate page where the user is redirected to.
 #[component]
 pub fn SettingsUpdateCard(
     title: String,

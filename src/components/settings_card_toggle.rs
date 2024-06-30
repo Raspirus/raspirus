@@ -3,9 +3,9 @@ use leptonic::components::toggle::Toggle;
 use leptonic::prelude::icondata;
 use leptos::*;
 
-// format!("flex-no-shrink px-5 ml-4 py-2 text-sm shadow-sm font-medium border-2 text-white rounded-full {}", button_class)
 
-
+/// A simple toggle card for settings
+/// It is the most common setting and allows user to set something to on or off
 #[component]
 pub fn SettingsToggleCard(
     title: String,

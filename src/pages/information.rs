@@ -6,9 +6,13 @@ use crate::components::home_button::HomeButton;
 use crate::components::info_card::InfoCard;
 
 
+/// Information page
+/// It contains a list of useful information about the application
+/// We also retrieve the application version from the environment variables
 #[component]
 pub fn Information() -> impl IntoView {
     let i18n = use_i18n();
+    // Warning! This is the raspirus-ui version, not the backend version
     let appVersion = env!("CARGO_PKG_VERSION");
 
     view! {
@@ -33,7 +37,7 @@ pub fn Information() -> impl IntoView {
                 value=t!(i18n, app_title)().to_string()
                 icon=icondata::TbHexagonLetterR
             />
-        <InfoCard
+            <InfoCard
                 title=t!(i18n, description)().to_string()
                 value=t!(i18n, description_val)().to_string()
                 icon=icondata::TbFileDescription
