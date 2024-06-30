@@ -34,7 +34,7 @@ pub fn SettingsDownloadCard(
                             created_at: time::OffsetDateTime::now_utc(),
                             variant: ToastVariant::Success,
                             header: t!(i18n, logs_download_dialog).into_view(),
-                            body: format!("{} {}", t!(i18n, logs_download_dialog_text)().to_string(), output).into_view(),
+                            body: format!("{} {}", t!(i18n, logs_download_dialog_text)(), output).into_view(),
                             timeout: ToastTimeout::DefaultDelay,
                         }
                     );
@@ -47,7 +47,7 @@ pub fn SettingsDownloadCard(
                             created_at: time::OffsetDateTime::now_utc(),
                             variant: ToastVariant::Error,
                             header: t!(i18n, logs_download_dialog_failed).into_view(),
-                            body: format!("Error: {}", e.to_string()).into_view(),
+                            body: format!("Error: {:?}", e).into_view(),
                             timeout: ToastTimeout::DefaultDelay,
                         }
                     );

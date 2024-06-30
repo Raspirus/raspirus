@@ -18,7 +18,7 @@ pub fn DirectoryPickerButton(
     let handle_button_click = move || {
         spawn_local(async move {
             let path_buffer: PathBuf;
-            if (move || can_select_directories.get())() {
+            if can_select_directories.get() {
                 let folder = FileDialogBuilder::new().pick_folder().await;
                 log!("Selected folder: {:?}", folder);
                 // If the folder is ok, we parse the path, else we just don't do anything

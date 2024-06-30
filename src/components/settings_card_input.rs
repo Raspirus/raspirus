@@ -33,7 +33,7 @@ pub fn SettingsInputCard(
                     let path_string = path_buffer.into_os_string().into_string().unwrap_or_default();
                     set_value.set(path_string);
                 }
-                _ => return,
+                _ => {}
             }
         });
     };
