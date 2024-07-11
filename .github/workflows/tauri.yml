@@ -24,12 +24,6 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libwebkit2gtk-4.1-dev build-essential curl wget file libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev
 
-      - name: setup node
-        uses: actions/setup-node@v4
-        with:
-          node-version: lts/*
-          cache: 'npm' # Set this to npm, yarn or pnpm.
-
       - name: Rust setup
         uses: dtolnay/rust-toolchain@stable
 
