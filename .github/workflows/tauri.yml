@@ -38,6 +38,9 @@ jobs:
       - name: Add Rust WASM target
         run: rustup target add wasm32-unknown-unknown
 
+      - name: Setup npm for Tauri
+        run: npm install -g @tauri-apps/cli@next
+
       - name: Build the app
         uses: tauri-apps/tauri-action@v0
 
@@ -51,3 +54,4 @@ jobs:
           releaseBody: 'See the assets to download and install this version.'
           releaseDraft: true
           prerelease: false
+          tauriScript: tauri
