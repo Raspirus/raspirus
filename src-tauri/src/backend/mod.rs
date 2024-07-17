@@ -10,3 +10,5 @@ pub mod file_log;
 pub mod scanner;
 /// various specific function collections
 pub mod utils;
+/// the revised scanner using yara rules
+pub mod yara_scanner;
