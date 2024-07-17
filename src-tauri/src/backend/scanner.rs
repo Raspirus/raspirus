@@ -7,7 +7,7 @@ use std::{
 
 use chrono::{DateTime, Local};
 use log::{debug, error, info, warn};
-use tauri::Manager;
+use tauri::Emitter;
 use zip::ZipArchive;
 
 use crate::backend::utils::generic::size;
