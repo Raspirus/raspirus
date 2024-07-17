@@ -5,7 +5,7 @@ use std::{
 };
 
 use log::{trace, warn};
-use tauri::Manager;
+use tauri::Emitter;
 use zip::ZipArchive;
 
 use crate::{backend::config_file::Config, CONFIG};
