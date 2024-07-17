@@ -812,7 +812,7 @@ dependencies = [
  "serde_json",
  "textwrap",
  "thiserror",
- "toml 0.8.14",
+ "toml 0.8.15",
  "ureq",
  "which",
  "windows 0.57.0",
@@ -849,7 +849,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8a969e13a7589e9e3e4207e153bae624ade2b5622fb4684a4923b23ec3d57719"
 dependencies = [
  "serde",
- "toml 0.8.14",
+ "toml 0.8.15",
 ]
 
 [[package]]
@@ -859,7 +859,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a98356df42a2eb1bd8f1793ae4ee4de48e384dd974ce5eac8eee802edb7492be"
 dependencies = [
  "serde",
- "toml 0.8.14",
+ "toml 0.8.15",
 ]
 
 [[package]]
@@ -1152,7 +1152,7 @@ dependencies = [
  "nom",
  "pathdiff",
  "serde",
- "toml 0.8.14",
+ "toml 0.8.15",
 ]
 
 [[package]]
@@ -1990,7 +1990,7 @@ dependencies = [
  "cc",
  "memchr",
  "rustc_version",
- "toml 0.8.14",
+ "toml 0.8.15",
  "vswhom",
  "winreg 0.52.0",
 ]
@@ -4237,7 +4237,7 @@ dependencies = [
  "serde",
  "serde_json",
  "syn 2.0.71",
- "toml 0.8.14",
+ "toml 0.8.15",
 ]
 
 [[package]]
@@ -7810,7 +7810,7 @@ dependencies = [
  "cfg-expr",
  "heck 0.5.0",
  "pkg-config",
- "toml 0.8.14",
+ "toml 0.8.15",
  "version-compare",
 ]
 
@@ -7948,7 +7948,7 @@ dependencies = [
  "serde_json",
  "tauri-utils 2.0.0-beta.19",
  "tauri-winres",
- "toml 0.8.14",
+ "toml 0.8.15",
  "walkdir",
 ]
 
@@ -8060,8 +8060,8 @@ dependencies = [
  "tauri-utils 1.6.0",
  "tauri-utils 2.0.0-beta.19",
  "tokio",
- "toml 0.8.14",
- "toml_edit 0.22.15",
+ "toml 0.8.15",
+ "toml_edit 0.22.16",
  "ureq",
  "url",
  "windows-sys 0.52.0",
@@ -8149,7 +8149,7 @@ dependencies = [
  "serde",
  "serde_json",
  "tauri-utils 2.0.0-beta.19",
- "toml 0.8.14",
+ "toml 0.8.15",
  "walkdir",
 ]
 
@@ -8312,7 +8312,7 @@ dependencies = [
  "serialize-to-javascript",
  "swift-rs",
  "thiserror",
- "toml 0.8.14",
+ "toml 0.8.15",
  "url",
  "urlpattern",
  "walkdir",
@@ -8628,15 +8628,15 @@ dependencies = [
 
 [[package]]
 name = "toml"
-version = "0.8.14"
+version = "0.8.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6f49eb2ab21d2f26bd6db7bf383edc527a7ebaee412d17af4d40fdccd442f335"
+checksum = "ac2caab0bf757388c6c0ae23b3293fdb463fee59434529014f85e3263b995c28"
 dependencies = [
  "indexmap 2.2.6",
  "serde",
  "serde_spanned",
  "toml_datetime",
- "toml_edit 0.22.15",
+ "toml_edit 0.22.16",
 ]
 
 [[package]]
@@ -8685,9 +8685,9 @@ dependencies = [
 
 [[package]]
 name = "toml_edit"
-version = "0.22.15"
+version = "0.22.16"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d59a3a72298453f564e2b111fa896f8d07fabb36f51f06d7e875fc5e0b5a3ef1"
+checksum = "278f3d518e152219c994ce877758516bca5e118eaed6996192a774fb9fbf0788"
 dependencies = [
  "indexmap 2.2.6",
  "serde",
