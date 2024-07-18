@@ -45,7 +45,7 @@ pub fn cli_scanner(app: tauri::AppHandle, data: String) {
             error!("Failed to initialize scanner: {err}");
             app.exit(-1);
             return;
-        },
+        }
     };
     let path = match PathBuf::from_str(&unescaped_str) {
         Ok(path) => path,
@@ -53,7 +53,7 @@ pub fn cli_scanner(app: tauri::AppHandle, data: String) {
             error!("Failed to create path from arguments: {err}");
             app.exit(-1);
             return;
-        },
+        }
     };
     match scanner.start(path) {
         Ok(res) => {
@@ -79,15 +79,14 @@ pub fn cli_update(app: tauri::AppHandle) {
     };
     rt.block_on(async {
         match downloader::update().await {
-        Ok(_) => {
-            info!("Successfully updated");
-            app.exit(0);
+            Ok(_) => {
+                info!("Successfully updated");
+                app.exit(0);
+            }
+            Err(err) => {
+                error!("Error: {err}");
+                app.exit(-1);
+            }
         }
-        Err(err) => {
-            error!("Error: {err}");
-            app.exit(-1);
-        }
-    }
-
     })
 }

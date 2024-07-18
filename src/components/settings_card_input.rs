@@ -1,13 +1,12 @@
+use crate::i18n::use_i18n;
 use leptonic::components::button::Button;
 use leptonic::components::icon::Icon;
 use leptonic::components::prelude::ButtonColor;
 use leptonic::prelude::icondata;
-use leptos::*;
 use leptos::logging::log;
-use tauri_wasm::plugin::dialog::FileDialogBuilder;
-use crate::i18n::use_i18n;
+use leptos::*;
 use leptos_i18n::t;
-
+use tauri_wasm::plugin::dialog::FileDialogBuilder;
 
 /// A card where the user can select a file from the file system
 /// The file path is then stored in the provided signal for further processing. This

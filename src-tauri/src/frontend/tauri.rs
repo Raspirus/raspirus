@@ -16,7 +16,7 @@ use crate::{
 };
 use tauri_plugin_cli::CliExt;
 
-use super::functions::{cli_update, cli_gui, not_implemented};
+use super::functions::{cli_gui, cli_update, not_implemented};
 
 pub fn init_tauri() {
     // Builds the Tauri connection
@@ -122,9 +122,6 @@ pub async fn save_config_fe(contents: Option<String>) -> Result<(), String> {
         config_received
             .logging_is_active
             .inspect(|val| config.logging_is_active = *val);
-        config_received
-            .yar_location
-            .inspect(|val| config.yar_location = val.clone());
         config_received
             .scan_dir
             .inspect(|val| config.scan_dir = *val);

@@ -1,7 +1,7 @@
 use std::{fs::File, path::PathBuf};
 
 use chrono::{DateTime, Local};
-use log::{debug, warn};
+use log::debug;
 use yara_x::Rules;
 
 use crate::backend::utils::generic::get_config;
@@ -27,7 +27,11 @@ pub struct YaraScanner {
 impl YaraScanner {
     /// creates a new scanenr and imports the yara rules
     pub fn new(tauri_window: Option<tauri::Window>) -> Result<Self, String> {
-        let yar_path = get_config().yar_location;
+        let yar_path = get_config()
+            .paths
+            .ok_or("No paths set. Is config initialized?")?
+            .data
+            .join(get_config().remote_file);
         // setup rules
         let reader = File::open(yar_path)
             .map_err(|err| format!("Failed to load yar file: {}", err.to_string()))?;

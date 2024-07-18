@@ -3,7 +3,9 @@ use std::{fs::File, io::copy, path::PathBuf};
 use log::{error, info};
 use serde::Deserialize;
 
-use super::utils::generic::{get_config, save_config};
+use crate::backend::utils::generic::update_config;
+
+use super::utils::generic::get_config;
 
 #[derive(Deserialize)]
 struct Release {
@@ -63,7 +65,7 @@ pub async fn update() -> Result<(), String> {
     if !check_update().await? {
         return Ok(());
     }
-    let mut config = get_config();
+    let config = get_config();
     let download_path = config
         .paths
         .ok_or("No paths set. Is config initialized?".to_owned())?
@@ -72,7 +74,11 @@ pub async fn update() -> Result<(), String> {
 
     info!("Starting download...");
     let release = get_release().await.map_err(|err| err.to_string())?;
-    if let Some(asset) = release.assets.iter().find(|&a| a.name == config.remote_file) {
+    if let Some(asset) = release
+        .assets
+        .iter()
+        .find(|&a| a.name == config.remote_file)
+    {
         download_file(&asset.browser_download_url, download_path)
             .await
             .map_err(|err| err.to_string())?;
@@ -83,8 +89,10 @@ pub async fn update() -> Result<(), String> {
     } else {
         error!("Asset not found");
     }
+    let mut config = get_config();
     config.rules_version = get_remote_version().await?;
-    save_config()?;
+    info!("Updated to {}", &config.rules_version);
+    update_config(config)?;
     Ok(())
 }
 
