@@ -21,7 +21,6 @@ mod tests;
 static CONFIG_FILENAME: &str = "Raspirus.json";
 
 // download settings
-static MAX_RETRY: usize = 5;
 static MAX_TIMEOUT: u64 = 120;
 
 // global config instance
