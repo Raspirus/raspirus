@@ -7,16 +7,14 @@ use std::path::{Path, PathBuf};
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(default)]
 pub struct Config {
-    // Saves hash count after update in order to avoid having to recount
-    pub hash_count: u32,
     // Last time and date when the db was successfully updated
-    pub last_db_update: String,
+    pub rules_version: String,
     // If we should log information to a file
     pub logging_is_active: bool,
     // Check if we should obfuscate the result
     pub obfuscated_is_active: bool,
     // Location of the .db file
-    pub db_location: String,
+    pub yar_location: String,
     // If we should scan direcories instead of files (You can only choose one on the current file picker dialog)
     pub scan_dir: bool,
     // mirror to folder with hashfiles for update
@@ -40,20 +38,19 @@ pub struct Paths {
 pub struct ConfigFrontend {
     pub logging_is_active: Option<bool>,
     pub obfuscated_is_active: Option<bool>,
-    pub db_location: Option<String>,
+    pub yar_location: Option<String>,
     pub scan_dir: Option<bool>,
 }
 
 impl Default for Config {
     fn default() -> Self {
         Self {
-            hash_count: 0,
-            last_db_update: "Never".to_string(),
+            rules_version: "None".to_string(),
             logging_is_active: true,
             obfuscated_is_active: true,
-            db_location: "".to_string(),
+            yar_location: "".to_string(),
             scan_dir: true,
-            mirror: "https://raw.githubusercontent.com/Raspirus/signatures/main/hashes".to_string(),
+            mirror: "https://github.com/Raspirus/yara-rules".to_string(),
             paths: None,
         }
     }

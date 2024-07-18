@@ -1,18 +1,22 @@
+use std::{path::PathBuf, str::FromStr};
+
 use log::{debug, error};
 
 use crate::{
     backend::{
         config_file::ConfigFrontend,
+        downloader,
         utils::{
             self,
             generic::{get_config, update_config},
         },
+        yara_scanner::YaraScanner,
     },
     frontend::functions::cli_scanner,
 };
 use tauri_plugin_cli::CliExt;
 
-use super::functions::{cli_dbupdate, cli_gui, not_implemented};
+use super::functions::{cli_update, cli_gui, not_implemented};
 
 pub fn init_tauri() {
     // Builds the Tauri connection
@@ -60,7 +64,7 @@ pub fn init_tauri() {
                                 }
                             },
                         ),
-                        "db-update" => cli_dbupdate(app.handle().clone()),
+                        "db-update" => cli_update(app.handle().clone()),
                         _ => not_implemented(app.handle().clone()),
                     }
                 }
@@ -70,13 +74,11 @@ pub fn init_tauri() {
         .invoke_handler(tauri::generate_handler![
             start_scanner,
             list_usb_drives,
-            update_database,
-            patch,
+            update,
             load_config_fe,
             save_config_fe,
             download_logs,
             check_update,
-            get_hash_count_fe
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
@@ -85,25 +87,21 @@ pub fn init_tauri() {
 // Starts the scanner over the GUI
 #[tauri::command]
 pub async fn start_scanner(window: tauri::Window, path: String) -> Result<String, String> {
-    tokio::task::spawn_blocking(|| utils::scanner_utils::start_scanner(Some(window), path))
-        .await
-        .map_err(|err| err.to_string())?
+    tokio::task::spawn_blocking(move || {
+        let scanner = YaraScanner::new(Some(window))?;
+        scanner.start(PathBuf::from_str(&path).map_err(|err| err.to_string())?)
+    })
+    .await
+    .map_err(|err| err.to_string())?
 }
 
 // Updates the database over the GUi
 #[tauri::command]
-pub async fn update_database(window: tauri::Window) -> Result<String, String> {
-    tokio::task::spawn_blocking(|| utils::update_utils::update(Some(window)))
+pub async fn update() -> Result<(), String> {
+    tokio::task::spawn_blocking(|| downloader::update())
         .await
         .map_err(|err| err.to_string())?
-}
-
-#[tauri::command]
-pub async fn patch(patchfile: String) -> Result<(usize, usize, usize), String> {
-    tokio::task::spawn_blocking(move || utils::update_utils::patch(&patchfile))
         .await
-        .map_err(|err| err.to_string())?
-        .map_err(|err| err.to_string())
 }
 
 // Returns a vector of all attached removable storage drives (USB) -> Unnecessary for the CLI
@@ -128,8 +126,8 @@ pub async fn save_config_fe(contents: Option<String>) -> Result<(), String> {
             .obfuscated_is_active
             .inspect(|val| config.obfuscated_is_active = *val);
         config_received
-            .db_location
-            .inspect(|val| config.db_location = val.clone());
+            .yar_location
+            .inspect(|val| config.yar_location = val.clone());
         config_received
             .scan_dir
             .inspect(|val| config.scan_dir = *val);
@@ -150,12 +148,12 @@ pub async fn load_config_fe() -> Result<String, String> {
     .map_err(|err| err.to_string())?
 }
 
+/// verifies if there are any yara rules present
 #[tauri::command]
 pub async fn check_update() -> Result<bool, String> {
-    tokio::task::spawn_blocking(utils::update_utils::check_update_necessary)
+    tokio::task::spawn_blocking(|| downloader::check_update())
         .await
         .map_err(|err| err.to_string())?
-        .map_err(|err| err.to_string())
 }
 
 #[tauri::command]
@@ -167,11 +165,6 @@ pub async fn download_logs() -> Result<String, String> {
         .join("main");
     let app_log_path = log_dir.join("app.log");
 
-    /*
-    let downloads_dir = Manager::path(Path::new("."))
-        .download_dir()
-        .expect("Failed to get download directory");
-        */
     let log_path = get_config()
         .paths
         .ok_or("No paths set. Is config initialized?".to_owned())?
@@ -183,15 +176,4 @@ pub async fn download_logs() -> Result<String, String> {
         .map_err(|err| format!("Error copying log file: {err}"))?;
     // If the copy operation is successful, return Ok indicating success
     Ok(log_path.to_str().unwrap().to_string())
-}
-
-#[tauri::command]
-pub async fn get_hash_count_fe() -> Result<String, String> {
-    tokio::task::spawn_blocking(move || {
-        // read hash count from config to avoid long waits on count
-        let config = get_config();
-        Ok(config.hash_count.to_string())
-    })
-    .await
-    .map_err(|err| err.to_string())?
 }
