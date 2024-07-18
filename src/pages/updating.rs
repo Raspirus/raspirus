@@ -89,7 +89,7 @@ pub fn Updating() -> impl IntoView {
     });
 
     spawn_local(async move {
-        let return_value: Result<String, Error> = invoke("update_database", &String::new()).await;
+        let return_value: Result<String, Error> = invoke("update", &String::new()).await;
         match return_value {
             Ok(_) => {
                 log!("Database update successful");
