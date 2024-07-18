@@ -68,7 +68,6 @@ impl YaraScanner {
         }
 
         //let fs = Scanner::new(db_file_str.as_str(), window)?;
-        warn!("Obfuscated mode is: {}", config.obfuscated_is_active);
         let dirty_files = 0; //fs.init(config.obfuscated_is_active, &path)?;
         debug!("Dirty files received: {:?}", dirty_files);
         serde_json::to_string(&dirty_files).map_err(|err| err.to_string())
