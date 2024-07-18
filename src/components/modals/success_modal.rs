@@ -1,19 +1,17 @@
 use leptonic::components::alert::{Alert, AlertContent, AlertTitle, AlertVariant};
-use leptos::*;
-use leptonic::components::modal::Modal;
 use leptonic::components::button::{Button, ButtonColor, ButtonWrapper};
-
+use leptonic::components::modal::Modal;
+use leptos::*;
 
 /// A modal that shows a success message
 /// Similar to the error modal, but with a different color
 #[component]
-pub fn SuccessModal (
+pub fn SuccessModal(
     show_modal: ReadSignal<bool>,
     set_show_modal: WriteSignal<bool>,
     title: ReadSignal<String>,
-    body: ReadSignal<String>
+    body: ReadSignal<String>,
 ) -> impl IntoView {
-
     view! {
         <Modal show_when=show_modal>
             <Alert variant=AlertVariant::Success>
@@ -25,5 +23,4 @@ pub fn SuccessModal (
             </ButtonWrapper>
         </Modal>
     }
-
 }
