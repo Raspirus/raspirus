@@ -11,8 +11,6 @@ pub struct Config {
     pub rules_version: String,
     // If we should log information to a file
     pub logging_is_active: bool,
-    // Location of the .db file
-    pub yar_location: String,
     // If we should scan direcories instead of files (You can only choose one on the current file picker dialog)
     pub scan_dir: bool,
     // mirror to folder with hashfiles for update
@@ -37,7 +35,6 @@ pub struct Paths {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct ConfigFrontend {
     pub logging_is_active: Option<bool>,
-    pub yar_location: Option<String>,
     pub scan_dir: Option<bool>,
 }
 
@@ -46,7 +43,6 @@ impl Default for Config {
         Self {
             rules_version: "None".to_string(),
             logging_is_active: true,
-            yar_location: "".to_string(),
             scan_dir: true,
             mirror: "https://api.github.com/repos/Raspirus/yara-rules/releases/latest".to_string(),
             remote_file: "rulepirus.yarac".to_string(),

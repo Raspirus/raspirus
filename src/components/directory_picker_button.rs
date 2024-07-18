@@ -1,19 +1,18 @@
-use std::path::PathBuf;
 use leptonic::components::button::Button;
 use leptonic::components::icon::Icon;
 use leptonic::components::prelude::ButtonColor;
 use leptonic::prelude::icondata;
-use leptos::*;
 use leptos::logging::log;
+use leptos::*;
+use std::path::PathBuf;
 use tauri_wasm::plugin::dialog::FileDialogBuilder;
-
 
 /// A button that opens a file dialog to select a directory or file
 /// and sets the selected path as the scan target. We open the dialog through the WebAssembly API
 #[component]
 pub fn DirectoryPickerButton(
     scan_target: WriteSignal<Option<String>>,
-    can_select_directories: ReadSignal<bool>
+    can_select_directories: ReadSignal<bool>,
 ) -> impl IntoView {
     let handle_button_click = move || {
         spawn_local(async move {
@@ -39,7 +38,10 @@ pub fn DirectoryPickerButton(
                     _ => return,
                 }
             }
-            let path_string = path_buffer.into_os_string().into_string().unwrap_or_default();
+            let path_string = path_buffer
+                .into_os_string()
+                .into_string()
+                .unwrap_or_default();
             scan_target.set(Option::from(path_string));
         });
     };
