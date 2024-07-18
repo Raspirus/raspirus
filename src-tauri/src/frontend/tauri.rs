@@ -123,9 +123,6 @@ pub async fn save_config_fe(contents: Option<String>) -> Result<(), String> {
             .logging_is_active
             .inspect(|val| config.logging_is_active = *val);
         config_received
-            .obfuscated_is_active
-            .inspect(|val| config.obfuscated_is_active = *val);
-        config_received
             .yar_location
             .inspect(|val| config.yar_location = val.clone());
         config_received
@@ -154,6 +151,7 @@ pub async fn check_update() -> Result<bool, String> {
     tokio::task::spawn_blocking(|| downloader::check_update())
         .await
         .map_err(|err| err.to_string())?
+        .await
 }
 
 #[tauri::command]

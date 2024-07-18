@@ -2,7 +2,7 @@ use std::{path::PathBuf, str::FromStr};
 
 use log::{debug, error, info, warn};
 
-use crate::backend::{downloader, utils, yara_scanner::YaraScanner};
+use crate::backend::{downloader, yara_scanner::YaraScanner};
 
 #[cfg(all(not(debug_assertions), windows))]
 pub fn remove_windows_console() {
