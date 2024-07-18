@@ -79,6 +79,8 @@ pub fn init_tauri() {
             save_config_fe,
             download_logs,
             check_update,
+            rules_version,
+            rule_count,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
@@ -172,4 +174,18 @@ pub async fn download_logs() -> Result<String, String> {
         .map_err(|err| format!("Error copying log file: {err}"))?;
     // If the copy operation is successful, return Ok indicating success
     Ok(log_path.to_str().unwrap().to_string())
+}
+
+#[tauri::command]
+pub async fn rule_count() -> Result<usize, String> {
+    tokio::task::spawn_blocking(move || 0)
+        .await
+        .map_err(|err| err.to_string())
+}
+
+#[tauri::command]
+pub async fn rules_version() -> Result<String, String> {
+    tokio::task::spawn_blocking(|| get_config().rules_version)
+        .await
+        .map_err(|err| err.to_string())
 }

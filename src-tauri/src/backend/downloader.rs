@@ -3,7 +3,7 @@ use std::{fs::File, io::copy, path::PathBuf};
 use log::{error, info};
 use serde::Deserialize;
 
-use crate::backend::utils::generic::update_config;
+use crate::{backend::utils::generic::update_config, MAX_TIMEOUT};
 
 use super::utils::generic::get_config;
 
@@ -37,7 +37,10 @@ async fn get_release() -> Result<Release, String> {
 async fn get_remote_version() -> Result<String, String> {
     let config = get_config();
     let url = config.mirror;
-    let client = reqwest::Client::new();
+    let client = reqwest::Client::builder()
+        .timeout(std::time::Duration::from_secs(MAX_TIMEOUT))
+        .build()
+        .map_err(|err| err.to_string())?;
     println!("{url}");
     let remote = client
         .get(&url)
