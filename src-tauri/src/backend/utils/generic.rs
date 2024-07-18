@@ -1,6 +1,6 @@
 use std::{
     fs::{self, File},
-    path::Path,
+    path::PathBuf,
     sync::Arc,
 };
 
@@ -80,7 +80,7 @@ pub fn clear_cache() -> std::io::Result<()> {
 }
 
 /// gets the unpacked size of a zip file
-pub fn size_zip(path: &Path) -> Result<u64, std::io::Error> {
+pub fn size_zip(path: &PathBuf) -> Result<u64, std::io::Error> {
     trace!("Calculating zip: {}", path.display());
     let file = File::open(path)?;
     let mut archive = ZipArchive::new(file)?;
@@ -93,8 +93,8 @@ pub fn size_zip(path: &Path) -> Result<u64, std::io::Error> {
     Ok(archive_size)
 }
 
-// gets the size of a file
-pub fn size_file(path: &Path) -> Result<u64, std::io::Error> {
+/// gets the size of a file
+pub fn size_file(path: &PathBuf) -> Result<u64, std::io::Error> {
     trace!("Calculating file: {}", path.display());
     Ok(
         match path
@@ -109,8 +109,8 @@ pub fn size_file(path: &Path) -> Result<u64, std::io::Error> {
     )
 }
 
-// gets the size of a folder and its contents
-pub fn size_folder(path: &Path) -> Result<u64, std::io::Error> {
+/// gets the size of a folder and its contents
+pub fn size_folder(path: &PathBuf) -> Result<u64, std::io::Error> {
     trace!("Calculating folder: {}", path.display());
     let mut size = 0;
 
@@ -129,7 +129,7 @@ pub fn size_folder(path: &Path) -> Result<u64, std::io::Error> {
 }
 
 // gets the size for a given path
-pub fn size(path: &Path) -> Result<u64, String> {
+pub fn size(path: &PathBuf) -> Result<u64, String> {
     if path.is_dir() {
         match size_folder(path) {
             Ok(size) => Ok(size),

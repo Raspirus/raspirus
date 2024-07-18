@@ -27,10 +27,10 @@ async fn get_release() -> Result<Release, String> {
         .header("User-Agent", "reqwest")
         .send()
         .await
-        .map_err(|err| format!("3: {err}"))?
+        .map_err(|err| format!("Failed to send release request: {err}"))?
         .json::<Release>()
         .await
-        .map_err(|err| format!("4: {err}"))?;
+        .map_err(|err| format!("Failed to serialize json from release: {err}"))?;
     Ok(response)
 }
 
@@ -44,10 +44,10 @@ async fn get_remote_version() -> Result<String, String> {
         .header("User-Agent", "reqwest")
         .send()
         .await
-        .map_err(|err| format!("1: {err}"))?
+        .map_err(|err| format!("Failed to send version request: {err}"))?
         .json::<Release>()
         .await
-        .map_err(|err| format!("2: {err}"))?
+        .map_err(|err| format!("Failed to serialize json from version: {err}"))?
         .tag_name;
     Ok(remote)
 }
@@ -70,7 +70,7 @@ pub async fn update() -> Result<(), String> {
         .paths
         .ok_or("No paths set. Is config initialized?".to_owned())?
         .data
-        .join("raspirus.yarac");
+        .join(get_config().remote_file);
 
     info!("Starting download...");
     let release = get_release().await.map_err(|err| err.to_string())?;
