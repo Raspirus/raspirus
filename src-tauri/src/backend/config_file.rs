@@ -9,6 +9,9 @@ use std::path::{Path, PathBuf};
 pub struct Config {
     // Last time and date when the db was successfully updated
     pub rules_version: String,
+    // lower and upper threshhold for flagging
+    pub min_matches: usize,
+    pub max_matches: usize,
     // If we should log information to a file
     pub logging_is_active: bool,
     // If we should scan direcories instead of files (You can only choose one on the current file picker dialog)
@@ -43,6 +46,8 @@ impl Default for Config {
         Self {
             rules_version: "None".to_string(),
             logging_is_active: true,
+            min_matches: 0,
+            max_matches: 20,
             scan_dir: true,
             mirror: "https://api.github.com/repos/Raspirus/yara-rules/releases/latest".to_string(),
             remote_file: "rulepirus.yarac".to_string(),

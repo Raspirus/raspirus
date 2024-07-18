@@ -1,13 +1,13 @@
 use std::{
-    fs::{self, File}, os::unix::fs::MetadataExt, path::{Path, PathBuf}
+    fs::{self}, os::unix::fs::MetadataExt, path::{Path, PathBuf}
 };
 
 use chrono::{DateTime, Local};
-use log::{debug, info, warn};
+use log::{debug, warn};
 use serde::Serialize;
-use yara_x::{Rules, ScanResults, Scanner};
+use yara_x::{ScanResults, Scanner};
 
-use crate::backend::utils::generic::get_config;
+use crate::backend::utils::generic::{get_config, get_rules};
 
 use super::{file_log::FileLog, utils::generic::{send, size}};
 
@@ -24,7 +24,6 @@ pub struct YaraScanner {
     last_size: u64,
     file_log: FileLog,
     tauri_window: Option<tauri::Window>,
-    last_percentage: f32,
     analysed: u64,
     skipped: u64,
 }
@@ -43,7 +42,6 @@ impl YaraScanner {
             size: 0,
             last_size: 0,
             file_log: FileLog::new(log_str)?,
-            last_percentage: 0.0,
             analysed: 0,
             skipped: 0,
         })
@@ -60,21 +58,7 @@ impl YaraScanner {
         self.scan_file(&path.clone())?;
         Ok(())
     }
-
-    fn get_rules(&self) -> Result<Rules, String> {
-        let yar_path = get_config()
-            .paths
-            .ok_or("No paths set. Is config initialized?")?
-            .data
-            .join(get_config().remote_file);
-        // setup rules
-        let reader = File::open(yar_path)
-            .map_err(|err| format!("Failed to load yar file: {}", err.to_string()))?;
-        Rules::deserialize_from(reader)
-            .map_err(|err| format!("Failed to deserialize yar file: {}", err.to_string()))
-
-    }
-
+ 
     fn evaluate_result(&mut self, result: ScanResults, path: &Path) {
         let matching = result.matching_rules();
         let rule_count = matching.count();
@@ -89,7 +73,8 @@ impl YaraScanner {
                     None => "No description set".to_owned(),
                 }
             }).collect::<Vec<String>>();
-        if rule_count > 0 {
+        if rule_count > get_config().min_matches {
+            self.file_log.log(path.to_str().unwrap_or_default().to_owned(), rule_count, &descriptions);
             self.tags.push(TaggedFile {
                 path: path.to_path_buf(),
                 descriptions,
@@ -104,11 +89,13 @@ impl YaraScanner {
             return self.scan_folder(path)
         }
         debug!("File: {}", path.to_str().unwrap_or_default());
-        let rules = &self.get_rules()?;
+        let rules = get_rules()?;
         let mut scanner = Scanner::new(&rules);
+        scanner.max_matches_per_pattern(get_config().max_matches);
         match path.extension().unwrap_or_default().to_str() {
             Some("zip") => {
                 warn!("Zip files are not supported at the moment and will nto be scanned!");
+                self.skipped += 1;
                 /*
                 let file = File::open(path).map_err(|err| format!("Failed to open zip file: {err}"))?;
                 let mut archive = ZipArchive::new(file).map_err(|err| format!("Failed to create zip: {err}"))?;
@@ -128,6 +115,7 @@ impl YaraScanner {
                     .map_err(|err| format!("Failed to scan file: {err}"))?;
                 self.evaluate_result(result, path);
                 self.last_size += path.metadata().map_err(|err| format!("Failed to get metadata: {err}"))?.size();
+                self.analysed += 1;
                 self.progress();
             }
         }

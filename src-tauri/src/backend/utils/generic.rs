@@ -6,6 +6,7 @@ use std::{
 
 use log::{trace, warn};
 use tauri::Emitter;
+use yara_x::Rules;
 use zip::ZipArchive;
 
 use crate::{backend::config_file::Config, CONFIG};
@@ -43,22 +44,17 @@ pub fn send(window: &Option<tauri::Window>, event: &str, message: String) {
     }
 }
 
-/// calculates progress and sends to frontend if changed. returns new percentage
-pub fn send_progress(
-    window: &Option<tauri::Window>,
-    last_percentage: f32,
-    current: usize,
-    total: usize,
-    event: &str,
-) -> Result<f32, String> {
-    let new_percentage = ((current as f32 / total as f32) * 100.0).round();
-    // if percentage has not changed return new percentage
-    if new_percentage == last_percentage {
-        return Ok(new_percentage);
-    }
-
-    send(window, event, format!("{new_percentage}"));
-    Ok(new_percentage)
+pub fn get_rules() -> Result<Rules, String> {
+    let yar_path = get_config()
+        .paths
+        .ok_or("No paths set. Is config initialized?")?
+        .data
+        .join(get_config().remote_file);
+    // setup rules
+    let reader = File::open(yar_path)
+        .map_err(|err| format!("Failed to load yar file: {}", err.to_string()))?;
+    Rules::deserialize_from(reader)
+        .map_err(|err| format!("Failed to deserialize yar file: {}", err.to_string()))
 }
 
 /// clears the cache directory
@@ -128,7 +124,7 @@ pub fn size_folder(path: &PathBuf) -> Result<u64, std::io::Error> {
     Ok(size)
 }
 
-// gets the size for a given path
+/// gets the size for a given path
 pub fn size(path: &PathBuf) -> Result<u64, String> {
     if path.is_dir() {
         match size_folder(path) {
