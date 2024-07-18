@@ -88,8 +88,9 @@ pub fn init_tauri() {
 #[tauri::command]
 pub async fn start_scanner(window: tauri::Window, path: String) -> Result<String, String> {
     tokio::task::spawn_blocking(move || {
-        let scanner = YaraScanner::new(Some(window))?;
-        scanner.start(PathBuf::from_str(&path).map_err(|err| err.to_string())?)
+        let mut scanner = YaraScanner::new(Some(window))?;
+        let result = scanner.start(PathBuf::from_str(&path).map_err(|err| err.to_string())?);
+        serde_json::to_string_pretty(&result).map_err(|err| err.to_string())
     })
     .await
     .map_err(|err| err.to_string())?

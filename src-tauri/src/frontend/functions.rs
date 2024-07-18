@@ -39,7 +39,7 @@ pub fn cli_gui(app: tauri::AppHandle) -> Result<(), tauri::Error> {
 pub fn cli_scanner(app: tauri::AppHandle, data: String) {
     let unescaped_str = data.replace("\\n", "\n").replace("\\t", "\t");
     debug!("Data provided: {}", unescaped_str);
-    let scanner = match YaraScanner::new(None) {
+    let mut scanner = match YaraScanner::new(None) {
         Ok(scanner) => scanner,
         Err(err) => {
             error!("Failed to initialize scanner: {err}");
@@ -57,7 +57,7 @@ pub fn cli_scanner(app: tauri::AppHandle, data: String) {
     };
     match scanner.start(path) {
         Ok(res) => {
-            info!("Result: {res}");
+            info!("Result: {res:#?}");
             app.exit(0);
         }
         Err(err) => {
