@@ -99,7 +99,7 @@ pub fn profile_folder(paths: &mut Vec<PathBuf>, size: &mut usize, path: PathBuf)
 
 /// adds file to paths and adds its size to the total
 pub fn profile_file(paths: &mut Vec<PathBuf>, size: &mut usize, path: PathBuf) -> Result<(), std::io::Error> {
-    *size += path.metadata()?.size() as usize;
+    *size += path.metadata()?.len() as usize;
     paths.push(path);
     Ok(())
 }

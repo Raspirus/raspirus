@@ -124,7 +124,7 @@ impl YaraScanner {
                     .unwrap_or("No description set")
                     .to_owned(),
                 None => "No description set".to_owned(),
-            }, rule_name: m.1.namespace().to_owned()})
+            }, rule_name: m.1.identifier().to_owned()})
             .collect::<Vec<RuleFeedback>>();
         if rule_count > get_config().min_matches {
             let file_log_locked = file_log
@@ -195,7 +195,7 @@ impl YaraScanner {
                     *scanned_size_locked += path
                         .metadata()
                         .map_err(|err| format!("Failed to get metadata: {err}"))?
-                        .size() as usize;
+                        .len() as usize;
                     let mut analysed_locked = analysed
                         .lock()
                         .map_err(|err| format!("Failed to lock analysed: {err}"))?;
