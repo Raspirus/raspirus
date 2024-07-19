@@ -7,19 +7,20 @@ use std::path::{Path, PathBuf};
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(default)]
 pub struct Config {
+    // Saves hash count after update in order to avoid having to recount
+    pub hash_count: u32,
     // Last time and date when the db was successfully updated
-    pub rules_version: String,
-    // lower and upper threshhold for flagging
-    pub min_matches: usize,
-    pub max_matches: usize,
+    pub last_db_update: String,
     // If we should log information to a file
     pub logging_is_active: bool,
+    // Check if we should obfuscate the result
+    pub obfuscated_is_active: bool,
+    // Location of the .db file
+    pub db_location: String,
     // If we should scan direcories instead of files (You can only choose one on the current file picker dialog)
     pub scan_dir: bool,
     // mirror to folder with hashfiles for update
     pub mirror: String,
-    // the filename of the compiled yara rules on remote
-    pub remote_file: String,
     // various paths in an effort to unify them. are folders expected to be used later
     #[serde(skip)]
     pub paths: Option<Paths>,
@@ -38,19 +39,21 @@ pub struct Paths {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct ConfigFrontend {
     pub logging_is_active: Option<bool>,
+    pub obfuscated_is_active: Option<bool>,
+    pub db_location: Option<String>,
     pub scan_dir: Option<bool>,
 }
 
 impl Default for Config {
     fn default() -> Self {
         Self {
-            rules_version: "None".to_string(),
+            hash_count: 0,
+            last_db_update: "Never".to_string(),
             logging_is_active: true,
-            min_matches: 0,
-            max_matches: 20,
+            obfuscated_is_active: true,
+            db_location: "".to_string(),
             scan_dir: true,
-            mirror: "https://api.github.com/repos/Raspirus/yara-rules/releases/latest".to_string(),
-            remote_file: "rulepirus.yarac".to_string(),
+            mirror: "https://raw.githubusercontent.com/Raspirus/signatures/main/hashes".to_string(),
             paths: None,
         }
     }

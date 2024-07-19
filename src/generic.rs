@@ -45,7 +45,7 @@ pub struct SettingsStruct {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct SettingsArgs {
-    pub contents: String,
+    pub contents: String
 }
 
 #[derive(Serialize, Deserialize)]
@@ -56,8 +56,5 @@ pub struct ScannerArgs {
 // A function to convert a big integer to a date string in the format of "DD-MM-YYYY HH:MM:SS"
 pub fn int_to_date_string(date_int: i64) -> String {
     let date_time = DateTime::from_timestamp(date_int, 0);
-    date_time
-        .unwrap_or_default()
-        .format("%d-%m-%Y %H:%M:%S")
-        .to_string()
+    date_time.unwrap_or_default().format("%d-%m-%Y %H:%M:%S").to_string()
 }
