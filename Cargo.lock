@@ -4731,15 +4731,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "leptos_sweetalert"
-version = "1.0.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cfb98e56f038701634e9cfe822aaba0d274de11e01fc52a469e6a4e35f05e383"
-dependencies = [
- "leptos",
-]
-
-[[package]]
 name = "lfs-core"
 version = "0.11.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -6806,21 +6797,15 @@ dependencies = [
  "chrono",
  "console_error_panic_hook",
  "futures-util",
- "js-sys",
  "leptonic",
  "leptos",
  "leptos_i18n",
  "leptos_router",
- "leptos_sweetalert",
- "log",
  "serde",
- "serde-wasm-bindgen",
  "serde_json",
  "tauri-wasm",
  "time",
  "uuid",
- "wasm-bindgen",
- "wasm-bindgen-futures",
 ]
 
 [[package]]
