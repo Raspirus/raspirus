@@ -1,3 +1,4 @@
+use std::path::PathBuf;
 use chrono::DateTime;
 use serde::{Deserialize, Serialize};
 
@@ -51,6 +52,20 @@ pub struct SettingsArgs {
 #[derive(Serialize, Deserialize)]
 pub struct ScannerArgs {
     pub path: String,
+}
+
+#[derive(Serialize, Clone, Debug)]
+pub struct TaggedFile {
+    pub path: PathBuf,
+    /// vector of description and rule name
+    pub descriptions: Vec<RuleFeedback>,
+    pub rule_count: usize,
+}
+
+#[derive(Serialize, Clone, Debug)]
+pub struct RuleFeedback {
+    pub rule_name: String,
+    pub rule_description: String
 }
 
 // A function to convert a big integer to a date string in the format of "DD-MM-YYYY HH:MM:SS"
