@@ -1,17 +1,18 @@
-use crate::generic::SettingsPatchArgs;
-use crate::i18n::use_i18n;
 use leptonic::components::button::Button;
 use leptonic::components::icon::Icon;
 use leptonic::components::prelude::ButtonColor;
-use leptonic::components::toast::{Toast, ToastTimeout, ToastVariant, Toasts};
+use leptonic::components::toast::{Toast, Toasts, ToastTimeout, ToastVariant};
 use leptonic::prelude::icondata;
-use leptos::logging::log;
 use leptos::*;
-use leptos_i18n::t;
+use leptos::logging::log;
 use tauri_wasm::api::core::invoke;
-use tauri_wasm::plugin::dialog::FileDialogBuilder;
 use tauri_wasm::Error;
+use crate::generic::SettingsPatchArgs;
+use tauri_wasm::plugin::dialog::FileDialogBuilder;
 use uuid::Uuid;
+use crate::i18n::use_i18n;
+use leptos_i18n::t;
+
 
 /// A card that allows the user to patch the database with a file
 /// The card opens a file picker where the user can choose a file they want to patch the database
@@ -37,42 +38,35 @@ pub fn SettingsPatchCard(
                 log!("Selected file path: {:?}", path_string);
 
                 // Here we send the path to the backend
-                let result: Result<(usize, usize, usize), Error> = invoke(
-                    "patch_settings",
-                    &SettingsPatchArgs {
-                        patchfile: path_string,
-                    },
-                )
-                .await;
+                let result: Result<(usize, usize, usize), Error> = invoke("patch_settings", &SettingsPatchArgs{patchfile: path_string}).await;
                 if let Ok(result_tuple) = result {
                     log!("Patch successful");
-                    toasts.push(Toast {
-                        id: Uuid::new_v4(),
-                        created_at: time::OffsetDateTime::now_utc(),
-                        variant: ToastVariant::Success,
-                        header: t!(i18n, add_patch_success).into_view(),
-                        body: format!(
-                            "{}: {} | {}: {} | {}: {}",
-                            t!(i18n, add_patch_result_inserted)(),
-                            result_tuple.0,
-                            t!(i18n, add_patch_result_removed)(),
-                            result_tuple.1,
-                            t!(i18n, add_patch_result_skipped)(),
-                            result_tuple.2
-                        )
-                        .into_view(),
-                        timeout: ToastTimeout::DefaultDelay,
-                    });
+                    toasts.push(
+                        Toast {
+                            id: Uuid::new_v4(),
+                            created_at: time::OffsetDateTime::now_utc(),
+                            variant: ToastVariant::Success,
+                            header: t!(i18n, add_patch_success).into_view(),
+                            body: format!("{}: {} | {}: {} | {}: {}",
+                                          t!(i18n, add_patch_result_inserted)(), result_tuple.0,
+                                          t!(i18n, add_patch_result_removed)(), result_tuple.1,
+                                          t!(i18n, add_patch_result_skipped)(), result_tuple.2
+                            ).into_view(),
+                            timeout: ToastTimeout::DefaultDelay,
+                        }
+                    );
                 } else if let Err(e) = result {
                     log!("Patch failed: {:?}", e);
-                    toasts.push(Toast {
-                        id: Uuid::new_v4(),
-                        created_at: time::OffsetDateTime::now_utc(),
-                        variant: ToastVariant::Error,
-                        header: t!(i18n, add_patch_failed).into_view(),
-                        body: format!("Error: {:?}", e).into_view(),
-                        timeout: ToastTimeout::DefaultDelay,
-                    });
+                    toasts.push(
+                        Toast {
+                            id: Uuid::new_v4(),
+                            created_at: time::OffsetDateTime::now_utc(),
+                            variant: ToastVariant::Error,
+                            header: t!(i18n, add_patch_failed).into_view(),
+                            body: format!("Error: {:?}", e).into_view(),
+                            timeout: ToastTimeout::DefaultDelay,
+                        }
+                    );
                 }
             }
         });

@@ -1,10 +1,12 @@
 use std::{
-    fs::{self, File}, os::unix::fs::MetadataExt, path::PathBuf, sync::Arc, usize
+    fs::{self, File},
+    path::Path,
+    sync::Arc,
 };
 
 use log::{trace, warn};
 use tauri::Emitter;
-use yara_x::Rules;
+use zip::ZipArchive;
 
 use crate::{backend::config_file::Config, CONFIG};
 
@@ -31,7 +33,7 @@ pub fn get_config() -> Config {
 }
 
 /// sends given percentage to the frontend
-pub fn send(window: &Option<Arc<tauri::Window>>, event: &str, message: String) {
+pub fn send(window: &Option<tauri::Window>, event: &str, message: String) {
     if let Some(window) = window {
         trace!("Sending {event}: {message}");
         match window.emit(event, message) {
@@ -41,17 +43,22 @@ pub fn send(window: &Option<Arc<tauri::Window>>, event: &str, message: String) {
     }
 }
 
-pub fn get_rules() -> Result<Rules, String> {
-    let yar_path = get_config()
-        .paths
-        .ok_or("No paths set. Is config initialized?")?
-        .data
-        .join(get_config().remote_file);
-    // setup rules
-    let reader = File::open(yar_path)
-        .map_err(|err| format!("Failed to load yar file: {}", err.to_string()))?;
-    Rules::deserialize_from(reader)
-        .map_err(|err| format!("Failed to deserialize yar file: {}", err.to_string()))
+/// calculates progress and sends to frontend if changed. returns new percentage
+pub fn send_progress(
+    window: &Option<tauri::Window>,
+    last_percentage: f32,
+    current: usize,
+    total: usize,
+    event: &str,
+) -> Result<f32, String> {
+    let new_percentage = ((current as f32 / total as f32) * 100.0).round();
+    // if percentage has not changed return new percentage
+    if new_percentage == last_percentage {
+        return Ok(new_percentage);
+    }
+
+    send(window, event, format!("{new_percentage}"));
+    Ok(new_percentage)
 }
 
 /// clears the cache directory
@@ -72,34 +79,72 @@ pub fn clear_cache() -> std::io::Result<()> {
     Ok(())
 }
 
-/// yields all file paths and the total size of them
-pub fn profile_path(path: PathBuf) -> Result<(Vec<PathBuf>, usize), std::io::Error> {
-    let mut paths = Vec::new();
-    let mut size = 0;
-    if path.is_dir() {
-        profile_folder(&mut paths, &mut size, path)?;
-    } else {
-        profile_file(&mut paths, &mut size, path)?;
+/// gets the unpacked size of a zip file
+pub fn size_zip(path: &Path) -> Result<u64, std::io::Error> {
+    trace!("Calculating zip: {}", path.display());
+    let file = File::open(path)?;
+    let mut archive = ZipArchive::new(file)?;
+    let mut archive_size = 0;
+
+    for i in 0..archive.len() {
+        let file = archive.by_index(i)?;
+        archive_size += file.size();
     }
-    Ok((paths, size))
+    Ok(archive_size)
 }
 
-/// adds files or files in subfolders to paths and adds their sizes to the total
-pub fn profile_folder(paths: &mut Vec<PathBuf>, size: &mut usize, path: PathBuf) -> Result<(), std::io::Error> {
-    for entry in fs::read_dir(path)? {
-        let entry = entry?;
-        if entry.path().is_dir() {
-            profile_folder(paths, size, entry.path())?;
-        } else {
-            profile_file(paths, size, entry.path())?;
+// gets the size of a file
+pub fn size_file(path: &Path) -> Result<u64, std::io::Error> {
+    trace!("Calculating file: {}", path.display());
+    Ok(
+        match path
+            .extension()
+            .unwrap_or_default()
+            .to_str()
+            .unwrap_or_default()
+        {
+            "zip" => size_zip(path)?,
+            _ => File::open(path)?.metadata()?.len(),
+        },
+    )
+}
+
+// gets the size of a folder and its contents
+pub fn size_folder(path: &Path) -> Result<u64, std::io::Error> {
+    trace!("Calculating folder: {}", path.display());
+    let mut size = 0;
+
+    let entries = fs::read_dir(path)?;
+    for entry in entries {
+        let entry_path = entry?.path();
+
+        if entry_path.is_dir() {
+            size += size_folder(&entry_path)?;
+        } else if entry_path.is_file() {
+            size += size_file(&entry_path)?;
         }
     }
-    Ok(())
+
+    Ok(size)
 }
 
-/// adds file to paths and adds its size to the total
-pub fn profile_file(paths: &mut Vec<PathBuf>, size: &mut usize, path: PathBuf) -> Result<(), std::io::Error> {
-    *size += path.metadata()?.size() as usize;
-    paths.push(path);
-    Ok(())
+// gets the size for a given path
+pub fn size(path: &Path) -> Result<u64, String> {
+    if path.is_dir() {
+        match size_folder(path) {
+            Ok(size) => Ok(size),
+            Err(err) => {
+                warn!("Failed to get folder size for scanning: {err}");
+                Err(String::from("Failed to get folder size for scanning"))
+            }
+        }
+    } else {
+        match size_file(path) {
+            Ok(size) => Ok(size),
+            Err(err) => {
+                warn!("Failed to get file size for scanning: {err}");
+                Ok(0)
+            }
+        }
+    }
 }

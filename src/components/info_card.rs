@@ -1,12 +1,17 @@
-use leptonic::components::icon::Icon;
-use leptonic::prelude::*;
 use leptos::*;
+use leptonic::prelude::*;
+use leptonic::components::icon::Icon;
+
 
 /// InfoCard component
 /// Standardizes the look of a card that displays information. It has a title, a value, and an icon.
 /// The user should not be able to interact with this component.
 #[component]
-pub fn InfoCard(title: String, value: String, icon: icondata::Icon) -> impl IntoView {
+pub fn InfoCard (
+    title: String,
+    value: String,
+    icon: icondata::Icon
+) -> impl IntoView {
     view! {
         <div class="flex flex-col m-6 p-2 bg-white rounded-2xl shadow-md">
             <div class="flex items-center justify-between mx-4">

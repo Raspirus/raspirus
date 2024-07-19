@@ -1,9 +1,10 @@
-use crate::components::home_button::HomeButton;
-use crate::components::info_card::InfoCard;
-use crate::i18n::use_i18n;
 use leptonic::prelude::*;
 use leptos::*;
+use crate::i18n::use_i18n;
 use leptos_i18n::t;
+use crate::components::home_button::HomeButton;
+use crate::components::info_card::InfoCard;
+
 
 /// Information page
 /// It contains a list of useful information about the application

@@ -1,9 +1,9 @@
 use leptonic::components::button::Button;
 use leptonic::components::icon::Icon;
 use leptonic::prelude::icondata;
+use leptos::*;
 use leptos::leptos_dom::error;
 use leptos::logging::log;
-use leptos::*;
 use leptos_i18n::t;
 use leptos_router::use_navigate;
 use tauri_wasm::api::core::invoke;
@@ -14,8 +14,9 @@ use crate::components::settings_card_input::SettingsInputCard;
 use crate::components::settings_card_patch::SettingsPatchCard;
 use crate::components::settings_card_toggle::SettingsToggleCard;
 use crate::components::settings_card_update::SettingsUpdateCard;
-use crate::generic::{int_to_date_string, Config, SettingsArgs, SettingsStruct};
+use crate::generic::{Config, int_to_date_string, SettingsArgs, SettingsStruct};
 use crate::i18n::use_i18n;
+
 
 /// The settings page
 /// This page allows the user to change the settings of the application
@@ -35,8 +36,7 @@ pub fn Settings() -> impl IntoView {
     let (updated_date, setUpdatedDate) = create_signal(String::new());
     let navigate = use_navigate();
     // A formatted string for the updated date
-    let formatted_updated_date =
-        int_to_date_string(updated_date.get().parse::<i64>().unwrap_or_default());
+    let formatted_updated_date = int_to_date_string(updated_date.get().parse::<i64>().unwrap_or_default());
 
     spawn_local(async move {
         let config: Result<String, Error> = invoke("load_config_fe", &String::new()).await;
@@ -66,7 +66,7 @@ pub fn Settings() -> impl IntoView {
         spawn_local(async move {
             // We need to convert the args to a string in order to send it to the backend
             let args = SettingsArgs {
-                contents: serde_json::to_string(&settings_struct).unwrap(),
+                contents: serde_json::to_string(&settings_struct).unwrap()
             };
             log!("Args: {:?}", args);
 

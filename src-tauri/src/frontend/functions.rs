@@ -1,8 +1,6 @@
-use std::{path::PathBuf, str::FromStr};
-
 use log::{debug, error, info, warn};
 
-use crate::backend::{downloader, yara_scanner::YaraScanner};
+use crate::backend::utils;
 
 #[cfg(all(not(debug_assertions), windows))]
 pub fn remove_windows_console() {
@@ -39,25 +37,9 @@ pub fn cli_gui(app: tauri::AppHandle) -> Result<(), tauri::Error> {
 pub fn cli_scanner(app: tauri::AppHandle, data: String) {
     let unescaped_str = data.replace("\\n", "\n").replace("\\t", "\t");
     debug!("Data provided: {}", unescaped_str);
-    let mut scanner = match YaraScanner::new(None) {
-        Ok(scanner) => scanner,
-        Err(err) => {
-            error!("Failed to initialize scanner: {err}");
-            app.exit(-1);
-            return;
-        }
-    };
-    let path = match PathBuf::from_str(&unescaped_str) {
-        Ok(path) => path,
-        Err(err) => {
-            error!("Failed to create path from arguments: {err}");
-            app.exit(-1);
-            return;
-        }
-    };
-    match scanner.start(path) {
+    match utils::scanner_utils::start_scanner(None, unescaped_str) {
         Ok(res) => {
-            info!("Result: {res:#?}");
+            info!("Result: {res}");
             app.exit(0);
         }
         Err(err) => {
@@ -67,26 +49,16 @@ pub fn cli_scanner(app: tauri::AppHandle, data: String) {
     }
 }
 
-// Updates over the CLI
-pub fn cli_update(app: tauri::AppHandle) {
-    let rt = match tokio::runtime::Runtime::new() {
-        Ok(rt) => rt,
+// Updates the DB over the CLI
+pub fn cli_dbupdate(app: tauri::AppHandle) {
+    match utils::update_utils::update(None) {
+        Ok(res) => {
+            info!("Result: {res}");
+            app.exit(0);
+        }
         Err(err) => {
-            error!("Failed to create tokio runtime: {err}");
+            error!("Error: {err}");
             app.exit(-1);
-            return;
         }
-    };
-    rt.block_on(async {
-        match downloader::update().await {
-            Ok(_) => {
-                info!("Successfully updated");
-                app.exit(0);
-            }
-            Err(err) => {
-                error!("Error: {err}");
-                app.exit(-1);
-            }
-        }
-    })
+    }
 }

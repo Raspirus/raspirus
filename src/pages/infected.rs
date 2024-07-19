@@ -1,12 +1,12 @@
-use crate::components::home_button::HomeButton;
-use crate::components::virus_card::VirusCard;
-use crate::generic::VirusFile;
-use crate::i18n::use_i18n;
 use leptonic::components::stack::Stack;
 use leptonic::Size;
 use leptos::*;
 use leptos_i18n::t;
 use leptos_router::use_query_map;
+use crate::components::home_button::HomeButton;
+use crate::components::virus_card::VirusCard;
+use crate::i18n::use_i18n;
+use crate::generic::VirusFile;
 
 // TODO:
 // - Styling
