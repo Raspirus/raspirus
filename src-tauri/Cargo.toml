@@ -30,7 +30,7 @@ tauri-plugin-cli = "2.0.0-beta.7"
 tauri-plugin-dialog = "2.0.0-beta.10"
 dirs = "5.0.1"
 yara-x = "0.5.0"
-
+num_cpus = "1.16.0"
 
 [target.'cfg(any(target_os = "linux", target_os = "macos"))'.dependencies]
 lfs-core = "0.11.2"

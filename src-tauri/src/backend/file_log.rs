@@ -43,10 +43,12 @@ impl FileLog {
     /// let log = FileLog::new("log.txt".to_owned());
     /// log.log("abc123".to_owned(), "C:/Users/user/Desktop/file.txt".to_owned());
     /// ```
-    pub fn log(&self, fpath: String, rule_count: usize, descriptions: &Vec<String>) {
+    pub fn log(&self, fpath: String, rule_count: usize, descriptions: &Vec<(String, String)>) {
         match self.file.as_ref() {
             Some(mut file) => {
-                match file.write_all(format!("{fpath}\t{rule_count}\t{}\n", descriptions.join(",")).as_bytes()) {
+                match file.write_all(
+                    format!("{fpath}\t{rule_count}\t{:#?}\n", descriptions).as_bytes(),
+                ) {
                     Ok(_) => {}
                     Err(err) => error!("Failed loggin: {err}"),
                 };
