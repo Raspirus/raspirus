@@ -1,5 +1,5 @@
 use std::{
-    fs::{self, File}, os::unix::fs::MetadataExt, path::PathBuf, sync::Arc, usize
+    fs::{self, File}, path::PathBuf, sync::Arc, usize
 };
 
 use log::{trace, warn};

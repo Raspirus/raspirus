@@ -1,5 +1,5 @@
 use std::{
-    fmt::Display, os::unix::fs::MetadataExt, path::{Path, PathBuf}, sync::Mutex
+    fmt::Display, path::{Path, PathBuf}, sync::Mutex
 };
 
 use chrono::{DateTime, Local};
