@@ -1,10 +1,9 @@
+use crate::i18n::use_i18n;
 use leptonic::components::button::LinkButton;
 use leptonic::components::icon::Icon;
 use leptonic::prelude::icondata;
 use leptos::*;
 use leptos_i18n::t;
-use crate::i18n::use_i18n;
-
 
 /// Home button component
 /// Is a button that redirects to the home page of the website. Used for convenience.

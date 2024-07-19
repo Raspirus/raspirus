@@ -20,13 +20,7 @@ mod tests;
 // config
 static CONFIG_FILENAME: &str = "Raspirus.json";
 
-// database settings
-static DB_NAME: &str = "signatures.db";
-static DB_TABLE: &str = "signatures";
-
 // download settings
-static MAX_RETRY: usize = 5;
-static PARALLEL_DOWNLOADS: usize = 3;
 static MAX_TIMEOUT: u64 = 120;
 
 // global config instance

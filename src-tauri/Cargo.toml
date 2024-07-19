@@ -15,8 +15,7 @@ rust-version = "1.75"
 [dependencies]
 threadpool_rs = { git = "https://github.com/GamingGuy003/threadpool_rs.git" }
 log = "0.4.22"
-reqwest = { version = "0.12.5", features = ["blocking"] }
-rusqlite = { version = "0.31.0", features = ["bundled"] }
+reqwest = { version = "0.12.5", features = ["blocking", "json"] }
 tokio = "1.38.0"
 serde_json = "1.0.120"
 serde = { version = "1.0.204", features = ["derive"] }
@@ -30,7 +29,8 @@ tauri-cli = "2.0.0-beta.21"
 tauri-plugin-cli = "2.0.0-beta.7"
 tauri-plugin-dialog = "2.0.0-beta.10"
 dirs = "5.0.1"
-
+yara-x = "0.5.0"
+num_cpus = "1.16.0"
 
 [target.'cfg(any(target_os = "linux", target_os = "macos"))'.dependencies]
 lfs-core = "0.11.2"

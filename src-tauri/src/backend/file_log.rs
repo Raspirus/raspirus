@@ -5,7 +5,7 @@ use std::{
 
 use log::{error, trace, warn};
 
-use super::utils::generic::get_config;
+use super::{utils::generic::get_config, yara_scanner::RuleFeedback};
 
 pub struct FileLog {
     pub file: Option<File>,
@@ -43,16 +43,13 @@ impl FileLog {
     /// let log = FileLog::new("log.txt".to_owned());
     /// log.log("abc123".to_owned(), "C:/Users/user/Desktop/file.txt".to_owned());
     /// ```
-    pub fn log(&self, hash: String, fpath: String) {
+    pub fn log(&self, fpath: String, rule_count: usize, descriptions: &Vec<RuleFeedback>) {
         match self.file.as_ref() {
             Some(mut file) => {
-                match file.write_all(format!("{hash}\t{fpath}\n").as_bytes()) {
-                    Ok(_) => {
-                        trace!(
-                            "Wrote {hash}\t{fpath} to {:?}",
-                            self.file.as_ref().expect("Invalid file reference")
-                        )
-                    }
+                match file.write_all(
+                    format!("[{rule_count}]\t{fpath}\n{}\n", descriptions.iter().map(|description| description.to_string()).collect::<Vec<String>>().join("\n")).as_bytes(),
+                ) {
+                    Ok(_) => {}
                     Err(err) => error!("Failed loggin: {err}"),
                 };
             }

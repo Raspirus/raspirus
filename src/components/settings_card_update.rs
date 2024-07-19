@@ -1,11 +1,10 @@
+use crate::i18n::use_i18n;
 use leptonic::components::button::LinkButton;
 use leptonic::components::icon::Icon;
 use leptonic::components::prelude::ButtonColor;
 use leptonic::prelude::icondata;
 use leptos::*;
-use crate::i18n::use_i18n;
 use leptos_i18n::t;
-
 
 /// A card that displays the current version of the database and allows the user to update it.
 /// The update does not happen in this component, but is triggered by the user clicking the button.
