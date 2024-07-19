@@ -1,7 +1,5 @@
 use std::{
-    os::unix::fs::MetadataExt,
-    path::{Path, PathBuf},
-    sync::Mutex,
+    fmt::Display, os::unix::fs::MetadataExt, path::{Path, PathBuf}, sync::Mutex
 };
 
 use chrono::{DateTime, Local};
@@ -22,8 +20,20 @@ use super::{
 pub struct TaggedFile {
     pub path: PathBuf,
     /// vector of description and rule name
-    pub descriptions: Vec<(String, String)>,
+    pub descriptions: Vec<RuleFeedback>,
     pub rule_count: usize,
+}
+
+#[derive(Serialize, Clone, Debug)]
+pub struct RuleFeedback {
+    pub rule_name: String,
+    pub rule_description: String
+}
+
+impl Display for RuleFeedback {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{} - {}", self.rule_name, self.rule_description)
+    }
 }
 
 pub struct YaraScanner {
@@ -108,14 +118,14 @@ impl YaraScanner {
         let descriptions = result
             .matching_rules()
             .map(|rule| (rule.metadata().into_json(), rule))
-            .map(|m| (match m.0.get("description") {
+            .map(|m| RuleFeedback { rule_description: match m.0.get("description") {
                 Some(description) => description
                     .as_str()
                     .unwrap_or("No description set")
                     .to_owned(),
                 None => "No description set".to_owned(),
-            }, m.1.namespace().to_owned()))
-            .collect::<Vec<(String, String)>>();
+            }, rule_name: m.1.namespace().to_owned()})
+            .collect::<Vec<RuleFeedback>>();
         if rule_count > get_config().min_matches {
             let file_log_locked = file_log
                 .lock()
