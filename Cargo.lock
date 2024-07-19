@@ -6780,6 +6780,7 @@ dependencies = [
  "lfs-core",
  "log",
  "md5",
+ "num_cpus",
  "regex",
  "reqwest 0.12.5",
  "serde",
