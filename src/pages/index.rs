@@ -1,17 +1,22 @@
-use crate::components::modals::{error_modal::ErrorModal, welcome_modal::WelcomeModal};
-use crate::components::{
-    directory_picker_button::DirectoryPickerButton, language_switch::LanguageSwitch,
-};
-use crate::generic::{Config, UsbDevice};
-use crate::i18n::use_i18n;
 use leptonic::{components::prelude::*, prelude::*};
-use leptos::logging::{error, log, warn};
 use leptos::*;
-use leptos_i18n::t;
-use leptos_router::{use_navigate, use_query_map};
+use leptos::logging::{log, error, warn};
 use tauri_wasm::api::core::invoke;
 use tauri_wasm::Error;
+use crate::i18n::use_i18n;
+use leptos_i18n::t;
+use leptos_router::{use_navigate, use_query_map};
 use uuid::Uuid;
+use crate::components::{
+    directory_picker_button::DirectoryPickerButton,
+    language_switch::LanguageSwitch,
+};
+use crate::components::modals::{
+    error_modal::ErrorModal,
+    welcome_modal::WelcomeModal,
+};
+use crate::generic::{Config, UsbDevice};
+
 
 /// The Index - main page
 /// It is the actual main page and can be called with parameters.
@@ -85,37 +90,38 @@ pub fn Index() -> impl IntoView {
     let update_usb_devices = move || {
         spawn_local(async move {
             // Retrieve a list of attached USB drives from the backend
-            let usb_devices: Result<String, Error> =
-                invoke("list_usb_drives", &String::new()).await;
+            let usb_devices: Result<String, Error> = invoke("list_usb_drives", &String::new()).await;
             match usb_devices {
                 Ok(usb_devices_string) => {
                     // We will get a JSON string with the USB devices
-                    let usb_devices_list: Vec<UsbDevice> =
-                        serde_json::from_str(&usb_devices_string).unwrap();
+                    let usb_devices_list: Vec<UsbDevice> = serde_json::from_str(&usb_devices_string).unwrap();
                     // Then we create a vector with the names of the USB devices
-                    let usb_names: Vec<String> =
-                        usb_devices_list.iter().map(|d| d.name.clone()).collect();
+                    let usb_names: Vec<String> = usb_devices_list.iter().map(|d| d.name.clone()).collect();
                     setUsbDevices.set(usb_names);
-                    toasts.push(Toast {
-                        id: Uuid::new_v4(),
-                        created_at: time::OffsetDateTime::now_utc(),
-                        variant: ToastVariant::Info,
-                        header: t!(i18n, ui_update_title).into_view(),
-                        body: t!(i18n, ui_update_text).into_view(),
-                        timeout: ToastTimeout::DefaultDelay,
-                    });
+                    toasts.push(
+                        Toast {
+                            id: Uuid::new_v4(),
+                            created_at: time::OffsetDateTime::now_utc(),
+                            variant: ToastVariant::Info,
+                            header: t!(i18n, ui_update_title).into_view(),
+                            body: t!(i18n, ui_update_text).into_view(),
+                            timeout: ToastTimeout::DefaultDelay,
+                        }
+                    );
                     log!("USB devices updated");
                 }
                 Err(e) => {
                     error!("Error listing USB devices: {:?}", e);
-                    toasts.push(Toast {
-                        id: Uuid::new_v4(),
-                        created_at: time::OffsetDateTime::now_utc(),
-                        variant: ToastVariant::Error,
-                        header: t!(i18n, usb_list_error).into_view(),
-                        body: format!("Error: {:?}", e).into_view(),
-                        timeout: ToastTimeout::DefaultDelay,
-                    });
+                    toasts.push(
+                        Toast {
+                            id: Uuid::new_v4(),
+                            created_at: time::OffsetDateTime::now_utc(),
+                            variant: ToastVariant::Error,
+                            header: t!(i18n, usb_list_error).into_view(),
+                            body: format!("Error: {:?}", e).into_view(),
+                            timeout: ToastTimeout::DefaultDelay,
+                        }
+                    );
                     error!("Error listing USB devices: {:?}", e);
                 }
             }
@@ -129,20 +135,19 @@ pub fn Index() -> impl IntoView {
         let target = scan_target.get();
         if target.is_some() && !target.clone().unwrap_or_default().is_empty() {
             log!("Target selected, navigating to loading page");
-            navigate(
-                &format!("/loading?target={}", target.unwrap_or_default()),
-                Default::default(),
-            );
+            navigate(&format!("/loading?target={}", target.unwrap_or_default()), Default::default());
         } else {
             warn!("No target selected, showing error modal");
-            toasts.push(Toast {
-                id: Uuid::new_v4(),
-                created_at: time::OffsetDateTime::now_utc(),
-                variant: ToastVariant::Warn,
-                header: t!(i18n, target_selection_error).into_view(),
-                body: t!(i18n, target_selection_error_msg).into_view(),
-                timeout: ToastTimeout::DefaultDelay,
-            });
+            toasts.push(
+                Toast {
+                    id: Uuid::new_v4(),
+                    created_at: time::OffsetDateTime::now_utc(),
+                    variant: ToastVariant::Warn,
+                    header: t!(i18n, target_selection_error).into_view(),
+                    body: t!(i18n, target_selection_error_msg).into_view(),
+                    timeout: ToastTimeout::DefaultDelay,
+                }
+            );
         }
     };
 

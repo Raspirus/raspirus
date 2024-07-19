@@ -1,14 +1,15 @@
-use crate::i18n::use_i18n;
 use leptonic::components::button::Button;
 use leptonic::components::icon::Icon;
-use leptonic::components::prelude::{ButtonColor, Toast, ToastTimeout, ToastVariant, Toasts};
+use leptonic::components::prelude::{ButtonColor, Toast, Toasts, ToastTimeout, ToastVariant};
 use leptonic::prelude::icondata;
-use leptos::logging::log;
 use leptos::*;
-use leptos_i18n::t;
+use leptos::logging::log;
 use tauri_wasm::api::core::invoke;
 use tauri_wasm::Error;
 use uuid::Uuid;
+use crate::i18n::use_i18n;
+use leptos_i18n::t;
+
 
 /// A card that allows the user to download logs
 /// On click, we call the download function from the backend and display the output in a toast.
@@ -27,26 +28,29 @@ pub fn SettingsDownloadCard(
             match output {
                 Ok(output) => {
                     log!("Output: {}", output);
-                    toasts.push(Toast {
-                        id: Uuid::new_v4(),
-                        created_at: time::OffsetDateTime::now_utc(),
-                        variant: ToastVariant::Success,
-                        header: t!(i18n, logs_download_dialog).into_view(),
-                        body: format!("{} {}", t!(i18n, logs_download_dialog_text)(), output)
-                            .into_view(),
-                        timeout: ToastTimeout::DefaultDelay,
-                    });
+                    toasts.push(
+                        Toast {
+                            id: Uuid::new_v4(),
+                            created_at: time::OffsetDateTime::now_utc(),
+                            variant: ToastVariant::Success,
+                            header: t!(i18n, logs_download_dialog).into_view(),
+                            body: format!("{} {}", t!(i18n, logs_download_dialog_text)(), output).into_view(),
+                            timeout: ToastTimeout::DefaultDelay,
+                        }
+                    );
                 }
                 Err(e) => {
                     log!("Error: {:?}", e);
-                    toasts.push(Toast {
-                        id: Uuid::new_v4(),
-                        created_at: time::OffsetDateTime::now_utc(),
-                        variant: ToastVariant::Error,
-                        header: t!(i18n, logs_download_dialog_failed).into_view(),
-                        body: format!("Error: {:?}", e).into_view(),
-                        timeout: ToastTimeout::DefaultDelay,
-                    });
+                    toasts.push(
+                        Toast {
+                            id: Uuid::new_v4(),
+                            created_at: time::OffsetDateTime::now_utc(),
+                            variant: ToastVariant::Error,
+                            header: t!(i18n, logs_download_dialog_failed).into_view(),
+                            body: format!("Error: {:?}", e).into_view(),
+                            timeout: ToastTimeout::DefaultDelay,
+                        }
+                    );
                 }
             }
         });

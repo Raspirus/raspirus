@@ -1,12 +1,19 @@
-use crate::i18n::provide_i18n_context;
-use crate::pages::{
-    agreement::Agreement, clean::Clean, index::Index, infected::Infected, information::Information,
-    loading::Loading, settings::Settings, updating::Updating,
-};
 use leptonic::components::root::Root;
 use leptonic::components::theme::LeptonicTheme;
 use leptos::*;
+use crate::i18n::provide_i18n_context;
 use leptos_router::*;
+use crate::pages::{
+    index::Index,
+    settings::Settings,
+    information::Information,
+    loading::Loading,
+    clean::Clean,
+    infected::Infected,
+    updating::Updating,
+    agreement::Agreement
+};
+
 
 /// Defines the routes of the application. We use the `StaticRoute` component to define the routes.
 /// The `StaticRoute` component is a wrapper around the `Route` component that provides a static

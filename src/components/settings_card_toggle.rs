@@ -3,6 +3,7 @@ use leptonic::components::toggle::Toggle;
 use leptonic::prelude::icondata;
 use leptos::*;
 
+
 /// A simple toggle card for settings
 /// It is the most common setting and allows user to set something to on or off
 #[component]
@@ -14,6 +15,7 @@ pub fn SettingsToggleCard(
     is_on: ReadSignal<bool>,
     toggle_function: WriteSignal<bool>,
 ) -> impl IntoView {
+
     view! {
         <div class="flex flex-col m-6 p-2 bg-white rounded-2xl shadow-md">
             <div class="flex items-center justify-between mx-4">

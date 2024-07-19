@@ -1,8 +1,9 @@
-use crate::i18n::use_i18n;
-use leptonic::components::button::{Button, ButtonColor, ButtonWrapper};
-use leptonic::components::modal::{Modal, ModalBody, ModalFooter, ModalHeader, ModalTitle};
 use leptos::*;
+use leptonic::components::modal::{Modal, ModalBody, ModalFooter, ModalHeader, ModalTitle};
+use leptonic::components::button::{Button, ButtonColor, ButtonWrapper};
+use crate::i18n::use_i18n;
 use leptos_i18n::t;
+
 
 /// Modal that shows a welcome message to the user
 /// This modal only shows up in the home page if the database is empty
