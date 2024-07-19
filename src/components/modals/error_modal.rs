@@ -1,20 +1,18 @@
 use leptonic::components::alert::{Alert, AlertContent, AlertTitle, AlertVariant};
-use leptos::*;
-use leptonic::components::modal::Modal;
 use leptonic::components::button::{Button, ButtonColor, ButtonWrapper};
-
+use leptonic::components::modal::Modal;
+use leptos::*;
 
 /// ErrorModal component
 /// A modal showing an error message. We have to use signals for reactive programming.
 /// The user can then close this modal either by clicking the button or by clicking outside the modal.
 #[component]
-pub fn ErrorModal (
+pub fn ErrorModal(
     show_modal: ReadSignal<bool>,
     set_show_modal: WriteSignal<bool>,
     title: ReadSignal<String>,
-    body: ReadSignal<String>
+    body: ReadSignal<String>,
 ) -> impl IntoView {
-
     view! {
         <Modal show_when=show_modal>
             <Alert variant=AlertVariant::Danger>
@@ -26,5 +24,4 @@ pub fn ErrorModal (
             </ButtonWrapper>
         </Modal>
     }
-
 }

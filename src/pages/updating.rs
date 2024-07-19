@@ -1,15 +1,12 @@
+use crate::components::home_button::HomeButton;
+use crate::components::modals::{error_modal::ErrorModal, success_modal::SuccessModal};
 use futures_util::StreamExt;
 use leptonic::components::prelude::ProgressBar;
-use leptos::*;
 use leptos::leptos_dom::log;
+use leptos::*;
 use tauri_wasm::api::core::invoke;
 use tauri_wasm::api::event::listen;
 use tauri_wasm::Error;
-use crate::components::home_button::HomeButton;
-use crate::components::modals::{
-    error_modal::ErrorModal,
-    success_modal::SuccessModal,
-};
 
 use crate::i18n::{t, use_i18n};
 
@@ -30,8 +27,7 @@ pub fn Updating() -> impl IntoView {
 
     // Progress listener for the Check state
     spawn_local(async move {
-        let mut progress_event = listen::<String>("chck")
-            .await.expect("event listen error");
+        let mut progress_event = listen::<String>("chck").await.expect("event listen error");
         while progress_event.next().await.is_some() {
             log!("Check event received");
             setShowProgress.set(false);
@@ -41,8 +37,7 @@ pub fn Updating() -> impl IntoView {
 
     // Progress listener for the Index state
     spawn_local(async move {
-        let mut progress_event = listen::<String>("idx")
-            .await.expect("event listen error");
+        let mut progress_event = listen::<String>("idx").await.expect("event listen error");
         while progress_event.next().await.is_some() {
             log!("Index event received");
             setShowProgress.set(false);
@@ -52,8 +47,7 @@ pub fn Updating() -> impl IntoView {
 
     // Progress listener for the Download state
     spawn_local(async move {
-        let mut progress_event = listen::<String>("dwld")
-            .await.expect("event listen error");
+        let mut progress_event = listen::<String>("dwld").await.expect("event listen error");
         while let Some(event) = progress_event.next().await {
             log!("Download event received with payload: {}", event.payload);
             setStatus.set(t!(i18n, db_update_stage_download)().to_string());
@@ -64,8 +58,7 @@ pub fn Updating() -> impl IntoView {
 
     // Progress listener for the Install state
     spawn_local(async move {
-        let mut progress_event = listen::<String>("ins")
-            .await.expect("event listen error");
+        let mut progress_event = listen::<String>("ins").await.expect("event listen error");
         while let Some(event) = progress_event.next().await {
             log!("Install event received with payload: {}", event.payload);
             setStatus.set(t!(i18n, db_update_stage_install)().to_string());
@@ -76,8 +69,7 @@ pub fn Updating() -> impl IntoView {
 
     // Progress listener for the Error state
     spawn_local(async move {
-        let mut progress_event = listen::<String>("err")
-            .await.expect("event listen error");
+        let mut progress_event = listen::<String>("err").await.expect("event listen error");
         while let Some(event) = progress_event.next().await {
             log!("Error event received: {}", event.payload);
             setStatus.set(t!(i18n, update_db_failed)().to_string());
@@ -89,7 +81,7 @@ pub fn Updating() -> impl IntoView {
     });
 
     spawn_local(async move {
-        let return_value: Result<String, Error> = invoke("update_database", &String::new()).await;
+        let return_value: Result<String, Error> = invoke("update", &String::new()).await;
         match return_value {
             Ok(_) => {
                 log!("Database update successful");
@@ -103,7 +95,6 @@ pub fn Updating() -> impl IntoView {
             }
         }
     });
-
 
     view! {
         <div class="h-screen">

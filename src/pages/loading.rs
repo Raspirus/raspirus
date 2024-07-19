@@ -1,15 +1,14 @@
-use leptos::*;
-use leptos::logging::log;
-use leptonic::components::progress_bar::ProgressBar;
-use leptos_router::{use_query_map, use_navigate};
-use tauri_wasm::api::event::listen;
-use tauri_wasm::api::core::invoke;
-use tauri_wasm::Error;
-use futures_util::StreamExt;
 use crate::generic::ScannerArgs;
 use crate::i18n::use_i18n;
+use futures_util::StreamExt;
+use leptonic::components::progress_bar::ProgressBar;
+use leptos::logging::log;
+use leptos::*;
 use leptos_i18n::t;
-
+use leptos_router::{use_navigate, use_query_map};
+use tauri_wasm::api::core::invoke;
+use tauri_wasm::api::event::listen;
+use tauri_wasm::Error;
 
 /// The loading page is responsible for starting the scanning process and displaying the progress
 /// of the scan. It listens for progress events and updates the progress bar accordingly.
@@ -26,9 +25,10 @@ pub fn Loading() -> impl IntoView {
 
     spawn_local(async move {
         let mut progress_event = listen::<String>("progress")
-            .await.expect("event listen error");
+            .await
+            .expect("event listen error");
         while let Some(event) = progress_event.next().await {
-            let payload : String = event.payload;
+            let payload: String = event.payload;
             let message = format!("payload: {}", payload);
             log!("Progress: {}", message);
             // Try to convert the payload to a float, if it fails, set the progress to 0
@@ -39,9 +39,10 @@ pub fn Loading() -> impl IntoView {
 
     spawn_local(async move {
         let mut error_event = listen::<String>("progerror")
-            .await.expect("event listen error");
+            .await
+            .expect("event listen error");
         while let Some(event) = error_event.next().await {
-            let payload : String = event.payload;
+            let payload: String = event.payload;
             let message = format!("payload: {}", payload);
             log!("Error: {}", message);
         }
@@ -50,7 +51,13 @@ pub fn Loading() -> impl IntoView {
     // We start the scanning process
     spawn_local(async move {
         log!("Starting scanner with target: {:?}", target);
-        let result: Result<String, Error> = invoke("start_scanner", &ScannerArgs{path: target.unwrap()}).await;
+        let result: Result<String, Error> = invoke(
+            "start_scanner",
+            &ScannerArgs {
+                path: target.unwrap(),
+            },
+        )
+        .await;
         match &result {
             Ok(result) => {
                 log!("Result: {}", result);
