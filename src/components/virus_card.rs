@@ -3,11 +3,7 @@ use leptonic::prelude::icondata;
 use leptos::*;
 
 #[component]
-pub fn VirusCard(
-    title: String,
-    text: String,
-) -> impl IntoView {
-
+pub fn VirusCard(title: String, text: String) -> impl IntoView {
     view! {
         <div className="flex mb-4 items-center shadow-md p-2 bg-white rounded-xl">
             <p className="whitespace-nowrap text-grey-darkest w-1/5 overflow-hidden">{title}</p>

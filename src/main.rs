@@ -1,8 +1,8 @@
 use leptos::*;
 
-mod pages;
 mod components;
 mod generic;
+mod pages;
 
 use pages::app::App;
 
