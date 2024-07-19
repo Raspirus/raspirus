@@ -1,4 +1,4 @@
-use std::{path::PathBuf, str::FromStr};
+use std::{path::PathBuf, str::FromStr, sync::Arc};
 
 use log::{debug, error};
 
@@ -90,7 +90,7 @@ pub fn init_tauri() {
 #[tauri::command]
 pub async fn start_scanner(window: tauri::Window, path: String) -> Result<String, String> {
     tokio::task::spawn_blocking(move || {
-        let mut scanner = YaraScanner::new(Some(window))?;
+        let mut scanner = YaraScanner::new(Some(Arc::new(window)))?;
         let result = scanner.start(PathBuf::from_str(&path).map_err(|err| err.to_string())?);
         serde_json::to_string_pretty(&result).map_err(|err| err.to_string())
     })
