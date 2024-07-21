@@ -41,7 +41,6 @@ async fn get_remote_version() -> Result<String, String> {
         .timeout(std::time::Duration::from_secs(MAX_TIMEOUT))
         .build()
         .map_err(|err| err.to_string())?;
-    println!("{url}");
     let remote = client
         .get(&url)
         .header("User-Agent", "reqwest")
