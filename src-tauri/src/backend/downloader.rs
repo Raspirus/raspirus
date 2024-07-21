@@ -40,7 +40,7 @@ async fn get_remote_version() -> Result<String, String> {
     let client = reqwest::Client::builder()
         .timeout(std::time::Duration::from_secs(MAX_TIMEOUT))
         .build()
-        .map_err(|err| err.to_string())?;
+        .map_err(|err| format!("Failed to fetch remove version: {err}"))?;
     let remote = client
         .get(&url)
         .header("User-Agent", "reqwest")
@@ -75,15 +75,13 @@ pub async fn update() -> Result<(), String> {
         .join(get_config().remote_file);
 
     info!("Starting download...");
-    let release = get_release().await.map_err(|err| err.to_string())?;
+    let release = get_release().await?;
     if let Some(asset) = release
         .assets
         .iter()
         .find(|&a| a.name == config.remote_file)
     {
-        download_file(&asset.browser_download_url, download_path)
-            .await
-            .map_err(|err| err.to_string())?;
+        download_file(&asset.browser_download_url, download_path).await?;
         info!(
             "Downloaded: {} from {}",
             asset.name, asset.browser_download_url

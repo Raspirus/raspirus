@@ -54,24 +54,6 @@ pub fn get_rules() -> Result<Rules, String> {
         .map_err(|err| format!("Failed to deserialize yar file: {}", err.to_string()))
 }
 
-/// clears the cache directory
-pub fn clear_cache() -> std::io::Result<()> {
-    trace!("Clearing caches...");
-    let cache_dir = get_config()
-        .paths
-        .ok_or(std::io::Error::new(
-            std::io::ErrorKind::NotFound,
-            "No paths set. Is config initialized?",
-        ))?
-        .cache;
-
-    cache_dir
-        .exists()
-        .then(|| fs::remove_dir_all(cache_dir))
-        .unwrap_or(Ok(()))?;
-    Ok(())
-}
-
 /// yields all file paths and the total size of them
 pub fn profile_path(path: PathBuf) -> Result<(Vec<PathBuf>, usize), std::io::Error> {
     let mut paths = Vec::new();
