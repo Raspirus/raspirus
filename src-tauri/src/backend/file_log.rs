@@ -43,7 +43,7 @@ impl FileLog {
     /// let log = FileLog::new("log.txt".to_owned());
     /// log.log("abc123".to_owned(), "C:/Users/user/Desktop/file.txt".to_owned());
     /// ```
-    pub fn log(&self, fpath: String, rule_count: usize, descriptions: &Vec<RuleFeedback>) {
+    pub fn log(&self, fpath: String, rule_count: usize, descriptions: &[RuleFeedback]) {
         match self.file.as_ref() {
             Some(mut file) => {
                 match file.write_all(
