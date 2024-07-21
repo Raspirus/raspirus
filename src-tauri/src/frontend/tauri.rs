@@ -127,6 +127,12 @@ pub async fn save_config_fe(contents: Option<String>) -> Result<(), String> {
         config_received
             .scan_dir
             .inspect(|val| config.scan_dir = *val);
+        config_received
+            .min_matches
+            .inspect(|val| config.min_matches = *val);
+        config_received
+            .max_matches
+            .inspect(|val| config.max_matches = *val);
         // save updated config
         update_config(config)
     })

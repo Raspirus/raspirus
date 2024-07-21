@@ -3,6 +3,7 @@ use serde::{Deserialize, Serialize};
 use std::fs::{self, File};
 use std::io::Read;
 use std::path::{Path, PathBuf};
+use std::usize;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(default)]
@@ -39,6 +40,8 @@ pub struct Paths {
 pub struct ConfigFrontend {
     pub logging_is_active: Option<bool>,
     pub scan_dir: Option<bool>,
+    pub min_matches: Option<usize>,
+    pub max_matches: Option<usize>
 }
 
 impl Default for Config {
