@@ -57,7 +57,7 @@ pub fn Index() -> impl IntoView {
                 let config: Config = serde_json::from_str(&config_string).unwrap();
                 // We set the flag to indicate if the file picker can select directories
                 setCanSelectDirectories.set(config.scan_dir);
-                if config.hash_count == 0 {
+                if config.rules_version.is_empty() {
                     setShowWelcomeModal.set(true);
                 }
                 log!("Config loaded")

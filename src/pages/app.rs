@@ -1,7 +1,7 @@
 use crate::i18n::provide_i18n_context;
 use crate::pages::{
     agreement::Agreement, clean::Clean, index::Index, infected::Infected, information::Information,
-    loading::Loading, settings::Settings, updating::Updating,
+    loading::Loading, settings::Settings
 };
 use leptonic::components::root::Root;
 use leptonic::components::theme::LeptonicTheme;
@@ -70,15 +70,8 @@ pub fn App() -> impl IntoView {
 
                     <StaticRoute
                         mode=StaticMode::Incremental
-                        path="/update"
-                        view=Updating
-                        static_params=|| Box::pin(async { StaticParamsMap::default() })
-                    />
-
-                    <StaticRoute
-                        mode=StaticMode::Incremental
                         path="/*any"
-                        view=|| view! { <h1>"Not Found"</h1> }
+                        view=|| view! { <h1>"Not Found"</h1> <p>"Please report this issue"</p> }
                         static_params=|| Box::pin(async { StaticParamsMap::default() })
                     />
                 </Routes>
