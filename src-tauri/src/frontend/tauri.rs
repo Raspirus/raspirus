@@ -43,7 +43,6 @@ pub fn init_tauri() {
 
             // Iterate over each key and execute functions based on them
             matches.args.iter().for_each(|(key, data)| {
-                println!("{}, {:?}", key, data);
                 if data.occurrences > 0 && key.as_str() != "help" && key.as_str() != "version" {
                     // Define all CLI commands/arguments here and in the tauri.conf.json file
                     // WARNING: If the commmand is not defined in the tauri.conf.json file, it can't be used here
