@@ -26,7 +26,7 @@ time = { version = "0.3.36", features = [
     "serde",
     "serde-well-known",
 ] }
-chrono = "0.4.38"
+#chrono = "0.4.38"
 
 [package.metadata.leptonic]
 # REQUIRED: Leptonic's build-script will copy the Leptonic themes to this directory.

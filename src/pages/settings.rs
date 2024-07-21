@@ -10,11 +10,10 @@ use tauri_wasm::api::core::invoke;
 use tauri_wasm::Error;
 
 use crate::components::settings_card_download::SettingsDownloadCard;
-use crate::components::settings_card_input::SettingsInputCard;
-use crate::components::settings_card_patch::SettingsPatchCard;
+use crate::components::settings_card_numinput::SettingsNumInputCard;
 use crate::components::settings_card_toggle::SettingsToggleCard;
 use crate::components::settings_card_update::SettingsUpdateCard;
-use crate::generic::{int_to_date_string, Config, SettingsArgs, SettingsStruct};
+use crate::generic::{Config, SettingsArgs, SettingsStruct};
 use crate::i18n::use_i18n;
 
 /// The settings page
@@ -28,15 +27,11 @@ pub fn Settings() -> impl IntoView {
     let i18n = use_i18n();
     // We have a signal for each changeable setting
     let (logging, setLogging) = create_signal(false);
-    let (use_db_path, setUseDbPath) = create_signal(false);
-    let (custom_db_path, setCustomDbPath) = create_signal(String::new());
     let (scan_dir, setScanDir) = create_signal(false);
-    let (hash_count, setHashCount) = create_signal(0);
-    let (updated_date, setUpdatedDate) = create_signal(String::new());
+    let (rules_version, setRulesVersion) = create_signal(String::new());
+    let (min_match, setMinMatch) = create_signal(0.0);
+    let (max_match, setMaxMatch) = create_signal(0.0);
     let navigate = use_navigate();
-    // A formatted string for the updated date
-    let formatted_updated_date =
-        int_to_date_string(updated_date.get().parse::<i64>().unwrap_or_default());
 
     spawn_local(async move {
         let config: Result<String, Error> = invoke("load_config_fe", &String::new()).await;
@@ -45,11 +40,10 @@ pub fn Settings() -> impl IntoView {
             Ok(config_string) => {
                 let config: Config = serde_json::from_str(&config_string).unwrap();
                 setLogging.set(config.logging_is_active);
-                setUseDbPath.set(!config.db_location.is_empty());
-                setCustomDbPath.set(config.db_location);
                 setScanDir.set(config.scan_dir);
-                setHashCount.set(config.hash_count);
-                setUpdatedDate.set(config.last_db_update);
+                setRulesVersion.set(config.rules_version);
+                setMinMatch.set(config.min_matches as f64);
+                setMaxMatch.set(config.max_matches as f64);
             }
             Err(e) => {
                 error!("Error loading config: {:?}", e);
@@ -60,7 +54,8 @@ pub fn Settings() -> impl IntoView {
     let navigate_home = move || {
         let settings_struct = SettingsStruct {
             logging_is_active: logging.get(),
-            db_location: custom_db_path.get(),
+            min_matches: min_match.get() as usize,
+            max_matches: max_match.get() as usize,
             scan_dir: scan_dir.get(),
         };
         spawn_local(async move {
@@ -84,7 +79,7 @@ pub fn Settings() -> impl IntoView {
     };
 
     view! {
-        <div>
+        <div class="pb-4">
             <div class="align-middle">
                         <Button on_press=move |_| navigate_home() class="inline-block align-middle px-6 py-2.5 m-2 bg-mainred text-white font-medium text-xs leading-tight uppercase rounded shadow-md">
                             <Icon icon=icondata::AiHomeFilled class="pr-1" />
@@ -98,9 +93,8 @@ pub fn Settings() -> impl IntoView {
         <SettingsUpdateCard
                 title=t!(i18n, update_db)().to_string()
                 short_description=t!(i18n, update_db_val)().to_string()
-                short_description_2=format!("{}: {} | {}: {}",
-                        t!(i18n, update_db_1)(), hash_count.get(),
-                        t!(i18n, update_db_2)(), formatted_updated_date)
+                short_description_2=format!("{}: {}",
+                        t!(i18n, update_db_1)(), rules_version.get())
                 icon=icondata::IoCloudDownload
             />
 
@@ -113,16 +107,6 @@ pub fn Settings() -> impl IntoView {
         toggle_function=setLogging
       />
 
-        <SettingsInputCard
-            title=t!(i18n, custom_db)().to_string()
-            short_description=t!(i18n, custom_db_val)().to_string()
-            short_description_2=if use_db_path.get() {
-                format!("{}: {}", t!(i18n, custom_db_1)(), custom_db_path.get())}
-                    else {t!(i18n, custom_db_2)().to_string()}
-            icon=icondata::FaDatabaseSolid
-            set_value=setCustomDbPath
-        />
-
       <SettingsToggleCard
         title=t!(i18n, file_dialog_opt)().to_string()
         short_description=t!(i18n, file_dialog_opt_val)().to_string()
@@ -132,11 +116,12 @@ pub fn Settings() -> impl IntoView {
         toggle_function=setScanDir
       />
 
-        <SettingsPatchCard
-            title=t!(i18n, add_patch_title)().to_string()
-            short_description=t!(i18n, add_patch_desc)().to_string()
-            short_description_2=t!(i18n, add_patch_desc2)().to_string()
-            icon=icondata::BsDatabaseFillGear
+        <SettingsNumInputCard
+            title="Set match limits".to_string()
+            short_description="Set how many rules must match to flag a file".to_string()
+            icon=icondata::ChChevronsUpDown
+            min_input=(min_match, setMinMatch)
+            max_input=(max_match, setMaxMatch)
         />
 
         <SettingsDownloadCard
