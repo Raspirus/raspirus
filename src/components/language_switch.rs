@@ -44,9 +44,12 @@ pub fn LanguageSwitch() -> impl IntoView {
                 <Select
                     class="uppercase bg-white w-fit"
                     options=available_locales
-                    search_text_provider=move |o| o
-                    render_option=move |o| view! {
-                        <FlagIcon country_code={o} />
+                    search_text_provider=move |o: String| o
+                    render_option=move |o: String| view! {
+                        <div class="flex">
+                            <FlagIcon country_code={o.clone()} />
+                            <p class="upper">{o}</p>
+                        </div>
                     }
                     selected=current_selected_locale
                     set_selected=set_locale
