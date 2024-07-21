@@ -1,5 +1,7 @@
 use std::{
-    fs::{self, File}, path::PathBuf, sync::Arc, usize
+    fs::{self, File},
+    path::PathBuf,
+    sync::Arc,
 };
 
 use log::{trace, warn};
@@ -49,9 +51,9 @@ pub fn get_rules() -> Result<Rules, String> {
         .join(get_config().remote_file);
     // setup rules
     let reader = File::open(yar_path)
-        .map_err(|err| format!("Failed to load yar file: {}", err.to_string()))?;
+        .map_err(|err| format!("Failed to load yar file: {err}"))?;
     Rules::deserialize_from(reader)
-        .map_err(|err| format!("Failed to deserialize yar file: {}", err.to_string()))
+        .map_err(|err| format!("Failed to deserialize yar file: {err}"))
 }
 
 /// yields all file paths and the total size of them
@@ -67,7 +69,11 @@ pub fn profile_path(path: PathBuf) -> Result<(Vec<PathBuf>, usize), std::io::Err
 }
 
 /// adds files or files in subfolders to paths and adds their sizes to the total
-pub fn profile_folder(paths: &mut Vec<PathBuf>, size: &mut usize, path: PathBuf) -> Result<(), std::io::Error> {
+pub fn profile_folder(
+    paths: &mut Vec<PathBuf>,
+    size: &mut usize,
+    path: PathBuf,
+) -> Result<(), std::io::Error> {
     for entry in fs::read_dir(path)? {
         let entry = entry?;
         if entry.path().is_dir() {
@@ -80,7 +86,11 @@ pub fn profile_folder(paths: &mut Vec<PathBuf>, size: &mut usize, path: PathBuf)
 }
 
 /// adds file to paths and adds its size to the total
-pub fn profile_file(paths: &mut Vec<PathBuf>, size: &mut usize, path: PathBuf) -> Result<(), std::io::Error> {
+pub fn profile_file(
+    paths: &mut Vec<PathBuf>,
+    size: &mut usize,
+    path: PathBuf,
+) -> Result<(), std::io::Error> {
     *size += path.metadata()?.len() as usize;
     paths.push(path);
     Ok(())

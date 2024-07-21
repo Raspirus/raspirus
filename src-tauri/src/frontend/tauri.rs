@@ -99,7 +99,7 @@ pub async fn start_scanner(window: tauri::Window, path: String) -> Result<String
 // Updates the database over the GUi
 #[tauri::command]
 pub async fn update() -> Result<(), String> {
-    tokio::task::spawn_blocking(|| downloader::update())
+    tokio::task::spawn_blocking(downloader::update)
         .await
         .map_err(|err| err.to_string())?
         .await
@@ -152,7 +152,7 @@ pub async fn load_config_fe() -> Result<String, String> {
 /// verifies if there are any yara rules present
 #[tauri::command]
 pub async fn check_update() -> Result<bool, String> {
-    tokio::task::spawn_blocking(|| downloader::check_update())
+    tokio::task::spawn_blocking(downloader::check_update)
         .await
         .map_err(|err| err.to_string())?
         .await

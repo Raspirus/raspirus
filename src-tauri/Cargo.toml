@@ -7,7 +7,7 @@ license = "GPLv3"
 repository = "https://github.com/Raspirus/Raspirus"
 default-run = "raspirus"
 edition = "2021"
-rust-version = "1.75"
+rust-version = "1.76"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
