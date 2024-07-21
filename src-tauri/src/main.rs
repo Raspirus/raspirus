@@ -2,7 +2,7 @@
 //#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use backend::config_file::Config;
-use backend::utils::generic::{clear_cache, get_config};
+use backend::utils::generic::get_config;
 use frontend::tauri::init_tauri;
 use log::{error, info, LevelFilter};
 use simplelog::{
@@ -19,6 +19,15 @@ mod tests;
 
 // config
 static CONFIG_FILENAME: &str = "Raspirus.json";
+static CONFIG_VERSION: &str = "2";
+
+// remote params
+static DEFAULT_MIRROR: &str = "https://api.github.com/repos/Raspirus/yara-rules/releases/latest";
+static DEFAULT_FILE: &str = "rulepirus.yarac";
+
+// default scan params
+static DEFAULT_MIN_MATCHES: usize = 0;
+static DEFAULT_MAX_MATCHES: usize = 20;
 
 // download settings
 static MAX_TIMEOUT: u64 = 120;
@@ -72,10 +81,7 @@ fn main() -> Result<(), String> {
         // Start loggers
         CombinedLogger::init(loggers).expect("Failed to initialize CombinedLogger");
     }
-
-    // clear caches before starting ui
-    clear_cache().map_err(|err| format!("Failed to clear caches: {err}"))?;
-
+ 
     // initializes the frontend
     init_tauri();
 
