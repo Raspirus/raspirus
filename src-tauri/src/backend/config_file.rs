@@ -1,4 +1,5 @@
 use directories_next::ProjectDirs;
+use log::info;
 use serde::{Deserialize, Serialize};
 use std::fs::{self, File};
 use std::io::Read;
@@ -8,22 +9,29 @@ use std::usize;
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(default)]
 pub struct Config {
-    // Last time and date when the db was successfully updated
+    /// contains the config version
+    #[serde(default = "default_config")]
+    pub config_version: String,
+    /// Last time and date when the db was successfully updated
     pub rules_version: String,
-    // lower and upper threshhold for flagging
+    /// lower and upper threshhold for flagging
     pub min_matches: usize,
     pub max_matches: usize,
-    // If we should log information to a file
+    /// If we should log information to a file
     pub logging_is_active: bool,
-    // If we should scan direcories instead of files (You can only choose one on the current file picker dialog)
+    /// If we should scan direcories instead of files (You can only choose one on the current file picker dialog)
     pub scan_dir: bool,
-    // mirror to folder with hashfiles for update
+    /// mirror to folder with hashfiles for update
     pub mirror: String,
-    // the filename of the compiled yara rules on remote
+    /// the filename of the compiled yara rules on remote
     pub remote_file: String,
-    // various paths in an effort to unify them. are folders expected to be used later
+    /// various paths in an effort to unify them. are folders expected to be used later
     #[serde(skip)]
     pub paths: Option<Paths>,
+}
+
+fn default_config() -> String {
+    String::from("0")
 }
 
 #[derive(Debug, Clone)]
@@ -31,7 +39,6 @@ pub struct Paths {
     pub data: PathBuf,
     pub config: PathBuf,
     pub logs: PathBuf,
-    pub cache: PathBuf,
     pub downloads: PathBuf,
 }
 
@@ -47,13 +54,14 @@ pub struct ConfigFrontend {
 impl Default for Config {
     fn default() -> Self {
         Self {
-            rules_version: "None".to_string(),
+            config_version: crate::CONFIG_VERSION.to_owned(),
+            rules_version: "None".to_owned(),
             logging_is_active: true,
-            min_matches: 0,
-            max_matches: 20,
+            min_matches: crate::DEFAULT_MIN_MATCHES,
+            max_matches: crate::DEFAULT_MAX_MATCHES,
             scan_dir: true,
-            mirror: "https://api.github.com/repos/Raspirus/yara-rules/releases/latest".to_string(),
-            remote_file: "rulepirus.yarac".to_string(),
+            mirror: crate::DEFAULT_MIRROR.to_owned(),
+            remote_file: crate::DEFAULT_FILE.to_owned(),
             paths: None,
         }
     }
@@ -62,15 +70,7 @@ impl Default for Config {
 /// The config file simply holds settings of the application that should perists during reboots
 /// The entire config is saved to a JSON file and loaded or created on the first start
 /// Default config gets created, then we try to load. If load fails we return default
-impl Config {
-    pub fn new() -> Result<Self, String> {
-        // creates instance of new config
-        let mut cfg = Config::default();
-        cfg.set_paths()?;
-        cfg.load()?;
-        Ok(cfg)
-    }
-
+impl Config { 
     /// Finds the suitable path for the current system, creates a subfolder for the app and returns
     /// the path as a normal String
     fn set_paths(&mut self) -> Result<(), String> {
@@ -83,36 +83,30 @@ impl Config {
         let dirs = ProjectDirs::from("com", "Raspirus", "")
             .ok_or("Failed to get projectdir".to_owned())?;
 
-        // RoamingData
+        // RoamingData under windows
         let data = dirs.data_dir().to_owned();
         let logs = data.to_owned().join("logs");
 
-        // LocalData
+        // LocalData under windows
         let config = dirs.config_dir().to_owned();
-        let cache = dirs.cache_dir().to_owned();
 
         // create all paths
         if !data.exists() {
-            fs::create_dir_all(&data).map_err(|err| err.to_string())?;
+            fs::create_dir_all(&data).map_err(|err| format!("Failed to create data dir: {err}"))?;
         }
 
         if !logs.exists() {
-            fs::create_dir_all(&logs).map_err(|err| err.to_string())?;
+            fs::create_dir_all(&logs).map_err(|err| format!("Failed to create log dir: {err}"))?;
         }
 
         if !config.exists() {
-            fs::create_dir_all(&config).map_err(|err| err.to_string())?;
+            fs::create_dir_all(&config).map_err(|err| format!("Failed to create config dir: {err}"))?;
         }
-
-        if !cache.exists() {
-            fs::create_dir_all(&cache).map_err(|err| err.to_string())?;
-        }
-
+ 
         self.paths = Some(Paths {
             data,
             config,
             logs,
-            cache,
             downloads,
         });
         Ok(())
@@ -137,8 +131,11 @@ impl Config {
     }
 
     /// Loads the current config and returns it, or creates a new one if there is none yet
-    pub fn load(&mut self) -> Result<(), String> {
-        let path = self
+    pub fn new() -> Result<Self, String> {
+        // fetch default config path
+        let mut tmp = Config::default();
+        tmp.set_paths()?;
+        let path = tmp
             .paths
             .clone()
             .ok_or("Could not get config path".to_owned())?
@@ -146,9 +143,10 @@ impl Config {
             .join(crate::CONFIG_FILENAME);
         // Checks if the config file exists, else quickly creates it
         if !path.exists() {
-            self.save()?;
+            tmp.save()?;
         };
 
+        // now we load the config
         let mut file = File::open(path).map_err(|err| err.to_string())?;
         let mut contents = String::new();
         file.read_to_string(&mut contents)
@@ -156,9 +154,21 @@ impl Config {
         let mut config_from_str: Config = serde_json::from_str(&contents)
             .map_err(|err| err.to_string())
             .map_err(|err| format!("Failed deserializing config: {err}"))?;
-
         config_from_str.set_paths()?;
-        *self = config_from_str;
-        Ok(())
+        config_from_str.update_config()?;
+        Ok(config_from_str)
+    }
+
+    /// checks if the config version is the expected one
+    fn update_config(&self) -> Result<Self, String> {
+        if self.config_version != crate::CONFIG_VERSION {
+            info!("Updating config from {} to {}", self.config_version, crate::CONFIG_VERSION);
+            let mut config = Config::default();
+            config.set_paths()?;
+            config.save()?;
+            Ok(config)
+        } else {
+            Ok(self.clone())
+        }
     }
 }
