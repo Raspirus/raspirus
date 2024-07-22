@@ -7,12 +7,6 @@ pub struct UsbDevice {
     pub path: String,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
-pub struct VirusFile {
-    pub path: String,
-    pub signature: String,
-}
-
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Config {
     pub rules_version: String,
@@ -42,7 +36,7 @@ pub struct ScannerArgs {
     pub path: String,
 }
 
-#[derive(Serialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct TaggedFile {
     pub path: PathBuf,
     /// vector of description and rule name
@@ -50,7 +44,7 @@ pub struct TaggedFile {
     pub rule_count: usize,
 }
 
-#[derive(Serialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct RuleFeedback {
     pub rule_name: String,
     pub rule_description: String

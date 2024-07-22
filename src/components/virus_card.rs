@@ -1,17 +1,42 @@
-use leptonic::components::prelude::{Icon, LinkExt, LinkExtTarget};
-use leptonic::prelude::icondata;
+use leptonic::components::prelude::{Chip, ChipColor, Collapsible, CollapsibleBody, CollapsibleHeader};
 use leptos::*;
+use crate::generic::RuleFeedback;
 
 #[component]
-pub fn VirusCard(title: String, text: String) -> impl IntoView {
+pub fn VirusCard(
+    file_path: String,
+    rules_count: usize,
+    rule_matches: Vec<RuleFeedback>
+) -> impl IntoView {
+    let chip_color = if rules_count > 5 { ChipColor::Danger } else { ChipColor::Warn };
+
     view! {
-        <div className="flex mb-4 items-center shadow-md p-2 bg-white rounded-xl">
-            <p className="whitespace-nowrap text-grey-darkest w-1/5 overflow-hidden">{title}</p>
-            <div className="inline-block min-h-[1em] w-0.5 self-stretch bg-maingreen opacity-100 mx-2"></div>
-            <p className="w-full text-grey-darkest overflow-x-auto">{&text}</p>
-            <LinkExt href=format!("www.virustotal.com/gui/search/{}", text) target=LinkExtTarget::Blank>
-                <Icon icon=icondata::SiVirustotal style="font-size: 3em;"/>
-            </LinkExt>
-        </div>
+        <Collapsible>
+            <CollapsibleHeader slot>
+            <div class="flex justify-between items-center">
+                <Chip color={chip_color} class="mr-2">{rules_count}</Chip>
+                <div>{file_path}</div>
+            </div>
+            </CollapsibleHeader>
+            <CollapsibleBody slot>
+            <div class="flex flex-col w-full">
+            {
+                rule_matches.iter().enumerate().map(|(index, rule_match)| {
+                    view! {
+                        <>
+                            <div class="flex flex-col my-2">
+                                <p class="font-medium">{rule_match.rule_name.clone()}</p>
+                                <p class="text-sm text-gray-600 leading-none mt-1">{rule_match.rule_description.clone()}</p>
+                            </div>
+                            <Show when=move || index < rules_count - 1 >
+                                <hr class="my-2 w-full"/>
+                            </Show>
+                        </>
+                    }
+                }).collect::<Vec<_>>()
+            }
+            </div>
+        </CollapsibleBody>
+        </Collapsible>
     }
 }
