@@ -1,8 +1,9 @@
 use crate::components::home_button::HomeButton;
 use crate::components::virus_card::VirusCard;
-use crate::generic::VirusFile;
+use crate::generic::TaggedFile;
 use crate::i18n::use_i18n;
 use leptonic::components::stack::Stack;
+use leptonic::components::prelude::{Collapsibles, OnOpen};
 use leptonic::Size;
 use leptos::*;
 use leptos_i18n::t;
@@ -19,7 +20,7 @@ use leptos_router::use_query_map;
 pub fn Infected() -> impl IntoView {
     let i18n = use_i18n();
     let infected = use_query_map().get_untracked().get("result").cloned();
-    let infected_files: Vec<VirusFile> = serde_json::from_str(&infected.unwrap()).unwrap();
+    let infected_files: Vec<TaggedFile> = serde_json::from_str(&infected.unwrap()).unwrap();
 
     view! {
         <div>
@@ -30,15 +31,20 @@ pub fn Infected() -> impl IntoView {
                 </h1>
             </div>
                 <div>
+                    <Collapsibles default_on_open=OnOpen::CloseOthers>
                     <Stack spacing=Size::Em(0.6)>
                         {infected_files.into_iter()
                             .map(|file| {
                                 view! {
-                                    <VirusCard title=file.path text=file.signature />
+                                    <VirusCard 
+                                        file_path=file.path.to_string_lossy().to_string() 
+                                        rules_count=file.rule_count 
+                                        rule_matches=file.descriptions />
                                 }
                             }).collect::<Vec<_>>()
                         }
                     </Stack>
+                    </Collapsibles>            
                 </div>
             </div>
     }
