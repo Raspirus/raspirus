@@ -9,8 +9,6 @@ use leptos::*;
 use leptos_i18n::t;
 use leptos_router::use_query_map;
 
-// TODO:
-// - Styling
 
 /// Infected page
 /// The page that is shown if after the scan the user has infected files
