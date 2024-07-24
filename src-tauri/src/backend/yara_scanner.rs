@@ -1,10 +1,12 @@
 use std::{
-    fmt::Display, path::{Path, PathBuf}, sync::Mutex
+    fmt::Display,
+    path::{Path, PathBuf},
+    sync::Mutex,
 };
 
 use chrono::{DateTime, Local};
 use log::{error, warn};
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 use threadpool_rs::threadpool::pool::ThreadPool;
 use yara_x::{ScanResults, Scanner};
@@ -16,7 +18,7 @@ use super::{
     utils::generic::{profile_path, send},
 };
 
-#[derive(Serialize, Clone, Debug)]
+#[derive(Deserialize, Serialize, Clone, Debug)]
 pub struct TaggedFile {
     pub path: PathBuf,
     /// vector of description and rule name
@@ -24,10 +26,10 @@ pub struct TaggedFile {
     pub rule_count: usize,
 }
 
-#[derive(Serialize, Clone, Debug)]
+#[derive(Deserialize, Serialize, Clone, Debug)]
 pub struct RuleFeedback {
     pub rule_name: String,
-    pub rule_description: String
+    pub rule_description: String,
 }
 
 impl Display for RuleFeedback {
@@ -42,7 +44,7 @@ pub struct PointerCollection {
     tagged: Arc<Mutex<Vec<TaggedFile>>>,
     analysed: Arc<Mutex<usize>>,
     skipped: Arc<Mutex<usize>>,
-    scanned_size: Arc<Mutex<usize>>
+    scanned_size: Arc<Mutex<usize>>,
 }
 
 pub struct YaraScanner {
@@ -72,7 +74,7 @@ impl YaraScanner {
         let total_size = profiled.1;
         let paths = profiled.0;
         let pointers = PointerCollection::default();
-        
+
         let threadpool = ThreadPool::new(num_cpus::get())
             .map_err(|err| format!("Failed to create threadpool: {err}"))?;
         for file in paths {
@@ -85,7 +87,7 @@ impl YaraScanner {
                     file_log_c,
                     tauri_window_c,
                     total_size,
-                    pointers_c
+                    pointers_c,
                 ) {
                     Ok(_) => {}
                     Err(err) => error!(
@@ -96,7 +98,8 @@ impl YaraScanner {
             });
         }
         drop(threadpool);
-        let tagged = pointers.tagged
+        let tagged = pointers
+            .tagged
             .lock()
             .map_err(|err| format!("Failed to lock final tagged vec: {err}"))?
             .clone();
@@ -115,13 +118,16 @@ impl YaraScanner {
         let descriptions = result
             .matching_rules()
             .map(|rule| (rule.metadata().into_json(), rule))
-            .map(|m| RuleFeedback { rule_description: match m.0.get("description") {
-                Some(description) => description
-                    .as_str()
-                    .unwrap_or("No description set")
-                    .to_owned(),
-                None => "No description set".to_owned(),
-            }, rule_name: m.1.identifier().to_owned()})
+            .map(|m| RuleFeedback {
+                rule_description: match m.0.get("description") {
+                    Some(description) => description
+                        .as_str()
+                        .unwrap_or("No description set")
+                        .to_owned(),
+                    None => "No description set".to_owned(),
+                },
+                rule_name: m.1.identifier().to_owned(),
+            })
             .collect::<Vec<RuleFeedback>>();
         if rule_count > get_config().min_matches {
             let file_log_locked = file_log
@@ -158,7 +164,8 @@ impl YaraScanner {
         match path.extension().unwrap_or_default().to_str() {
             Some("zip") => {
                 warn!("Zip files are not supported at the moment and will nto be scanned!");
-                let mut skipped_locked = pointers.skipped
+                let mut skipped_locked = pointers
+                    .skipped
                     .lock()
                     .map_err(|err| format!("Failed to lock skipped: {err}"))?;
                 *skipped_locked += 1;
@@ -183,14 +190,16 @@ impl YaraScanner {
 
                 // update shared variables
                 {
-                    let mut scanned_size_locked = pointers.scanned_size
+                    let mut scanned_size_locked = pointers
+                        .scanned_size
                         .lock()
                         .map_err(|err| format!("Failed to lock scanned size: {err}"))?;
                     *scanned_size_locked += path
                         .metadata()
                         .map_err(|err| format!("Failed to get metadata: {err}"))?
                         .len() as usize;
-                    let mut analysed_locked = pointers.analysed
+                    let mut analysed_locked = pointers
+                        .analysed
                         .lock()
                         .map_err(|err| format!("Failed to lock analysed: {err}"))?;
                     *analysed_locked += 1;

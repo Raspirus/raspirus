@@ -1,14 +1,16 @@
 use std::{
-    fs::{self, File},
-    path::PathBuf,
-    sync::Arc,
+    fs::{self, File}, io::{BufReader, Read}, path::PathBuf, sync::Arc
 };
 
-use log::{trace, warn};
+use log::{info, trace, warn};
+use sha2::{Digest, Sha256};
 use tauri::Emitter;
 use yara_x::Rules;
 
-use crate::{backend::config_file::Config, CONFIG};
+use crate::{
+    backend::{config_file::Config, yara_scanner::TaggedFile},
+    CONFIG,
+};
 
 #[allow(unused)]
 /// saves the global config
@@ -50,10 +52,8 @@ pub fn get_rules() -> Result<Rules, String> {
         .data
         .join(get_config().remote_file);
     // setup rules
-    let reader = File::open(yar_path)
-        .map_err(|err| format!("Failed to load yar file: {err}"))?;
-    Rules::deserialize_from(reader)
-        .map_err(|err| format!("Failed to deserialize yar file: {err}"))
+    let reader = File::open(yar_path).map_err(|err| format!("Failed to load yar file: {err}"))?;
+    Rules::deserialize_from(reader).map_err(|err| format!("Failed to deserialize yar file: {err}"))
 }
 
 /// yields all file paths and the total size of them
@@ -94,4 +94,23 @@ pub fn profile_file(
     *size += path.metadata()?.len() as usize;
     paths.push(path);
     Ok(())
+}
+
+pub fn generate_virustotal(file: TaggedFile) -> Result<String, String> {
+    info!("Starting hash compute for {}", file.path.to_string_lossy());
+    let file = File::open(file.path).map_err(|err| format!("Failed to open file for computing hash: {err}"))?;
+    
+    let mut reader = BufReader::new(file);
+    let mut sha256 = Sha256::new();
+
+    loop {
+        let mut buffer = [0; 8192];
+        let read = reader.read(&mut buffer).map_err(|err| format!("Failed to read into buffer: {err}"))?;
+        if read == 0 {
+            break;
+        }
+        sha256.update(&buffer[..read]);
+    }
+    let result = sha256.finalize();
+    Ok(format!("https://virustotal.com/gui/search/{}", hex::encode(result)))
 }

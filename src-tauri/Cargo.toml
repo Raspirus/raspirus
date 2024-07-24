@@ -31,6 +31,8 @@ tauri-plugin-dialog = "2.0.0-beta.10"
 dirs = "5.0.1"
 yara-x = "0.5.0"
 num_cpus = "1.16.0"
+sha2 = "0.10.8"
+hex = "0.4.3"
 
 [target.'cfg(any(target_os = "linux", target_os = "macos"))'.dependencies]
 lfs-core = "0.11.2"

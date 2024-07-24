@@ -11,7 +11,7 @@ pub fn SettingsNumInputCard(
     short_description: String,
     icon: icondata::Icon,
     min_input: (ReadSignal<f64>, WriteSignal<f64>),
-    max_input: (ReadSignal<f64>, WriteSignal<f64>)
+    max_input: (ReadSignal<f64>, WriteSignal<f64>),
 ) -> impl IntoView {
     view! {
         <div class="flex flex-col m-6 p-2 bg-white rounded-2xl shadow-md">
