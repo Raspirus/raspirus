@@ -105,7 +105,7 @@ pub fn generate_virustotal(file: TaggedFile) -> Result<String, String> {
     let mut sha256 = Sha256::new();
 
     loop {
-        let mut buffer = [0; crate::BUFFER * 1024];
+        let mut buffer = [0; 524288];
         let read = reader.read(&mut buffer).map_err(|err| format!("Failed to read into buffer: {err}"))?;
         if read == 0 {
             break;
