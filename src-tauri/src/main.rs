@@ -81,7 +81,7 @@ fn main() -> Result<(), String> {
         // Start loggers
         CombinedLogger::init(loggers).expect("Failed to initialize CombinedLogger");
     }
- 
+
     // initializes the frontend
     init_tauri();
 

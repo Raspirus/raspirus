@@ -1,6 +1,6 @@
 use std::{path::PathBuf, str::FromStr, sync::Arc};
 
-use log::{debug, error};
+use log::error;
 
 use crate::{
     backend::{
@@ -8,9 +8,9 @@ use crate::{
         downloader,
         utils::{
             self,
-            generic::{get_config, update_config},
+            generic::{generate_virustotal, get_config, update_config},
         },
-        yara_scanner::YaraScanner,
+        yara_scanner::{TaggedFile, YaraScanner},
     },
     frontend::functions::cli_scanner,
 };
@@ -30,10 +30,7 @@ pub fn init_tauri() {
             }
             // Else, we start in CLI mode and parse the given parameters
             let matches = match app.cli().matches() {
-                Ok(matches) => {
-                    debug!("CLI matches state: {matches:?}");
-                    matches
-                }
+                Ok(matches) => matches,
                 Err(err) => {
                     error!("{}", err);
                     app.handle().exit(1);
@@ -79,6 +76,7 @@ pub fn init_tauri() {
             download_logs,
             check_update,
             rules_version,
+            lookup_file,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
@@ -86,7 +84,7 @@ pub fn init_tauri() {
 
 // Starts the scanner over the GUI
 #[tauri::command]
-pub async fn start_scanner(window: tauri::Window, path: String) -> Result<String, String> {
+async fn start_scanner(window: tauri::Window, path: String) -> Result<String, String> {
     tokio::task::spawn_blocking(move || {
         let mut scanner = YaraScanner::new(Some(Arc::new(window)))?;
         let result = scanner.start(PathBuf::from_str(&path).map_err(|err| err.to_string())?);
@@ -98,7 +96,7 @@ pub async fn start_scanner(window: tauri::Window, path: String) -> Result<String
 
 // Updates the database over the GUi
 #[tauri::command]
-pub async fn update() -> Result<(), String> {
+async fn update() -> Result<(), String> {
     tokio::task::spawn_blocking(downloader::update)
         .await
         .map_err(|err| err.to_string())?
@@ -107,13 +105,13 @@ pub async fn update() -> Result<(), String> {
 
 // Returns a vector of all attached removable storage drives (USB) -> Unnecessary for the CLI
 #[tauri::command]
-pub async fn list_usb_drives() -> Result<String, String> {
+async fn list_usb_drives() -> Result<String, String> {
     utils::usb_utils::list_usb_drives().await
 }
 
 // Creates the config from the GUI
 #[tauri::command]
-pub async fn save_config_fe(contents: Option<String>) -> Result<(), String> {
+async fn save_config_fe(contents: Option<String>) -> Result<(), String> {
     tokio::task::spawn_blocking(move || {
         let config_received =
             serde_json::from_str::<ConfigFrontend>(&contents.ok_or("Json was none".to_owned())?)
@@ -140,7 +138,7 @@ pub async fn save_config_fe(contents: Option<String>) -> Result<(), String> {
 }
 
 #[tauri::command]
-pub async fn load_config_fe() -> Result<String, String> {
+async fn load_config_fe() -> Result<String, String> {
     tokio::task::spawn_blocking(move || {
         serde_json::to_string(&get_config())
             .map_err(|err| format!("Failed to convert config to json: {err}"))
@@ -151,7 +149,7 @@ pub async fn load_config_fe() -> Result<String, String> {
 
 /// verifies if there are any yara rules present
 #[tauri::command]
-pub async fn check_update() -> Result<bool, String> {
+async fn check_update() -> Result<bool, String> {
     tokio::task::spawn_blocking(downloader::check_update)
         .await
         .map_err(|err| err.to_string())?
@@ -159,7 +157,7 @@ pub async fn check_update() -> Result<bool, String> {
 }
 
 #[tauri::command]
-pub async fn download_logs() -> Result<String, String> {
+async fn download_logs() -> Result<String, String> {
     let log_dir = get_config()
         .paths
         .ok_or("No paths set. Is config initialized?".to_owned())?
@@ -181,8 +179,17 @@ pub async fn download_logs() -> Result<String, String> {
 }
 
 #[tauri::command]
-pub async fn rules_version() -> Result<String, String> {
+async fn rules_version() -> Result<String, String> {
     tokio::task::spawn_blocking(|| get_config().rules_version)
         .await
         .map_err(|err| err.to_string())
+}
+
+#[tauri::command]
+async fn lookup_file(file: String) -> Result<String, String> {
+    let file = serde_json::from_str::<TaggedFile>(&file)
+        .map_err(|err| err.to_string())?;
+    tokio::task::spawn_blocking(|| generate_virustotal(file))
+        .await
+        .map_err(|err| err.to_string())?
 }

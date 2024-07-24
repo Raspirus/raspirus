@@ -47,7 +47,15 @@ impl FileLog {
         match self.file.as_ref() {
             Some(mut file) => {
                 match file.write_all(
-                    format!("[{rule_count}]\t{fpath}\n{}\n", descriptions.iter().map(|description| description.to_string()).collect::<Vec<String>>().join("\n")).as_bytes(),
+                    format!(
+                        "[{rule_count}]\t{fpath}\n{}\n",
+                        descriptions
+                            .iter()
+                            .map(|description| description.to_string())
+                            .collect::<Vec<String>>()
+                            .join("\n")
+                    )
+                    .as_bytes(),
                 ) {
                     Ok(_) => {}
                     Err(err) => error!("Failed loggin: {err}"),

@@ -1,5 +1,5 @@
-use std::path::PathBuf;
 use serde::{Deserialize, Serialize};
+use std::path::PathBuf;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct UsbDevice {
@@ -47,6 +47,5 @@ pub struct TaggedFile {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct RuleFeedback {
     pub rule_name: String,
-    pub rule_description: String
+    pub rule_description: String,
 }
-

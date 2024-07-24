@@ -1,7 +1,7 @@
 use crate::i18n::provide_i18n_context;
 use crate::pages::{
     agreement::Agreement, clean::Clean, index::Index, infected::Infected, information::Information,
-    loading::Loading, settings::Settings
+    loading::Loading, settings::Settings,
 };
 use leptonic::components::root::Root;
 use leptonic::components::theme::LeptonicTheme;
