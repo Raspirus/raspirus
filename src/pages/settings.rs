@@ -9,7 +9,6 @@ use leptos_router::use_navigate;
 use tauri_wasm::api::core::invoke;
 use tauri_wasm::Error;
 
-use crate::components::modals::update_modal::UpdateModal;
 use crate::components::settings_card_download::SettingsDownloadCard;
 use crate::components::settings_card_numinput::SettingsNumInputCard;
 use crate::components::settings_card_toggle::SettingsToggleCard;
@@ -33,7 +32,6 @@ pub fn Settings() -> impl IntoView {
     let (min_match, setMinMatch) = create_signal(0.0);
     let (max_match, setMaxMatch) = create_signal(0.0);
     let navigate = use_navigate();
-    let (show_updater, setShowUpdater) = create_signal(false);
 
     spawn_local(async move {
         let config: Result<String, Error> = invoke("load_config_fe", &String::new()).await;
@@ -91,17 +89,11 @@ pub fn Settings() -> impl IntoView {
                   {t!(i18n, settings)}
                 </h1>
             </div>
-        
-        <UpdateModal
-            show_modal=show_updater
-            set_show_modal=setShowUpdater
-        />
 
         <SettingsUpdateCard
                 title=t!(i18n, update_db)().to_string()
                 short_description=t!(i18n, update_db_val)().to_string()
-                short_description_2=format!("{}: {}",
-                        t!(i18n, update_db_1)(), rules_version.get())
+                short_description_2=rules_version
                 icon=icondata::IoCloudDownload
             />
 
