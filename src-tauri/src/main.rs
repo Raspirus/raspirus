@@ -2,7 +2,8 @@
 //#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use backend::config_file::Config;
-use backend::utils::generic::get_config;
+use backend::utils::generic::{generate_virustotal, get_config};
+use backend::yara_scanner::TaggedFile;
 use frontend::tauri::init_tauri;
 use log::{error, info, LevelFilter};
 use simplelog::{
@@ -11,6 +12,8 @@ use simplelog::{
 use std::cell::RefCell;
 use std::fs;
 use std::fs::File;
+use std::path::PathBuf;
+use std::str::FromStr;
 use std::sync::Arc;
 
 mod backend;
@@ -28,8 +31,6 @@ static DEFAULT_FILE: &str = "rulepirus.yarac";
 // default scan params
 static DEFAULT_MIN_MATCHES: usize = 0;
 static DEFAULT_MAX_MATCHES: usize = 20;
-// hash buffer size in megabytes
-static BUFFER: usize = 512;
 
 // download settings
 static MAX_TIMEOUT: u64 = 120;
