@@ -2,13 +2,12 @@ use crate::components::home_button::HomeButton;
 use crate::components::virus_card::VirusCard;
 use crate::generic::TaggedFile;
 use crate::i18n::use_i18n;
-use leptonic::components::stack::Stack;
 use leptonic::components::prelude::{Collapsibles, OnOpen};
+use leptonic::components::stack::Stack;
 use leptonic::Size;
 use leptos::*;
 use leptos_i18n::t;
 use leptos_router::use_query_map;
-
 
 /// Infected page
 /// The page that is shown if after the scan the user has infected files
@@ -34,15 +33,15 @@ pub fn Infected() -> impl IntoView {
                         {infected_files.into_iter()
                             .map(|file| {
                                 view! {
-                                    <VirusCard 
-                                        file_path=file.path.to_string_lossy().to_string() 
-                                        rules_count=file.rule_count 
+                                    <VirusCard
+                                        file_path=file.path.to_string_lossy().to_string()
+                                        rules_count=file.rule_count
                                         rule_matches=file.descriptions />
                                 }
                             }).collect::<Vec<_>>()
                         }
                     </Stack>
-                    </Collapsibles>            
+                    </Collapsibles>
                 </div>
             </div>
     }

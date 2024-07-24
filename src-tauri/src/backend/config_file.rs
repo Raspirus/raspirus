@@ -47,7 +47,7 @@ pub struct ConfigFrontend {
     pub logging_is_active: Option<bool>,
     pub scan_dir: Option<bool>,
     pub min_matches: Option<usize>,
-    pub max_matches: Option<usize>
+    pub max_matches: Option<usize>,
 }
 
 impl Default for Config {
@@ -69,7 +69,7 @@ impl Default for Config {
 /// The config file simply holds settings of the application that should perists during reboots
 /// The entire config is saved to a JSON file and loaded or created on the first start
 /// Default config gets created, then we try to load. If load fails we return default
-impl Config { 
+impl Config {
     /// Finds the suitable path for the current system, creates a subfolder for the app and returns
     /// the path as a normal String
     fn set_paths(&mut self) -> Result<(), String> {
@@ -99,9 +99,10 @@ impl Config {
         }
 
         if !config.exists() {
-            fs::create_dir_all(&config).map_err(|err| format!("Failed to create config dir: {err}"))?;
+            fs::create_dir_all(&config)
+                .map_err(|err| format!("Failed to create config dir: {err}"))?;
         }
- 
+
         self.paths = Some(Paths {
             data,
             config,
@@ -161,7 +162,11 @@ impl Config {
     /// checks if the config version is the expected one
     fn update_config(&self) -> Result<Self, String> {
         if self.config_version != crate::CONFIG_VERSION {
-            info!("Updating config from {} to {}", self.config_version, crate::CONFIG_VERSION);
+            info!(
+                "Updating config from {} to {}",
+                self.config_version,
+                crate::CONFIG_VERSION
+            );
             let mut config = Config::default();
             config.set_paths()?;
             config.save()?;

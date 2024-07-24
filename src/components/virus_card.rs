@@ -1,14 +1,20 @@
-use leptonic::components::prelude::{Chip, ChipColor, Collapsible, CollapsibleBody, CollapsibleHeader};
-use leptos::*;
 use crate::generic::RuleFeedback;
+use leptonic::components::prelude::{
+    Chip, ChipColor, Collapsible, CollapsibleBody, CollapsibleHeader,
+};
+use leptos::*;
 
 #[component]
 pub fn VirusCard(
     file_path: String,
     rules_count: usize,
-    rule_matches: Vec<RuleFeedback>
+    rule_matches: Vec<RuleFeedback>,
 ) -> impl IntoView {
-    let chip_color = if rules_count > 5 { ChipColor::Danger } else { ChipColor::Warn };
+    let chip_color = if rules_count > 5 {
+        ChipColor::Danger
+    } else {
+        ChipColor::Warn
+    };
 
     view! {
         <Collapsible>
