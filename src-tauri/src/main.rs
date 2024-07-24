@@ -28,6 +28,8 @@ static DEFAULT_FILE: &str = "rulepirus.yarac";
 // default scan params
 static DEFAULT_MIN_MATCHES: usize = 0;
 static DEFAULT_MAX_MATCHES: usize = 20;
+// hash buffer size in megabytes
+static BUFFER: usize = 512;
 
 // download settings
 static MAX_TIMEOUT: u64 = 120;
