@@ -54,7 +54,7 @@ pub fn Scanning() -> impl IntoView {
         let result: Result<String, Error> = invoke(
             "start_scanner",
             &ScannerArgs {
-                path: target.unwrap().replace("\"", "").replace("'", ""),
+                path: target.unwrap(),
             },
         )
         .await;

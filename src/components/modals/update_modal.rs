@@ -14,37 +14,41 @@ pub fn UpdateModal (
     set_show_modal: WriteSignal<bool>
 ) -> impl IntoView {
     let (is_completed, setIsCompleted) = create_signal(false);
-    let (error_message, setErrorMessage) = create_signal(String::new());
+    let (message, setMessage) = create_signal(String::new());
 
-    spawn_local(async move {
-        log!("UPDATE STARTED");
-        let return_value: Result<(), Error> = invoke("update", &String::new()).await;
-        match return_value {
-            Ok(_) => {
-                log!("Database update successful");
-                setIsCompleted.set(true);
+    watch(
+        move || show_modal.get(),
+       move |_, _, _| { spawn_local(async move {
+            log!("UPDATE STARTED");
+            let return_value: Result<(), Error> = invoke("update", &String::new()).await;
+            match return_value {
+                Ok(_) => {
+                    log!("Database update successful");
+                    setMessage.set("Update completed".to_string());
+                    setIsCompleted.set(true);
+                }
+                Err(e) => {
+                    error!("Database update failed: {:?}", e);
+                    setMessage.set(e.to_string());
+                    setIsCompleted.set(true);
+                }
             }
-            Err(e) => {
-                error!("Database update failed: {:?}", e);
-                setErrorMessage.set(e.to_string());
-                setIsCompleted.set(true);
-            }
-        }
-    });
-
+        })},
+        false
+    );
 
     view! {
         <Modal show_when=show_modal>
         <ModalHeader><ModalTitle>{"Updater"}</ModalTitle></ModalHeader>
-        <ModalBody>{
-            if error_message.get().is_empty() { 
+        <ModalBody>{move || 
+            if message.get().is_empty() { 
             "Updating, please wait...".to_string() } 
-            else {error_message.get()} }
+            else {message.get()} }
         </ModalBody>
         <Show when=move || { is_completed.get() }>
             <ModalFooter>
                 <ButtonWrapper>
-                    <Button on_press=move |_| set_show_modal.set(false) color=ButtonColor::Secondary>"Done"</Button>
+                    <Button on_press=move |_| set_show_modal.set(false) color=ButtonColor::Info>"Done"</Button>
                 </ButtonWrapper>
             </ModalFooter>
         </Show>
