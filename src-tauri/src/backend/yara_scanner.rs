@@ -163,7 +163,7 @@ impl YaraScanner {
         scanner.max_matches_per_pattern(get_config().max_matches);
         match path.extension().unwrap_or_default().to_str() {
             Some("zip") => {
-                warn!("Zip files are not supported at the moment and will nto be scanned!");
+                warn!("Zip files are not supported at the moment and will not be scanned!");
                 let mut skipped_locked = pointers
                     .skipped
                     .lock()

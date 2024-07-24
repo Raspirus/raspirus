@@ -124,13 +124,13 @@ pub fn Index() -> impl IntoView {
         });
     };
 
-    // A function that programmatically navigates to the loading page if the selected target is not empty
-    let navigate_to_loading = move || {
+    // A function that programmatically navigates to the scanning page if the selected target is not empty
+    let navigate_to_scanning = move || {
         let target = scan_target.get();
         if target.is_some() && !target.clone().unwrap_or_default().is_empty() {
-            log!("Target selected, navigating to loading page");
+            log!("Target selected, navigating to scanning page");
             navigate(
-                &format!("/loading?target={}", target.unwrap_or_default()),
+                &format!("/scanning?target={}", target.unwrap_or_default()),
                 Default::default(),
             );
         } else {
@@ -218,7 +218,7 @@ pub fn Index() -> impl IntoView {
                 >
                   {t!(i18n, info)}
                 </LinkButton>
-                <Button on_press=move |_| navigate_to_loading() color=ButtonColor::Primary
+                <Button on_press=move |_| navigate_to_scanning() color=ButtonColor::Primary
                   class="ml-2 inline-block px-7 py-3 font-medium text-sm uppercase shadow-md"
                 >
                   {t!(i18n, start)}
