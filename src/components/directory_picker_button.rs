@@ -41,7 +41,10 @@ pub fn DirectoryPickerButton(
             let path_string = path_buffer
                 .into_os_string()
                 .into_string()
-                .unwrap_or_default();
+                .unwrap_or_default()
+                .replace("\"", "") // Remove double quotes
+                .replace("'", ""); // Remove single quotes
+            log!("Selected formatted target: {}", path_string.clone());
             scan_target.set(Option::from(path_string));
         });
     };

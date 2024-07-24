@@ -4,6 +4,5 @@ mod clean;
 mod index;
 mod infected;
 mod information;
-mod loading;
+mod scanning;
 mod settings;
-mod updating;
