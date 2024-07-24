@@ -96,6 +96,7 @@ pub fn profile_file(
     Ok(())
 }
 
+/// calculates sha256 hash and generates virustotal search link
 pub fn generate_virustotal(file: TaggedFile) -> Result<String, String> {
     info!("Starting hash compute for {}", file.path.to_string_lossy());
     let file = File::open(file.path).map_err(|err| format!("Failed to open file for computing hash: {err}"))?;
