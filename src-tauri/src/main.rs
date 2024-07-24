@@ -2,8 +2,7 @@
 //#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use backend::config_file::Config;
-use backend::utils::generic::{generate_virustotal, get_config};
-use backend::yara_scanner::TaggedFile;
+use backend::utils::generic::get_config;
 use frontend::tauri::init_tauri;
 use log::{error, info, LevelFilter};
 use simplelog::{
@@ -12,8 +11,6 @@ use simplelog::{
 use std::cell::RefCell;
 use std::fs;
 use std::fs::File;
-use std::path::PathBuf;
-use std::str::FromStr;
 use std::sync::Arc;
 
 mod backend;
