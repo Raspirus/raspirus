@@ -10,13 +10,13 @@ use tauri_wasm::api::core::invoke;
 use tauri_wasm::api::event::listen;
 use tauri_wasm::Error;
 
-/// The loading page is responsible for starting the scanning process and displaying the progress
+/// The Scanning page is responsible for starting the scanning process and displaying the progress
 /// of the scan. It listens for progress events and updates the progress bar accordingly.
 /// If the scan is successful and infected files are found, it navigates to the infected page.
 /// If the scan is successful and no infected files are found, it navigates to the clean page.
 /// If the scan fails, it navigates back to the home page with an error message.
 #[component]
-pub fn Loading() -> impl IntoView {
+pub fn Scanning() -> impl IntoView {
     let (progress, set_progress) = create_signal(Some(0.0));
     let target = use_query_map().get_untracked().get("target").cloned();
     let navigate = use_navigate();
@@ -50,11 +50,11 @@ pub fn Loading() -> impl IntoView {
 
     // We start the scanning process
     spawn_local(async move {
-        log!("Starting scanner with target: {:?}", target);
+        log!("Starting scanner with target: {:?}", target.clone().unwrap());
         let result: Result<String, Error> = invoke(
             "start_scanner",
             &ScannerArgs {
-                path: target.unwrap(),
+                path: target.unwrap().replace("\"", "").replace("'", ""),
             },
         )
         .await;

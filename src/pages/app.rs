@@ -1,7 +1,7 @@
 use crate::i18n::provide_i18n_context;
 use crate::pages::{
     agreement::Agreement, clean::Clean, index::Index, infected::Infected, information::Information,
-    loading::Loading, settings::Settings,
+    scanning::Scanning, settings::Settings,
 };
 use leptonic::components::root::Root;
 use leptonic::components::theme::LeptonicTheme;
@@ -45,8 +45,8 @@ pub fn App() -> impl IntoView {
                     />
                     <StaticRoute
                         mode=StaticMode::Incremental
-                        path="/loading"
-                        view=Loading
+                        path="/scanning"
+                        view=Scanning
                         static_params=|| Box::pin(async { StaticParamsMap::default() })
                     />
                     <StaticRoute
