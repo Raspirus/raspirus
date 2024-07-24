@@ -173,7 +173,7 @@ pub fn Index() -> impl IntoView {
                   </LinkButton>
             </Show>
 
-            <LinkButton href="/infected" variant=ButtonVariant::Outlined
+            <LinkButton href="/settings" variant=ButtonVariant::Outlined
                 class="px-6 py-2 m-2 font-medium text-sm leading-tight uppercase">
               <Icon
                 icon=icondata::OcGearLg
