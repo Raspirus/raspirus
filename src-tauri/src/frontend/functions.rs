@@ -84,7 +84,13 @@ pub fn cli_update(app: tauri::AppHandle) {
                 app.exit(0);
             }
             Err(err) => {
-                error!("Error: {err}");
+                error!(
+                    "Error: {}",
+                    match err {
+                        downloader::RemoteError::Offline => "Offline".to_owned(),
+                        downloader::RemoteError::Other(err) => err,
+                    }
+                );
                 app.exit(-1);
             }
         }
