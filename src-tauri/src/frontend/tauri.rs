@@ -5,7 +5,7 @@ use log::error;
 use crate::{
     backend::{
         config_file::ConfigFrontend,
-        downloader,
+        downloader::{self, RemoteError},
         utils::{
             self,
             generic::{generate_virustotal, get_config, update_config},
@@ -96,10 +96,10 @@ async fn start_scanner(window: tauri::Window, path: String) -> Result<String, St
 
 // Updates the database over the GUi
 #[tauri::command]
-async fn update() -> Result<(), String> {
+async fn update() -> Result<(), RemoteError> {
     tokio::task::spawn_blocking(downloader::update)
         .await
-        .map_err(|err| err.to_string())?
+        .map_err(|err| RemoteError::Other(err.to_string()))?
         .await
 }
 
@@ -149,15 +149,15 @@ async fn load_config_fe() -> Result<String, String> {
 
 /// verifies if there are any yara rules present
 #[tauri::command]
-async fn check_update() -> Result<bool, String> {
+async fn check_update() -> Result<bool, RemoteError> {
     tokio::task::spawn_blocking(downloader::check_update)
         .await
-        .map_err(|err| err.to_string())?
+        .map_err(|err| RemoteError::Other(err.to_string()))?
         .await
 }
 
 #[tauri::command]
-async fn download_logs() -> Result<String, String> {
+async fn download_logs() -> Result<PathBuf, String> {
     let log_dir = get_config()
         .paths
         .ok_or("No paths set. Is config initialized?".to_owned())?
@@ -175,7 +175,7 @@ async fn download_logs() -> Result<String, String> {
     std::fs::copy(app_log_path, &log_path)
         .map_err(|err| format!("Error copying log file: {err}"))?;
     // If the copy operation is successful, return Ok indicating success
-    Ok(log_path.to_str().unwrap().to_string())
+    Ok(log_path)
 }
 
 #[tauri::command]
