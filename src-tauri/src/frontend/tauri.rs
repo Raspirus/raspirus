@@ -1,4 +1,4 @@
-use std::{path::{Path, PathBuf}, str::FromStr, sync::Arc};
+use std::{path::PathBuf, sync::Arc};
 
 use log::error;
 
@@ -96,10 +96,7 @@ async fn start_scanner(window: tauri::Window, path: PathBuf) -> Result<(Vec<Tagg
 // Updates the database over the GUi
 #[tauri::command]
 async fn update() -> Result<(), RemoteError> {
-    tokio::task::spawn_blocking(downloader::update)
-        .await
-        .map_err(|err| RemoteError::Other(err.to_string()))?
-        .await
+    downloader::update().await
 }
 
 // Returns a vector of all attached removable storage drives (USB) -> Unnecessary for the CLI
@@ -145,10 +142,7 @@ async fn load_config_fe() -> Result<Config, String> {
 /// verifies if there are any yara rules present
 #[tauri::command]
 async fn check_update() -> Result<bool, RemoteError> {
-    tokio::task::spawn_blocking(downloader::check_update)
-        .await
-        .map_err(|err| RemoteError::Other(err.to_string()))?
-        .await
+    downloader::check_update().await
 }
 
 #[tauri::command]

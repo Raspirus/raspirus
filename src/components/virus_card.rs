@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 use crate::generic::RuleFeedback;
 use leptonic::{components::prelude::{
     Button, Chip, ChipColor, Collapsible, CollapsibleBody, CollapsibleHeader
@@ -7,7 +9,7 @@ use leptonic::components::prelude::Icon;
 
 #[component]
 pub fn VirusCard(
-    file_path: String,
+    file_path: PathBuf,
     rules_count: usize,
     rule_matches: Vec<RuleFeedback>,
 ) -> impl IntoView {
@@ -17,12 +19,15 @@ pub fn VirusCard(
         ChipColor::Warn
     };
 
+    let string_lossy = file_path.to_string_lossy();
+    let display_path = string_lossy.to_string();
+
     view! {
         <Collapsible>
             <CollapsibleHeader slot class="w-full">
             <div class="flex w-full">
                 <Chip color={chip_color} class="mr-2">{rules_count}</Chip>
-                <div>{file_path}</div>
+                <div>{display_path}</div>
                 <Button class="ml-auto mr-2" on_press=move |_| {}>
                     <Icon icon=icondata::SiVirustotal />
                 </Button>

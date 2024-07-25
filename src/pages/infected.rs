@@ -63,7 +63,7 @@ pub fn Infected() -> impl IntoView {
                             .map(|file| {
                                 view! {
                                     <VirusCard
-                                        file_path=file.path.to_string_lossy().to_string()
+                                        file_path=file.path
                                         rules_count=file.rule_count
                                         rule_matches=file.descriptions />
                                 }
