@@ -30,7 +30,7 @@ static DEFAULT_MIN_MATCHES: usize = 0;
 static DEFAULT_MAX_MATCHES: usize = 20;
 
 // download settings
-static MAX_TIMEOUT: u64 = 120;
+static MAX_TIMEOUT: u64 = 10;
 
 // global config instance
 thread_local!(static CONFIG: RefCell<Arc<Config>> =
