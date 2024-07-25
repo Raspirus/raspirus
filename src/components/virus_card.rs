@@ -1,8 +1,9 @@
 use crate::generic::RuleFeedback;
-use leptonic::components::prelude::{
-    Chip, ChipColor, Collapsible, CollapsibleBody, CollapsibleHeader,
-};
+use leptonic::{components::prelude::{
+    Button, Chip, ChipColor, Collapsible, CollapsibleBody, CollapsibleHeader
+}, prelude::icondata::{self}};
 use leptos::*;
+use leptonic::components::prelude::Icon;
 
 #[component]
 pub fn VirusCard(
@@ -18,10 +19,13 @@ pub fn VirusCard(
 
     view! {
         <Collapsible>
-            <CollapsibleHeader slot>
-            <div class="flex justify-between items-center">
+            <CollapsibleHeader slot class="w-full">
+            <div class="flex w-full">
                 <Chip color={chip_color} class="mr-2">{rules_count}</Chip>
                 <div>{file_path}</div>
+                <Button class="ml-auto mr-2" on_press=move |_| {}>
+                    <Icon icon=icondata::SiVirustotal />
+                </Button>
             </div>
             </CollapsibleHeader>
             <CollapsibleBody slot>

@@ -37,17 +37,6 @@ pub fn Scanning() -> impl IntoView {
         }
     });
 
-    spawn_local(async move {
-        let mut error_event = listen::<String>("progerror")
-            .await
-            .expect("event listen error");
-        while let Some(event) = error_event.next().await {
-            let payload: String = event.payload;
-            let message = format!("payload: {}", payload);
-            log!("Error: {}", message);
-        }
-    });
-
     // We start the scanning process
     spawn_local(async move {
         log!("Starting scanner with target: {:?}", target.clone().unwrap());
