@@ -54,7 +54,7 @@ fn main() -> Result<(), String> {
             .build();
         // Terminal logger is always used if logging so we add it right away
         let mut loggers: Vec<Box<dyn simplelog::SharedLogger>> = vec![TermLogger::new(
-            LevelFilter::Info,
+            LevelFilter::Debug,
             log_config.clone(),
             TerminalMode::Mixed,
             ColorChoice::Auto,
