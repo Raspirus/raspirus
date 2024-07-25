@@ -13,7 +13,7 @@ use yara_x::Rules;
 use crate::{
     backend::{
         config_file::Config,
-        yara_scanner::{Skipped, TaggedFile},
+        yara_scanner::Skipped,
     },
     CONFIG,
 };
@@ -119,9 +119,9 @@ pub fn profile_file(
 }
 
 /// calculates sha256 hash and generates virustotal search link
-pub fn generate_virustotal(file: TaggedFile) -> Result<String, String> {
-    info!("Starting hash compute for {}", file.path.to_string_lossy());
-    let file = File::open(file.path)
+pub fn generate_virustotal(file: PathBuf) -> Result<String, String> {
+    info!("Starting hash compute for {}", file.to_string_lossy());
+    let file = File::open(file)
         .map_err(|err| format!("Failed to open file for computing hash: {err}"))?;
 
     let mut reader = BufReader::new(file);

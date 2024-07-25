@@ -10,7 +10,7 @@ use crate::{
             self,
             generic::{generate_virustotal, get_config, update_config},
         },
-        yara_scanner::{TaggedFile, YaraScanner},
+        yara_scanner::YaraScanner,
     },
     frontend::functions::cli_scanner,
 };
@@ -187,7 +187,7 @@ async fn rules_version() -> Result<String, String> {
 
 #[tauri::command]
 async fn lookup_file(file: String) -> Result<String, String> {
-    let file = serde_json::from_str::<TaggedFile>(&file)
+    let file = serde_json::from_str::<PathBuf>(&file)
         .map_err(|err| err.to_string())?;
     tokio::task::spawn_blocking(|| generate_virustotal(file))
         .await

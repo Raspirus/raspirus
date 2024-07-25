@@ -136,7 +136,10 @@ impl YaraScanner {
                 rule_name: m.1.identifier().to_owned(),
             })
             .collect::<Vec<RuleFeedback>>();
-        if rule_count > get_config().min_matches {
+        let config = get_config();
+        if rule_count >= config.min_matches
+            && (config.max_matches == 0 || rule_count <= config.max_matches)
+        {
             let file_log_locked = file_log
                 .lock()
                 .map_err(|err| format!("Failed to lock file logger: {err}"))?;
