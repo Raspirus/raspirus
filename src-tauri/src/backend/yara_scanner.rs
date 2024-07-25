@@ -5,7 +5,7 @@ use std::{
 };
 
 use chrono::{DateTime, Local};
-use log::{error, warn};
+use log::{error, info, warn};
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 use threadpool_rs::threadpool::pool::ThreadPool;
@@ -14,6 +14,7 @@ use yara_x::{ScanResults, Scanner};
 use crate::backend::utils::generic::{get_config, get_rules};
 
 use super::{
+    config_file::Config,
     file_log::FileLog,
     utils::generic::{profile_path, send},
 };
@@ -38,7 +39,7 @@ impl Display for RuleFeedback {
     }
 }
 
-#[derive(Serialize, Debug)]
+#[derive(Serialize, Debug, Clone)]
 pub struct Skipped {
     pub path: PathBuf,
     pub reason: String,
@@ -48,9 +49,10 @@ pub struct Skipped {
 #[derive(Default, Clone)]
 pub struct PointerCollection {
     tagged: Arc<Mutex<Vec<TaggedFile>>>,
+    skipped: Arc<Mutex<Vec<Skipped>>>,
     analysed: Arc<Mutex<usize>>,
-    skipped: Arc<Mutex<usize>>,
-    scanned_size: Arc<Mutex<usize>>,
+    total: Arc<Mutex<usize>>,
+    config: Arc<Config>,
 }
 
 pub struct YaraScanner {
@@ -75,12 +77,11 @@ impl YaraScanner {
         let log_str = format!("{}.log", now_str);
         let file_log = Arc::new(Mutex::new(FileLog::new(log_str)?));
 
-        let profiled = profile_path(path.clone())
+        let paths = profile_path(path.clone())
             .map_err(|err| format!("Failed to calculate file tree: {err}"))?;
-        let skipped = profiled.2;
-        let total_size = profiled.1;
-        let paths = profiled.0;
-        let pointers = PointerCollection::default();
+        let mut pointers = PointerCollection::default();
+        pointers.config = Arc::from(get_config());
+        pointers.total = Arc::new(Mutex::new(paths.len()));
 
         let threadpool = ThreadPool::new(num_cpus::get())
             .map_err(|err| format!("Failed to create threadpool: {err}"))?;
@@ -89,13 +90,7 @@ impl YaraScanner {
             let file_log_c = file_log.clone();
             let tauri_window_c = self.tauri_window.as_ref().map(|window| window.clone());
             threadpool.execute(move || {
-                match Self::scan_file(
-                    file.as_path(),
-                    file_log_c,
-                    tauri_window_c,
-                    total_size,
-                    pointers_c,
-                ) {
+                match Self::scan_file(file.as_path(), file_log_c, tauri_window_c, pointers_c) {
                     Ok(_) => {}
                     Err(err) => error!(
                         "Failed to scan file {}: {err}",
@@ -110,13 +105,18 @@ impl YaraScanner {
             .lock()
             .map_err(|err| format!("Failed to lock final tagged vec: {err}"))?
             .clone();
+        let skipped = pointers
+            .skipped
+            .lock()
+            .map_err(|err| format!("Failed to lock skipped: {err}"))?
+            .clone();
         println!("Found tagged files: {:#?}", tagged);
         Ok((tagged, skipped))
     }
 
     fn evaluate_result(
+        pointers: &PointerCollection,
         file_log: Arc<Mutex<FileLog>>,
-        tagged: Arc<Mutex<Vec<TaggedFile>>>,
         result: ScanResults,
         path: &Path,
     ) -> Result<(), String> {
@@ -136,14 +136,13 @@ impl YaraScanner {
                 rule_name: m.1.identifier().to_owned(),
             })
             .collect::<Vec<RuleFeedback>>();
-        let config = get_config();
         if (rule_count
-            >= if config.min_matches == 0 {
+            >= if pointers.config.min_matches == 0 {
                 1
             } else {
-                config.min_matches
+                pointers.config.min_matches
             })
-            && (config.max_matches == 0 || rule_count <= config.max_matches)
+            && (pointers.config.max_matches == 0 || rule_count <= pointers.config.max_matches)
         {
             let file_log_locked = file_log
                 .lock()
@@ -153,7 +152,8 @@ impl YaraScanner {
                 rule_count,
                 &descriptions,
             );
-            let mut tagged_locked = tagged
+            let mut tagged_locked = pointers
+                .tagged
                 .lock()
                 .map_err(|err| format!("Failed to lock tagged: {err}"))?;
             tagged_locked.push(TaggedFile {
@@ -170,12 +170,20 @@ impl YaraScanner {
         path: &Path,
         file_log: Arc<Mutex<FileLog>>,
         tauri_window: Option<Arc<tauri::Window>>,
-        total_size: usize,
         pointers: PointerCollection,
     ) -> Result<(), String> {
-        let rules = get_rules()?;
+        info!("Scanning {}", path.to_string_lossy());
+        let rules = get_rules(
+            pointers
+                .config
+                .paths
+                .clone()
+                .ok_or("No paths set. Is config initialized?")?
+                .data
+                .join(get_config().remote_file),
+        )?;
         let mut scanner = Scanner::new(&rules);
-        scanner.max_matches_per_pattern(get_config().max_matches);
+        scanner.max_matches_per_pattern(pointers.config.max_matches);
         match path.extension().unwrap_or_default().to_str() {
             Some("zip") => {
                 warn!("Zip files are not supported at the moment and will not be scanned!");
@@ -183,7 +191,10 @@ impl YaraScanner {
                     .skipped
                     .lock()
                     .map_err(|err| format!("Failed to lock skipped: {err}"))?;
-                *skipped_locked += 1;
+                skipped_locked.push(Skipped {
+                    path: path.to_path_buf(),
+                    reason: "Zip files unsupported for now".to_owned(),
+                });
                 /*
                 let file = File::open(path).map_err(|err| format!("Failed to open zip file: {err}"))?;
                 let mut archive = ZipArchive::new(file).map_err(|err| format!("Failed to create zip: {err}"))?;
@@ -198,21 +209,23 @@ impl YaraScanner {
                 */
             }
             None | Some(_) => {
-                let result = scanner
-                    .scan_file(path)
-                    .map_err(|err| format!("Failed to scan file: {err}"))?;
-                Self::evaluate_result(file_log, pointers.tagged, result, path)?;
+                let result = scanner.scan_file(path).map_err(|err| {
+                    let reason = format!("Skipping file {}: {err}", path.to_string_lossy());
+                    match pointers.skipped.lock() {
+                        Ok(mut skipped_locked) => {
+                            skipped_locked.push(Skipped {
+                                path: path.to_path_buf(),
+                                reason: reason.clone(),
+                            });
+                            reason
+                        }
+                        Err(err) => format!("Failed to lock skipped: {err}"),
+                    }
+                })?;
+                Self::evaluate_result(&pointers, file_log, result, path)?;
 
                 // update shared variables
                 {
-                    let mut scanned_size_locked = pointers
-                        .scanned_size
-                        .lock()
-                        .map_err(|err| format!("Failed to lock scanned size: {err}"))?;
-                    *scanned_size_locked += path
-                        .metadata()
-                        .map_err(|err| format!("Failed to get metadata: {err}"))?
-                        .len() as usize;
                     let mut analysed_locked = pointers
                         .analysed
                         .lock()
@@ -220,22 +233,30 @@ impl YaraScanner {
                     *analysed_locked += 1;
                 }
                 // send progress to frontend
-                Self::progress(pointers.scanned_size, total_size, tauri_window)?;
+                Self::progress(&pointers, tauri_window)?;
             }
         }
         Ok(())
     }
 
     fn progress(
-        scanned_size: Arc<Mutex<usize>>,
-        total_size: usize,
+        pointers: &PointerCollection,
         tauri_window: Option<Arc<tauri::Window>>,
     ) -> Result<(), String> {
-        let scanned_size_locked = scanned_size
+        let analysed_locked = pointers
+            .analysed
             .lock()
-            .map_err(|err| format!("Failed to lock scanned size: {err}"))?;
-        let scanned = *scanned_size_locked as f64;
-        let percentage = (scanned / total_size as f64) * 100.0;
+            .map_err(|err| format!("Failed to lock analysed: {err}"))?;
+        let skipped_locked = pointers
+            .skipped
+            .lock()
+            .map_err(|err| format!("Failed to lock skipped: {err}"))?;
+        let scanned = *analysed_locked as f64 + skipped_locked.len() as f64;
+        let total_locked = pointers
+            .total
+            .lock()
+            .map_err(|err| format!("Failed to lock total: {err}"))?;
+        let percentage = (scanned / *total_locked as f64) * 100.0;
         if tauri_window.is_some() {
             send(&tauri_window, "progress", format!("{percentage:.2}"));
             println!("Scan progress: {percentage:.2}%");
