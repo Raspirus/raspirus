@@ -137,7 +137,12 @@ impl YaraScanner {
             })
             .collect::<Vec<RuleFeedback>>();
         let config = get_config();
-        if rule_count >= config.min_matches
+        if (rule_count
+            >= if config.min_matches == 0 {
+                1
+            } else {
+                config.min_matches
+            })
             && (config.max_matches == 0 || rule_count <= config.max_matches)
         {
             let file_log_locked = file_log
