@@ -1,5 +1,8 @@
 use std::{
-    fs::{self, File}, io::{BufReader, Read}, path::PathBuf, sync::Arc
+    fs::{self, File},
+    io::{BufReader, Read},
+    path::PathBuf,
+    sync::Arc,
 };
 
 use log::{info, trace, warn};
@@ -8,7 +11,10 @@ use tauri::Emitter;
 use yara_x::Rules;
 
 use crate::{
-    backend::{config_file::Config, yara_scanner::TaggedFile},
+    backend::{
+        config_file::Config,
+        yara_scanner::{Skipped, TaggedFile},
+    },
     CONFIG,
 };
 
@@ -57,29 +63,33 @@ pub fn get_rules() -> Result<Rules, String> {
 }
 
 /// yields all file paths and the total size of them
-pub fn profile_path(path: PathBuf) -> Result<(Vec<PathBuf>, usize), std::io::Error> {
+pub fn profile_path(path: PathBuf) -> Result<(Vec<PathBuf>, usize, Vec<Skipped>), std::io::Error> {
+    info!("Starting indexing...");
     let mut paths = Vec::new();
+    let mut skipped = Vec::new();
     let mut size = 0;
     if path.is_dir() {
-        profile_folder(&mut paths, &mut size, path)?;
+        profile_folder(&mut paths, &mut skipped, &mut size, path)?;
     } else {
-        profile_file(&mut paths, &mut size, path)?;
+        profile_file(&mut paths, &mut skipped, &mut size, path)?;
     }
-    Ok((paths, size))
+    info!("Finished indexing {} files", skipped.len() + paths.len());
+    Ok((paths, size, skipped))
 }
 
 /// adds files or files in subfolders to paths and adds their sizes to the total
 pub fn profile_folder(
     paths: &mut Vec<PathBuf>,
+    skipped: &mut Vec<Skipped>,
     size: &mut usize,
     path: PathBuf,
 ) -> Result<(), std::io::Error> {
     for entry in fs::read_dir(path)? {
         let entry = entry?;
         if entry.path().is_dir() {
-            profile_folder(paths, size, entry.path())?;
+            profile_folder(paths, skipped, size, entry.path())?;
         } else {
-            profile_file(paths, size, entry.path())?;
+            profile_file(paths, skipped, size, entry.path())?;
         }
     }
     Ok(())
@@ -88,30 +98,48 @@ pub fn profile_folder(
 /// adds file to paths and adds its size to the total
 pub fn profile_file(
     paths: &mut Vec<PathBuf>,
+    skipped: &mut Vec<Skipped>,
     size: &mut usize,
     path: PathBuf,
 ) -> Result<(), std::io::Error> {
-    *size += path.metadata()?.len() as usize;
-    paths.push(path);
+    match path.metadata() {
+        Ok(metadata) => {
+            *size += metadata.len() as usize;
+            paths.push(path)
+        }
+        Err(err) => {
+            warn!("Failed to index file {}: {err}", path.to_string_lossy());
+            skipped.push(Skipped {
+                path: path.clone(),
+                reason: err.kind().to_string(),
+            })
+        }
+    }
     Ok(())
 }
 
 /// calculates sha256 hash and generates virustotal search link
 pub fn generate_virustotal(file: TaggedFile) -> Result<String, String> {
     info!("Starting hash compute for {}", file.path.to_string_lossy());
-    let file = File::open(file.path).map_err(|err| format!("Failed to open file for computing hash: {err}"))?;
-    
+    let file = File::open(file.path)
+        .map_err(|err| format!("Failed to open file for computing hash: {err}"))?;
+
     let mut reader = BufReader::new(file);
     let mut sha256 = Sha256::new();
 
     loop {
         let mut buffer = [0; 524288];
-        let read = reader.read(&mut buffer).map_err(|err| format!("Failed to read into buffer: {err}"))?;
+        let read = reader
+            .read(&mut buffer)
+            .map_err(|err| format!("Failed to read into buffer: {err}"))?;
         if read == 0 {
             break;
         }
         sha256.update(&buffer[..read]);
     }
     let result = sha256.finalize();
-    Ok(format!("https://virustotal.com/gui/search/{}", hex::encode(result)))
+    Ok(format!(
+        "https://virustotal.com/gui/search/{}",
+        hex::encode(result)
+    ))
 }
