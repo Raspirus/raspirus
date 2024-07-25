@@ -38,6 +38,12 @@ impl Display for RuleFeedback {
     }
 }
 
+#[derive(Serialize, Debug)]
+pub struct Skipped {
+    pub path: PathBuf,
+    pub reason: String,
+}
+
 /// collection of pointers for the scan threads
 #[derive(Default, Clone)]
 pub struct PointerCollection {
@@ -58,7 +64,7 @@ impl YaraScanner {
     }
 
     /// Starts the scanner in the specified location
-    pub fn start(&mut self, path: PathBuf) -> Result<Vec<TaggedFile>, String> {
+    pub fn start(&mut self, path: PathBuf) -> Result<(Vec<TaggedFile>, Vec<Skipped>), String> {
         if !path.exists() {
             return Err("Invalid path".to_owned());
         }
@@ -71,6 +77,7 @@ impl YaraScanner {
 
         let profiled = profile_path(path.clone())
             .map_err(|err| format!("Failed to calculate file tree: {err}"))?;
+        let skipped = profiled.2;
         let total_size = profiled.1;
         let paths = profiled.0;
         let pointers = PointerCollection::default();
@@ -104,7 +111,7 @@ impl YaraScanner {
             .map_err(|err| format!("Failed to lock final tagged vec: {err}"))?
             .clone();
         println!("Found tagged files: {:#?}", tagged);
-        Ok(tagged)
+        Ok((tagged, skipped))
     }
 
     fn evaluate_result(
@@ -222,7 +229,7 @@ impl YaraScanner {
         let scanned = *scanned_size_locked as f64;
         let percentage = (scanned / total_size as f64) * 100.0;
         if tauri_window.is_some() {
-            send(&tauri_window, "progress", format!("{percentage:.2}%"));
+            send(&tauri_window, "progress", format!("{percentage:.2}"));
             println!("Scan progress: {percentage:.2}%");
         } else {
             println!("Scan progress: {percentage:.2}%");
