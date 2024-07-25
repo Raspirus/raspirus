@@ -1,6 +1,8 @@
 use crate::components::home_button::HomeButton;
 use crate::components::virus_card::VirusCard;
 use crate::generic::TaggedFile;
+//use crate::generic::{RuleFeedback, TaggedFile};
+// use std::path::PathBuf;
 use crate::i18n::use_i18n;
 use leptonic::components::prelude::{Collapsibles, OnOpen};
 use leptonic::components::stack::Stack;
@@ -19,6 +21,33 @@ pub fn Infected() -> impl IntoView {
     let infected = use_query_map().get_untracked().get("result").cloned();
     let infected_files: Vec<TaggedFile> = serde_json::from_str(&infected.unwrap()).unwrap();
 
+    // let infected_files: Vec<TaggedFile> = vec![
+    //     TaggedFile {
+    //         path: PathBuf::from("/path/to/infected/file1"),
+    //         descriptions: vec![
+    //             RuleFeedback {
+    //                 rule_name: String::from("Malware Detected"),
+    //                 rule_description: String::from("This file contains signatures of known malware."),
+    //             },
+    //             RuleFeedback {
+    //                 rule_name: String::from("Suspicious Activity"),
+    //                 rule_description: String::from("Suspicious behavior detected in file operations."),
+    //             },
+    //         ],
+    //         rule_count: 2,
+    //     },
+    //     TaggedFile {
+    //         path: PathBuf::from("/path/to/infected/file2"),
+    //         descriptions: vec![
+    //             RuleFeedback {
+    //                 rule_name: String::from("Ransomware Detected"),
+    //                 rule_description: String::from("File encryption patterns related to ransomware were detected."),
+    //             },
+    //         ],
+    //         rule_count: 1,
+    //     },
+    // ];
+
     view! {
         <div>
             <div class="align-middle">
@@ -27,7 +56,7 @@ pub fn Infected() -> impl IntoView {
                     {t!(i18n, infected_title)}
                 </h1>
             </div>
-                <div>
+                <div class="px-2">
                     <Collapsibles default_on_open=OnOpen::CloseOthers>
                     <Stack spacing=Size::Em(0.6)>
                         {infected_files.into_iter()
