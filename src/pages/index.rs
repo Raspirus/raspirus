@@ -51,10 +51,9 @@ pub fn Index() -> impl IntoView {
     // We have to call a couple invoke commands to set the initial state of the app
     spawn_local(async move {
         // First we load the config
-        let config: Result<String, Error> = invoke("load_config_fe", &String::new()).await;
+        let config: Result<Config, Error> = invoke("load_config_fe", &String::new()).await;
         match config {
-            Ok(config_string) => {
-                let config: Config = serde_json::from_str(&config_string).unwrap();
+            Ok(config) => {
                 // We set the flag to indicate if the file picker can select directories
                 setCanSelectDirectories.set(config.scan_dir);
                 if config.rules_version.is_empty() || config.rules_version == "None" {

@@ -34,11 +34,10 @@ pub fn Settings() -> impl IntoView {
     let navigate = use_navigate();
 
     spawn_local(async move {
-        let config: Result<String, Error> = invoke("load_config_fe", &String::new()).await;
+        let config: Result<Config, Error> = invoke("load_config_fe", &String::new()).await;
         match config {
             // We load the config and set the signals
-            Ok(config_string) => {
-                let config: Config = serde_json::from_str(&config_string).unwrap();
+            Ok(config) => {
                 setLogging.set(config.logging_is_active);
                 setScanDir.set(config.scan_dir);
                 setRulesVersion.set(config.rules_version);
@@ -51,21 +50,20 @@ pub fn Settings() -> impl IntoView {
         }
     });
 
-    let navigate_home = move || {
-        let settings_struct = SettingsStruct {
-            logging_is_active: logging.get(),
-            min_matches: min_match.get() as usize,
-            max_matches: max_match.get() as usize,
-            scan_dir: scan_dir.get(),
-        };
-        spawn_local(async move {
-            // We need to convert the args to a string in order to send it to the backend
-            let args = SettingsArgs {
-                contents: serde_json::to_string(&settings_struct).unwrap(),
+       let navigate_home = move |_| {
+            let update_config = SettingsStruct {
+                    logging_is_active: logging.get(),
+                    min_matches: min_match.get() as usize,
+                    max_matches: max_match.get() as usize,
+                    scan_dir: scan_dir.get(),
             };
-            log!("Args: {:?}", args);
 
-            let result: Result<(), Error> = invoke("save_config_fe", &args).await;
+        spawn_local(async move {
+            let result: Result<(), Error> = invoke(
+                "save_config_fe",
+                &SettingsArgs { received: update_config  },
+            )
+            .await;
             match result {
                 Ok(_) => {
                     log!("Settings saved");
@@ -81,7 +79,7 @@ pub fn Settings() -> impl IntoView {
     view! {
         <div class="pb-4">
             <div class="align-middle">
-                        <Button on_press=move |_| navigate_home() class="inline-block align-middle px-6 py-2.5 m-2 bg-mainred text-white font-medium text-xs leading-tight uppercase rounded shadow-md">
+                        <Button on_press=navigate_home class="inline-block align-middle px-6 py-2.5 m-2 bg-mainred text-white font-medium text-xs leading-tight uppercase rounded shadow-md">
                             <Icon icon=icondata::AiHomeFilled class="pr-1" />
                             {t!(i18n, back_btn)}
                         </Button>
