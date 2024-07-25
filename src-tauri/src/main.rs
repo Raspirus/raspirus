@@ -1,17 +1,14 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 //#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use backend::config_file::Config;
 use backend::utils::generic::get_config;
 use frontend::tauri::init_tauri;
 use log::{error, info, LevelFilter};
 use simplelog::{
     ColorChoice, CombinedLogger, ConfigBuilder, TermLogger, TerminalMode, WriteLogger,
 };
-use std::cell::RefCell;
 use std::fs;
 use std::fs::File;
-use std::sync::Arc;
 
 mod backend;
 mod frontend;
@@ -33,8 +30,7 @@ static DEFAULT_MAX_MATCHES: usize = 20;
 static MAX_TIMEOUT: u64 = 120;
 
 // global config instance
-thread_local!(static CONFIG: RefCell<Arc<Config>> =
-    RefCell::new(Arc::new(Config::new().expect("Failed to get paths"))));
+//thread_local!(static CONFIG: RefCell<Arc<Config>> = RefCell::new(Arc::new(Config::new().expect("Failed to get paths"))));
 
 // NOTE: All functions with #[tauri::command] can and will be called from the GUI
 // Their name should not be changed and any new functions should return JSON data
@@ -58,7 +54,7 @@ fn main() -> Result<(), String> {
             .build();
         // Terminal logger is always used if logging so we add it right away
         let mut loggers: Vec<Box<dyn simplelog::SharedLogger>> = vec![TermLogger::new(
-            LevelFilter::Trace,
+            LevelFilter::Info,
             log_config.clone(),
             TerminalMode::Mixed,
             ColorChoice::Auto,

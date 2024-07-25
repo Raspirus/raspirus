@@ -1,9 +1,8 @@
-use std::path::{Path, PathBuf} ;
-use std::str::FromStr;
+use std::path::Path ;
 
 use crate::generic::{ScannerArgs, Skipped, TaggedFile};
 use crate::i18n::use_i18n;
-use futures_util::{SinkExt, StreamExt};
+use futures_util::StreamExt;
 use leptonic::components::progress_bar::ProgressBar;
 use leptos::logging::log;
 use leptos::*;
