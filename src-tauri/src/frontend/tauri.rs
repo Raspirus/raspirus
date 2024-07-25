@@ -1,16 +1,16 @@
-use std::{path::PathBuf, str::FromStr, sync::Arc};
+use std::{path::{Path, PathBuf}, str::FromStr, sync::Arc};
 
 use log::error;
 
 use crate::{
     backend::{
-        config_file::ConfigFrontend,
+        config_file::{Config, ConfigFrontend},
         downloader::{self, RemoteError},
         utils::{
             self,
-            generic::{generate_virustotal, get_config, update_config},
+            generic::{generate_virustotal, get_config, update_config}, usb_utils::UsbDevice,
         },
-        yara_scanner::YaraScanner,
+        yara_scanner::{Skipped, TaggedFile, YaraScanner},
     },
     frontend::functions::cli_scanner,
 };
@@ -84,11 +84,10 @@ pub fn init_tauri() {
 
 // Starts the scanner over the GUI
 #[tauri::command]
-async fn start_scanner(window: tauri::Window, path: String) -> Result<String, String> {
+async fn start_scanner(window: tauri::Window, path: PathBuf) -> Result<(Vec<TaggedFile>, Vec<Skipped>), String> {
     tokio::task::spawn_blocking(move || {
         let mut scanner = YaraScanner::new(Some(Arc::new(window)))?;
-        let result = scanner.start(PathBuf::from_str(&path).map_err(|err| err.to_string())?);
-        serde_json::to_string_pretty(&result).map_err(|err| err.to_string())
+        scanner.start(path)
     })
     .await
     .map_err(|err| err.to_string())?
@@ -105,29 +104,26 @@ async fn update() -> Result<(), RemoteError> {
 
 // Returns a vector of all attached removable storage drives (USB) -> Unnecessary for the CLI
 #[tauri::command]
-async fn list_usb_drives() -> Result<String, String> {
+async fn list_usb_drives() -> Result<Vec<UsbDevice>, String> {
     utils::usb_utils::list_usb_drives().await
 }
 
 // Creates the config from the GUI
 #[tauri::command]
-async fn save_config_fe(contents: Option<String>) -> Result<(), String> {
+async fn save_config_fe(received: ConfigFrontend) -> Result<(), String> {
     tokio::task::spawn_blocking(move || {
-        let config_received =
-            serde_json::from_str::<ConfigFrontend>(&contents.ok_or("Json was none".to_owned())?)
-                .map_err(|err| err.to_string())?;
         let mut config = get_config();
         // update received fields
-        config_received
+        received
             .logging_is_active
             .inspect(|val| config.logging_is_active = *val);
-        config_received
+        received
             .scan_dir
             .inspect(|val| config.scan_dir = *val);
-        config_received
+        received
             .min_matches
             .inspect(|val| config.min_matches = *val);
-        config_received
+        received
             .max_matches
             .inspect(|val| config.max_matches = *val);
         // save updated config
@@ -138,13 +134,12 @@ async fn save_config_fe(contents: Option<String>) -> Result<(), String> {
 }
 
 #[tauri::command]
-async fn load_config_fe() -> Result<String, String> {
-    tokio::task::spawn_blocking(move || {
-        serde_json::to_string(&get_config())
-            .map_err(|err| format!("Failed to convert config to json: {err}"))
+async fn load_config_fe() -> Result<Config, String> {
+    tokio::task::spawn_blocking(|| {
+        get_config()
     })
     .await
-    .map_err(|err| err.to_string())?
+    .map_err(|err| err.to_string())
 }
 
 /// verifies if there are any yara rules present
