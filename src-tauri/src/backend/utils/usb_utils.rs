@@ -2,13 +2,13 @@ use log::{debug, info};
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug)]
-struct UsbDevice {
+pub struct UsbDevice {
     name: String,
     path: String,
 }
 
 // Lists all the attached USBs for various platforms
-pub async fn list_usb_drives() -> Result<String, String> {
+pub async fn list_usb_drives() -> Result<Vec<UsbDevice>, String> {
     let mut usb_drives: Vec<UsbDevice> = Vec::new();
 
     #[cfg(any(target_os = "linux", target_os = "macos"))]
@@ -61,12 +61,12 @@ pub async fn list_usb_drives() -> Result<String, String> {
     ))]
     warn!("Not retrieving USBs -> Wrong OS");
 
-    Ok(serde_json::to_string(&usb_drives).expect("Couldnt convert usb drives to a Serde string"))
+    Ok(usb_drives)
 }
 
 // In Windows we need to iterate through all possible mount points and see what type of device is mounted
 #[cfg(windows)]
-fn list_usb_windows() -> Vec<UsbDevice> {
+fn list_usb_windows() -> Result<Vec<UsbDevice>, String> {
     use std::ffi::OsStr;
     use std::fs;
     use std::iter::once;
@@ -80,8 +80,8 @@ fn list_usb_windows() -> Vec<UsbDevice> {
         // We retrieve all possible information to determine if its a removable USB device
         let drive_path = letter.clone().to_string() + ":\\";
         let drive_path = std::path::Path::new(&drive_path);
-        let drive_name = drive_path.file_name().unwrap_or_default();
-        let drive_path = drive_path.to_str().unwrap();
+        let drive_name = drive_path.file_name().ok_or("Could not get file name".to_owned())?;
+        let drive_path = drive_path.to_str().ok_or("Failed to convert path to string".to_owned());
         let wide_path = OsStr::new(&drive_path)
             .encode_wide()
             .chain(once(0))

@@ -1,6 +1,9 @@
-use crate::generic::ScannerArgs;
+use std::path::{Path, PathBuf} ;
+use std::str::FromStr;
+
+use crate::generic::{ScannerArgs, Skipped, TaggedFile};
 use crate::i18n::use_i18n;
-use futures_util::StreamExt;
+use futures_util::{SinkExt, StreamExt};
 use leptonic::components::progress_bar::ProgressBar;
 use leptos::logging::log;
 use leptos::*;
@@ -40,21 +43,22 @@ pub fn Scanning() -> impl IntoView {
     // We start the scanning process
     spawn_local(async move {
         log!("Starting scanner with target: {:?}", target.clone().unwrap());
-        let result: Result<String, Error> = invoke(
+        let result: Result<(Vec<TaggedFile>, Vec<Skipped>), Error> = invoke(
             "start_scanner",
-            &ScannerArgs {
-                path: target.unwrap(),
-            },
+            &ScannerArgs { path: Path::new(&target.unwrap()).to_path_buf() },
         )
         .await;
         match &result {
             Ok(result) => {
-                log!("Result: {}", result);
-                let infected_files: Vec<String> = serde_json::from_str(result).unwrap();
+                let infected_files = result.0.clone();
+                log!("Infected: {infected_files:#?}");
+                let skipped_files = result.1.clone();
+                log!("Skipped: {skipped_files:#?}");
                 let count = infected_files.len();
                 log!("Infected files: {:?}", count);
                 if count > 0 {
-                    navigate(&format!("/infected?result={}", result), Default::default());
+                    todo!();
+                    //navigate(&format!("/infected?result={:?}", result), Default::default());
                 } else {
                     navigate("/clean", Default::default());
                 }

@@ -28,12 +28,12 @@ pub struct SettingsStruct {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct SettingsArgs {
-    pub contents: String,
+    pub received: SettingsStruct,
 }
 
 #[derive(Serialize, Deserialize)]
 pub struct ScannerArgs {
-    pub path: String,
+    pub path: PathBuf,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -42,6 +42,12 @@ pub struct TaggedFile {
     /// vector of description and rule name
     pub descriptions: Vec<RuleFeedback>,
     pub rule_count: usize,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct Skipped {
+    pub path: PathBuf,
+    pub reason: String,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
