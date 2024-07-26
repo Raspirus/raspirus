@@ -13,7 +13,7 @@ rust-version = "1.76"
 
 # generic dependencies
 [dependencies]
-threadpool_rs = { git = "https://github.com/GamingGuy003/threadpool_rs.git" }
+threadpool_rs = { git = "https://github.com/GamingGuy003/threadpool_rs.git", features = ["log"] }
 log = "0.4.22"
 reqwest = { version = "0.12.5", features = ["blocking", "json"] }
 tokio = "1.38.0"

@@ -8,7 +8,7 @@ use chrono::{DateTime, Local};
 use log::{error, info, warn};
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
-use threadpool_rs::threadpool::pool::ThreadPool;
+use threadpool_rs::threadpool::pool::Threadpool;
 use yara_x::{ScanResults, Scanner};
 
 use crate::backend::utils::generic::{get_config, get_rules};
@@ -83,8 +83,7 @@ impl YaraScanner {
         pointers.config = Arc::from(get_config());
         pointers.total = Arc::new(Mutex::new(paths.len()));
 
-        let threadpool = ThreadPool::new(num_cpus::get())
-            .map_err(|err| format!("Failed to create threadpool: {err}"))?;
+        let mut threadpool = Threadpool::new(num_cpus::get());
         for file in paths {
             let pointers_c = pointers.clone();
             let file_log_c = file_log.clone();
@@ -99,7 +98,7 @@ impl YaraScanner {
                 }
             });
         }
-        drop(threadpool);
+        threadpool.join();
         let tagged = pointers
             .tagged
             .lock()
