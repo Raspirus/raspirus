@@ -55,3 +55,8 @@ pub struct RuleFeedback {
     pub rule_name: String,
     pub rule_description: String,
 }
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct FileLookupArgs {
+    pub file: PathBuf
+}
