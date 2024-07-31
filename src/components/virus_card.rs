@@ -1,11 +1,13 @@
 use std::path::PathBuf;
-
-use crate::generic::RuleFeedback;
+use crate::generic::{RuleFeedback, FileLookupArgs};
 use leptonic::{components::prelude::{
     Button, Chip, ChipColor, Collapsible, CollapsibleBody, CollapsibleHeader
 }, prelude::icondata::{self}};
 use leptos::*;
 use leptonic::components::prelude::Icon;
+use leptos_router::NavigateOptions;
+use tauri_wasm::{api::core::invoke, Error};
+use leptos::logging::log;
 
 #[component]
 pub fn VirusCard(
@@ -18,9 +20,33 @@ pub fn VirusCard(
     } else {
         ChipColor::Warn
     };
-
     let string_lossy = file_path.to_string_lossy();
     let display_path = string_lossy.to_string();
+    let navigate = leptos_router::use_navigate();
+    
+    // A function that gathers the file signature from the backend and then sends
+    // it to VirusTotal for further analysis
+    let analyze_file = move || {
+            spawn_local(async move {
+                let file_signature: Result<String, Error> = invoke("lookup_file", 
+                &FileLookupArgs{
+                    file: file_path.clone()
+                }).await;
+                match file_signature {
+                    Ok(file_signature) => {
+                        log!("File signature: {}", file_signature);
+                        navigate(
+                            &format!("https://www.virustotal.com/gui/search/{}", file_signature), 
+                            NavigateOptions{ resolve: false, replace: false, scroll: true, state: Default::default() }
+                        );
+                        
+                    }
+                    Err(e) => {
+                        log!("Error: {:?}", e);
+                    }
+                }
+            });
+    };
 
     view! {
         <Collapsible>
@@ -28,7 +54,7 @@ pub fn VirusCard(
             <div class="flex w-full">
                 <Chip color={chip_color} class="mr-2">{rules_count}</Chip>
                 <div>{display_path}</div>
-                <Button class="ml-auto mr-2" on_press=move |_| {}>
+                <Button on_press=move |_| { /* TODO: Add function call */ } class="ml-auto mr-2">
                     <Icon icon=icondata::SiVirustotal />
                 </Button>
             </div>

@@ -1,10 +1,11 @@
 use crate::components::home_button::HomeButton;
+use crate::components::skipped_card::SkippedCard;
 use crate::components::virus_card::VirusCard;
-use crate::generic::TaggedFile;
+use crate::generic::{Skipped, TaggedFile};
 //use crate::generic::{RuleFeedback, TaggedFile};
 // use std::path::PathBuf;
 use crate::i18n::use_i18n;
-use leptonic::components::prelude::{Collapsibles, OnOpen};
+use leptonic::components::prelude::{Collapsibles, OnOpen, Separator};
 use leptonic::components::stack::Stack;
 use leptonic::Size;
 use leptos::*;
@@ -18,8 +19,10 @@ use leptos_router::use_query_map;
 #[component]
 pub fn Infected() -> impl IntoView {
     let i18n = use_i18n();
-    let infected = use_query_map().get_untracked().get("result").cloned();
-    let infected_files: Vec<TaggedFile> = serde_json::from_str(&infected.unwrap()).unwrap();
+    let infected = use_query_map().get_untracked().get("infected").cloned();
+    let infected_files: Vec<TaggedFile> = serde_json::from_str(&infected.unwrap_or_default()).unwrap_or_default();
+    let skipped = use_query_map().get_untracked().get("skipped").cloned();
+    let skipped_files: Vec<Skipped> = serde_json::from_str(&skipped.unwrap_or_default()).unwrap_or_default();
 
     // let infected_files: Vec<TaggedFile> = vec![
     //     TaggedFile {
@@ -55,7 +58,9 @@ pub fn Infected() -> impl IntoView {
                 <h1 class="inline-block align-middle p-2 font-medium leading-tight text-5xl mt-0 mb-2 text-mainred">
                     {t!(i18n, infected_title)}
                 </h1>
+                <button on:click=move |_| {}>"Print PDF"</button>
             </div>
+                <h2>"Infected files"</h2>
                 <div class="px-2">
                     <Collapsibles default_on_open=OnOpen::CloseOthers>
                     <Stack spacing=Size::Em(0.6)>
@@ -72,6 +77,23 @@ pub fn Infected() -> impl IntoView {
                     </Stack>
                     </Collapsibles>
                 </div>
+                <Separator />
+                <h2 class="mt-2">"Skipped files"</h2>
+                <div class="px-2">
+                <Collapsibles default_on_open=OnOpen::CloseOthers>
+                <Stack spacing=Size::Em(0.6)>
+                    {skipped_files.into_iter()
+                        .map(|file| {
+                            view! {
+                                <SkippedCard
+                                    file_path=file.path
+                                    skip_reason=file.reason />
+                            }
+                        }).collect::<Vec<_>>()
+                    }
+                </Stack>
+                </Collapsibles>
+            </div>
             </div>
     }
 }
