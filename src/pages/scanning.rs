@@ -53,11 +53,12 @@ pub fn Scanning() -> impl IntoView {
                 log!("Infected: {infected_files:#?}");
                 let skipped_files = result.1.clone();
                 log!("Skipped: {skipped_files:#?}");
-                let count = infected_files.len();
-                log!("Infected files: {:?}", count);
-                if count > 0 {
-                    todo!();
-                    //navigate(&format!("/infected?result={:?}", result), Default::default());
+                let count_infected = infected_files.len();
+                log!("Infected files: {:?}", count_infected);
+                let count_skipped = skipped_files.len();
+                log!("Skipped files: {:?}", count_skipped);
+                if count_infected > 0 || count_skipped > 0 {
+                    navigate(&format!("/infected?infected={:?}&skipped={:?}", infected_files, skipped_files), Default::default());
                 } else {
                     navigate("/clean", Default::default());
                 }
