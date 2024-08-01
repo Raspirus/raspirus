@@ -86,7 +86,7 @@ async fn download_file(url: &str, path: PathBuf) -> Result<(), RemoteError> {
     } else {
         RemoteError::Other(err.to_string())
     })?;
-    info!("Starting download of {}", response.content_length().unwrap_or_default());
+    info!("Starting download of {}mb", response.content_length().unwrap_or_default() / 1048576);
     let mut dest = File::create(&path).map_err(|err| RemoteError::Other(format!("Failed to create file: {err}")))?;
     let content = response.bytes().await.map_err(|err| if err.is_timeout() {
         RemoteError::Offline
