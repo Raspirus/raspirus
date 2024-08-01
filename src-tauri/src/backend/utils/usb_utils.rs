@@ -50,7 +50,7 @@ pub async fn list_usb_drives() -> Result<Vec<UsbDevice>, String> {
 
     #[cfg(target_os = "windows")]
     {
-        let mut win_usb_drives = list_usb_windows();
+        let mut win_usb_drives = list_usb_windows()?;
         usb_drives.append(&mut win_usb_drives);
     }
 
@@ -71,6 +71,7 @@ fn list_usb_windows() -> Result<Vec<UsbDevice>, String> {
     use std::fs;
     use std::iter::once;
     use std::os::windows::prelude::OsStrExt;
+    use log::warn;
     use winapi::um::fileapi::GetDriveTypeW;
     use winapi::um::winbase::DRIVE_REMOVABLE;
 
@@ -82,6 +83,15 @@ fn list_usb_windows() -> Result<Vec<UsbDevice>, String> {
         let drive_path = std::path::Path::new(&drive_path);
         let drive_name = drive_path.file_name().ok_or("Could not get file name".to_owned())?;
         let drive_path = drive_path.to_str().ok_or("Failed to convert path to string".to_owned());
+        // If the path is not valid we skip it, else we check if its a removable drive
+        let drive_path = match drive_path {
+            Ok(path) => path,
+            Err(e) => {
+                warn!("Failed to convert path to string: {}", e);
+                continue;
+            }
+        };
+
         let wide_path = OsStr::new(&drive_path)
             .encode_wide()
             .chain(once(0))
@@ -98,5 +108,5 @@ fn list_usb_windows() -> Result<Vec<UsbDevice>, String> {
             }
         }
     }
-    usb_drives
+    Ok(usb_drives)
 }
