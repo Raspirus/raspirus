@@ -1,4 +1,6 @@
-use log::{debug, warn, info};
+use log::{debug, info};
+#[cfg(target_os = "windows")]
+use log::warn;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -59,7 +61,7 @@ pub async fn list_usb_drives() -> Result<Vec<UsbDevice>, String> {
         not(target_os = "linux"),
         not(target_os = "macos")
     ))]
-    warn!("Not retrieving USBs -> Wrong OS");
+    warn!("Not retrieving USBs -> Unsupported OS. Please open an issue on Github");
 
     Ok(usb_drives)
 }

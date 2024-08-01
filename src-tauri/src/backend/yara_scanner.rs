@@ -173,15 +173,15 @@ impl YaraScanner {
         pointers: PointerCollection,
     ) -> Result<(), String> {
         info!("Scanning {}", path.to_string_lossy());
-        let rules = get_rules(
-            pointers
-                .config
-                .paths
-                .clone()
-                .ok_or("No paths set. Is config initialized?")?
-                .data
-                .join(get_config().remote_file),
-        )?;
+        let rule_path = pointers
+            .config
+            .paths
+            .clone()
+            .ok_or("No paths set. Is config initialized?")?
+            .data
+            .join(get_config().remote_file);
+        info!("Loading rules at {}", rule_path.to_string_lossy());
+        let rules = get_rules(rule_path)?;
         let mut scanner = Scanner::new(&rules);
         scanner.max_matches_per_pattern(pointers.config.max_matches);
         match path.extension().unwrap_or_default().to_str() {
