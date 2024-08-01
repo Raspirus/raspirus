@@ -1,4 +1,4 @@
-use log::{debug, info};
+use log::{debug, warn, info};
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -71,7 +71,6 @@ fn list_usb_windows() -> Result<Vec<UsbDevice>, String> {
     use std::fs;
     use std::iter::once;
     use std::os::windows::prelude::OsStrExt;
-    use log::warn;
     use winapi::um::fileapi::GetDriveTypeW;
     use winapi::um::winbase::DRIVE_REMOVABLE;
 
