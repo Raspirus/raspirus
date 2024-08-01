@@ -109,7 +109,8 @@ impl YaraScanner {
             .lock()
             .map_err(|err| format!("Failed to lock skipped: {err}"))?
             .clone();
-        println!("Found tagged files: {:#?}", tagged);
+        println!("Found tagged files: {tagged:#?}");
+        println!("Found skipped files: {skipped:#?}");
         Ok((tagged, skipped))
     }
 
