@@ -4,15 +4,14 @@
 use backend::config_file::Config;
 use frontend::tauri::init_tauri;
 use lazy_static::lazy_static;
-use log::{info, LevelFilter};
+use log::LevelFilter;
 use simplelog::{
     ColorChoice, CombinedLogger, ConfigBuilder, TermLogger, TerminalMode, WriteLogger,
 };
-use std::fs;
 use std::fs::File;
 use std::sync::Mutex;
 
-use chrono::{DateTime, Local};
+use chrono::Local;
 
 mod backend;
 mod frontend;
@@ -50,25 +49,17 @@ fn main() -> Result<(), String> {
     // We check if we should log the application messages to a file or not, default is yes. Defined in the Config
     if CONFIG
         .lock()
-        .expect("Failed to get config")
+        .expect("Failed to lock config")
         .logging_is_active
     {
-        // Create string with current time
-        let now: DateTime<Local> = Local::now();
-        let now_str = now.format("%Y_%m_%d_%H_%M_%S").to_string();
-
         // Logdir for application
-        let log_dir = CONFIG
+        let log_application = CONFIG
             .lock()
-            .expect("Failed to get config")
+            .expect("Failed to lock config")
             .paths
             .clone()
             .ok_or("No paths set. Is config initialized?".to_owned())?
             .logs_app;
-
-        fs::create_dir_all(&log_dir)
-            .map_err(|err| format!("Failed to create application logdir: {err}"))?;
-        let log_file_path = log_dir.join(format!("{now_str}.log"));
 
         let log_config = ConfigBuilder::new()
             .add_filter_ignore_str("reqwest")
@@ -86,12 +77,8 @@ fn main() -> Result<(), String> {
         )];
 
         // If we are able to create both the file and directory path, we can start the FileLogger
-        let log_file = File::create(&log_file_path)
+        let log_file = File::create(&log_application)
             .map_err(|err| format!("Failed to create application logfile: {err}"))?;
-        info!(
-            "Created application log file at {}",
-            log_file_path.to_string_lossy()
-        );
         loggers.push(WriteLogger::new(LOGGING_FILTER, log_config, log_file));
 
         // Start loggers

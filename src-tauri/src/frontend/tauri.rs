@@ -1,8 +1,6 @@
-use std::fs::OpenOptions;
-use std::io::Write;
 use std::{path::PathBuf, sync::Arc};
 
-use log::{error, trace, warn};
+use log::{debug, error, info, trace, warn};
 
 use crate::backend::utils::generic::FrontendLog;
 use crate::{
@@ -14,7 +12,7 @@ use crate::{
     },
     frontend::functions::cli_scanner,
 };
-use crate::{APPLICATION_LOG, CONFIG};
+use crate::CONFIG;
 use tauri_plugin_cli::CliExt;
 
 use super::functions::{cli_gui, cli_update, not_implemented};
@@ -191,25 +189,11 @@ async fn lookup_file(file: String) -> Result<String, String> {
 
 #[tauri::command]
 async fn log_frontend(msg: FrontendLog) {
-    if let Some(log_path) = CONFIG
-        .lock()
-        .expect("Failed to lock config")
-        .paths
-        .clone()
-        .map(|paths| paths.logs_app.join(APPLICATION_LOG.clone()))
-    {
-        trace!("Logging to {}", log_path.to_string_lossy());
-        if let Ok(mut file) = OpenOptions::new()
-            .append(true)
-            .create(true)
-            .open(log_path)
-            .map_err(|err| warn!("Could not open application log file: {err}"))
-        {
-            let _ = match msg {
-                FrontendLog::Error(msg) => writeln!(file, "[Error] {msg}"),
-                FrontendLog::Warn(msg) => writeln!(file, "[Warning] {msg}"),
-                FrontendLog::Info(msg) => writeln!(file, "[Info] {msg}"),
-            }.map_err(|err| warn!("Could not open application log file: {err}"));              
-        }
+    match msg {
+        FrontendLog::Error(msg) => error!("Frontend: {msg}"),
+        FrontendLog::Warn(msg) => warn!("Frontend: {msg}"),
+        FrontendLog::Info(msg) => info!("Frontend: {msg}"),
+        FrontendLog::Debug(msg) => debug!("Frontend: {msg}"),
+        FrontendLog::Trace(msg) => trace!("Frontend: {msg}"),
     }
 }
