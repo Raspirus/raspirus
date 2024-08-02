@@ -5,6 +5,8 @@ use std::fs::{self, File};
 use std::io::Read;
 use std::path::{Path, PathBuf};
 
+use crate::APPLICATION_LOG;
+
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(default)]
 pub struct Config {
@@ -37,7 +39,8 @@ fn default_config() -> String {
 pub struct Paths {
     pub data: PathBuf,
     pub config: PathBuf,
-    pub logs: PathBuf,
+    pub logs_scan: PathBuf,
+    pub logs_app: PathBuf,
     pub downloads: PathBuf,
 }
 
@@ -86,27 +89,27 @@ impl Config {
         let data = dirs.data_dir().to_owned();
         let logs = data.to_owned().join("logs");
 
+        let logs_scan = logs.join("scan");
+        let mut logs_app = logs.join("application");
+
         // LocalData under windows
         let config = dirs.config_dir().to_owned();
 
-        // create all paths
-        if !data.exists() {
-            fs::create_dir_all(&data).map_err(|err| format!("Failed to create data dir: {err}"))?;
-        }
+        fs::create_dir_all(&data).map_err(|err| format!("Failed to create data dir: {err}"))?;
+        fs::create_dir_all(&logs_scan)
+            .map_err(|err| format!("Failed to create scan log dir: {err}"))?;
+        fs::create_dir_all(&logs_app)
+            .map_err(|err| format!("Failed to create application log dir: {err}"))?;
+        fs::create_dir_all(&config).map_err(|err| format!("Failed to create config dir: {err}"))?;
 
-        if !logs.exists() {
-            fs::create_dir_all(&logs).map_err(|err| format!("Failed to create log dir: {err}"))?;
-        }
-
-        if !config.exists() {
-            fs::create_dir_all(&config)
-                .map_err(|err| format!("Failed to create config dir: {err}"))?;
-        }
+        // add launch timestamp to app log path
+        logs_app = logs_app.join(format!("{}.log", APPLICATION_LOG.clone()));
 
         self.paths = Some(Paths {
             data,
             config,
-            logs,
+            logs_scan,
+            logs_app,
             downloads,
         });
         Ok(())

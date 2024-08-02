@@ -1,19 +1,20 @@
+use std::fs::OpenOptions;
+use std::io::Write;
 use std::{path::PathBuf, sync::Arc};
 
-use log::error;
+use log::{error, trace, warn};
 
+use crate::backend::utils::generic::FrontendLog;
 use crate::{
     backend::{
         config_file::{Config, ConfigFrontend},
         downloader::{self, RemoteError},
-        utils::{
-            self,
-            generic::{generate_virustotal, get_config, update_config}, usb_utils::UsbDevice,
-        },
+        utils::{self, generic::generate_virustotal, usb_utils::UsbDevice},
         yara_scanner::{Skipped, TaggedFile, YaraScanner},
     },
     frontend::functions::cli_scanner,
 };
+use crate::{APPLICATION_LOG, CONFIG};
 use tauri_plugin_cli::CliExt;
 
 use super::functions::{cli_gui, cli_update, not_implemented};
@@ -77,6 +78,7 @@ pub fn init_tauri() {
             check_update,
             rules_version,
             lookup_file,
+            log_frontend,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
@@ -84,7 +86,10 @@ pub fn init_tauri() {
 
 // Starts the scanner over the GUI
 #[tauri::command]
-async fn start_scanner(window: tauri::Window, path: PathBuf) -> Result<(Vec<TaggedFile>, Vec<Skipped>), String> {
+async fn start_scanner(
+    window: tauri::Window,
+    path: PathBuf,
+) -> Result<(Vec<TaggedFile>, Vec<Skipped>), String> {
     tokio::task::spawn_blocking(move || {
         let mut scanner = YaraScanner::new(Some(Arc::new(window)))?;
         scanner.start(path)
@@ -109,14 +114,12 @@ async fn list_usb_drives() -> Result<Vec<UsbDevice>, String> {
 #[tauri::command]
 async fn save_config_fe(received: ConfigFrontend) -> Result<(), String> {
     tokio::task::spawn_blocking(move || {
-        let mut config = get_config();
+        let mut config = CONFIG.lock().expect("Failed to lock config");
         // update received fields
         received
             .logging_is_active
             .inspect(|val| config.logging_is_active = *val);
-        received
-            .scan_dir
-            .inspect(|val| config.scan_dir = *val);
+        received.scan_dir.inspect(|val| config.scan_dir = *val);
         received
             .min_matches
             .inspect(|val| config.min_matches = *val);
@@ -124,7 +127,7 @@ async fn save_config_fe(received: ConfigFrontend) -> Result<(), String> {
             .max_matches
             .inspect(|val| config.max_matches = *val);
         // save updated config
-        update_config(config)
+        config.save()
     })
     .await
     .map_err(|err| err.to_string())?
@@ -132,11 +135,9 @@ async fn save_config_fe(received: ConfigFrontend) -> Result<(), String> {
 
 #[tauri::command]
 async fn load_config_fe() -> Result<Config, String> {
-    tokio::task::spawn_blocking(|| {
-        get_config()
-    })
-    .await
-    .map_err(|err| err.to_string())
+    tokio::task::spawn_blocking(|| CONFIG.lock().expect("Failed to lock config").clone())
+        .await
+        .map_err(|err| err.to_string())
 }
 
 /// verifies if there are any yara rules present
@@ -147,38 +148,68 @@ async fn check_update() -> Result<bool, RemoteError> {
 
 #[tauri::command]
 async fn download_logs() -> Result<PathBuf, String> {
-    let log_dir = get_config()
+    let config = CONFIG.lock().expect("Failed to lock config").clone();
+    let app_log = config
         .paths
+        .clone()
         .ok_or("No paths set. Is config initialized?".to_owned())?
-        .logs
-        .join("main");
-    let app_log_path = log_dir.join("app.log");
+        .logs_app;
 
-    let log_path = get_config()
+    let download_path = config
         .paths
         .ok_or("No paths set. Is config initialized?".to_owned())?
         .downloads
         .join("log.txt");
 
     // If there's an error during copying, return an error message
-    std::fs::copy(app_log_path, &log_path)
+    std::fs::copy(&app_log, &download_path)
         .map_err(|err| format!("Error copying log file: {err}"))?;
     // If the copy operation is successful, return Ok indicating success
-    Ok(log_path)
+    Ok(download_path)
 }
 
 #[tauri::command]
 async fn rules_version() -> Result<String, String> {
-    tokio::task::spawn_blocking(|| get_config().rules_version)
-        .await
-        .map_err(|err| err.to_string())
+    tokio::task::spawn_blocking(|| {
+        CONFIG
+            .lock()
+            .expect("Failed to lock config")
+            .rules_version
+            .clone()
+    })
+    .await
+    .map_err(|err| err.to_string())
 }
 
 #[tauri::command]
 async fn lookup_file(file: String) -> Result<String, String> {
-    let file = serde_json::from_str::<PathBuf>(&file)
-        .map_err(|err| err.to_string())?;
+    let file = serde_json::from_str::<PathBuf>(&file).map_err(|err| err.to_string())?;
     tokio::task::spawn_blocking(|| generate_virustotal(file))
         .await
         .map_err(|err| err.to_string())?
+}
+
+#[tauri::command]
+async fn log_frontend(msg: FrontendLog) {
+    if let Some(log_path) = CONFIG
+        .lock()
+        .expect("Failed to lock config")
+        .paths
+        .clone()
+        .map(|paths| paths.logs_app.join(APPLICATION_LOG.clone()))
+    {
+        trace!("Logging to {}", log_path.to_string_lossy());
+        if let Ok(mut file) = OpenOptions::new()
+            .append(true)
+            .create(true)
+            .open(log_path)
+            .map_err(|err| warn!("Could not open application log file: {err}"))
+        {
+            let _ = match msg {
+                FrontendLog::Error(msg) => writeln!(file, "[Error] {msg}"),
+                FrontendLog::Warn(msg) => writeln!(file, "[Warning] {msg}"),
+                FrontendLog::Info(msg) => writeln!(file, "[Info] {msg}"),
+            }.map_err(|err| warn!("Could not open application log file: {err}"));              
+        }
+    }
 }

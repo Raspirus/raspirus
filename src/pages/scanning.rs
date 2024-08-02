@@ -1,4 +1,4 @@
-use std::path::Path ;
+use std::path::Path;
 
 use crate::generic::{ScannerArgs, Skipped, TaggedFile};
 use crate::i18n::use_i18n;
@@ -41,10 +41,15 @@ pub fn Scanning() -> impl IntoView {
 
     // We start the scanning process
     spawn_local(async move {
-        log!("Starting scanner with target: {:?}", target.clone().unwrap());
+        log!(
+            "Starting scanner with target: {:?}",
+            target.clone().unwrap()
+        );
         let result: Result<(Vec<TaggedFile>, Vec<Skipped>), Error> = invoke(
             "start_scanner",
-            &ScannerArgs { path: Path::new(&target.unwrap()).to_path_buf() },
+            &ScannerArgs {
+                path: Path::new(&target.unwrap()).to_path_buf(),
+            },
         )
         .await;
         match &result {
@@ -58,7 +63,13 @@ pub fn Scanning() -> impl IntoView {
                 let count_skipped = skipped_files.len();
                 log!("Skipped files: {:?}", count_skipped);
                 if count_infected > 0 || count_skipped > 0 {
-                    navigate(&format!("/infected?infected={:?}&skipped={:?}", infected_files, skipped_files), Default::default());
+                    navigate(
+                        &format!(
+                            "/infected?infected={:?}&skipped={:?}",
+                            infected_files, skipped_files
+                        ),
+                        Default::default(),
+                    );
                 } else {
                     navigate("/clean", Default::default());
                 }

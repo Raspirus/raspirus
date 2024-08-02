@@ -1,6 +1,6 @@
-use log::{debug, info};
 #[cfg(target_os = "windows")]
 use log::warn;
+use log::{debug, info};
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -82,8 +82,12 @@ fn list_usb_windows() -> Result<Vec<UsbDevice>, String> {
         // We retrieve all possible information to determine if its a removable USB device
         let drive_path = letter.clone().to_string() + ":\\";
         let drive_path = std::path::Path::new(&drive_path);
-        let drive_name = drive_path.file_name().ok_or("Could not get file name".to_owned())?;
-        let drive_path = drive_path.to_str().ok_or("Failed to convert path to string".to_owned());
+        let drive_name = drive_path
+            .file_name()
+            .ok_or("Could not get file name".to_owned())?;
+        let drive_path = drive_path
+            .to_str()
+            .ok_or("Failed to convert path to string".to_owned());
         // If the path is not valid we skip it, else we check if its a removable drive
         let drive_path = match drive_path {
             Ok(path) => path,

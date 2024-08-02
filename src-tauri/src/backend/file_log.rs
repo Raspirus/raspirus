@@ -1,12 +1,16 @@
-use std::{
-    fs::{self, File},
-    io::Write,
-};
+use std::{fs::File, io::Write};
 
-use log::{error, trace, warn};
+use log::{debug, error, warn};
 
-use super::{utils::generic::get_config, yara_scanner::RuleFeedback};
+use std::path::PathBuf;
 
+use chrono::Local;
+
+use crate::CONFIG;
+
+use super::yara_scanner::RuleFeedback;
+
+#[derive(Default)]
 pub struct FileLog {
     pub file: Option<File>,
 }
@@ -24,9 +28,9 @@ impl FileLog {
     /// ```
     /// let log = FileLog::new("log.txt".to_owned());
     /// ```
-    pub fn new(fname: String) -> Result<Self, String> {
-        let mut ret = FileLog { file: None };
-        ret.create_file(fname)?;
+    pub fn new() -> Result<Self, String> {
+        let mut ret = Self::default();
+        ret.create_file()?;
         Ok(ret)
     }
 
@@ -43,27 +47,22 @@ impl FileLog {
     /// let log = FileLog::new("log.txt".to_owned());
     /// log.log("abc123".to_owned(), "C:/Users/user/Desktop/file.txt".to_owned());
     /// ```
-    pub fn log(&self, fpath: String, rule_count: usize, descriptions: &[RuleFeedback]) {
-        match self.file.as_ref() {
-            Some(mut file) => {
-                match file.write_all(
-                    format!(
-                        "[{rule_count}]\t{fpath}\n{}\n",
-                        descriptions
-                            .iter()
-                            .map(|description| description.to_string())
-                            .collect::<Vec<String>>()
-                            .join("\n")
-                    )
-                    .as_bytes(),
-                ) {
-                    Ok(_) => {}
-                    Err(err) => error!("Failed loggin: {err}"),
-                };
-            }
-            None => {
-                warn!("Logfile invalid!");
-            }
+    pub fn log(&self, file_path: PathBuf, rule_count: usize, descriptions: &[RuleFeedback]) {
+        if let Some(mut log_file) = self.file.as_ref() {
+            let log_string = format!(
+                "[{rule_count}]\t{}\n{}\n",
+                file_path.to_string_lossy(),
+                descriptions
+                    .iter()
+                    .map(|description| description.to_string())
+                    .collect::<Vec<String>>()
+                    .join("\n")
+            );
+            let _ = log_file
+                .write_all(log_string.as_bytes())
+                .map_err(|err| error!("Failed to log: {err}"));
+        } else {
+            warn!("Log file is none");
         }
     }
 
@@ -79,26 +78,22 @@ impl FileLog {
     /// let mut log = FileLog::new("log.txt".to_owned());
     /// log.create_file("new_log.txt".to_owned());
     /// ```
-    pub fn create_file(&mut self, fname: String) -> Result<(), String> {
-        // get log directory with Scan subdir
-        let log_dir = get_config()
+    pub fn create_file(&mut self) -> Result<(), String> {
+        // Create scan log dir
+        let log_file_path = CONFIG
+            .lock()
+            .expect("Failed to lock config")
             .paths
+            .clone()
             .ok_or("No paths set. Is config initialized?".to_owned())?
-            .logs
-            .join("scan");
+            .logs_scan
+            .join(format!("{}.log", Local::now().format("%Y_%m_%d_%H_%M_%S")));
 
-        match fs::create_dir_all(&log_dir) {
-            Ok(_) => {
-                self.file = Some(match File::create(log_dir.join(fname.clone())) {
-                    Ok(file) => {
-                        trace!("Created logfile at {}", log_dir.join(fname).display());
-                        Ok(file)
-                    }
-                    Err(err) => Err(format!("Failed creating log file: {err}")),
-                }?);
-                Ok(())
-            }
-            Err(err) => Err(format!("Failed creating log folder: {err}")),
-        }
+        self.file = Some(
+            File::create(&log_file_path)
+                .map_err(|err| format!("Failed to create log file: {err}"))?,
+        );
+        debug!("Created log file at {}", log_file_path.to_string_lossy());
+        Ok(())
     }
 }

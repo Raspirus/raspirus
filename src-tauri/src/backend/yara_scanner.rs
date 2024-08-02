@@ -4,14 +4,13 @@ use std::{
     sync::Mutex,
 };
 
-use chrono::{DateTime, Local};
 use log::{error, info, warn};
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 use threadpool_rs::threadpool::pool::Threadpool;
 use yara_x::{ScanResults, Scanner};
 
-use crate::backend::utils::generic::{get_config, get_rules};
+use crate::{backend::utils::generic::get_rules, CONFIG};
 
 use super::{
     config_file::Config,
@@ -72,15 +71,12 @@ impl YaraScanner {
         }
 
         // setup file log
-        let now: DateTime<Local> = Local::now();
-        let now_str = now.format("%Y_%m_%d_%H_%M_%S").to_string();
-        let log_str = format!("{}.log", now_str);
-        let file_log = Arc::new(Mutex::new(FileLog::new(log_str)?));
+        let file_log = Arc::new(Mutex::new(FileLog::new()?));
 
         let paths = profile_path(path.clone())
             .map_err(|err| format!("Failed to calculate file tree: {err}"))?;
         let mut pointers = PointerCollection::default();
-        pointers.config = Arc::from(get_config());
+        pointers.config = Arc::from(CONFIG.lock().expect("Failed to lock config").clone());
         pointers.total = Arc::new(Mutex::new(paths.len()));
 
         let mut threadpool = Threadpool::new(num_cpus::get());
@@ -147,11 +143,7 @@ impl YaraScanner {
             let file_log_locked = file_log
                 .lock()
                 .map_err(|err| format!("Failed to lock file logger: {err}"))?;
-            file_log_locked.log(
-                path.to_str().unwrap_or_default().to_owned(),
-                rule_count,
-                &descriptions,
-            );
+            file_log_locked.log(path.to_path_buf(), rule_count, &descriptions);
             let mut tagged_locked = pointers
                 .tagged
                 .lock()
@@ -179,7 +171,13 @@ impl YaraScanner {
             .clone()
             .ok_or("No paths set. Is config initialized?")?
             .data
-            .join(get_config().remote_file);
+            .join(
+                CONFIG
+                    .lock()
+                    .expect("Failed to lock config")
+                    .remote_file
+                    .clone(),
+            );
         info!("Loading rules at {}", rule_path.to_string_lossy());
         let rules = get_rules(rule_path)?;
         let mut scanner = Scanner::new(&rules);
@@ -195,18 +193,6 @@ impl YaraScanner {
                     path: path.to_path_buf(),
                     reason: "Zip files unsupported for now".to_owned(),
                 });
-                /*
-                let file = File::open(path).map_err(|err| format!("Failed to open zip file: {err}"))?;
-                let mut archive = ZipArchive::new(file).map_err(|err| format!("Failed to create zip: {err}"))?;
-                for i in 0..archive.len() {
-                    let mut content = archive.by_index(i).map_err(|err| format!("Failed to get file in zip: {err}"))?;
-                    if !content.is_file() {
-                        continue;
-                    }
-                    let buffer = content.bytes
-                    self.evaluate_result(scanner.scan())
-                }
-                */
             }
             None | Some(_) => {
                 let result = scanner.scan_file(path).map_err(|err| {
