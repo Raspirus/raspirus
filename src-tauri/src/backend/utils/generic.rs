@@ -15,7 +15,9 @@ use yara_x::Rules;
 pub enum FrontendLog {
     Error(String),
     Warn(String),
-    Info(String)
+    Info(String),
+    Debug(String),
+    Trace(String),
 }
 
 /// sends given percentage to the frontend
