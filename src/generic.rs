@@ -58,5 +58,5 @@ pub struct RuleFeedback {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct FileLookupArgs {
-    pub file: PathBuf
+    pub file: PathBuf,
 }

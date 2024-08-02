@@ -50,18 +50,20 @@ pub fn Settings() -> impl IntoView {
         }
     });
 
-       let navigate_home = move |_| {
-            let update_config = SettingsStruct {
-                    logging_is_active: logging.get(),
-                    min_matches: min_match.get() as usize,
-                    max_matches: max_match.get() as usize,
-                    scan_dir: scan_dir.get(),
-            };
+    let navigate_home = move |_| {
+        let update_config = SettingsStruct {
+            logging_is_active: logging.get(),
+            min_matches: min_match.get() as usize,
+            max_matches: max_match.get() as usize,
+            scan_dir: scan_dir.get(),
+        };
 
         spawn_local(async move {
             let result: Result<(), Error> = invoke(
                 "save_config_fe",
-                &SettingsArgs { received: update_config  },
+                &SettingsArgs {
+                    received: update_config,
+                },
             )
             .await;
             match result {

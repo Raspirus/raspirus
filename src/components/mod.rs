@@ -8,5 +8,5 @@ pub mod settings_card_download;
 pub mod settings_card_numinput;
 pub mod settings_card_toggle;
 pub mod settings_card_update;
-pub mod virus_card;
 pub mod skipped_card;
+pub mod virus_card;
