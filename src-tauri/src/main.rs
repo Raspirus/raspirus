@@ -1,14 +1,18 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 //#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use backend::utils::generic::get_config;
+use backend::config_file::Config;
 use frontend::tauri::init_tauri;
-use log::{error, info, LevelFilter};
+use lazy_static::lazy_static;
+use log::{info, LevelFilter};
 use simplelog::{
     ColorChoice, CombinedLogger, ConfigBuilder, TermLogger, TerminalMode, WriteLogger,
 };
 use std::fs;
 use std::fs::File;
+use std::sync::Mutex;
+
+use chrono::{DateTime, Local};
 
 mod backend;
 mod frontend;
@@ -29,50 +33,66 @@ static DEFAULT_MAX_MATCHES: usize = 20;
 // download settings
 static MAX_TIMEOUT: u64 = 120;
 
-// global config instance
-//thread_local!(static CONFIG: RefCell<Arc<Config>> = RefCell::new(Arc::new(Config::new().expect("Failed to get paths"))));
+static LOGGING_FILTER: LevelFilter = LevelFilter::Debug;
+
+lazy_static! {
+    // Create string with current time
+    static ref APPLICATION_LOG: String = format!("{}.log", Local::now().format("%Y_%m_%d_%H_%M_%S"));
+    // Global config instance
+    static ref CONFIG: Mutex<Config> = Mutex::new(Config::new().expect("Failed to load config"));
+}
 
 // NOTE: All functions with #[tauri::command] can and will be called from the GUI
 // Their name should not be changed and any new functions should return JSON data
 // using serde parsing
 
 fn main() -> Result<(), String> {
-    // We try to load the config, to make sure the rest of the programm will always have valid data to work with
-    let config = get_config();
-
     // We check if we should log the application messages to a file or not, default is yes. Defined in the Config
-    if config.logging_is_active {
-        // Get logdir with Main Subdir
-        let log_dir = config
+    if CONFIG
+        .lock()
+        .expect("Failed to get config")
+        .logging_is_active
+    {
+        // Create string with current time
+        let now: DateTime<Local> = Local::now();
+        let now_str = now.format("%Y_%m_%d_%H_%M_%S").to_string();
+
+        // Logdir for application
+        let log_dir = CONFIG
+            .lock()
+            .expect("Failed to get config")
             .paths
+            .clone()
             .ok_or("No paths set. Is config initialized?".to_owned())?
-            .logs
-            .join("main");
+            .logs_app;
+
+        fs::create_dir_all(&log_dir)
+            .map_err(|err| format!("Failed to create application logdir: {err}"))?;
+        let log_file_path = log_dir.join(format!("{now_str}.log"));
 
         let log_config = ConfigBuilder::new()
-            .add_filter_ignore("reqwest".to_string())
+            .add_filter_ignore_str("reqwest")
+            .add_filter_ignore_str("hyper_util")
+            .add_filter_ignore_str("cranelift_codegen")
+            .add_filter_ignore_str("wasmtime")
+            .add_filter_ignore_str("aho_corasick")
             .build();
         // Terminal logger is always used if logging so we add it right away
         let mut loggers: Vec<Box<dyn simplelog::SharedLogger>> = vec![TermLogger::new(
-            LevelFilter::Debug,
+            LOGGING_FILTER,
             log_config.clone(),
             TerminalMode::Mixed,
             ColorChoice::Auto,
         )];
 
         // If we are able to create both the file and directory path, we can start the FileLogger
-        match fs::create_dir_all(&log_dir) {
-            // Create a new file with the given name. Will overwrite the old/existisng file
-            Ok(_) => match File::create(log_dir.join("app.log")) {
-                Ok(log_file) => {
-                    info!("Created logfile at {}", log_dir.display());
-                    // file logger is only used if log path is defined
-                    loggers.push(WriteLogger::new(LevelFilter::Debug, log_config, log_file));
-                }
-                Err(err) => error!("Failed creating logfile: {err}"),
-            },
-            Err(err) => error!("Failed creating logs folder: {err}"),
-        }
+        let log_file = File::create(&log_file_path)
+            .map_err(|err| format!("Failed to create application logfile: {err}"))?;
+        info!(
+            "Created application log file at {}",
+            log_file_path.to_string_lossy()
+        );
+        loggers.push(WriteLogger::new(LOGGING_FILTER, log_config, log_file));
 
         // Start loggers
         CombinedLogger::init(loggers).expect("Failed to initialize CombinedLogger");

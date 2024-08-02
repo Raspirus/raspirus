@@ -3,9 +3,7 @@ use std::{fs::File, io::copy, path::PathBuf};
 use log::{error, info};
 use serde::{Deserialize, Serialize};
 
-use crate::{backend::utils::generic::update_config, MAX_TIMEOUT};
-
-use super::utils::generic::get_config;
+use crate::{CONFIG, MAX_TIMEOUT};
 
 #[derive(Deserialize)]
 struct Release {
@@ -26,7 +24,7 @@ pub enum RemoteError {
 }
 
 async fn get_release() -> Result<Release, RemoteError> {
-    let url = get_config().mirror;
+    let url = CONFIG.lock().expect("Failed to lock config").mirror.clone();
     let client = reqwest::Client::new();
     let response = match client
         .get(&url)
@@ -49,7 +47,7 @@ async fn get_release() -> Result<Release, RemoteError> {
 }
 
 async fn get_remote_version() -> Result<String, RemoteError> {
-    let config = get_config();
+    let config = CONFIG.lock().expect("Failed to lock config").clone();
     let url = config.mirror;
     let client = reqwest::Client::builder()
         .timeout(std::time::Duration::from_secs(MAX_TIMEOUT))
@@ -81,17 +79,25 @@ async fn get_remote_version() -> Result<String, RemoteError> {
 }
 
 async fn download_file(url: &str, path: PathBuf) -> Result<(), RemoteError> {
-    let response = reqwest::get(url).await.map_err(|err| if err.is_timeout() {
-        RemoteError::Offline
-    } else {
-        RemoteError::Other(err.to_string())
+    let response = reqwest::get(url).await.map_err(|err| {
+        if err.is_timeout() {
+            RemoteError::Offline
+        } else {
+            RemoteError::Other(err.to_string())
+        }
     })?;
-    info!("Starting download of {}mb", response.content_length().unwrap_or_default() / 1048576);
-    let mut dest = File::create(&path).map_err(|err| RemoteError::Other(format!("Failed to create file: {err}")))?;
-    let content = response.bytes().await.map_err(|err| if err.is_timeout() {
-        RemoteError::Offline
-    } else {
-        RemoteError::Other(err.to_string())
+    info!(
+        "Starting download of {}mb",
+        response.content_length().unwrap_or_default() / 1048576
+    );
+    let mut dest = File::create(&path)
+        .map_err(|err| RemoteError::Other(format!("Failed to create file: {err}")))?;
+    let content = response.bytes().await.map_err(|err| {
+        if err.is_timeout() {
+            RemoteError::Offline
+        } else {
+            RemoteError::Other(err.to_string())
+        }
     })?;
     copy(&mut content.as_ref(), &mut dest).map_err(|err| RemoteError::Other(err.to_string()))?;
     info!("Downloaded to {}", path.to_string_lossy());
@@ -105,13 +111,13 @@ pub async fn update() -> Result<(), RemoteError> {
         return Ok(());
     }
 
-    let config = get_config();
+    let config = CONFIG.lock().expect("Failed to lock config").clone();
     let download_path = config
         .paths
         .ok_or("No paths set. Is config initialized?".to_owned())
         .map_err(|err| RemoteError::Other(err))?
         .data
-        .join(get_config().remote_file);
+        .join(config.remote_file.clone());
 
     info!("Starting download...");
     let release = get_release().await?;
@@ -128,15 +134,19 @@ pub async fn update() -> Result<(), RemoteError> {
     } else {
         error!("Asset not found");
     }
-    let mut config = get_config();
-    config.rules_version = get_remote_version().await?;
+    CONFIG.lock().expect("Failed to lock config").rules_version = get_remote_version().await?;
+    let config = CONFIG.lock().expect("Failed to lock config");
+    config.save().map_err(|err| RemoteError::Other(err))?;
     info!("Updated to {}", &config.rules_version);
-    update_config(config).map_err(|err| RemoteError::Other(err))?;
     Ok(())
 }
 
 /// returns true or false if update is available, otherwise the remote error enum
 pub async fn check_update() -> Result<bool, RemoteError> {
-    let current_version = get_config().rules_version;
+    let current_version = CONFIG
+        .lock()
+        .expect("Failed to lock config")
+        .rules_version
+        .clone();
     Ok(current_version != get_remote_version().await?)
 }

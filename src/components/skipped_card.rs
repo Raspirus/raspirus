@@ -1,14 +1,11 @@
-use std::path::PathBuf;
 use leptonic::components::prelude::{
-    Chip, ChipColor, Collapsible, CollapsibleBody, CollapsibleHeader
+    Chip, ChipColor, Collapsible, CollapsibleBody, CollapsibleHeader,
 };
 use leptos::*;
+use std::path::PathBuf;
 
 #[component]
-pub fn SkippedCard(
-    file_path: PathBuf,
-    skip_reason: String,
-) -> impl IntoView {
+pub fn SkippedCard(file_path: PathBuf, skip_reason: String) -> impl IntoView {
     let string_lossy = file_path.to_string_lossy();
     let display_path = string_lossy.to_string();
 

@@ -20,9 +20,11 @@ use leptos_router::use_query_map;
 pub fn Infected() -> impl IntoView {
     let i18n = use_i18n();
     let infected = use_query_map().get_untracked().get("infected").cloned();
-    let infected_files: Vec<TaggedFile> = serde_json::from_str(&infected.unwrap_or_default()).unwrap_or_default();
+    let infected_files: Vec<TaggedFile> =
+        serde_json::from_str(&infected.unwrap_or_default()).unwrap_or_default();
     let skipped = use_query_map().get_untracked().get("skipped").cloned();
-    let skipped_files: Vec<Skipped> = serde_json::from_str(&skipped.unwrap_or_default()).unwrap_or_default();
+    let skipped_files: Vec<Skipped> =
+        serde_json::from_str(&skipped.unwrap_or_default()).unwrap_or_default();
 
     // let infected_files: Vec<TaggedFile> = vec![
     //     TaggedFile {

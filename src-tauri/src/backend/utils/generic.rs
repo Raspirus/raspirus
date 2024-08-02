@@ -5,47 +5,17 @@ use std::{
     sync::Arc,
 };
 
-use log::{debug, info, trace, warn};
+use log::{info, trace, warn};
+use serde::Deserialize;
 use sha2::{Digest, Sha256};
 use tauri::Emitter;
 use yara_x::Rules;
 
-use crate::backend::config_file::Config;
-
-/*
-/// saves the global config
-pub fn save_config() -> Result<(), String> {
-    CONFIG.with(|config| config.borrow().save())
-}
-
-/// updates the global config to new_config and saves
-pub fn update_config(new_config: Config) -> Result<(), String> {
-    println!("Updating to: {new_config:#?}");
-    CONFIG.with(|config| {
-        *config.borrow_mut() = Arc::new(new_config);
-        save_config()
-    })
-}
-
-
-/// returns the config struct
-pub fn get_config() -> Config {
-    CONFIG.with(|config| {
-        let clone = (*config.borrow()).clone();
-        println!("Fetching {clone:#?}");
-        (*clone).clone()
-    })
-}
-*/
-
-pub fn update_config(new_config: Config) -> Result<(), String> {
-    debug!("Saving {new_config:?}");
-    new_config.save()
-}
-
-pub fn get_config() -> Config {
-    debug!("Loading");
-    Config::new().expect("Failed to load config")
+#[derive(Deserialize)]
+pub enum FrontendLog {
+    Error(String),
+    Warn(String),
+    Info(String)
 }
 
 /// sends given percentage to the frontend
