@@ -2,6 +2,7 @@
 //#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use backend::config_file::Config;
+use iced::{Application, Settings};
 use lazy_static::lazy_static;
 use log::LevelFilter;
 use simplelog::{
@@ -34,10 +35,12 @@ static MAX_TIMEOUT: u64 = 120;
 static LOGGING_FILTER: LevelFilter = LevelFilter::Debug;
 
 lazy_static! {
-    // Create string with current time
+    /// Create string with current time
     static ref APPLICATION_LOG: String = format!("{}.log", Local::now().format("%Y_%m_%d_%H_%M_%S"));
-    // Global config instance
+    /// Global config instance
     static ref CONFIG: Mutex<Config> = Mutex::new(Config::new().expect("Failed to load config"));
+    /// Supported languages
+    static ref SUPPORTED_LANGUAGES: Vec<String> = vec!["en-US".to_owned(), "de-DE".to_owned(), "fr-FR".to_owned()];
 }
 
 // NOTE: All functions with #[tauri::command] can and will be called from the GUI
@@ -62,7 +65,10 @@ fn main() -> Result<(), String> {
 
         let log_config = ConfigBuilder::new()
             .add_filter_ignore_str("reqwest")
-            .add_filter_ignore_str("hyper_util")
+            .add_filter_ignore_str("wgpu_core")
+            .add_filter_ignore_str("iced_wgpu")
+            .add_filter_ignore_str("cosmic_text")
+            .add_filter_ignore_str("naga")
             .add_filter_ignore_str("cranelift_codegen")
             .add_filter_ignore_str("wasmtime")
             .add_filter_ignore_str("aho_corasick")
@@ -83,6 +89,8 @@ fn main() -> Result<(), String> {
         // Start loggers
         CombinedLogger::init(loggers).expect("Failed to initialize CombinedLogger");
     }
+
+    frontend::iced::Raspirus::run(Settings::default()).expect("Failed to start frontend");
 
     Ok(())
 }
