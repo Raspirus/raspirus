@@ -42,7 +42,7 @@ impl Sandbox for Raspirus {
             Message::OpenSettings => self.state = State::Settings,
             Message::ReturnMain => self.state = State::MainMenu,
             Message::StartScan => todo!(),
-            Message::LanguageSelectExpand => self.language_expanded = true,
+            Message::LanguageSelectExpand => self.language_expanded = !self.language_expanded,
             Message::LanguageChanged(language) => {
                 self.language_expanded = false;
                 self.language = language
