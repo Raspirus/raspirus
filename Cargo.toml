@@ -24,11 +24,11 @@ yara-x = "0.6.0"
 num_cpus = "1.16.0"
 sha2 = "0.10.8"
 hex = "0.4.3"
-tokio = "1.39.2"
 serde = { version = "1.0.204", features = ["derive"] }
 serde_json = "1.0.122"
-iced = "0.12.1"
-iced_aw = "0.9.3"
+iced = { version = "0.12.1", features = ["tokio"] }
+iced_aw = { version = "0.9.3", features = ["icons"] }
+native-dialog = "0.7.0"
 
 # usb detection on linux
 [target.'cfg(any(target_os = "linux", target_os = "macos"))'.dependencies]

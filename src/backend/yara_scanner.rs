@@ -1,14 +1,13 @@
 use std::{
     fmt::Display,
     path::{Path, PathBuf},
-    sync::Mutex,
+    sync::{mpsc, Mutex},
 };
 
 use log::{error, info, warn};
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 use threadpool_rs::threadpool::pool::Threadpool;
-use tokio::sync::mpsc;
 use yara_x::{ScanResults, Scanner};
 
 use crate::{backend::utils::generic::get_rules, CONFIG};
