@@ -68,20 +68,26 @@ impl Sandbox for Raspirus {
 
 impl Raspirus {
     fn main_menu(&self) -> iced::Element<Message> {
-        let a = iced_aw::widgets::DropDown::new(
-            iced::widget::Row::new().push(
-                iced::widget::Button::new(iced::widget::Text::new(&self.language))
-                    .on_press(Message::LanguageSelectExpand),
-            ),
-            iced_aw::widgets::SelectionList::new(
-                &crate::SUPPORTED_LANGUAGES,
-                Message::LanguageChanged,
-            ),
-            self.lang_expanded,
-        );
         let top_row = iced::widget::row!(
-            a,
+            // language selection
+            iced_aw::widgets::DropDown::new(
+                // button to trigger dropdow
+                iced::widget::Row::new().push(
+                    iced::widget::Button::new(iced::widget::Text::new(&self.language))
+                        .on_press(Message::LanguageSelectExpand),
+                ),
+                // dropdown selection list
+                iced_aw::widgets::SelectionList::new(
+                    &crate::SUPPORTED_LANGUAGES,
+                    Message::LanguageChanged,
+                )
+                .height(iced::Length::Shrink),
+                // expanded state
+                self.lang_expanded,
+            ),
+            // spacer
             iced::widget::horizontal_space(),
+            // settings button
             iced::widget::button("settings").on_press(Message::OpenSettings)
         )
         .align_items(iced::Alignment::Center);
