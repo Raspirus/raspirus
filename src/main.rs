@@ -90,7 +90,9 @@ fn main() -> Result<(), String> {
         CombinedLogger::init(loggers).expect("Failed to initialize CombinedLogger");
     }
 
-    frontend::iced::Raspirus::run(Settings::default()).expect("Failed to start frontend");
+    let mut settings = Settings::default();
+    settings.fonts = vec![iced_aw::BOOTSTRAP_FONT_BYTES.into()]; 
+    frontend::iced::Raspirus::run(settings).expect("Failed to start frontend");
 
     Ok(())
 }
