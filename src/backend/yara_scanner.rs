@@ -4,13 +4,13 @@ use std::{
     sync::{mpsc, Mutex},
 };
 
-use log::{error, info, warn};
+use log::{debug, error, info, warn};
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 use threadpool_rs::threadpool::pool::Threadpool;
 use yara_x::{ScanResults, Scanner};
 
-use crate::{backend::utils::generic::get_rules, CONFIG};
+use crate::{backend::utils::generic::get_rules, frontend::iced::Message, CONFIG};
 
 use super::{config_file::Config, file_log::FileLog, utils::generic::profile_path};
 
@@ -51,17 +51,17 @@ pub struct PointerCollection {
 }
 
 pub struct YaraScanner {
-    pub progress_channel: Option<Arc<mpsc::Sender<String>>>,
+    pub progress_channel: Option<Arc<mpsc::Sender<Message>>>,
 }
 
 impl YaraScanner {
     /// creates a new scanenr and imports the yara rules
-    pub fn new(progress_channel: Option<Arc<mpsc::Sender<String>>>) -> Result<Self, String> {
+    pub fn new(progress_channel: Option<Arc<mpsc::Sender<Message>>>) -> Result<Self, String> {
         Ok(Self { progress_channel })
     }
 
     /// Starts the scanner in the specified location
-    pub fn start(&mut self, path: PathBuf) -> Result<(Vec<TaggedFile>, Vec<Skipped>), String> {
+    pub fn start(&mut self, path: PathBuf) -> Result<Option<(Vec<TaggedFile>, Vec<Skipped>)>, String> {
         if !path.exists() {
             return Err("Invalid path".to_owned());
         }
@@ -101,9 +101,14 @@ impl YaraScanner {
             .lock()
             .map_err(|err| format!("Failed to lock skipped: {err}"))?
             .clone();
-        println!("Found tagged files: {tagged:#?}");
-        println!("Found skipped files: {skipped:#?}");
-        Ok((tagged, skipped))
+        if let Some(channel) = &self.progress_channel {
+            channel.send(Message::ScanComplete((tagged, skipped))).unwrap();
+            Ok(None)
+        } else {
+            println!("Found tagged files: {tagged:#?}");
+            println!("Found skipped files: {skipped:#?}");
+            Ok(Some((tagged, skipped)))  
+        }
     }
 
     fn evaluate_result(
@@ -157,7 +162,7 @@ impl YaraScanner {
     fn scan_file(
         path: &Path,
         file_log: Arc<Mutex<FileLog>>,
-        progress_channel: Option<Arc<mpsc::Sender<String>>>,
+        progress_channel: Option<Arc<mpsc::Sender<Message>>>,
         pointers: PointerCollection,
     ) -> Result<(), String> {
         info!("Scanning {}", path.to_string_lossy());
@@ -174,7 +179,7 @@ impl YaraScanner {
                     .remote_file
                     .clone(),
             );
-        info!("Loading rules at {}", rule_path.to_string_lossy());
+        debug!("Loading rules at {}", rule_path.to_string_lossy());
         let rules = get_rules(rule_path)?;
         let mut scanner = Scanner::new(&rules);
         scanner.max_matches_per_pattern(pointers.config.max_matches);
@@ -223,7 +228,7 @@ impl YaraScanner {
 
     fn progress(
         pointers: &PointerCollection,
-        progress_channel: Option<Arc<mpsc::Sender<String>>>,
+        progress_channel: Option<Arc<mpsc::Sender<Message>>>,
     ) -> Result<(), String> {
         let analysed_locked = pointers
             .analysed
@@ -240,7 +245,7 @@ impl YaraScanner {
             .map_err(|err| format!("Failed to lock total: {err}"))?;
         let percentage = (scanned / *total_locked as f64) * 100.0;
         if let Some(channel) = progress_channel {
-            channel.send(format!("progress {percentage:.2}"));
+            channel.send(Message::ScanPercentage(percentage)).unwrap();
             println!("Scan progress: {percentage:.2}%");
         } else {
             println!("Scan progress: {percentage:.2}%");
