@@ -1,9 +1,8 @@
 use std::{
-    fmt::Display,
-    path::{Path, PathBuf},
-    sync::{mpsc, Mutex},
+    fmt::Display, path::{Path, PathBuf}, sync::Mutex
 };
 
+use iced::futures::{channel::mpsc, SinkExt};
 use log::{debug, error, info, warn};
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
@@ -51,17 +50,19 @@ pub struct PointerCollection {
 }
 
 pub struct YaraScanner {
-    pub progress_channel: Option<Arc<mpsc::Sender<Message>>>,
+    pub progress_channel: Arc<Mutex<mpsc::Sender<Message>>>,
 }
 
 impl YaraScanner {
     /// creates a new scanenr and imports the yara rules
-    pub fn new(progress_channel: Option<Arc<mpsc::Sender<Message>>>) -> Result<Self, String> {
-        Ok(Self { progress_channel })
+    pub fn new(progress_channel: mpsc::Sender<Message>) -> Result<Self, String> {
+        Ok(Self {
+            progress_channel: Arc::new(Mutex::new(progress_channel)),
+        })
     }
 
     /// Starts the scanner in the specified location
-    pub fn start(&mut self, path: PathBuf) -> Result<Option<(Vec<TaggedFile>, Vec<Skipped>)>, String> {
+    pub async fn start(&mut self, path: PathBuf) -> Result<(), String> {
         if !path.exists() {
             return Err("Invalid path".to_owned());
         }
@@ -79,9 +80,10 @@ impl YaraScanner {
         for file in paths {
             let pointers_c = pointers.clone();
             let file_log_c = file_log.clone();
-            let progress_c = self.progress_channel.as_ref().map(|sender| sender.clone());
+            let progress_c = self.progress_channel.clone();
             threadpool.execute(move || {
-                match Self::scan_file(file.as_path(), file_log_c, progress_c, pointers_c) {
+                let scan_result = || async { Self::scan_file(file.as_path(), file_log_c, progress_c, pointers_c).await };
+                match futures::executor::block_on(scan_result()) {
                     Ok(_) => {}
                     Err(err) => error!(
                         "Failed to scan file {}: {err}",
@@ -101,14 +103,14 @@ impl YaraScanner {
             .lock()
             .map_err(|err| format!("Failed to lock skipped: {err}"))?
             .clone();
-        if let Some(channel) = &self.progress_channel {
-            channel.send(Message::ScanComplete((tagged, skipped))).unwrap();
-            Ok(None)
-        } else {
-            println!("Found tagged files: {tagged:#?}");
-            println!("Found skipped files: {skipped:#?}");
-            Ok(Some((tagged, skipped)))  
-        }
+
+        self.progress_channel
+            .lock()
+            .map_err(|err| format!("Failed to lock progress channel: {err}"))?
+            .send(Message::ScanComplete((tagged, skipped)))
+            .await
+            .map_err(|err| format!("Failed to send completion message: {err}"))?;
+        Ok(())
     }
 
     fn evaluate_result(
@@ -159,10 +161,10 @@ impl YaraScanner {
     }
 
     /// thread function to scan a singular file
-    fn scan_file(
+    async fn scan_file(
         path: &Path,
         file_log: Arc<Mutex<FileLog>>,
-        progress_channel: Option<Arc<mpsc::Sender<Message>>>,
+        progress_channel: Arc<Mutex<mpsc::Sender<Message>>>,
         pointers: PointerCollection,
     ) -> Result<(), String> {
         info!("Scanning {}", path.to_string_lossy());
@@ -220,15 +222,15 @@ impl YaraScanner {
                     *analysed_locked += 1;
                 }
                 // send progress to frontend
-                Self::progress(&pointers, progress_channel)?;
+                Self::progress(&pointers, progress_channel).await?;
             }
         }
         Ok(())
     }
 
-    fn progress(
+    async fn progress(
         pointers: &PointerCollection,
-        progress_channel: Option<Arc<mpsc::Sender<Message>>>,
+        progress_channel: Arc<Mutex<mpsc::Sender<Message>>>,
     ) -> Result<(), String> {
         let analysed_locked = pointers
             .analysed
@@ -244,12 +246,14 @@ impl YaraScanner {
             .lock()
             .map_err(|err| format!("Failed to lock total: {err}"))?;
         let percentage = (scanned / *total_locked as f64) * 100.0;
-        if let Some(channel) = progress_channel {
-            channel.send(Message::ScanPercentage(percentage)).unwrap();
-            println!("Scan progress: {percentage:.2}%");
-        } else {
-            println!("Scan progress: {percentage:.2}%");
-        }
+
+        progress_channel
+            .lock()
+            .map_err(|err| format!("Failed to lock progress sender: {err}"))?
+            .send(Message::ScanPercentage(percentage))
+            .await
+            .map_err(|err| format!("Failed to send progress: {err}"))?;
+        println!("Scan progress: {percentage:.2}%");
         Ok(())
     }
 }

@@ -29,6 +29,7 @@ serde_json = "1.0.122"
 iced = { version = "0.12.1", features = ["tokio"] }
 iced_aw = { version = "0.9.3", features = ["icons"] }
 native-dialog = "0.7.0"
+futures = "0.3.30"
 
 # usb detection on linux
 [target.'cfg(any(target_os = "linux", target_os = "macos"))'.dependencies]
