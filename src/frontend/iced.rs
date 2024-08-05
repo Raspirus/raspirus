@@ -1,6 +1,6 @@
-use core::f64;
+use iced::futures::channel::mpsc;
 use log::{debug, error, info};
-use std::{path::PathBuf, sync::mpsc};
+use std::{path::PathBuf, sync::{Arc, Mutex}};
 
 use crate::backend::yara_scanner::{Skipped, TaggedFile, YaraScanner};
 
@@ -9,7 +9,7 @@ pub struct Raspirus {
     pub language: String,
     pub language_expanded: bool,
     pub path_selected: PathBuf,
-    pub scan_channel: Option<(mpsc::Sender<Message>, mpsc::Receiver<Message>)>,
+    pub scan_progress: Arc<Mutex<(mpsc::Sender<Message>, mpsc::Receiver<Message>)>>,
 }
 
 pub enum State {
@@ -44,13 +44,15 @@ impl iced::Application for Raspirus {
     type Flags = ();
 
     fn new(_flags: ()) -> (Self, iced::Command<Message>) {
+        let channel = mpsc::channel(8192);
+        info!("Channel built");
         let app = (
             Self {
                 state: State::MainMenu,
                 language: "en-US".to_owned(),
                 language_expanded: false,
                 path_selected: PathBuf::new(),
-                scan_channel: None,
+                scan_progress: Arc::new(Mutex::new(channel)),
             },
             iced::Command::none(),
         );
@@ -75,11 +77,11 @@ impl iced::Application for Raspirus {
             }
             Message::StartScan => {
                 let scanner_path = self.path_selected.clone();
-                let sender_c = self.scan_channel.0.clone();
+                let sender_c = self.scan_progress.lock().expect("Failed to lock channel").0.clone();
+                let mut scanner = YaraScanner::new(sender_c).expect("Failed to build scanner");
                 iced::Command::perform(
-                    async {
-                        let mut scanner = YaraScanner::new(Some(sender_c.into())).unwrap();
-                        scanner.start(scanner_path).unwrap();
+                    async move {
+                        scanner.start(scanner_path)
                     },
                     |_| Message::OpenMain,
                 )
@@ -125,9 +127,9 @@ impl iced::Application for Raspirus {
     fn view(&self) -> iced::Element<Message> {
         let content = match &self.state {
             State::MainMenu => self.main_menu(),
-            State::Scanning(percentage) => todo!(),
+            State::Scanning(_percentage) => todo!(),
             State::Settings => self.settings(),
-            State::Results(tagged, skipped) => todo!(),
+            State::Results(_tagged, _skipped) => todo!(),
         };
         iced::Element::new(
             iced::widget::Container::new(content)
@@ -140,14 +142,22 @@ impl iced::Application for Raspirus {
     fn subscription(&self) -> iced::Subscription<Message> {
         iced::subscription::unfold(
             "Scan_Update",
-            self.scan_channel.as_ref().unwrap().1.recv(),
-            |message| async {
-                (
-                    message
-                        .clone()
-                        .unwrap_or(Message::Error("Failed to receive message".to_owned())),
-                    message,
-                )
+            self.scan_progress.clone(),
+            move |channel| async move {
+                let message = channel.lock().expect("Failed to lock channel").1.try_next();
+                match message {
+                    Ok(message) => {
+                        if let Some(message) = message {
+                            (message, channel)
+                        } else {
+                            (Message::Error("Failed to get message".to_owned()), channel)
+                        }
+                    },
+                    Err(err) => {
+                        error!("{err}");
+                        (Message::Error(err.to_string()), channel)
+                    },
+                }
             },
         )
     }
