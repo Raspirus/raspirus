@@ -1,6 +1,10 @@
+use futures::StreamExt;
 use iced::futures::channel::mpsc;
 use log::{debug, error, info};
-use std::{path::PathBuf, sync::{Arc, Mutex}};
+use std::{
+    path::PathBuf,
+    sync::{Arc, Mutex},
+};
 
 use crate::backend::yara_scanner::{Skipped, TaggedFile, YaraScanner};
 
@@ -9,7 +13,10 @@ pub struct Raspirus {
     pub language: String,
     pub language_expanded: bool,
     pub path_selected: PathBuf,
-    pub scan_progress: Arc<Mutex<(mpsc::Sender<Message>, mpsc::Receiver<Message>)>>,
+    pub scan_progress: (
+        Arc<Mutex<mpsc::UnboundedSender<Message>>>,
+        Arc<Mutex<mpsc::UnboundedReceiver<Message>>>,
+    ),
 }
 
 pub enum State {
@@ -35,6 +42,8 @@ pub enum Message {
     // data messages
     ScanPercentage(f64),
     Error(String),
+    // none message
+    None,
 }
 
 impl iced::Application for Raspirus {
@@ -44,7 +53,7 @@ impl iced::Application for Raspirus {
     type Flags = ();
 
     fn new(_flags: ()) -> (Self, iced::Command<Message>) {
-        let channel = mpsc::channel(8192);
+        let channel = mpsc::unbounded();
         info!("Channel built");
         let app = (
             Self {
@@ -52,7 +61,10 @@ impl iced::Application for Raspirus {
                 language: "en-US".to_owned(),
                 language_expanded: false,
                 path_selected: PathBuf::new(),
-                scan_progress: Arc::new(Mutex::new(channel)),
+                scan_progress: (
+                    Arc::new(Mutex::new(channel.0)),
+                    Arc::new(Mutex::new(channel.1)),
+                ),
             },
             iced::Command::none(),
         );
@@ -76,14 +88,19 @@ impl iced::Application for Raspirus {
                 iced::Command::none()
             }
             Message::StartScan => {
+                self.state = State::Scanning(0.0);
                 let scanner_path = self.path_selected.clone();
-                let sender_c = self.scan_progress.lock().expect("Failed to lock channel").0.clone();
-                let mut scanner = YaraScanner::new(sender_c).expect("Failed to build scanner");
+                let sender_c = self.scan_progress.0.clone();
+
                 iced::Command::perform(
                     async move {
-                        scanner.start(scanner_path)
+                        let scanner = YaraScanner::new(sender_c).expect("Failed to build scanner");
+                        scanner.start(scanner_path).await
                     },
-                    |_| Message::OpenMain,
+                    |result| match result {
+                        Ok((tagged, skipped)) => Message::ScanComplete((tagged, skipped)),
+                        Err(err) => Message::Error(err),
+                    },
                 )
             }
             Message::ToggleLanguage => {
@@ -121,15 +138,21 @@ impl iced::Application for Raspirus {
                 self.state = State::Scanning(percentage);
                 iced::Command::none()
             }
+            Message::None => iced::Command::none(),
         }
     }
 
     fn view(&self) -> iced::Element<Message> {
         let content = match &self.state {
             State::MainMenu => self.main_menu(),
-            State::Scanning(_percentage) => todo!(),
+            State::Scanning(percentage) => {
+                iced::widget::Text::new(format!("{percentage:.2}%")).into()
+            }
             State::Settings => self.settings(),
-            State::Results(_tagged, _skipped) => todo!(),
+            State::Results(tagged, skipped) => {
+                println!("{:?}, {:?}", tagged, skipped);
+                iced::widget::Text::new("done").into()
+            }
         };
         iced::Element::new(
             iced::widget::Container::new(content)
@@ -140,25 +163,32 @@ impl iced::Application for Raspirus {
     }
 
     fn subscription(&self) -> iced::Subscription<Message> {
-        iced::subscription::unfold(
-            "Scan_Update",
-            self.scan_progress.clone(),
-            move |channel| async move {
-                let message = channel.lock().expect("Failed to lock channel").1.try_next();
-                match message {
-                    Ok(message) => {
-                        if let Some(message) = message {
-                            (message, channel)
-                        } else {
-                            (Message::Error("Failed to get message".to_owned()), channel)
+        match self.state {
+            State::Scanning(_) => iced::subscription::unfold(
+                "Scan_Update",
+                self.scan_progress.clone(),
+                move |channel| async move {
+                    let channel_c = channel.clone();
+                    let mut receiver = match channel_c.1.lock() {
+                        Ok(receiver) => receiver,
+                        Err(err) => {
+                            error!("Failed to lock receiver: {err}");
+                            return (Message::Error(format!("Failed to lock receiver: {err}")), channel)
+                        },
+                    };
+                    match receiver.try_next() {
+                        Ok(message) => {
+                            if let Some(message) = message {
+                                (message, channel)
+                            } else {
+                                (Message::Error("Failed to get message".to_owned()), channel)
+                            }
                         }
-                    },
-                    Err(err) => {
-                        error!("{err}");
-                        (Message::Error(err.to_string()), channel)
-                    },
-                }
-            },
-        )
+                        Err(_) => (Message::None, channel),
+                    }
+                },
+            ),
+            _ => iced::Subscription::none(),
+        }
     }
 }
