@@ -50,19 +50,19 @@ pub struct PointerCollection {
 }
 
 pub struct YaraScanner {
-    pub progress_channel: Arc<Mutex<mpsc::Sender<Message>>>,
+    pub progress_channel: Arc<Mutex<mpsc::UnboundedSender<Message>>>,
 }
 
 impl YaraScanner {
     /// creates a new scanenr and imports the yara rules
-    pub fn new(progress_channel: mpsc::Sender<Message>) -> Result<Self, String> {
+    pub fn new(progress_channel: Arc<Mutex<mpsc::UnboundedSender<Message>>>) -> Result<Self, String> {
         Ok(Self {
-            progress_channel: Arc::new(Mutex::new(progress_channel)),
+            progress_channel,
         })
     }
 
     /// Starts the scanner in the specified location
-    pub async fn start(&mut self, path: PathBuf) -> Result<(), String> {
+    pub async fn start(&self, path: PathBuf) -> Result<(Vec<TaggedFile>, Vec<Skipped>), String> {
         if !path.exists() {
             return Err("Invalid path".to_owned());
         }
@@ -70,7 +70,7 @@ impl YaraScanner {
         // setup file log
         let file_log = Arc::new(Mutex::new(FileLog::new()?));
 
-        let paths = profile_path(path.clone())
+        let paths = profile_path(path)
             .map_err(|err| format!("Failed to calculate file tree: {err}"))?;
         let mut pointers = PointerCollection::default();
         pointers.config = Arc::from(CONFIG.lock().expect("Failed to lock config").clone());
@@ -104,13 +104,7 @@ impl YaraScanner {
             .map_err(|err| format!("Failed to lock skipped: {err}"))?
             .clone();
 
-        self.progress_channel
-            .lock()
-            .map_err(|err| format!("Failed to lock progress channel: {err}"))?
-            .send(Message::ScanComplete((tagged, skipped)))
-            .await
-            .map_err(|err| format!("Failed to send completion message: {err}"))?;
-        Ok(())
+        Ok((tagged, skipped))
     }
 
     fn evaluate_result(
@@ -164,7 +158,7 @@ impl YaraScanner {
     async fn scan_file(
         path: &Path,
         file_log: Arc<Mutex<FileLog>>,
-        progress_channel: Arc<Mutex<mpsc::Sender<Message>>>,
+        progress_channel: Arc<Mutex<mpsc::UnboundedSender<Message>>>,
         pointers: PointerCollection,
     ) -> Result<(), String> {
         info!("Scanning {}", path.to_string_lossy());
@@ -230,7 +224,7 @@ impl YaraScanner {
 
     async fn progress(
         pointers: &PointerCollection,
-        progress_channel: Arc<Mutex<mpsc::Sender<Message>>>,
+        progress_channel: Arc<Mutex<mpsc::UnboundedSender<Message>>>,
     ) -> Result<(), String> {
         let analysed_locked = pointers
             .analysed
