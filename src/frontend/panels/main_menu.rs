@@ -7,7 +7,7 @@ impl Raspirus {
         let top_row = iced::widget::Row::new()
             // language selection
             .push(iced_aw::widgets::DropDown::new(
-                // button to trigger dropdow
+                // button to trigger dropdown
                 iced::widget::Row::new().push(
                     iced::widget::Button::new(iced::widget::Text::new(&self.language))
                         .on_press(Message::ToggleLanguage),
@@ -29,25 +29,36 @@ impl Raspirus {
             .align_items(iced::Alignment::Center);
 
         let middle_row = iced::widget::Column::new()
-            .push(iced::widget::Row::new()
             .push(
-                iced::widget::TextInput::new("", &self.path_selected.to_string_lossy())
-                    .on_input(|content| Message::PathChanged(Path::new(&content).to_path_buf())),
+                iced::widget::Row::new()
+                    .push(
+                        iced::widget::TextInput::new("", &self.path_selected.to_string_lossy())
+                            .on_input(|content| {
+                                Message::PathChanged(Path::new(&content).to_path_buf())
+                            }),
+                    )
+                    //.push(iced::widget::horizontal_space().width(10))
+                    .push(
+                        iced::widget::Button::new(
+                            iced::widget::Text::new(iced_aw::Bootstrap::Folder.to_string())
+                                .font(iced_aw::BOOTSTRAP_FONT),
+                        )
+                        .on_press(Message::SelectPath),
+                    )
+                    .spacing(5),
             )
-            .push(iced::widget::horizontal_space().width(10))
             .push(
-                iced::widget::Button::new(
-                    iced::widget::Text::new(iced_aw::Bootstrap::Folder.to_string())
-                        .font(iced_aw::BOOTSTRAP_FONT),
-                )
-                .on_press(Message::SelectPath),
-            )).push(iced::widget::Button::new(iced::widget::Text::new("Start")).on_press(Message::StartScan));
+                iced::widget::Button::new(iced::widget::Text::new("Start"))
+                    .on_press(Message::StartScan),
+            )
+            .spacing(5);
 
-        let column = iced::widget::Column::new()
+        iced::widget::Column::new()
             .push(top_row)
             .push(iced::widget::vertical_space())
             .push(middle_row)
-            .push(iced::widget::vertical_space());
-        iced::Element::new(column)
+            .push(iced::widget::vertical_space())
+            .spacing(5)
+            .into()
     }
 }
