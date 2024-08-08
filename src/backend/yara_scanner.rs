@@ -2,7 +2,8 @@ use std::{
     fmt::Display, path::{Path, PathBuf}, sync::Mutex
 };
 
-use iced::futures::{channel::mpsc, SinkExt};
+//use iced::futures::{channel::mpsc, SinkExt};
+use std::sync::mpsc;
 use log::{debug, error, info, warn};
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
@@ -50,12 +51,12 @@ pub struct PointerCollection {
 }
 
 pub struct YaraScanner {
-    pub progress_channel: Arc<Mutex<mpsc::UnboundedSender<Message>>>,
+    pub progress_channel: Arc<Mutex<mpsc::Sender<Message>>>,
 }
 
 impl YaraScanner {
     /// creates a new scanenr and imports the yara rules
-    pub fn new(progress_channel: Arc<Mutex<mpsc::UnboundedSender<Message>>>) -> Result<Self, String> {
+    pub fn new(progress_channel: Arc<Mutex<mpsc::Sender<Message>>>) -> Result<Self, String> {
         Ok(Self {
             progress_channel,
         })
@@ -158,7 +159,7 @@ impl YaraScanner {
     async fn scan_file(
         path: &Path,
         file_log: Arc<Mutex<FileLog>>,
-        progress_channel: Arc<Mutex<mpsc::UnboundedSender<Message>>>,
+        progress_channel: Arc<Mutex<mpsc::Sender<Message>>>,
         pointers: PointerCollection,
     ) -> Result<(), String> {
         info!("Scanning {}", path.to_string_lossy());
@@ -224,7 +225,7 @@ impl YaraScanner {
 
     async fn progress(
         pointers: &PointerCollection,
-        progress_channel: Arc<Mutex<mpsc::UnboundedSender<Message>>>,
+        progress_channel: Arc<Mutex<mpsc::Sender<Message>>>,
     ) -> Result<(), String> {
         let analysed_locked = pointers
             .analysed
@@ -245,7 +246,6 @@ impl YaraScanner {
             .lock()
             .map_err(|err| format!("Failed to lock progress sender: {err}"))?
             .send(Message::ScanPercentage(percentage))
-            .await
             .map_err(|err| format!("Failed to send progress: {err}"))?;
         println!("Scan progress: {percentage:.2}%");
         Ok(())

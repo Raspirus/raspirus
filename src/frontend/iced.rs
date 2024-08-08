@@ -1,4 +1,5 @@
-use iced::futures::channel::mpsc;
+//use iced::futures::channel::mpsc;
+use std::sync::mpsc;
 use log::{debug, error, info};
 use std::{
     path::PathBuf,
@@ -13,8 +14,8 @@ pub struct Raspirus {
     pub language_expanded: bool,
     pub path_selected: PathBuf,
     pub scan_progress: (
-        Arc<Mutex<mpsc::UnboundedSender<Message>>>,
-        Arc<Mutex<mpsc::UnboundedReceiver<Message>>>,
+        Arc<Mutex<mpsc::Sender<Message>>>,
+        Arc<Mutex<mpsc::Receiver<Message>>>,
     ),
 }
 
@@ -52,7 +53,7 @@ impl iced::Application for Raspirus {
     type Flags = ();
 
     fn new(_flags: ()) -> (Self, iced::Command<Message>) {
-        let channel = mpsc::unbounded();
+        let channel = mpsc::channel();
         info!("Channel built");
         let app = (
             Self {
@@ -145,9 +146,7 @@ impl iced::Application for Raspirus {
     fn view(&self) -> iced::Element<Message> {
         let content = match &self.state {
             State::MainMenu => self.main_menu(),
-            State::Scanning(percentage) => {
-                iced::widget::Text::new(format!("{percentage:.2}%")).into()
-            }
+            State::Scanning(percentage) => self.scanning(*percentage as f32),
             State::Settings => self.settings(),
             State::Results(tagged, skipped) => {
                 println!("{:?}, {:?}", tagged, skipped);
@@ -169,23 +168,17 @@ impl iced::Application for Raspirus {
             |receiver| async {
                 // get receiver
                 let receiver_c = receiver.clone();
-                let mut receiver_l = match receiver_c.lock() {
+                let receiver_l = match receiver_c.lock() {
                     Ok(receiver_l) => receiver_l,
                     Err(err) => return (Message::Error(err.to_string()), receiver),
                 };
 
                 loop {
-                    let message_try = match receiver_l.try_next() {
-                        Ok(message_try) => message_try,
+                    match receiver_l.recv() {
+                        Ok(message) => return (message, receiver),
                         Err(_) => {
                             sleep(Duration::from_millis(100));
                             continue
-                        },
-                    };
-                    match message_try {
-                        Some(message) => return (message, receiver),
-                        None => {
-                            sleep(Duration::from_millis(100))
                         },
                     }
                 }
