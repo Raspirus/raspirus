@@ -1,9 +1,11 @@
 //use iced::futures::channel::mpsc;
+use log::{error, info};
 use std::sync::mpsc;
-use log::{debug, error, info};
 use std::{
     path::PathBuf,
-    sync::{Arc, Mutex}, thread::sleep, time::Duration,
+    sync::{Arc, Mutex},
+    thread::sleep,
+    time::Duration,
 };
 
 use crate::backend::yara_scanner::{Skipped, TaggedFile, YaraScanner};
@@ -21,9 +23,9 @@ pub struct Raspirus {
 
 pub enum State {
     MainMenu,
-    Scanning(f64),
+    Scanning(f32),
     Settings,
-    Results(Vec<TaggedFile>, Vec<Skipped>),
+    Results(Vec<(TaggedFile, bool)>, Vec<(Skipped, bool)>),
 }
 
 #[derive(Debug, Clone)]
@@ -38,12 +40,19 @@ pub enum Message {
     // update messages
     PathChanged(PathBuf),
     LanguageChanged(String),
-    ScanComplete((Vec<TaggedFile>, Vec<Skipped>)),
+    ScanComplete((Vec<(TaggedFile, bool)>, Vec<(Skipped, bool)>)),
+    ToggleCard(Card),
     // data messages
-    ScanPercentage(f64),
+    ScanPercentage(f32),
     Error(String),
     // none message
     None,
+}
+
+#[derive(Debug, Clone)]
+pub enum Card {
+    Skipped(Skipped),
+    Tagged(TaggedFile),
 }
 
 impl iced::Application for Raspirus {
@@ -77,7 +86,6 @@ impl iced::Application for Raspirus {
     }
 
     fn update(&mut self, message: Message) -> iced::Command<Message> {
-        debug!("Message: {:?}", message);
         match message {
             Message::OpenSettings => {
                 self.state = State::Settings;
@@ -94,11 +102,15 @@ impl iced::Application for Raspirus {
 
                 iced::Command::perform(
                     async move {
-                        let scanner = YaraScanner::new(sender_c).expect("Failed to build scanner");
+                        let scanner = YaraScanner::new(sender_c)
+                            .map_err(|err| format!("Failed to build scanner: {err}"))?;
                         scanner.start(scanner_path).await
                     },
                     |result| match result {
-                        Ok((tagged, skipped)) => Message::ScanComplete((tagged, skipped)),
+                        Ok((tagged, skipped)) => Message::ScanComplete((
+                            tagged.iter().map(|tag| (tag.clone(), false)).collect(),
+                            skipped.iter().map(|skip| (skip.clone(), false)).collect(),
+                        )),
                         Err(err) => Message::Error(err),
                     },
                 )
@@ -135,8 +147,43 @@ impl iced::Application for Raspirus {
                 iced::Command::none()
             }
             Message::ScanPercentage(percentage) => {
-                info!("{percentage}");
                 self.state = State::Scanning(percentage);
+                iced::Command::none()
+            }
+            Message::ToggleCard(card) => {
+                match &self.state {
+                    State::Results(tagged, skipped) => {
+                        self.state = match card {
+                            Card::Skipped(skipped_card) => State::Results(
+                                tagged.to_vec(),
+                                skipped
+                                    .iter()
+                                    .map(|(skip, expanded)| {
+                                        if *skip == skipped_card {
+                                            (skip.clone(), !*expanded)
+                                        } else {
+                                            (skip.clone(), *expanded)
+                                        }
+                                    })
+                                    .collect(),
+                            ),
+                            Card::Tagged(tagged_card) => State::Results(
+                                tagged
+                                    .iter()
+                                    .map(|(tag, expanded)| {
+                                        if *tag == tagged_card {
+                                            (tag.clone(), !*expanded)
+                                        } else {
+                                            (tag.clone(), *expanded)
+                                        }
+                                    })
+                                    .collect(),
+                                skipped.to_vec(),
+                            ),
+                        }
+                    }
+                    _ => {}
+                }
                 iced::Command::none()
             }
             Message::None => iced::Command::none(),
@@ -146,12 +193,9 @@ impl iced::Application for Raspirus {
     fn view(&self) -> iced::Element<Message> {
         let content = match &self.state {
             State::MainMenu => self.main_menu(),
-            State::Scanning(percentage) => self.scanning(*percentage as f32),
+            State::Scanning(percentage) => self.scanning(),
             State::Settings => self.settings(),
-            State::Results(tagged, skipped) => {
-                println!("{:?}, {:?}", tagged, skipped);
-                iced::widget::Text::new("done").into()
-            }
+            State::Results(tagged, skipped) => self.results()
         };
         iced::Element::new(
             iced::widget::Container::new(content)
@@ -162,28 +206,30 @@ impl iced::Application for Raspirus {
     }
 
     fn subscription(&self) -> iced::Subscription<Message> {
-        iced::subscription::unfold(
-            "scan_update",
-            self.scan_progress.1.clone(),
-            |receiver| async {
-                // get receiver
-                let receiver_c = receiver.clone();
-                let receiver_l = match receiver_c.lock() {
-                    Ok(receiver_l) => receiver_l,
-                    Err(err) => return (Message::Error(err.to_string()), receiver),
-                };
+        match self.state {
+            State::Scanning(_) => iced::subscription::unfold(
+                "scan_update",
+                self.scan_progress.1.clone(),
+                |receiver| async {
+                    // get receiver
+                    let receiver_c = receiver.clone();
+                    let receiver_l = match receiver_c.lock() {
+                        Ok(receiver_l) => receiver_l,
+                        Err(err) => return (Message::Error(err.to_string()), receiver),
+                    };
 
-                loop {
-                    match receiver_l.recv() {
-                        Ok(message) => return (message, receiver),
-                        Err(_) => {
-                            sleep(Duration::from_millis(100));
-                            continue
-                        },
+                    loop {
+                        match receiver_l.recv() {
+                            Ok(message) => return (message, receiver),
+                            Err(_) => {
+                                sleep(Duration::from_millis(100));
+                                continue;
+                            }
+                        }
                     }
-                }
-
-            },
-        )
+                },
+            ),
+            _ => iced::Subscription::none(),
+        }
     }
 }
