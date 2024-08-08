@@ -2,9 +2,8 @@ use std::{
     fmt::Display, path::{Path, PathBuf}, sync::Mutex
 };
 
-//use iced::futures::{channel::mpsc, SinkExt};
 use std::sync::mpsc;
-use log::{debug, error, info, warn};
+use log::{error, info, trace, warn};
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 use threadpool_rs::threadpool::pool::Threadpool;
@@ -14,7 +13,7 @@ use crate::{backend::utils::generic::get_rules, frontend::iced::Message, CONFIG}
 
 use super::{config_file::Config, file_log::FileLog, utils::generic::profile_path};
 
-#[derive(Deserialize, Serialize, Clone, Debug)]
+#[derive(Deserialize, Serialize, Clone, Debug, PartialEq)]
 pub struct TaggedFile {
     pub path: PathBuf,
     /// vector of description and rule name
@@ -22,7 +21,7 @@ pub struct TaggedFile {
     pub rule_count: usize,
 }
 
-#[derive(Deserialize, Serialize, Clone, Debug)]
+#[derive(Deserialize, Serialize, Clone, Debug, PartialEq)]
 pub struct RuleFeedback {
     pub rule_name: String,
     pub rule_description: String,
@@ -34,7 +33,7 @@ impl Display for RuleFeedback {
     }
 }
 
-#[derive(Serialize, Debug, Clone)]
+#[derive(Serialize, Debug, Clone, PartialEq)]
 pub struct Skipped {
     pub path: PathBuf,
     pub reason: String,
@@ -176,7 +175,7 @@ impl YaraScanner {
                     .remote_file
                     .clone(),
             );
-        debug!("Loading rules at {}", rule_path.to_string_lossy());
+        trace!("Loading rules at {}", rule_path.to_string_lossy());
         let rules = get_rules(rule_path)?;
         let mut scanner = Scanner::new(&rules);
         scanner.max_matches_per_pattern(pointers.config.max_matches);
@@ -235,19 +234,19 @@ impl YaraScanner {
             .skipped
             .lock()
             .map_err(|err| format!("Failed to lock skipped: {err}"))?;
-        let scanned = *analysed_locked as f64 + skipped_locked.len() as f64;
+        let scanned = *analysed_locked + skipped_locked.len();
         let total_locked = pointers
             .total
             .lock()
             .map_err(|err| format!("Failed to lock total: {err}"))?;
-        let percentage = (scanned / *total_locked as f64) * 100.0;
+        let percentage = (scanned as f32 / *total_locked as f32) * 100.0;
 
         progress_channel
             .lock()
             .map_err(|err| format!("Failed to lock progress sender: {err}"))?
             .send(Message::ScanPercentage(percentage))
             .map_err(|err| format!("Failed to send progress: {err}"))?;
-        println!("Scan progress: {percentage:.2}%");
+        trace!("Scan progress: {percentage:.2}%");
         Ok(())
     }
 }
