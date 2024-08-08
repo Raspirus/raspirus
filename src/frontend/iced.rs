@@ -1,9 +1,8 @@
-use futures::StreamExt;
 use iced::futures::channel::mpsc;
 use log::{debug, error, info};
 use std::{
     path::PathBuf,
-    sync::{Arc, Mutex},
+    sync::{Arc, Mutex}, thread::sleep, time::Duration,
 };
 
 use crate::backend::yara_scanner::{Skipped, TaggedFile, YaraScanner};
@@ -135,6 +134,7 @@ impl iced::Application for Raspirus {
                 iced::Command::none()
             }
             Message::ScanPercentage(percentage) => {
+                info!("{percentage}");
                 self.state = State::Scanning(percentage);
                 iced::Command::none()
             }
@@ -163,32 +163,34 @@ impl iced::Application for Raspirus {
     }
 
     fn subscription(&self) -> iced::Subscription<Message> {
-        match self.state {
-            State::Scanning(_) => iced::subscription::unfold(
-                "Scan_Update",
-                self.scan_progress.clone(),
-                move |channel| async move {
-                    let channel_c = channel.clone();
-                    let mut receiver = match channel_c.1.lock() {
-                        Ok(receiver) => receiver,
-                        Err(err) => {
-                            error!("Failed to lock receiver: {err}");
-                            return (Message::Error(format!("Failed to lock receiver: {err}")), channel)
+        iced::subscription::unfold(
+            "scan_update",
+            self.scan_progress.1.clone(),
+            |receiver| async {
+                // get receiver
+                let receiver_c = receiver.clone();
+                let mut receiver_l = match receiver_c.lock() {
+                    Ok(receiver_l) => receiver_l,
+                    Err(err) => return (Message::Error(err.to_string()), receiver),
+                };
+
+                loop {
+                    let message_try = match receiver_l.try_next() {
+                        Ok(message_try) => message_try,
+                        Err(_) => {
+                            sleep(Duration::from_millis(100));
+                            continue
                         },
                     };
-                    match receiver.try_next() {
-                        Ok(message) => {
-                            if let Some(message) = message {
-                                (message, channel)
-                            } else {
-                                (Message::Error("Failed to get message".to_owned()), channel)
-                            }
-                        }
-                        Err(_) => (Message::None, channel),
+                    match message_try {
+                        Some(message) => return (message, receiver),
+                        None => {
+                            sleep(Duration::from_millis(100))
+                        },
                     }
-                },
-            ),
-            _ => iced::Subscription::none(),
-        }
+                }
+
+            },
+        )
     }
 }
