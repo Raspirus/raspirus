@@ -2,6 +2,7 @@
 //#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use backend::config_file::Config;
+use frontend::iced::Message;
 use iced::{Application, Settings};
 use lazy_static::lazy_static;
 use log::LevelFilter;
@@ -90,8 +91,19 @@ fn main() -> Result<(), String> {
         CombinedLogger::init(loggers).expect("Failed to initialize CombinedLogger");
     }
 
+    
+    /*let proxy: iced_winit::Proxy<Message> = iced_winit::Proxy::new(
+        let event_loop: iced_winit::winit::event_loop::EventLoopProxy<Message> = iced_winit::winit::event_loop::EventLoopBuilder::with_user_event()
+            .build()
+            .map_err(|err| err.to_string())?
+            .create_proxy();
+    );*/
+    
+
     let mut settings = Settings::default();
-    settings.fonts = vec![iced_aw::BOOTSTRAP_FONT_BYTES.into()]; 
+    settings.window.exit_on_close_request = false;
+    settings.id = Some("raspirus.app".to_owned());
+    settings.fonts = vec![iced_aw::BOOTSTRAP_FONT_BYTES.into()];
     frontend::iced::Raspirus::run(settings).expect("Failed to start frontend");
 
     Ok(())

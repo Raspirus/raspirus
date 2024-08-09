@@ -3,7 +3,7 @@ use std::path::Path;
 use crate::frontend::iced::{Message, Raspirus};
 
 impl Raspirus {
-    pub fn main_menu(&self) -> iced::Element<Message> {
+    pub fn main_menu(&self, language_expanded: bool) -> iced::Element<Message> {
         let top_row = iced::widget::Row::new()
             // language selection
             .push(iced_aw::widgets::DropDown::new(
@@ -15,11 +15,11 @@ impl Raspirus {
                 // dropdown selection list
                 iced_aw::widgets::SelectionList::new(
                     &crate::SUPPORTED_LANGUAGES,
-                    |_idx: usize, language: String| Message::LanguageChanged(language),
+                    |_idx: usize, language: String| Message::LanguageChanged { language },
                 )
                 .height(iced::Length::Shrink),
                 // expanded state
-                self.language_expanded,
+                language_expanded,
             ))
             // spacer
             .push(iced::widget::horizontal_space())
@@ -32,10 +32,13 @@ impl Raspirus {
             .push(
                 iced::widget::Row::new()
                     .push(
-                        iced::widget::TextInput::new("", &self.path_selected.to_string_lossy())
-                            .on_input(|content| {
-                                Message::PathChanged(Path::new(&content).to_path_buf())
-                            }),
+                        iced::widget::TextInput::new(
+                            "Select path",
+                            &self.scan_path.clone().unwrap_or_default().to_string_lossy(),
+                        )
+                        .on_input(|content| Message::PathChanged {
+                            path: Path::new(&content).to_path_buf(),
+                        }),
                     )
                     //.push(iced::widget::horizontal_space().width(10))
                     .push(
