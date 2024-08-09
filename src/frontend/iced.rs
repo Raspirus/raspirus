@@ -1,4 +1,4 @@
-use log::{error, info, trace};
+use log::{debug, error, info, trace};
 use std::sync::mpsc;
 use std::{
     path::PathBuf,
@@ -7,14 +7,14 @@ use std::{
     time::Duration,
 };
 
-use crate::backend;
-use crate::backend::utils::usb_utils::{self, UsbDevice};
+use crate::backend::utils::usb_utils::{list_usb_drives, UsbDevice};
 use crate::backend::yara_scanner::{Skipped, TaggedFile, YaraScanner};
 
 pub struct Raspirus {
     pub state: State,
     pub language: String,
     pub scan_path: Option<PathBuf>,
+    pub usb_devices: Vec<UsbDevice>,
     /// head and body for optional popup
     pub pop_up: Option<(String, String)>,
     /// warning
@@ -27,9 +27,12 @@ pub struct Raspirus {
 
 pub enum State {
     MainMenu {
-        // dropdown state
-        language_expanded: bool,
-        folder_expanded: bool,
+        /// language dropdown state
+        expanded_language: bool,
+        /// dropdown to switch between usb folder and file scan
+        expanded_location: bool,
+        /// dropdown for selecting usb
+        expanded_usb: bool,
         selection: LocationSelection,
     },
     Scanning {
@@ -46,9 +49,9 @@ pub enum State {
 
 #[derive(Debug, Clone)]
 pub enum LocationSelection {
-    USB { device: Option<UsbDevice> },
-    Folder { path: PathBuf },
-    File { path: PathBuf },
+    USB { usb: Option<UsbDevice> },
+    Folder { path: Option<PathBuf> },
+    File { path: Option<PathBuf> },
 }
 
 #[derive(Debug, Clone)]
@@ -58,17 +61,19 @@ pub enum Message {
     OpenMain,
     // action messages
     StartScan,
-    ToggleLanguage,
-    SelectPath,
     Shutdown,
     DismissWarning,
     DismissPopup,
+    ToggleLanguageSelection,
+    ToggleUSBSelection,
+    ToggleLocationSelection,
     // update messages
-    PathChanged {
-        path: PathBuf,
-    },
     LanguageChanged {
         language: String,
+    },
+    /// contains empty enum if just type changed and enum with content if something has been selected
+    LocationChanged {
+        selection: LocationSelection,
     },
     ScanComplete {
         tagged: Vec<(TaggedFile, bool)>,
@@ -101,16 +106,6 @@ pub enum Card {
     Tagged { card: TaggedFile },
 }
 
-impl Default for LocationSelection {
-    fn default() -> Self {
-        let usbs = match usb_utils::list_usb_drives() {
-            Ok(usbs) => usbs,
-            Err(_) => return LocationSelection::USB { device: None }
-        };
-        LocationSelection::USB { device: usbs.first().cloned() }
-    }
-}
-
 impl iced::Application for Raspirus {
     type Message = Message;
     type Executor = iced::executor::Default;
@@ -119,21 +114,28 @@ impl iced::Application for Raspirus {
 
     fn new(_flags: ()) -> (Self, iced::Command<Message>) {
         let channel = mpsc::channel();
+        let usb = list_usb_drives().unwrap_or_default().first().cloned();
         let app = (
             Self {
                 state: State::MainMenu {
-                    language_expanded: false,
-                    folder_expanded: false,
-                    selection: LocationSelection::default(),
+                    expanded_language: false,
+                    expanded_location: false,
+                    expanded_usb: false,
+                    selection: LocationSelection::USB { usb: usb.clone() },
                 },
                 language: "en-US".to_owned(),
-                scan_path: None,
+                scan_path: if let Some(usb) = usb {
+                    Some(usb.path)
+                } else {
+                    None
+                },
                 pop_up: None,
                 warning: None,
                 scan_progress: (
                     Arc::new(Mutex::new(channel.0)),
                     Arc::new(Mutex::new(channel.1)),
                 ),
+                usb_devices: list_usb_drives().unwrap_or_default(),
             },
             iced::Command::none(),
         );
@@ -145,17 +147,23 @@ impl iced::Application for Raspirus {
     }
 
     fn update(&mut self, message: Message) -> iced::Command<Message> {
+        dbg!(&message);
         match message {
             Message::OpenSettings => {
                 self.state = State::Settings;
                 iced::Command::none()
             }
             Message::OpenMain => {
+                let usb = list_usb_drives().unwrap_or_default().first().cloned();
                 self.state = State::MainMenu {
-                    language_expanded: false,
-                    folder_expanded: false,
-                    selection: LocationSelection::default(),
+                    expanded_language: false,
+                    expanded_location: false,
+                    expanded_usb: false,
+                    selection: LocationSelection::USB { usb: usb.clone() },
                 };
+                if let Some(usb) = usb {
+                    self.scan_path = Some(usb.path);
+                }
                 iced::Command::none()
             }
             Message::StartScan => {
@@ -185,42 +193,40 @@ impl iced::Application for Raspirus {
                     },
                 )
             }
-            Message::ToggleLanguage => {
+            Message::ToggleLanguageSelection => {
                 // invert expanded state
                 match &self.state {
-                    State::MainMenu { language_expanded, folder_expanded, selection } => {
+                    State::MainMenu {
+                        expanded_language,
+                        expanded_location,
+                        expanded_usb,
+                        selection,
+                    } => {
                         self.state = State::MainMenu {
-                            language_expanded: !language_expanded,
-                            folder_expanded: *folder_expanded,
-                            selection: selection.clone()
+                            expanded_language: !expanded_language,
+                            expanded_location: *expanded_location,
+                            expanded_usb: *expanded_usb,
+                            selection: selection.clone(),
                         }
                     }
                     _ => {}
                 };
                 iced::Command::none()
             }
-            Message::SelectPath => iced::Command::perform(
-                async {
-                    native_dialog::FileDialog::new()
-                        .set_location("~")
-                        .show_open_single_dir()
-                        .expect("Failed to select file")
-                        .unwrap_or_default()
-                },
-                |result| Message::PathChanged { path: result },
-            ),
-            Message::PathChanged { path } => {
-                self.scan_path = Some(path);
-                iced::Command::none()
-            }
             Message::LanguageChanged { language } => {
                 // close language dialog
                 match &self.state {
-                    State::MainMenu { folder_expanded, selection, .. } => {
+                    State::MainMenu {
+                        expanded_location,
+                        expanded_usb,
+                        selection,
+                        ..
+                    } => {
                         self.state = State::MainMenu {
-                            language_expanded: false,
-                            folder_expanded: *folder_expanded,
-                            selection: selection.clone()
+                            expanded_language: false,
+                            expanded_location: *expanded_location,
+                            expanded_usb: *expanded_usb,
+                            selection: selection.clone(),
                         }
                     }
                     _ => {}
@@ -316,12 +322,143 @@ impl iced::Application for Raspirus {
                 self.pop_up = None;
                 iced::Command::none()
             }
+            Message::LocationChanged { selection } => match &self.state {
+                State::MainMenu {
+                    expanded_language, ..
+                } => match selection {
+                    LocationSelection::USB { usb } => {
+                        // if contains usb device we update to scan and display it
+                        if let Some(usb) = usb {
+                            self.scan_path = Some(usb.path.clone());
+                            self.state = State::MainMenu {
+                                expanded_language: *expanded_language,
+                                expanded_location: false,
+                                expanded_usb: false,
+                                selection: LocationSelection::USB { usb: Some(usb) },
+                            }
+                        // if does not contain usb device we just update to show
+                        } else {
+                            self.state = State::MainMenu {
+                                expanded_language: *expanded_language,
+                                expanded_location: false,
+                                expanded_usb: false,
+                                selection: LocationSelection::USB { usb },
+                            }
+                        }
+                        iced::Command::none()
+                    }
+                    LocationSelection::Folder { path } => {
+                        // if contains path to scan and display it
+                        if let Some(path) = path {
+                            self.scan_path = Some(path.clone());
+                            self.state = State::MainMenu {
+                                expanded_language: *expanded_language,
+                                expanded_location: false,
+                                expanded_usb: false,
+                                selection: LocationSelection::Folder { path: Some(path) },
+                            };
+                            iced::Command::none()
+                        // if does not contain path we open file dialog to pick one
+                        } else {
+                            iced::Command::perform(
+                                async {
+                                    native_dialog::FileDialog::new()
+                                        .set_location("~")
+                                        .show_open_single_dir()
+                                        .expect("Failed to select folder")
+                                        .unwrap_or_default()
+                                },
+                                |result| Message::LocationChanged {
+                                    selection: LocationSelection::Folder { path: Some(result) },
+                                },
+                            )
+                        }
+                    }
+                    LocationSelection::File { path } => {
+                        // if contains path to scan and display it
+                        if let Some(path) = path {
+                            self.scan_path = Some(path.clone());
+                            self.state = State::MainMenu {
+                                expanded_language: *expanded_language,
+                                expanded_location: false,
+                                expanded_usb: false,
+                                selection: LocationSelection::Folder { path: Some(path) },
+                            };
+                            iced::Command::none()
+                        // if does not contain path we open file dialog to pick one
+                        } else {
+                            iced::Command::perform(
+                                async {
+                                    native_dialog::FileDialog::new()
+                                        .set_location("~")
+                                        .show_open_single_file()
+                                        .expect("Failed to select file")
+                                        .unwrap_or_default()
+                                },
+                                |result| Message::LocationChanged {
+                                    selection: LocationSelection::Folder { path: Some(result) },
+                                },
+                            )
+                        }
+                    }
+                },
+                _ => iced::Command::none(),
+            },
+            Message::ToggleUSBSelection => {
+                match &self.state {
+                    State::MainMenu {
+                        expanded_language,
+                        expanded_location,
+                        expanded_usb,
+                        selection,
+                    } => {
+                        self.state = State::MainMenu {
+                            expanded_language: *expanded_language,
+                            expanded_location: *expanded_location,
+                            expanded_usb: !*expanded_usb,
+                            selection: selection.clone(),
+                        }
+                    }
+                    _ => {}
+                }
+                iced::Command::none()
+            }
+            Message::ToggleLocationSelection => {
+                match &self.state {
+                    State::MainMenu {
+                        expanded_language,
+                        expanded_location,
+                        expanded_usb,
+                        selection,
+                    } => {
+                        self.state = State::MainMenu {
+                            expanded_language: *expanded_language,
+                            expanded_location: !*expanded_location,
+                            expanded_usb: *expanded_usb,
+                            selection: selection.clone(),
+                        }
+                    }
+                    _ => {}
+                }
+                iced::Command::none()
+            }
         }
     }
 
     fn view(&self) -> iced::Element<Message> {
         let content = match &self.state {
-            State::MainMenu { language_expanded, folder_expanded, selection } => self.main_menu(*language_expanded, *folder_expanded, selection.clone()),
+            State::MainMenu {
+                expanded_language,
+                expanded_location,
+                expanded_usb,
+                selection,
+            } => self.main_menu(
+                *expanded_language,
+                *expanded_location,
+                *expanded_usb,
+                selection.clone(),
+                &self.usb_devices,
+            ),
             State::Scanning { percentage } => self.scanning(*percentage),
             State::Settings => self.settings(),
             State::Results { tagged, skipped } => self.results(tagged.clone(), skipped.clone()),
@@ -335,7 +472,7 @@ impl iced::Application for Raspirus {
     }
 
     fn subscription(&self) -> iced::Subscription<Message> {
-        // subsribe to thescan progress update or event stream. this also doubles as quit
+        // subsribe to the scan progress update or event stream. this also doubles as quit
         // prevention during scanning
         match self.state {
             State::Scanning { .. } => iced::subscription::unfold(
