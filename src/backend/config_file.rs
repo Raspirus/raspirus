@@ -20,8 +20,6 @@ pub struct Config {
     pub max_matches: usize,
     /// If we should log information to a file
     pub logging_is_active: bool,
-    /// If we should scan direcories instead of files (You can only choose one on the current file picker dialog)
-    pub scan_dir: bool,
     /// mirror to folder with hashfiles for update
     pub mirror: String,
     /// the filename of the compiled yara rules on remote
@@ -61,7 +59,6 @@ impl Default for Config {
             logging_is_active: true,
             min_matches: crate::DEFAULT_MIN_MATCHES,
             max_matches: crate::DEFAULT_MAX_MATCHES,
-            scan_dir: true,
             mirror: crate::DEFAULT_MIRROR.to_owned(),
             remote_file: crate::DEFAULT_FILE.to_owned(),
             paths: None,
