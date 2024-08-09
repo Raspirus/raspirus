@@ -41,6 +41,8 @@ lazy_static! {
     static ref CONFIG: Mutex<Config> = Mutex::new(Config::new().expect("Failed to load config"));
     /// Supported languages
     static ref SUPPORTED_LANGUAGES: Vec<String> = vec!["en-US".to_owned(), "de-DE".to_owned(), "fr-FR".to_owned()];
+    /// Symbols for selection
+    static ref SELECTION_ICONS: Vec<String> = vec![iced_aw::Bootstrap::UsbDriveFill.to_string(), iced_aw::Bootstrap::FolderFill.to_string(), iced_aw::Bootstrap::FileFill.to_string(),];
 }
 
 fn main() -> Result<(), String> {
@@ -84,7 +86,7 @@ fn main() -> Result<(), String> {
 
         // Start loggers
         CombinedLogger::init(loggers).expect("Failed to initialize CombinedLogger");
-    }    
+    }
 
     let mut settings = Settings::default();
     settings.window.exit_on_close_request = false;

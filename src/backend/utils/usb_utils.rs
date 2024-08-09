@@ -1,12 +1,20 @@
+use std::{fmt::Display, path::PathBuf};
+
 #[cfg(target_os = "windows")]
 use log::warn;
 use log::{debug, info};
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash, Default)]
 pub struct UsbDevice {
-    name: String,
-    path: String,
+    pub name: String,
+    pub path: PathBuf,
+}
+
+impl Display for UsbDevice {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{} {}", self.path.to_string_lossy(), self.name)
+    }
 }
 
 // Lists all the attached USBs for various platforms
@@ -39,12 +47,7 @@ pub fn list_usb_drives() -> Result<Vec<UsbDevice>, String> {
                         .unwrap_or_else(|| panic!("Broken disk data for usb {entry:?}"))
                         .name
                 ),
-                path: entry
-                    .info
-                    .mount_point
-                    .to_str()
-                    .unwrap_or_else(|| panic!("Broken mount point for usb {entry:?}"))
-                    .to_owned(),
+                path: entry.info.mount_point,
             });
         }
         debug!("Found: {usb_drives:?}")
