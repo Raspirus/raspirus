@@ -40,7 +40,7 @@ impl Raspirus {
         let mut center_row = iced::widget::Row::new().spacing(5);
 
         center_row = match selection {
-            LocationSelection::USB { usb } => {
+            LocationSelection::USB { ref usb } => {
                 center_row.push(iced_aw::widgets::DropDown::new(
                     // large button that displays usb and triggers dropdown on click
                     iced::widget::Button::new(iced::widget::Text::new({
@@ -53,7 +53,7 @@ impl Raspirus {
                     .width(iced::Length::Fill),
                     // list of usb devices
                     iced_aw::widgets::SelectionList::new(usbs, |_idx: usize, usb: UsbDevice| {
-                        Message::LocationChanged {
+                        Message::RequestLocation {
                             selection: LocationSelection::USB { usb: Some(usb) },
                         }
                     })
@@ -61,23 +61,23 @@ impl Raspirus {
                     expanded_usb,
                 ))
             }
-            LocationSelection::Folder { path } => center_row.push(
+            LocationSelection::Folder { ref path } => center_row.push(
                 iced::widget::Button::new(iced::widget::Text::new(match path {
                     Some(path) => path.to_string_lossy().to_string(),
                     None => "No folder selected".to_owned(),
                 }))
                 .width(iced::Length::Fill)
-                .on_press(Message::LocationChanged {
+                .on_press(Message::RequestLocation {
                     selection: LocationSelection::Folder { path: None },
                 }),
             ),
-            LocationSelection::File { path } => center_row.push(
+            LocationSelection::File { ref path } => center_row.push(
                 iced::widget::Button::new(iced::widget::Text::new(match path {
                     Some(path) => path.to_string_lossy().to_string(),
-                    None => "No folder selected".to_owned(),
+                    None => "No file selected".to_owned(),
                 }))
                 .width(iced::Length::Fill)
-                .on_press(Message::LocationChanged {
+                .on_press(Message::RequestLocation {
                     selection: LocationSelection::File { path: None },
                 }),
             ),
@@ -86,26 +86,15 @@ impl Raspirus {
         center_row = center_row.push(iced_aw::widgets::DropDown::new(
             // button to trigger dropdown
             iced::widget::Row::new().push(
-                iced::widget::Button::new(iced::widget::Text::new(&self.language))
-                    .on_press(Message::ToggleLocationSelection),
+                iced::widget::Button::new(
+                    iced::widget::Text::new(selection.to_string()).font(iced_aw::BOOTSTRAP_FONT),
+                )
+                .on_press(Message::ToggleLocationSelection),
             ),
             // dropdown selection list
             iced_aw::widgets::SelectionList::new(
                 &crate::SELECTION_ICONS,
-                |_idx: usize, selection: String| Message::LocationChanged {
-                    selection: match selection {
-                        _ if selection == iced_aw::Bootstrap::UsbDriveFill.to_string() => {
-                            LocationSelection::USB { usb: None }
-                        }
-                        _ if selection == iced_aw::Bootstrap::FolderFill.to_string() => {
-                            LocationSelection::Folder { path: None }
-                        }
-                        _ if selection == iced_aw::Bootstrap::FileFill.to_string() => {
-                            LocationSelection::File { path: None }
-                        }
-                        _ => LocationSelection::USB { usb: None },
-                    },
-                },
+                |_idx: usize, selection: LocationSelection| Message::LocationChanged { selection },
             )
             .height(iced::Length::Shrink),
             // expanded state

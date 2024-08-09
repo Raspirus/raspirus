@@ -5,18 +5,8 @@ use std::{
 };
 
 use log::info;
-use serde::Deserialize;
 use sha2::{Digest, Sha256};
 use yara_x::Rules;
-
-#[derive(Deserialize)]
-pub enum FrontendLog {
-    Error(String),
-    Warn(String),
-    Info(String),
-    Debug(String),
-    Trace(String),
-}
 
 pub fn get_rules(yar_path: PathBuf) -> Result<Rules, String> {
     // setup rules
