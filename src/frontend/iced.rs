@@ -114,6 +114,9 @@ pub enum Message {
     LocationChanged {
         selection: LocationSelection,
     },
+    ConfigChanged {
+        value: ConfigValue
+    },
     /// sent when we want the user to pick a location
     RequestLocation {
         selection: LocationSelection,
@@ -142,6 +145,13 @@ pub enum Message {
 pub enum ErrorCase {
     Critical { message: String },
     Warning { message: String },
+}
+
+#[derive(Debug, Clone)]
+pub enum ConfigValue {
+    Update,
+    MinMatch { min: usize },
+    MaxMatch { max: usize }
 }
 
 #[derive(Debug, Clone)]
@@ -551,11 +561,14 @@ impl iced::Application for Raspirus {
                 },
             ),
             Message::None => iced::Command::none(),
+            Message::ConfigChanged { value } => {
+                iced::Command::none()
+            },
         }
     }
 
     fn view(&self) -> iced::Element<Message> {
-        let content = match &self.state {
+        match &self.state {
             State::MainMenu {
                 expanded_language,
                 expanded_location,
@@ -571,13 +584,8 @@ impl iced::Application for Raspirus {
             State::Scanning { percentage } => self.scanning(*percentage),
             State::Settings => self.settings(),
             State::Results { tagged, skipped } => self.results(tagged.clone(), skipped.clone()),
-        };
-        iced::Element::new(
-            iced::widget::Container::new(content)
-                .padding(10)
-                .center_x()
-                .width(iced::Length::Fill),
-        )
+        }
+        .into()
     }
 
     fn subscription(&self) -> iced::Subscription<Message> {
@@ -619,4 +627,10 @@ impl iced::Application for Raspirus {
             _ => iced::event::listen().map(|event| Message::Event { event }),
         }
     }
+}
+
+pub fn wrap(padding: u16, element: iced::Element<Message>) -> iced::Element<Message> {
+    iced::widget::Container::new(element)
+        .padding(padding)
+        .into()
 }

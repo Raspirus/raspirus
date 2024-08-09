@@ -1,4 +1,4 @@
-use crate::frontend::iced::{Message, Raspirus};
+use crate::frontend::iced::{wrap, Message, Raspirus};
 
 impl Raspirus {
     pub fn scanning(&self, percentage: f32) -> iced::Element<Message> {
@@ -24,10 +24,13 @@ impl Raspirus {
             )
             .spacing(5);
 
-        iced::widget::Column::new()
-            .push(iced::widget::vertical_space())
-            .push(middle_row)
-            .push(iced::widget::vertical_space())
-            .into()
+        wrap(
+            10,
+            iced::widget::Column::new()
+                .push(iced::widget::vertical_space())
+                .push(middle_row)
+                .push(iced::widget::vertical_space())
+                .into(),
+        )
     }
 }

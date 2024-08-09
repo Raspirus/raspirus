@@ -20,7 +20,7 @@ mod tests;
 
 /// config
 static CONFIG_FILENAME: &str = "Raspirus.json";
-static CONFIG_VERSION: &str = "2";
+static CONFIG_VERSION: &str = "3";
 
 /// remote params
 static DEFAULT_MIRROR: &str = "https://api.github.com/repos/Raspirus/yara-rules/releases/latest";
