@@ -1,10 +1,12 @@
 use std::{
-    fmt::Display, path::{Path, PathBuf}, sync::Mutex
+    fmt::Display,
+    path::{Path, PathBuf},
+    sync::Mutex,
 };
 
-use std::sync::mpsc;
 use log::{error, info, trace, warn};
 use serde::{Deserialize, Serialize};
+use std::sync::mpsc;
 use std::sync::Arc;
 use threadpool_rs::threadpool::pool::Threadpool;
 use yara_x::{ScanResults, Scanner};
@@ -56,9 +58,7 @@ pub struct YaraScanner {
 impl YaraScanner {
     /// creates a new scanenr and imports the yara rules
     pub fn new(progress_channel: Arc<Mutex<mpsc::Sender<Message>>>) -> Result<Self, String> {
-        Ok(Self {
-            progress_channel,
-        })
+        Ok(Self { progress_channel })
     }
 
     /// Starts the scanner in the specified location
@@ -70,8 +70,8 @@ impl YaraScanner {
         // setup file log
         let file_log = Arc::new(Mutex::new(FileLog::new()?));
 
-        let paths = profile_path(path)
-            .map_err(|err| format!("Failed to calculate file tree: {err}"))?;
+        let paths =
+            profile_path(path).map_err(|err| format!("Failed to calculate file tree: {err}"))?;
         let mut pointers = PointerCollection::default();
         pointers.config = Arc::from(CONFIG.lock().expect("Failed to lock config").clone());
         pointers.total = Arc::new(Mutex::new(paths.len()));
@@ -82,7 +82,9 @@ impl YaraScanner {
             let file_log_c = file_log.clone();
             let progress_c = self.progress_channel.clone();
             threadpool.execute(move || {
-                let scan_result = || async { Self::scan_file(file.as_path(), file_log_c, progress_c, pointers_c).await };
+                let scan_result = || async {
+                    Self::scan_file(file.as_path(), file_log_c, progress_c, pointers_c).await
+                };
                 match futures::executor::block_on(scan_result()) {
                     Ok(_) => {}
                     Err(err) => error!(
