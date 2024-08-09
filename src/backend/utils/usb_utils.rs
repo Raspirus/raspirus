@@ -3,14 +3,14 @@ use log::warn;
 use log::{debug, info};
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct UsbDevice {
     name: String,
     path: String,
 }
 
 // Lists all the attached USBs for various platforms
-pub async fn list_usb_drives() -> Result<Vec<UsbDevice>, String> {
+pub fn list_usb_drives() -> Result<Vec<UsbDevice>, String> {
     let mut usb_drives: Vec<UsbDevice> = Vec::new();
 
     #[cfg(any(target_os = "linux", target_os = "macos"))]
