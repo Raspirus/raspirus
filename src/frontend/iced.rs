@@ -1,4 +1,6 @@
 use log::{debug, error, info, trace};
+use std::fmt::Display;
+use std::str::FromStr;
 use std::sync::mpsc;
 use std::{
     path::PathBuf,
@@ -52,6 +54,39 @@ pub enum LocationSelection {
     USB { usb: Option<UsbDevice> },
     Folder { path: Option<PathBuf> },
     File { path: Option<PathBuf> },
+}
+
+impl FromStr for LocationSelection {
+    type Err = ();
+
+    fn from_str(selection: &str) -> Result<Self, Self::Err> {
+        match selection {
+            _ if selection == iced_aw::Bootstrap::UsbDriveFill.to_string() => {
+                Ok(LocationSelection::USB { usb: None })
+            }
+            _ if selection == iced_aw::Bootstrap::FolderFill.to_string() => {
+                Ok(LocationSelection::Folder { path: None })
+            }
+            _ if selection == iced_aw::Bootstrap::FileFill.to_string() => {
+                Ok(LocationSelection::File { path: None })
+            }
+            _ => Err(()),
+        }
+    }
+}
+
+impl Display for LocationSelection {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{}",
+            match self {
+                LocationSelection::USB { .. } => iced_aw::Bootstrap::UsbDriveFill.to_string(),
+                LocationSelection::Folder { .. } => iced_aw::Bootstrap::FolderFill.to_string(),
+                LocationSelection::File { .. } => iced_aw::Bootstrap::FileFill.to_string(),
+            }
+        )
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -147,7 +182,10 @@ impl iced::Application for Raspirus {
     }
 
     fn update(&mut self, message: Message) -> iced::Command<Message> {
-        dbg!(&message);
+        match &message {
+            Message::Event { .. } => {}
+            others => println!("{:?}", others),
+        }
         match message {
             Message::OpenSettings => {
                 self.state = State::Settings;

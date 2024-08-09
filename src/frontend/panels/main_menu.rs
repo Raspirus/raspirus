@@ -41,16 +41,14 @@ impl Raspirus {
 
         center_row = match selection {
             LocationSelection::USB { usb } => {
-                center_row = center_row.push(iced_aw::widgets::DropDown::new(
+                center_row.push(iced_aw::widgets::DropDown::new(
                     // large button that displays usb and triggers dropdown on click
-                    iced::widget::Button::new(iced::widget::Container::new(
-                        iced::widget::Text::new({
-                            match usb {
-                                Some(usb) => usb.to_string(),
-                                None => "No mounted USB devices detected".to_owned(),
-                            }
-                        }),
-                    ))
+                    iced::widget::Button::new(iced::widget::Text::new({
+                        match usb {
+                            Some(usb) => usb.to_string(),
+                            None => "No mounted USB devices detected".to_owned(),
+                        }
+                    }))
                     .on_press(Message::ToggleUSBSelection)
                     .width(iced::Length::Fill),
                     // list of usb devices
@@ -61,11 +59,28 @@ impl Raspirus {
                     })
                     .height(iced::Length::Shrink),
                     expanded_usb,
-                ));
-                center_row
+                ))
             }
-            LocationSelection::Folder { path } => todo!("folder not done"),
-            LocationSelection::File { path } => todo!(),
+            LocationSelection::Folder { path } => center_row.push(
+                iced::widget::Button::new(iced::widget::Text::new(match path {
+                    Some(path) => path.to_string_lossy().to_string(),
+                    None => "No folder selected".to_owned(),
+                }))
+                .width(iced::Length::Fill)
+                .on_press(Message::LocationChanged {
+                    selection: LocationSelection::Folder { path: None },
+                }),
+            ),
+            LocationSelection::File { path } => center_row.push(
+                iced::widget::Button::new(iced::widget::Text::new(match path {
+                    Some(path) => path.to_string_lossy().to_string(),
+                    None => "No folder selected".to_owned(),
+                }))
+                .width(iced::Length::Fill)
+                .on_press(Message::LocationChanged {
+                    selection: LocationSelection::File { path: None },
+                }),
+            ),
         };
 
         center_row = center_row.push(iced_aw::widgets::DropDown::new(
