@@ -2,7 +2,6 @@
 //#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use backend::config_file::Config;
-use frontend::iced::Message;
 use iced::{Application, Settings};
 use lazy_static::lazy_static;
 use log::LevelFilter;
@@ -18,19 +17,19 @@ mod backend;
 mod frontend;
 mod tests;
 
-// config
+/// config
 static CONFIG_FILENAME: &str = "Raspirus.json";
 static CONFIG_VERSION: &str = "2";
 
-// remote params
+/// remote params
 static DEFAULT_MIRROR: &str = "https://api.github.com/repos/Raspirus/yara-rules/releases/latest";
 static DEFAULT_FILE: &str = "rulepirus.yarac";
 
-// default scan params
+/// default scan params
 static DEFAULT_MIN_MATCHES: usize = 0;
 static DEFAULT_MAX_MATCHES: usize = 20;
 
-// download settings
+/// download settings
 static MAX_TIMEOUT: u64 = 120;
 
 static LOGGING_FILTER: LevelFilter = LevelFilter::Debug;
@@ -43,10 +42,6 @@ lazy_static! {
     /// Supported languages
     static ref SUPPORTED_LANGUAGES: Vec<String> = vec!["en-US".to_owned(), "de-DE".to_owned(), "fr-FR".to_owned()];
 }
-
-// NOTE: All functions with #[tauri::command] can and will be called from the GUI
-// Their name should not be changed and any new functions should return JSON data
-// using serde parsing
 
 fn main() -> Result<(), String> {
     // We check if we should log the application messages to a file or not, default is yes. Defined in the Config
@@ -89,16 +84,7 @@ fn main() -> Result<(), String> {
 
         // Start loggers
         CombinedLogger::init(loggers).expect("Failed to initialize CombinedLogger");
-    }
-
-    
-    /*let proxy: iced_winit::Proxy<Message> = iced_winit::Proxy::new(
-        let event_loop: iced_winit::winit::event_loop::EventLoopProxy<Message> = iced_winit::winit::event_loop::EventLoopBuilder::with_user_event()
-            .build()
-            .map_err(|err| err.to_string())?
-            .create_proxy();
-    );*/
-    
+    }    
 
     let mut settings = Settings::default();
     settings.window.exit_on_close_request = false;
