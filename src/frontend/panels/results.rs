@@ -66,6 +66,15 @@ impl Raspirus {
                                 card: Card::Tagged { card: tag.clone() },
                             }),
                         )
+                        .push(
+                            iced::widget::Button::new(
+                                iced::widget::Text::new(
+                                    iced_aw::Bootstrap::BoxArrowUpLeft.to_string(),
+                                )
+                                .font(iced_aw::BOOTSTRAP_FONT),
+                            )
+                            .on_press(Message::GenerateVirustotal { path: tag.path }),
+                        )
                         .spacing(5)
                         .height(iced::Length::Shrink),
                     descriptions,

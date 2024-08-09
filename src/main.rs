@@ -2,6 +2,7 @@
 //#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use backend::config_file::Config;
+use frontend::iced::LocationSelection;
 use iced::{Application, Settings};
 use lazy_static::lazy_static;
 use log::LevelFilter;
@@ -42,7 +43,7 @@ lazy_static! {
     /// Supported languages
     static ref SUPPORTED_LANGUAGES: Vec<String> = vec!["en-US".to_owned(), "de-DE".to_owned(), "fr-FR".to_owned()];
     /// Symbols for selection
-    static ref SELECTION_ICONS: Vec<String> = vec![iced_aw::Bootstrap::UsbDriveFill.to_string(), iced_aw::Bootstrap::FolderFill.to_string(), iced_aw::Bootstrap::FileFill.to_string(),];
+    static ref SELECTION_ICONS: Vec<LocationSelection> = vec![LocationSelection::USB { usb: None }, LocationSelection::Folder { path: None }, LocationSelection::File { path: None }];
 }
 
 fn main() -> Result<(), String> {
