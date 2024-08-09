@@ -1,6 +1,6 @@
 use crate::{
     backend::yara_scanner::{Skipped, TaggedFile},
-    frontend::iced::{Card, Message, Raspirus},
+    frontend::iced::{wrap, Card, Message, Raspirus},
 };
 
 impl Raspirus {
@@ -139,12 +139,17 @@ impl Raspirus {
                 card
             });
         }
-
-        iced::widget::Column::new()
-            .push(top_row)
-            .push(tagged_list)
-            .push(skipped_list)
-            .spacing(5)
-            .into()
+        iced::widget::Scrollable::new(
+            wrap(
+                15,
+                iced::widget::Column::new()
+                    .push(top_row)
+                    .push(tagged_list)
+                    .push(skipped_list)
+                    .spacing(5)
+                    .into(),
+            ),
+        )
+        .into()
     }
 }

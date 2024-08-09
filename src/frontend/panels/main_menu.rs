@@ -1,6 +1,6 @@
 use crate::{
     backend::utils::usb_utils::UsbDevice,
-    frontend::iced::{LocationSelection, Message, Raspirus},
+    frontend::iced::{wrap, LocationSelection, Message, Raspirus},
 };
 
 impl Raspirus {
@@ -110,12 +110,15 @@ impl Raspirus {
             .align_items(iced::Alignment::Center)
             .spacing(5);
 
-        iced::widget::Column::new()
-            .push(top_row)
-            .push(iced::widget::vertical_space())
-            .push(middle_row)
-            .push(iced::widget::vertical_space())
-            .spacing(5)
-            .into()
+        wrap(
+            10,
+            iced::widget::Column::new()
+                .push(top_row)
+                .push(iced::widget::vertical_space())
+                .push(middle_row)
+                .push(iced::widget::vertical_space())
+                .spacing(5)
+                .into(),
+        )
     }
 }
