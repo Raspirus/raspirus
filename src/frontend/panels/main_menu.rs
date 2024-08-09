@@ -1,9 +1,9 @@
 use std::path::Path;
 
-use crate::frontend::iced::{Message, Raspirus};
+use crate::frontend::iced::{LocationSelection, Message, Raspirus};
 
 impl Raspirus {
-    pub fn main_menu(&self, language_expanded: bool) -> iced::Element<Message> {
+    pub fn main_menu(&self, language_expanded: bool, folder_expanded: bool, selection: LocationSelection) -> iced::Element<Message> {
         let top_row = iced::widget::Row::new()
             // language selection
             .push(iced_aw::widgets::DropDown::new(
@@ -26,8 +26,9 @@ impl Raspirus {
             // settings button
             .push(iced::widget::button("settings").on_press(Message::OpenSettings))
             // ite allignment
-            .align_items(iced::Alignment::Center);
-
+            .align_items(iced::Alignment::Center)
+            .spacing(5);
+ 
         let middle_row = iced::widget::Column::new()
             .push(
                 iced::widget::Row::new()
@@ -54,6 +55,7 @@ impl Raspirus {
                 iced::widget::Button::new(iced::widget::Text::new("Start"))
                     .on_press(Message::StartScan),
             )
+            .align_items(iced::Alignment::Center)
             .spacing(5);
 
         iced::widget::Column::new()

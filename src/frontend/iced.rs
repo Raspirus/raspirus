@@ -7,13 +7,18 @@ use std::{
     time::Duration,
 };
 
+use crate::backend;
+use crate::backend::utils::usb_utils::{self, UsbDevice};
 use crate::backend::yara_scanner::{Skipped, TaggedFile, YaraScanner};
 
 pub struct Raspirus {
     pub state: State,
     pub language: String,
     pub scan_path: Option<PathBuf>,
-    pub pop_up: Option<String>,
+    /// head and body for optional popup
+    pub pop_up: Option<(String, String)>,
+    /// warning
+    pub warning: Option<String>,
     pub scan_progress: (
         Arc<Mutex<mpsc::Sender<Message>>>,
         Arc<Mutex<mpsc::Receiver<Message>>>,
@@ -24,6 +29,8 @@ pub enum State {
     MainMenu {
         // dropdown state
         language_expanded: bool,
+        folder_expanded: bool,
+        selection: LocationSelection,
     },
     Scanning {
         // current displayed percentage
@@ -38,6 +45,13 @@ pub enum State {
 }
 
 #[derive(Debug, Clone)]
+pub enum LocationSelection {
+    USB { device: Option<UsbDevice> },
+    Folder { path: PathBuf },
+    File { path: PathBuf },
+}
+
+#[derive(Debug, Clone)]
 pub enum Message {
     // location messages
     OpenSettings,
@@ -47,6 +61,8 @@ pub enum Message {
     ToggleLanguage,
     SelectPath,
     Shutdown,
+    DismissWarning,
+    DismissPopup,
     // update messages
     PathChanged {
         path: PathBuf,
@@ -85,6 +101,16 @@ pub enum Card {
     Tagged { card: TaggedFile },
 }
 
+impl Default for LocationSelection {
+    fn default() -> Self {
+        let usbs = match usb_utils::list_usb_drives() {
+            Ok(usbs) => usbs,
+            Err(_) => return LocationSelection::USB { device: None }
+        };
+        LocationSelection::USB { device: usbs.first().cloned() }
+    }
+}
+
 impl iced::Application for Raspirus {
     type Message = Message;
     type Executor = iced::executor::Default;
@@ -97,10 +123,13 @@ impl iced::Application for Raspirus {
             Self {
                 state: State::MainMenu {
                     language_expanded: false,
+                    folder_expanded: false,
+                    selection: LocationSelection::default(),
                 },
                 language: "en-US".to_owned(),
                 scan_path: None,
                 pop_up: None,
+                warning: None,
                 scan_progress: (
                     Arc::new(Mutex::new(channel.0)),
                     Arc::new(Mutex::new(channel.1)),
@@ -124,6 +153,8 @@ impl iced::Application for Raspirus {
             Message::OpenMain => {
                 self.state = State::MainMenu {
                     language_expanded: false,
+                    folder_expanded: false,
+                    selection: LocationSelection::default(),
                 };
                 iced::Command::none()
             }
@@ -156,10 +187,12 @@ impl iced::Application for Raspirus {
             }
             Message::ToggleLanguage => {
                 // invert expanded state
-                match self.state {
-                    State::MainMenu { language_expanded } => {
+                match &self.state {
+                    State::MainMenu { language_expanded, folder_expanded, selection } => {
                         self.state = State::MainMenu {
                             language_expanded: !language_expanded,
+                            folder_expanded: *folder_expanded,
+                            selection: selection.clone()
                         }
                     }
                     _ => {}
@@ -182,10 +215,12 @@ impl iced::Application for Raspirus {
             }
             Message::LanguageChanged { language } => {
                 // close language dialog
-                match self.state {
-                    State::MainMenu { .. } => {
+                match &self.state {
+                    State::MainMenu { folder_expanded, selection, .. } => {
                         self.state = State::MainMenu {
                             language_expanded: false,
+                            folder_expanded: *folder_expanded,
+                            selection: selection.clone()
                         }
                     }
                     _ => {}
@@ -207,7 +242,7 @@ impl iced::Application for Raspirus {
                     |_| Message::Shutdown,
                 ),
                 ErrorCase::Warning { message } => {
-                    self.pop_up = Some(message);
+                    self.warning = Some(message);
                     iced::Command::none()
                 }
             },
@@ -273,12 +308,20 @@ impl iced::Application for Raspirus {
                 }
                 iced::Command::none()
             }
+            Message::DismissWarning => {
+                self.warning = None;
+                iced::Command::none()
+            }
+            Message::DismissPopup => {
+                self.pop_up = None;
+                iced::Command::none()
+            }
         }
     }
 
     fn view(&self) -> iced::Element<Message> {
         let content = match &self.state {
-            State::MainMenu { language_expanded } => self.main_menu(*language_expanded),
+            State::MainMenu { language_expanded, folder_expanded, selection } => self.main_menu(*language_expanded, *folder_expanded, selection.clone()),
             State::Scanning { percentage } => self.scanning(*percentage),
             State::Settings => self.settings(),
             State::Results { tagged, skipped } => self.results(tagged.clone(), skipped.clone()),
@@ -292,6 +335,8 @@ impl iced::Application for Raspirus {
     }
 
     fn subscription(&self) -> iced::Subscription<Message> {
+        // subsribe to thescan progress update or event stream. this also doubles as quit
+        // prevention during scanning
         match self.state {
             State::Scanning { .. } => iced::subscription::unfold(
                 "scan_update",
@@ -324,6 +369,7 @@ impl iced::Application for Raspirus {
                     }
                 },
             ),
+            // relay window events as messages
             _ => iced::event::listen().map(|event| Message::Event { event }),
         }
     }
