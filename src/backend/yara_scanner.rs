@@ -244,7 +244,7 @@ impl YaraScanner {
         progress_channel
             .lock()
             .map_err(|err| format!("Failed to lock progress sender: {err}"))?
-            .send(Message::ScanPercentage(percentage))
+            .send(Message::ScanPercentage { percentage })
             .map_err(|err| format!("Failed to send progress: {err}"))?;
         trace!("Scan progress: {percentage:.2}%");
         Ok(())

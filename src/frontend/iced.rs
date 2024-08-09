@@ -1,5 +1,4 @@
-//use iced::futures::channel::mpsc;
-use log::{error, info};
+use log::{error, info, trace};
 use std::sync::mpsc;
 use std::{
     path::PathBuf,
@@ -13,8 +12,8 @@ use crate::backend::yara_scanner::{Skipped, TaggedFile, YaraScanner};
 pub struct Raspirus {
     pub state: State,
     pub language: String,
-    pub language_expanded: bool,
-    pub path_selected: PathBuf,
+    pub scan_path: Option<PathBuf>,
+    pub pop_up: Option<String>,
     pub scan_progress: (
         Arc<Mutex<mpsc::Sender<Message>>>,
         Arc<Mutex<mpsc::Receiver<Message>>>,
@@ -22,10 +21,20 @@ pub struct Raspirus {
 }
 
 pub enum State {
-    MainMenu,
-    Scanning(f32),
+    MainMenu {
+        // dropdown state
+        language_expanded: bool,
+    },
+    Scanning {
+        // current displayed percentage
+        percentage: f32,
+    },
     Settings,
-    Results(Vec<(TaggedFile, bool)>, Vec<(Skipped, bool)>),
+    Results {
+        // tagged / skipped files and if the file is expanded in the view
+        tagged: Vec<(TaggedFile, bool)>,
+        skipped: Vec<(Skipped, bool)>,
+    },
 }
 
 #[derive(Debug, Clone)]
@@ -37,22 +46,43 @@ pub enum Message {
     StartScan,
     ToggleLanguage,
     SelectPath,
+    Shutdown,
     // update messages
-    PathChanged(PathBuf),
-    LanguageChanged(String),
-    ScanComplete((Vec<(TaggedFile, bool)>, Vec<(Skipped, bool)>)),
-    ToggleCard(Card),
+    PathChanged {
+        path: PathBuf,
+    },
+    LanguageChanged {
+        language: String,
+    },
+    ScanComplete {
+        tagged: Vec<(TaggedFile, bool)>,
+        skipped: Vec<(Skipped, bool)>,
+    },
+    ToggleCard {
+        card: Card,
+    },
+    Event {
+        event: iced::Event,
+    },
     // data messages
-    ScanPercentage(f32),
-    Error(String),
-    // none message
-    None,
+    ScanPercentage {
+        percentage: f32,
+    },
+    Error {
+        case: ErrorCase,
+    },
+}
+
+#[derive(Debug, Clone)]
+pub enum ErrorCase {
+    Critical { message: String },
+    Warning { message: String },
 }
 
 #[derive(Debug, Clone)]
 pub enum Card {
-    Skipped(Skipped),
-    Tagged(TaggedFile),
+    Skipped { card: Skipped },
+    Tagged { card: TaggedFile },
 }
 
 impl iced::Application for Raspirus {
@@ -63,13 +93,14 @@ impl iced::Application for Raspirus {
 
     fn new(_flags: ()) -> (Self, iced::Command<Message>) {
         let channel = mpsc::channel();
-        info!("Channel built");
         let app = (
             Self {
-                state: State::MainMenu,
+                state: State::MainMenu {
+                    language_expanded: false,
+                },
                 language: "en-US".to_owned(),
-                language_expanded: false,
-                path_selected: PathBuf::new(),
+                scan_path: None,
+                pop_up: None,
                 scan_progress: (
                     Arc::new(Mutex::new(channel.0)),
                     Arc::new(Mutex::new(channel.1)),
@@ -77,7 +108,6 @@ impl iced::Application for Raspirus {
             },
             iced::Command::none(),
         );
-        info!("Build app");
         app
     }
 
@@ -92,31 +122,48 @@ impl iced::Application for Raspirus {
                 iced::Command::none()
             }
             Message::OpenMain => {
-                self.state = State::MainMenu;
+                self.state = State::MainMenu {
+                    language_expanded: false,
+                };
                 iced::Command::none()
             }
             Message::StartScan => {
-                self.state = State::Scanning(0.0);
-                let scanner_path = self.path_selected.clone();
+                self.state = State::Scanning { percentage: 0.0 };
+                let scanner_path = self.scan_path.clone();
                 let sender_c = self.scan_progress.0.clone();
 
                 iced::Command::perform(
                     async move {
-                        let scanner = YaraScanner::new(sender_c)
-                            .map_err(|err| format!("Failed to build scanner: {err}"))?;
-                        scanner.start(scanner_path).await
+                        let scanner =
+                            YaraScanner::new(sender_c).map_err(|err| ErrorCase::Critical {
+                                message: format!("Failed to build scanner: {err}"),
+                            })?;
+                        scanner
+                            .start(scanner_path.ok_or_else(|| ErrorCase::Warning {
+                                message: "Select a path first!".to_owned(),
+                            })?)
+                            .await
+                            .map_err(|err| ErrorCase::Critical { message: err })
                     },
                     |result| match result {
-                        Ok((tagged, skipped)) => Message::ScanComplete((
-                            tagged.iter().map(|tag| (tag.clone(), false)).collect(),
-                            skipped.iter().map(|skip| (skip.clone(), false)).collect(),
-                        )),
-                        Err(err) => Message::Error(err),
+                        Ok((tagged, skipped)) => Message::ScanComplete {
+                            tagged: tagged.iter().map(|tag| (tag.clone(), false)).collect(),
+                            skipped: skipped.iter().map(|skip| (skip.clone(), false)).collect(),
+                        },
+                        Err(err) => Message::Error { case: err },
                     },
                 )
             }
             Message::ToggleLanguage => {
-                self.language_expanded = !self.language_expanded;
+                // invert expanded state
+                match self.state {
+                    State::MainMenu { language_expanded } => {
+                        self.state = State::MainMenu {
+                            language_expanded: !language_expanded,
+                        }
+                    }
+                    _ => {}
+                };
                 iced::Command::none()
             }
             Message::SelectPath => iced::Command::perform(
@@ -127,75 +174,114 @@ impl iced::Application for Raspirus {
                         .expect("Failed to select file")
                         .unwrap_or_default()
                 },
-                |result| Message::PathChanged(result),
+                |result| Message::PathChanged { path: result },
             ),
-            Message::PathChanged(new_path) => {
-                self.path_selected = new_path;
+            Message::PathChanged { path } => {
+                self.scan_path = Some(path);
                 iced::Command::none()
             }
-            Message::LanguageChanged(language) => {
-                self.language_expanded = false;
+            Message::LanguageChanged { language } => {
+                // close language dialog
+                match self.state {
+                    State::MainMenu { .. } => {
+                        self.state = State::MainMenu {
+                            language_expanded: false,
+                        }
+                    }
+                    _ => {}
+                }
                 self.language = language;
                 iced::Command::none()
             }
-            Message::Error(err) => {
-                error!("{err}");
+            // show popup for warnings and quit for critical errors
+            Message::Error { case } => match case {
+                ErrorCase::Critical { message } => iced::Command::perform(
+                    async move {
+                        error!("{message}");
+                        native_dialog::MessageDialog::new()
+                            .set_text(&message)
+                            .set_title("Error occurred")
+                            .set_type(native_dialog::MessageType::Error)
+                            .show_alert()
+                    },
+                    |_| Message::Shutdown,
+                ),
+                ErrorCase::Warning { message } => {
+                    self.pop_up = Some(message);
+                    iced::Command::none()
+                }
+            },
+            Message::ScanComplete { tagged, skipped } => {
+                self.state = State::Results { tagged, skipped };
                 iced::Command::none()
             }
-            Message::ScanComplete((tagged, skipped)) => {
-                self.state = State::Results(tagged, skipped);
+            Message::ScanPercentage { percentage } => {
+                self.state = State::Scanning { percentage };
                 iced::Command::none()
             }
-            Message::ScanPercentage(percentage) => {
-                self.state = State::Scanning(percentage);
-                iced::Command::none()
-            }
-            Message::ToggleCard(card) => {
+            Message::ToggleCard { card } => {
                 match &self.state {
-                    State::Results(tagged, skipped) => {
+                    State::Results { tagged, skipped } => {
                         self.state = match card {
-                            Card::Skipped(skipped_card) => State::Results(
-                                tagged.to_vec(),
-                                skipped
+                            Card::Skipped { card } => State::Results {
+                                tagged: tagged.to_vec(),
+                                skipped: skipped
                                     .iter()
                                     .map(|(skip, expanded)| {
-                                        if *skip == skipped_card {
+                                        if *skip == card {
                                             (skip.clone(), !*expanded)
                                         } else {
                                             (skip.clone(), *expanded)
                                         }
                                     })
                                     .collect(),
-                            ),
-                            Card::Tagged(tagged_card) => State::Results(
-                                tagged
+                            },
+                            Card::Tagged { card } => State::Results {
+                                tagged: tagged
                                     .iter()
                                     .map(|(tag, expanded)| {
-                                        if *tag == tagged_card {
+                                        if *tag == card {
                                             (tag.clone(), !*expanded)
                                         } else {
                                             (tag.clone(), *expanded)
                                         }
                                     })
                                     .collect(),
-                                skipped.to_vec(),
-                            ),
+                                skipped: skipped.to_vec(),
+                            },
                         }
                     }
                     _ => {}
                 }
                 iced::Command::none()
             }
-            Message::None => iced::Command::none(),
+            Message::Shutdown => std::process::exit(0),
+            Message::Event { event } => {
+                match event {
+                    iced::Event::Window(_, ref request) => match request {
+                        iced::window::Event::CloseRequested => {
+                            return iced::Command::perform(
+                                async {
+                                    info!("Shutting down...");
+                                },
+                                |_| Message::Shutdown,
+                            )
+                        }
+                        _ => trace!("Ignoring {event:?}"),
+                    },
+                    _ => trace!("Ignoring {event:?}"),
+                }
+                iced::Command::none()
+            }
         }
     }
 
     fn view(&self) -> iced::Element<Message> {
         let content = match &self.state {
-            State::MainMenu => self.main_menu(),
-            State::Scanning(percentage) => self.scanning(),
+            State::MainMenu { language_expanded } => self.main_menu(*language_expanded),
+            State::Scanning { percentage } => self.scanning(*percentage),
             State::Settings => self.settings(),
-            State::Results(tagged, skipped) => self.results()
+            State::Results { tagged, skipped } => self.results(tagged.clone(), skipped.clone()),
         };
         iced::Element::new(
             iced::widget::Container::new(content)
@@ -207,7 +293,7 @@ impl iced::Application for Raspirus {
 
     fn subscription(&self) -> iced::Subscription<Message> {
         match self.state {
-            State::Scanning(_) => iced::subscription::unfold(
+            State::Scanning { .. } => iced::subscription::unfold(
                 "scan_update",
                 self.scan_progress.1.clone(),
                 |receiver| async {
@@ -215,7 +301,16 @@ impl iced::Application for Raspirus {
                     let receiver_c = receiver.clone();
                     let receiver_l = match receiver_c.lock() {
                         Ok(receiver_l) => receiver_l,
-                        Err(err) => return (Message::Error(err.to_string()), receiver),
+                        Err(err) => {
+                            return (
+                                Message::Error {
+                                    case: ErrorCase::Critical {
+                                        message: err.to_string(),
+                                    },
+                                },
+                                receiver,
+                            )
+                        }
                     };
 
                     loop {
@@ -229,7 +324,7 @@ impl iced::Application for Raspirus {
                     }
                 },
             ),
-            _ => iced::Subscription::none(),
+            _ => iced::event::listen().map(|event| Message::Event { event }),
         }
     }
 }
