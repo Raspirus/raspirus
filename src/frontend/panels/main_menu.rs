@@ -101,12 +101,23 @@ impl Raspirus {
             expanded_location,
         ));
 
+        let mut start_button = iced::widget::Button::new(iced::widget::Text::new("Start"));
+
+        match selection {
+            LocationSelection::USB { usb } => if usb.is_some() {
+                start_button = start_button.on_press(Message::StartScan);
+            },
+            LocationSelection::Folder { path } => if path.is_some() {
+                start_button = start_button.on_press(Message::StartScan)
+            },
+            LocationSelection::File { path } => if path.is_some() {
+                start_button = start_button.on_press(Message::StartScan)
+            },
+        }
+
         let middle_row = iced::widget::Column::new()
             .push(center_row)
-            .push(
-                iced::widget::Button::new(iced::widget::Text::new("Start"))
-                    .on_press(Message::StartScan),
-            )
+            .push(start_button)
             .align_items(iced::Alignment::Center)
             .spacing(5);
 
