@@ -19,7 +19,7 @@ impl Raspirus {
                 .on_press(Message::OpenMain),
             );
         let mut tagged_list = iced::widget::Column::new()
-            .push(iced::widget::Text::new("Found files"))
+            .push(iced::widget::Text::new(format!("Found files ({})", tagged.len())))
             .spacing(5);
 
         for (tag, expanded) in tagged {
@@ -90,7 +90,7 @@ impl Raspirus {
         }
 
         let mut skipped_list = iced::widget::Column::new()
-            .push(iced::widget::Text::new("Skipped files"))
+            .push(iced::widget::Text::new(format!("Skipped files ({})", skipped.len())))
             .spacing(5);
 
         for (skip, expanded) in skipped {
