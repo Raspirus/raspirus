@@ -42,13 +42,25 @@ pub struct Skipped {
 }
 
 /// collection of pointers for the scan threads
-#[derive(Default, Clone)]
+#[derive(Clone)]
 pub struct PointerCollection {
     tagged: Arc<Mutex<Vec<TaggedFile>>>,
     skipped: Arc<Mutex<Vec<Skipped>>>,
     analysed: Arc<Mutex<usize>>,
     total: Arc<Mutex<usize>>,
     config: Arc<Config>,
+}
+
+impl PointerCollection {
+    fn new(path_len: usize) -> Self {
+        Self {
+            tagged: Arc::new(Mutex::new(Vec::new())),
+            skipped: Arc::new(Mutex::new(Vec::new())),
+            analysed: Arc::new(Mutex::new(0)),
+            total: Arc::new(Mutex::new(path_len)),
+            config: Arc::from(CONFIG.lock().expect("Failed to lock config").clone()),
+        }
+    }
 }
 
 pub struct YaraScanner {
@@ -72,9 +84,7 @@ impl YaraScanner {
 
         let paths =
             profile_path(path).map_err(|err| format!("Failed to calculate file tree: {err}"))?;
-        let mut pointers = PointerCollection::default();
-        pointers.config = Arc::from(CONFIG.lock().expect("Failed to lock config").clone());
-        pointers.total = Arc::new(Mutex::new(paths.len()));
+        let pointers = PointerCollection::new(paths.len());
 
         let mut threadpool = Threadpool::new(num_cpus::get());
         for file in paths {

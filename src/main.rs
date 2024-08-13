@@ -43,7 +43,7 @@ lazy_static! {
     /// Supported languages
     static ref SUPPORTED_LANGUAGES: Vec<String> = vec!["en-US".to_owned(), "de-DE".to_owned(), "fr-FR".to_owned()];
     /// Symbols for selection
-    static ref SELECTION_ICONS: Vec<LocationSelection> = vec![LocationSelection::USB { usb: None }, LocationSelection::Folder { path: None }, LocationSelection::File { path: None }];
+    static ref SELECTION_ICONS: Vec<LocationSelection> = vec![LocationSelection::Usb { usb: None }, LocationSelection::Folder { path: None }, LocationSelection::File { path: None }];
 }
 
 fn main() -> Result<(), String> {
@@ -81,7 +81,7 @@ fn main() -> Result<(), String> {
         )];
 
         // If we are able to create both the file and directory path, we can start the FileLogger
-        let log_file = File::create(&log_application)
+        let log_file = File::create(log_application)
             .map_err(|err| format!("Failed to create application logfile: {err}"))?;
         loggers.push(WriteLogger::new(LOGGING_FILTER, log_config, log_file));
 
