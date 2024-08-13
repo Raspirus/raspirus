@@ -1,3 +1,5 @@
+use iced::alignment;
+use iced::widget::container;
 use crate::{
     backend::utils::usb_utils::UsbDevice,
     frontend::iced::{wrap, LocationSelection, Message, Raspirus},
@@ -36,6 +38,12 @@ impl Raspirus {
             // ite allignment
             .align_items(iced::Alignment::Center)
             .spacing(5);
+
+        let title_text = container::Container::new(
+            iced::widget::text("RASPIRUS")
+                    .size(120)
+                    .horizontal_alignment(alignment::Horizontal::Center)
+        ).padding([0, 0, 10, 0]);
 
         let mut center_row = iced::widget::Row::new().spacing(5);
 
@@ -137,6 +145,7 @@ impl Raspirus {
         }
 
         let middle_row = iced::widget::Column::new()
+            .push(title_text)
             .push(center_row)
             .push(start_button)
             .align_items(iced::Alignment::Center)
