@@ -26,7 +26,7 @@ sha2 = "0.10.8"
 hex = "0.4.3"
 serde = { version = "1.0.204", features = ["derive"] }
 serde_json = "1.0.122"
-iced = { version = "0.12.1", features = ["tokio"] }
+iced = { version = "0.12.1", features = ["tokio", "image"] }
 iced_aw = { version = "0.9.3", features = ["icons"] }
 native-dialog = "0.7.0"
 futures = "0.3.30"
