@@ -8,6 +8,8 @@ use log::info;
 use sha2::{Digest, Sha256};
 use yara_x::Rules;
 
+use crate::frontend::iced::ConfigValue;
+
 pub fn get_rules(yar_path: PathBuf) -> Result<Rules, String> {
     // setup rules
     let reader = File::open(yar_path).map_err(|err| format!("Failed to load yar file: {err}"))?;
@@ -64,4 +66,9 @@ pub fn generate_virustotal(file: PathBuf) -> Result<String, String> {
         "https://virustotal.com/gui/search/{}",
         hex::encode(result)
     ))
+}
+
+/// updates the global config to what it should be
+pub fn update_config(value: ConfigValue) -> Result<(), String> {
+    Ok(())
 }
