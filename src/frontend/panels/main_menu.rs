@@ -92,11 +92,17 @@ impl Raspirus {
                 .on_press(Message::ToggleLocationSelection),
             ),
             // dropdown selection list
-            iced_aw::widgets::SelectionList::new(
+            iced_aw::widgets::SelectionList::new_with(
                 &crate::SELECTION_ICONS,
                 |_idx: usize, selection: LocationSelection| Message::LocationChanged { selection },
+                16.0,
+                3.0,
+                iced_aw::SelectionListStyles::default(),
+                None,
+                iced_aw::BOOTSTRAP_FONT,
             )
-            .height(iced::Length::Shrink),
+            .height(iced::Length::Shrink)
+            .width(iced::Length::Shrink),
             // expanded state
             expanded_location,
         ));
@@ -104,15 +110,21 @@ impl Raspirus {
         let mut start_button = iced::widget::Button::new(iced::widget::Text::new("Start"));
 
         match selection {
-            LocationSelection::USB { usb } => if usb.is_some() {
-                start_button = start_button.on_press(Message::StartScan);
-            },
-            LocationSelection::Folder { path } => if path.is_some() {
-                start_button = start_button.on_press(Message::StartScan)
-            },
-            LocationSelection::File { path } => if path.is_some() {
-                start_button = start_button.on_press(Message::StartScan)
-            },
+            LocationSelection::USB { usb } => {
+                if usb.is_some() {
+                    start_button = start_button.on_press(Message::StartScan);
+                }
+            }
+            LocationSelection::Folder { path } => {
+                if path.is_some() {
+                    start_button = start_button.on_press(Message::StartScan)
+                }
+            }
+            LocationSelection::File { path } => {
+                if path.is_some() {
+                    start_button = start_button.on_press(Message::StartScan)
+                }
+            }
         }
 
         let middle_row = iced::widget::Column::new()
