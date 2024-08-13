@@ -52,7 +52,7 @@ impl Raspirus {
                     .push(iced::widget::horizontal_space())
                     .push(iced_aw::widgets::NumberInput::new(
                         config.max_matches,
-                        usize::max_value(),
+                        usize::MAX,
                         |matches| Message::ConfigChanged {
                             value: ConfigValue::MaxMatch(matches),
                         },

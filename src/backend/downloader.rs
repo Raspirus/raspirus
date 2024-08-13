@@ -115,7 +115,7 @@ pub async fn update() -> Result<(), RemoteError> {
     let download_path = config
         .paths
         .ok_or("No paths set. Is config initialized?".to_owned())
-        .map_err(|err| RemoteError::Other(err))?
+        .map_err(RemoteError::Other)?
         .data
         .join(config.remote_file.clone());
 
@@ -136,7 +136,7 @@ pub async fn update() -> Result<(), RemoteError> {
     }
     CONFIG.lock().expect("Failed to lock config").rules_version = get_remote_version().await?;
     let config = CONFIG.lock().expect("Failed to lock config");
-    config.save().map_err(|err| RemoteError::Other(err))?;
+    config.save().map_err(RemoteError::Other)?;
     info!("Updated to {}", &config.rules_version);
     Ok(())
 }
