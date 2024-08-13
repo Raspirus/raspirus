@@ -206,10 +206,6 @@ impl iced::Application for Raspirus {
         "Raspirus".to_owned()
     }
 
-    fn theme(&self) -> Self::Theme {
-        Theme::CatppuccinLatte
-    }
-
     fn update(&mut self, message: Message) -> iced::Command<Message> {
         match &message {
             Message::Event { .. } => {}
@@ -659,6 +655,10 @@ impl iced::Application for Raspirus {
             State::Results { tagged, skipped } => self.results(tagged.clone(), skipped.clone()),
         }
         .into()
+    }
+
+    fn theme(&self) -> Self::Theme {
+        Theme::CatppuccinLatte
     }
 
     fn subscription(&self) -> iced::Subscription<Message> {
