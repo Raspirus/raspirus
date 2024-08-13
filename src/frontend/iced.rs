@@ -658,7 +658,7 @@ impl iced::Application for Raspirus {
     }
 
     fn theme(&self) -> Self::Theme {
-        Theme::CatppuccinLatte
+        Theme::TokyoNight
     }
 
     fn subscription(&self) -> iced::Subscription<Message> {
