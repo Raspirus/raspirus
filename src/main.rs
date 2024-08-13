@@ -13,6 +13,8 @@ use std::fs::File;
 use std::sync::Mutex;
 
 use chrono::Local;
+use iced::advanced::graphics::image::image_rs::ImageFormat;
+use iced::window::icon;
 
 mod backend;
 mod frontend;
@@ -89,10 +91,12 @@ fn main() -> Result<(), String> {
         CombinedLogger::init(loggers).expect("Failed to initialize CombinedLogger");
     }
 
+    const ICON_BYTES: &[u8] = include_bytes!("assets/logo.ico");
     let mut settings = Settings::default();
     settings.window.exit_on_close_request = false;
     settings.id = Some("raspirus.app".to_owned());
     settings.fonts = vec![iced_aw::BOOTSTRAP_FONT_BYTES.into()];
+    settings.window.icon = icon::from_file_data(ICON_BYTES, Option::from(ImageFormat::Ico)).ok();
     frontend::iced::Raspirus::run(settings).expect("Failed to start frontend");
 
     Ok(())
