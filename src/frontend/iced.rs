@@ -26,6 +26,7 @@ pub struct Raspirus {
     ),
 }
 
+#[derive(Debug)]
 pub enum State {
     MainMenu {
         /// language dropdown state
@@ -212,7 +213,6 @@ impl iced::Application for Raspirus {
             others => debug!("{:?}", others),
         }
         match message {
-            // open settings
             Message::OpenSettings => {
                 self.state = State::Settings {
                     config: crate::CONFIG.lock().expect("Failed to lock config").clone(),

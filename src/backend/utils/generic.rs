@@ -70,5 +70,12 @@ pub fn generate_virustotal(file: PathBuf) -> Result<String, String> {
 
 /// updates the global config to what it should be
 pub fn update_config(value: ConfigValue) -> Result<(), String> {
+    let mut config = crate::CONFIG.lock().map_err(|err| format!("Failed to lock config: {err}"))?;
+    match value {
+        ConfigValue::MinMatch(min_matches) => config.min_matches = min_matches,
+        ConfigValue::MaxMatch(max_matches) => config.max_matches = max_matches,
+        ConfigValue::Logging(logging) => config.logging_is_active = logging,
+    }
+    config.save()?;
     Ok(())
 }
