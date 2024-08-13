@@ -3,7 +3,6 @@ use crate::backend::downloader;
 use crate::backend::utils::generic::{generate_virustotal, update_config};
 use crate::backend::utils::usb_utils::{list_usb_drives, UsbDevice};
 use crate::backend::yara_scanner::{Skipped, TaggedFile, YaraScanner};
-use iced::Theme;
 use log::{debug, error, info, trace, warn};
 use std::fmt::Display;
 use std::str::FromStr;
@@ -645,7 +644,7 @@ impl iced::Application for Raspirus {
     }
 
     fn theme(&self) -> Self::Theme {
-        Theme::TokyoNight
+        iced::Theme::TokyoNight
     }
 
     fn subscription(&self) -> iced::Subscription<Message> {
