@@ -8,7 +8,7 @@ use std::{
     thread::sleep,
     time::Duration,
 };
-
+use iced::Theme;
 use crate::backend::config_file::Config;
 use crate::backend::downloader;
 use crate::backend::utils::generic::{generate_virustotal, update_config};
@@ -170,8 +170,8 @@ pub enum Card {
 }
 
 impl iced::Application for Raspirus {
-    type Message = Message;
     type Executor = iced::executor::Default;
+    type Message = Message;
     type Theme = iced::Theme;
     type Flags = ();
 
@@ -655,6 +655,10 @@ impl iced::Application for Raspirus {
             State::Results { tagged, skipped } => self.results(tagged.clone(), skipped.clone()),
         }
         .into()
+    }
+
+    fn theme(&self) -> Self::Theme {
+        Theme::CatppuccinLatte
     }
 
     fn subscription(&self) -> iced::Subscription<Message> {
