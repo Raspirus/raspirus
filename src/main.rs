@@ -68,6 +68,7 @@ fn main() -> Result<(), String> {
             .add_filter_ignore_str("reqwest")
             .add_filter_ignore_str("wgpu_core")
             .add_filter_ignore_str("iced_wgpu")
+            .add_filter_ignore_str("iced_winit")
             .add_filter_ignore_str("cosmic_text")
             .add_filter_ignore_str("naga")
             .add_filter_ignore_str("cranelift_codegen")
