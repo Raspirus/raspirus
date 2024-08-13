@@ -111,7 +111,7 @@ fn list_usb_windows() -> Result<Vec<UsbDevice>, String> {
                 info!("Found Drive: {}", drive_path);
                 usb_drives.push(UsbDevice {
                     name: drive_path.to_string() + " " + &drive_name.to_string_lossy(),
-                    path: drive_path.to_string(),
+                    path: drive_path.to_string().into(),
                 });
             }
         }
