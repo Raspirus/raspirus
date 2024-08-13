@@ -18,7 +18,7 @@ impl Raspirus {
                     iced::widget::Button::new(iced::widget::Text::new(match update {
                         UpdateState::Loaded => iced_aw::Bootstrap::ArrowUpCircleFill,
                         UpdateState::Updating => iced_aw::Bootstrap::ArrowClockwise,
-                        UpdateState::Updated => iced_aw::Bootstrap::CheckCircleFill,
+                        UpdateState::Updated => iced_aw::Bootstrap::Check,
                     }.to_string()).font(iced_aw::BOOTSTRAP_FONT))
                         .on_press(Message::UpdateRules),
                 ),
@@ -26,6 +26,7 @@ impl Raspirus {
         let content = iced::widget::Scrollable::new(options);
         iced::widget::Column::new()
             .push(top_row)
+            .push(iced::widget::horizontal_rule(5))
             .push(content)
             .spacing(5)
             .padding(10)

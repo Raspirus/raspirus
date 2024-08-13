@@ -144,7 +144,9 @@ impl Raspirus {
                 15,
                 iced::widget::Column::new()
                     .push(top_row)
+                    .push(iced::widget::horizontal_rule(5))
                     .push(tagged_list)
+                    .push(iced::widget::horizontal_rule(5))
                     .push(skipped_list)
                     .spacing(5)
                     .into(),
