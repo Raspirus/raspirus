@@ -125,6 +125,7 @@ impl Raspirus {
             10,
             iced::widget::Column::new()
                 .push(top_row)
+                .push(iced::widget::horizontal_rule(5))
                 .push(iced::widget::vertical_space())
                 .push(middle_row)
                 .push(iced::widget::vertical_space())
