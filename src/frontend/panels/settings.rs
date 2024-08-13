@@ -62,15 +62,16 @@ impl Raspirus {
                 iced::widget::Row::new()
                     .push(iced::widget::Text::new("Logging"))
                     .push(iced::widget::horizontal_space())
-                    .push(iced::widget::Toggler::new(
-                        None,
-                        config.logging_is_active,
-                        |logging| Message::ConfigChanged {
-                            value: ConfigValue::Logging(logging),
-                        },
-                    )),
+                    .push(
+                        iced::widget::Toggler::new(None, config.logging_is_active, |logging| {
+                            Message::ConfigChanged {
+                                value: ConfigValue::Logging(logging),
+                            }
+                        })
+                        .width(iced::Length::Shrink),
+                    ),
             )
-            .spacing(5);
+            .spacing(15);
         let content = iced::widget::Scrollable::new(wrap(15, options.into()));
         iced::widget::Column::new()
             .push(top_row)
