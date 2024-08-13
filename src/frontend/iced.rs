@@ -1,4 +1,4 @@
-use log::{debug, error, info, trace};
+use log::{debug, error, info, trace, warn};
 use std::fmt::Display;
 use std::str::FromStr;
 use std::sync::mpsc;
@@ -9,7 +9,9 @@ use std::{
     time::Duration,
 };
 
-use crate::backend::utils::generic::generate_virustotal;
+use crate::backend::config_file::Config;
+use crate::backend::downloader;
+use crate::backend::utils::generic::{generate_virustotal, update_config};
 use crate::backend::utils::usb_utils::{list_usb_drives, UsbDevice};
 use crate::backend::yara_scanner::{Skipped, TaggedFile, YaraScanner};
 
@@ -18,10 +20,6 @@ pub struct Raspirus {
     pub language: String,
     pub scan_path: Option<PathBuf>,
     pub usb_devices: Vec<UsbDevice>,
-    /// head and body for optional popup
-    pub pop_up: Option<(String, String)>,
-    /// warning
-    pub warning: Option<String>,
     pub scan_progress: (
         Arc<Mutex<mpsc::Sender<Message>>>,
         Arc<Mutex<mpsc::Receiver<Message>>>,
@@ -42,12 +40,22 @@ pub enum State {
         // current displayed percentage
         percentage: f32,
     },
-    Settings,
+    Settings {
+        config: Config,
+        update: UpdateState,
+    },
     Results {
         // tagged / skipped files and if the file is expanded in the view
         tagged: Vec<(TaggedFile, bool)>,
         skipped: Vec<(Skipped, bool)>,
     },
+}
+
+#[derive(Debug, Clone)]
+pub enum UpdateState {
+    Loaded,
+    Updating,
+    Updated,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -98,14 +106,13 @@ pub enum Message {
     // action messages
     StartScan,
     Shutdown,
-    DismissWarning,
-    DismissPopup,
     ToggleLanguageSelection,
     ToggleUSBSelection,
     ToggleLocationSelection,
     GenerateVirustotal {
         path: PathBuf,
     },
+    UpdateRules,
     // update messages
     LanguageChanged {
         language: String,
@@ -115,7 +122,7 @@ pub enum Message {
         selection: LocationSelection,
     },
     ConfigChanged {
-        value: ConfigValue
+        value: ConfigValue,
     },
     /// sent when we want the user to pick a location
     RequestLocation {
@@ -131,6 +138,7 @@ pub enum Message {
     Event {
         event: iced::Event,
     },
+    UpdateFinished,
     // data messages
     ScanPercentage {
         percentage: f32,
@@ -149,9 +157,9 @@ pub enum ErrorCase {
 
 #[derive(Debug, Clone)]
 pub enum ConfigValue {
-    Update,
-    MinMatch { min: usize },
-    MaxMatch { max: usize }
+    MinMatch(usize),
+    MaxMatch(usize),
+    Logging(bool),
 }
 
 #[derive(Debug, Clone)]
@@ -183,8 +191,6 @@ impl iced::Application for Raspirus {
                 } else {
                     None
                 },
-                pop_up: None,
-                warning: None,
                 scan_progress: (
                     Arc::new(Mutex::new(channel.0)),
                     Arc::new(Mutex::new(channel.1)),
@@ -206,10 +212,15 @@ impl iced::Application for Raspirus {
             others => debug!("{:?}", others),
         }
         match message {
+            // open settings
             Message::OpenSettings => {
-                self.state = State::Settings;
+                self.state = State::Settings {
+                    config: crate::CONFIG.lock().expect("Failed to lock config").clone(),
+                    update: UpdateState::Loaded,
+                };
                 iced::Command::none()
             }
+            // return back to main menu
             Message::OpenMain => {
                 let usb = list_usb_drives().unwrap_or_default().first().cloned();
                 self.state = State::MainMenu {
@@ -223,6 +234,7 @@ impl iced::Application for Raspirus {
                 }
                 iced::Command::none()
             }
+            // start scan with current path
             Message::StartScan => {
                 self.state = State::Scanning { percentage: 0.0 };
                 let scanner_path = self.scan_path.clone();
@@ -250,6 +262,7 @@ impl iced::Application for Raspirus {
                     },
                 )
             }
+            // expand language dropdown
             Message::ToggleLanguageSelection => {
                 // invert expanded state
                 match &self.state {
@@ -270,6 +283,7 @@ impl iced::Application for Raspirus {
                 };
                 iced::Command::none()
             }
+            // update locally selected language
             Message::LanguageChanged { language } => {
                 // close language dialog
                 match &self.state {
@@ -304,56 +318,65 @@ impl iced::Application for Raspirus {
                     },
                     |_| Message::Shutdown,
                 ),
-                ErrorCase::Warning { message } => {
-                    self.warning = Some(message);
-                    iced::Command::none()
-                }
+                ErrorCase::Warning { message } => iced::Command::perform(
+                    async move {
+                        warn!("{message}");
+                        native_dialog::MessageDialog::new()
+                            .set_text(&message)
+                            .set_title("Notice")
+                            .set_type(native_dialog::MessageType::Warning)
+                            .show_alert()
+                    },
+                    |_| Message::None,
+                ),
             },
+            // switch to result page
             Message::ScanComplete { tagged, skipped } => {
                 self.state = State::Results { tagged, skipped };
                 iced::Command::none()
             }
+            // update local scan percentage
             Message::ScanPercentage { percentage } => {
                 self.state = State::Scanning { percentage };
                 iced::Command::none()
             }
+            // toggle expansion of card in results screen
             Message::ToggleCard { card } => {
-                match &self.state {
-                    State::Results { tagged, skipped } => {
-                        self.state = match card {
-                            Card::Skipped { card } => State::Results {
-                                tagged: tagged.to_vec(),
-                                skipped: skipped
-                                    .iter()
-                                    .map(|(skip, expanded)| {
-                                        if *skip == card {
-                                            (skip.clone(), !*expanded)
-                                        } else {
-                                            (skip.clone(), *expanded)
-                                        }
-                                    })
-                                    .collect(),
-                            },
-                            Card::Tagged { card } => State::Results {
-                                tagged: tagged
-                                    .iter()
-                                    .map(|(tag, expanded)| {
-                                        if *tag == card {
-                                            (tag.clone(), !*expanded)
-                                        } else {
-                                            (tag.clone(), *expanded)
-                                        }
-                                    })
-                                    .collect(),
-                                skipped: skipped.to_vec(),
-                            },
-                        }
+                if let State::Results { tagged, skipped } = &self.state {
+                    self.state = match card {
+                        Card::Skipped { card } => State::Results {
+                            tagged: tagged.to_vec(),
+                            skipped: skipped
+                                .iter()
+                                .map(|(skip, expanded)| {
+                                    if *skip == card {
+                                        (skip.clone(), !*expanded)
+                                    } else {
+                                        (skip.clone(), *expanded)
+                                    }
+                                })
+                                .collect(),
+                        },
+                        Card::Tagged { card } => State::Results {
+                            tagged: tagged
+                                .iter()
+                                .map(|(tag, expanded)| {
+                                    if *tag == card {
+                                        (tag.clone(), !*expanded)
+                                    } else {
+                                        (tag.clone(), *expanded)
+                                    }
+                                })
+                                .collect(),
+                            skipped: skipped.to_vec(),
+                        },
                     }
-                    _ => {}
                 }
                 iced::Command::none()
             }
+            // shutdown application
             Message::Shutdown => std::process::exit(0),
+            // work with window events
             Message::Event { event } => {
                 match event {
                     iced::Event::Window(_, ref request) => match request {
@@ -371,14 +394,7 @@ impl iced::Application for Raspirus {
                 }
                 iced::Command::none()
             }
-            Message::DismissWarning => {
-                self.warning = None;
-                iced::Command::none()
-            }
-            Message::DismissPopup => {
-                self.pop_up = None;
-                iced::Command::none()
-            }
+            // update local scan path to selected media
             Message::LocationChanged { selection } => match &self.state {
                 State::MainMenu { .. } => match selection {
                     LocationSelection::USB { usb } => {
@@ -427,6 +443,8 @@ impl iced::Application for Raspirus {
                 },
                 _ => iced::Command::none(),
             },
+            // either change to allow for selection of usb, file or folder
+            // or update current path to selection
             Message::RequestLocation { selection } => match &self.state {
                 State::MainMenu { .. } => match selection {
                     LocationSelection::USB { usb } => {
@@ -507,6 +525,7 @@ impl iced::Application for Raspirus {
                 },
                 _ => iced::Command::none(),
             },
+            // expand list with usb drives
             Message::ToggleUSBSelection => {
                 match &self.state {
                     State::MainMenu {
@@ -526,6 +545,7 @@ impl iced::Application for Raspirus {
                 }
                 iced::Command::none()
             }
+            // expand dropdown to choose folder, file or usb
             Message::ToggleLocationSelection => {
                 match &self.state {
                     State::MainMenu {
@@ -545,6 +565,7 @@ impl iced::Application for Raspirus {
                 }
                 iced::Command::none()
             }
+            // generate hash for file and open in preferred browser
             Message::GenerateVirustotal { path } => iced::Command::perform(
                 async {
                     open::that(
@@ -560,10 +581,58 @@ impl iced::Application for Raspirus {
                     Err(err) => Message::Error { case: err },
                 },
             ),
+            // do nothing
             Message::None => iced::Command::none(),
-            Message::ConfigChanged { value } => {
-                iced::Command::none()
+            // send changed config value to backend
+            Message::ConfigChanged { value } => match update_config(value) {
+                Ok(_) => {
+                    self.state = State::Settings {
+                        config: crate::CONFIG.lock().expect("Failed to lock config").clone(),
+                        update: UpdateState::Loaded,
+                    };
+                    iced::Command::none()
+                }
+                Err(message) => iced::Command::perform(async {}, |_| Message::Error {
+                    case: ErrorCase::Critical { message },
+                }),
             },
+            // start rule update
+            Message::UpdateRules => {
+                if let State::Settings { config, .. } = &self.state {
+                    self.state = State::Settings {
+                        config: config.clone(),
+                        update: UpdateState::Updating,
+                    };
+                }
+                iced::Command::perform(
+                    async move {
+                        match downloader::update().await {
+                            Ok(_) => Message::UpdateFinished,
+                            Err(err) => match err {
+                                downloader::RemoteError::Offline => Message::Error {
+                                    case: ErrorCase::Warning {
+                                        message: "You appear to be offline".to_owned(),
+                                    },
+                                },
+                                downloader::RemoteError::Other(message) => Message::Error {
+                                    case: ErrorCase::Warning { message },
+                                },
+                            },
+                        }
+                    },
+                    |result| result,
+                )
+            }
+            // update is finished
+            Message::UpdateFinished => {
+                if let State::Settings { config, .. } = &self.state {
+                    self.state = State::Settings {
+                        config: config.clone(),
+                        update: UpdateState::Updated,
+                    };
+                }
+                iced::Command::none()
+            }
         }
     }
 
@@ -582,7 +651,7 @@ impl iced::Application for Raspirus {
                 &self.usb_devices,
             ),
             State::Scanning { percentage } => self.scanning(*percentage),
-            State::Settings => self.settings(),
+            State::Settings { config, update } => self.settings(config, update),
             State::Results { tagged, skipped } => self.results(tagged.clone(), skipped.clone()),
         }
         .into()
