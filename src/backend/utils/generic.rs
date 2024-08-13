@@ -31,7 +31,7 @@ pub fn profile_path(path: PathBuf) -> Result<Vec<PathBuf>, std::io::Error> {
 
 /// adds files or files in subfolders to paths and adds their sizes to the total
 pub fn profile_folder(paths: &mut Vec<PathBuf>, path: PathBuf) -> Result<(), std::io::Error> {
-    for entry in fs::read_dir(&path)? {
+    for entry in fs::read_dir(path)? {
         let entry = entry?;
         if entry.path().is_dir() {
             profile_folder(paths, entry.path())?;

@@ -10,7 +10,7 @@ impl Raspirus {
         expanded_location: bool,
         expanded_usb: bool,
         selection: LocationSelection,
-        usbs: &'a Vec<UsbDevice>,
+        usbs: &'a [UsbDevice],
     ) -> iced::Element<Message> {
         let top_row = iced::widget::Row::new()
             // language selection
@@ -40,7 +40,7 @@ impl Raspirus {
         let mut center_row = iced::widget::Row::new().spacing(5);
 
         center_row = match selection {
-            LocationSelection::USB { ref usb } => {
+            LocationSelection::Usb { ref usb } => {
                 center_row.push(iced_aw::widgets::DropDown::new(
                     // large button that displays usb and triggers dropdown on click
                     iced::widget::Button::new(
@@ -57,7 +57,7 @@ impl Raspirus {
                     // list of usb devices
                     iced_aw::widgets::SelectionList::new(usbs, |_idx: usize, usb: UsbDevice| {
                         Message::RequestLocation {
-                            selection: LocationSelection::USB { usb: Some(usb) },
+                            selection: LocationSelection::Usb { usb: Some(usb) },
                         }
                     })
                     .height(iced::Length::Shrink),
@@ -119,7 +119,7 @@ impl Raspirus {
         let mut start_button = iced::widget::Button::new(iced::widget::Text::new("Start"));
 
         match selection {
-            LocationSelection::USB { usb } => {
+            LocationSelection::Usb { usb } => {
                 if usb.is_some() {
                     start_button = start_button.on_press(Message::StartScan);
                 }
