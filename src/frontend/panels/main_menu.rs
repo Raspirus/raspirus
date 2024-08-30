@@ -1,10 +1,10 @@
-use iced::theme::Button;
+use iced::{color, font, theme::Button, widget::Space};
 
 use crate::{
     backend::utils::usb_utils::UsbDevice,
     frontend::{
         iced::{wrap, LocationSelection, Message, Raspirus}, 
-        theme::button::{RaspirusButtonPrimary, RaspirusButtonSecondary}
+        theme::button::{RaspirusButtonOrange, RaspirusButtonPrimary, RaspirusButtonSecondary}
     },
 };
 
@@ -37,8 +37,15 @@ impl Raspirus {
             // spacer
             .push(iced::widget::horizontal_space())
             // settings button
-            .push(iced::widget::button("settings").on_press(Message::OpenSettings)
-                                            .style(Button::Custom(Box::new(RaspirusButtonSecondary))))
+            .push(iced::widget::button(iced::widget::text("SETTINGS")
+                                            .font(font::Font{
+                                                weight: iced::font::Weight::Bold,
+                                                ..font::Font::DEFAULT
+                                            }))
+                                            .on_press(Message::OpenSettings)
+                                            .style(Button::Custom(Box::new(RaspirusButtonSecondary)))
+                                            .padding(10)
+            )
             // ite allignment
             .align_items(iced::Alignment::Center)
             .spacing(5);
@@ -47,9 +54,16 @@ impl Raspirus {
             iced::widget::text("RASPIRUS")
                     .size(120)
                     .horizontal_alignment(iced::alignment::Horizontal::Center)
+                    .font(font::Font{
+                        weight: iced::font::Weight::Bold,
+                        ..font::Font::DEFAULT
+                    })
+                    .style(color!(0xd7105e)),
         ).padding([0, 0, 10, 0]);
 
         let mut center_row = iced::widget::Row::new().spacing(5);
+
+        center_row = center_row.push(Space::with_width(iced::Length::FillPortion(2)));
 
         center_row = match selection {
             LocationSelection::Usb { ref usb } => {
@@ -65,7 +79,7 @@ impl Raspirus {
                         .horizontal_alignment(iced::alignment::Horizontal::Center),
                     )
                     .on_press(Message::ToggleUSBSelection)
-                    .width(iced::Length::Fill),
+                    .width(iced::Length::FillPortion(4)),
                     // list of usb devices
                     iced_aw::widgets::SelectionList::new(usbs, |_idx: usize, usb: UsbDevice| {
                         Message::RequestLocation {
@@ -84,7 +98,7 @@ impl Raspirus {
                     })
                     .horizontal_alignment(iced::alignment::Horizontal::Center),
                 )
-                .width(iced::Length::Fill)
+                .width(iced::Length::FillPortion(4))
                 .on_press(Message::RequestLocation {
                     selection: LocationSelection::Folder { path: None },
                 }),
@@ -97,7 +111,7 @@ impl Raspirus {
                     })
                     .horizontal_alignment(iced::alignment::Horizontal::Center),
                 )
-                .width(iced::Length::Fill)
+                .width(iced::Length::FillPortion(4))
                 .on_press(Message::RequestLocation {
                     selection: LocationSelection::File { path: None },
                 }),
@@ -110,7 +124,8 @@ impl Raspirus {
                 iced::widget::Button::new(
                     iced::widget::Text::new(selection.to_string()).font(iced_aw::BOOTSTRAP_FONT),
                 )
-                .on_press(Message::ToggleLocationSelection),
+                .on_press(Message::ToggleLocationSelection)
+                .style(Button::Custom(Box::new(RaspirusButtonOrange))),
             ),
             // dropdown selection list
             iced_aw::widgets::SelectionList::new_with(
@@ -128,8 +143,15 @@ impl Raspirus {
             expanded_location,
         ));
 
-        let mut start_button = iced::widget::Button::new(iced::widget::Text::new("Start"))
-                                        .style(Button::Custom(Box::new(RaspirusButtonPrimary)));
+        center_row = center_row.push(Space::with_width(iced::Length::FillPortion(2)));
+
+        let mut start_button = iced::widget::Button::new(iced::widget::text("START")
+                                                    .font(font::Font{
+                                                        weight: iced::font::Weight::Bold,
+                                                        ..font::Font::DEFAULT
+                                                    }))
+                                        .style(Button::Custom(Box::new(RaspirusButtonPrimary)))
+                                        .padding(10);
 
         match selection {
             LocationSelection::Usb { usb } => {
