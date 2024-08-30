@@ -643,10 +643,6 @@ impl iced::Application for Raspirus {
         }
     }
 
-    fn theme(&self) -> Self::Theme {
-        iced::Theme::TokyoNight
-    }
-
     fn subscription(&self) -> iced::Subscription<Message> {
         // subsribe to the scan progress update or event stream. this also doubles as quit
         // prevention during scanning

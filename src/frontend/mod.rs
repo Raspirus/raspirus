@@ -4,3 +4,5 @@ pub mod functions;
 pub mod iced;
 /// iced frontend panels
 pub mod panels;
+/// custom theme
+pub mod theme;
