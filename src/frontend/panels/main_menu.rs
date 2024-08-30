@@ -1,6 +1,11 @@
+use iced::theme::Button;
+
 use crate::{
     backend::utils::usb_utils::UsbDevice,
-    frontend::iced::{wrap, LocationSelection, Message, Raspirus},
+    frontend::{
+        iced::{wrap, LocationSelection, Message, Raspirus}, 
+        theme::button::{RaspirusButtonPrimary, RaspirusButtonSecondary}
+    },
 };
 
 impl Raspirus {
@@ -32,7 +37,8 @@ impl Raspirus {
             // spacer
             .push(iced::widget::horizontal_space())
             // settings button
-            .push(iced::widget::button("settings").on_press(Message::OpenSettings))
+            .push(iced::widget::button("settings").on_press(Message::OpenSettings)
+                                            .style(Button::Custom(Box::new(RaspirusButtonSecondary))))
             // ite allignment
             .align_items(iced::Alignment::Center)
             .spacing(5);
@@ -122,7 +128,8 @@ impl Raspirus {
             expanded_location,
         ));
 
-        let mut start_button = iced::widget::Button::new(iced::widget::Text::new("Start"));
+        let mut start_button = iced::widget::Button::new(iced::widget::Text::new("Start"))
+                                        .style(Button::Custom(Box::new(RaspirusButtonPrimary)));
 
         match selection {
             LocationSelection::Usb { usb } => {
