@@ -1,10 +1,11 @@
 use iced::{color, font, theme::Button, widget::Space};
+use iced_aw::SelectionListStyles;
 
 use crate::{
     backend::utils::usb_utils::UsbDevice,
     frontend::{
         iced::{wrap, LocationSelection, Message, Raspirus}, 
-        theme::button::{RaspirusButtonOrange, RaspirusButtonPrimary, RaspirusButtonSecondary}
+        theme::{button::{RaspirusButtonOrange, RaspirusButtonPrimary, RaspirusButtonSecondary}, selection_list::RaspirusSelectionList}
     },
 };
 
@@ -138,7 +139,8 @@ impl Raspirus {
                 iced_aw::BOOTSTRAP_FONT,
             )
             .height(iced::Length::Shrink)
-            .width(iced::Length::Shrink),
+            .width(iced::Length::Shrink)
+            .style(SelectionListStyles::custom(RaspirusSelectionList)),
             // expanded state
             expanded_location,
         ));
