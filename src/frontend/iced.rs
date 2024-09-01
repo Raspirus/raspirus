@@ -526,11 +526,30 @@ impl iced::Application for Raspirus {
                     selection,
                 } = &self.state
                 {
-                    self.state = State::MainMenu {
-                        expanded_language: *expanded_language,
-                        expanded_location: *expanded_location,
-                        expanded_usb: !*expanded_usb,
-                        selection: selection.clone(),
+                    if let LocationSelection::Usb { usb } = &selection {
+                        if usb.is_some() {
+                            self.state = State::MainMenu {
+                                expanded_language: *expanded_language,
+                                expanded_location: *expanded_location,
+                                expanded_usb: !*expanded_usb,
+                                selection: selection.clone(),
+                            }
+                        } else {
+                            let usbs = list_usb_drives().and_then(|usbs| {
+                                self.usb_devices = usbs.clone();
+                                Ok(usbs)
+                            });
+                            let usb = usbs.unwrap_or_default().first().cloned();
+                            self.state = State::MainMenu {
+                                expanded_language: *expanded_language,
+                                expanded_location: *expanded_location,
+                                expanded_usb: !*expanded_usb,
+                                selection: LocationSelection::Usb { usb: usb.clone() },
+                            };
+                            if let Some(usb) = usb {
+                                self.scan_path = Some(usb.path);
+                            }
+                        }
                     }
                 }
                 iced::Command::none()
