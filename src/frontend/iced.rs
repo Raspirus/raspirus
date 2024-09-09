@@ -49,6 +49,7 @@ pub enum State {
         tagged: Vec<(TaggedFile, bool)>,
         skipped: Vec<(Skipped, bool)>,
     },
+    Information,
 }
 
 #[derive(Debug, Clone)]
@@ -102,6 +103,7 @@ impl Display for LocationSelection {
 pub enum Message {
     // location messages
     OpenSettings,
+    OpenInformation,
     OpenMain,
     // action messages
     StartScan,
@@ -216,6 +218,10 @@ impl iced::Application for Raspirus {
                     config: crate::CONFIG.lock().expect("Failed to lock config").clone(),
                     update: UpdateState::Loaded,
                 };
+                iced::Command::none()
+            }
+            Message::OpenInformation => {
+                self.state = State::Information;
                 iced::Command::none()
             }
             // return back to main menu
@@ -659,6 +665,7 @@ impl iced::Application for Raspirus {
             State::Scanning { percentage } => self.scanning(*percentage),
             State::Settings { config, update } => self.settings(config, update),
             State::Results { tagged, skipped } => self.results(tagged.clone(), skipped.clone()),
+            State::Information => self.information(),
         }
     }
 
