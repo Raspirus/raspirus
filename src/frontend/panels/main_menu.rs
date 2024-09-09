@@ -153,7 +153,7 @@ impl Raspirus {
                                                         ..font::Font::DEFAULT
                                                     }))
                                         .style(Button::Custom(Box::new(RaspirusButtonPrimary)))
-                                        .padding(10);
+                                        .padding([15, 20]);
 
         match selection {
             LocationSelection::Usb { usb } => {
@@ -173,10 +173,24 @@ impl Raspirus {
             }
         }
 
+        let info_button = iced::widget::Button::new(iced::widget::text("INFO")
+                                                .font(font::Font{
+                                                    weight: iced::font::Weight::Bold,
+                                                    ..font::Font::DEFAULT
+                                                }))
+                                        .style(Button::Custom(Box::new(RaspirusButtonSecondary)))
+                                        .padding([15, 20])
+                                        .on_press(Message::OpenInformation);
+        
+        let button_row = iced::widget::Row::new()
+            .push(info_button)
+            .push(start_button)
+            .spacing(10);
+
         let middle_row = iced::widget::Column::new()
             .push(title_text)
             .push(center_row)
-            .push(start_button)
+            .push(button_row)
             .align_items(iced::Alignment::Center)
             .spacing(5);
 

@@ -29,7 +29,6 @@ impl iced::widget::button::StyleSheet for RaspirusButtonPrimary {
         }
     }
     fn hovered(&self, _style: &Self::Style) -> button::Appearance {
-        // TODO: Check if settings from active function can be omitted here
         button::Appearance {
             background: Some(iced::Background::Color(PRIMARY_COLOR_DARK)),
             text_color: Color::WHITE,
