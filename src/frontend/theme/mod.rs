@@ -1,9 +1,9 @@
 use iced::{color, Color};
 
 pub mod button;
-pub mod selection_list;
-pub mod icon;
 pub mod container;
+pub mod icon;
+pub mod selection_list;
 
 /// Colors for the Raspirus theme
 pub const PRIMARY_COLOR: Color = color!(0xd7105e);
@@ -15,10 +15,13 @@ pub const SECONDARY_COLOR_LIGHT: Color = color!(0x01e99a);
 
 pub const BLUE_COLOR: Color = color!(0x2181d4);
 pub const BLUE_COLOR_DARK: Color = color!(0x1a67aa);
+pub const BLUE_COLOR_LIGHT: Color = color!(0x007BFF);
 
 pub const ORANGE_COLOR: Color = color!(0xFB923C);
 pub const ORANGE_COLOR_DARK: Color = color!(0xf47105);
 pub const ORANGE_COLOR_LIGHT: Color = color!(0xfdc89e);
+
+pub const GRAY_COLOR: Color = color!(0x808080);
 
 /// Default settings
 pub const DEFAULT_BUTTON_RADIUS: f32 = 2.5;

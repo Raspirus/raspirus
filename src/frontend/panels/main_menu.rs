@@ -4,8 +4,11 @@ use iced_aw::SelectionListStyles;
 use crate::{
     backend::utils::usb_utils::UsbDevice,
     frontend::{
-        iced::{wrap, LocationSelection, Message, Raspirus}, 
-        theme::{button::{RaspirusButtonOrange, RaspirusButtonPrimary, RaspirusButtonSecondary}, selection_list::RaspirusSelectionList}
+        iced::{wrap, LocationSelection, Message, Raspirus},
+        theme::{
+            button::{RaspirusButtonOrange, RaspirusButtonPrimary, RaspirusButtonSecondary},
+            selection_list::RaspirusSelectionList,
+        },
     },
 };
 
@@ -38,14 +41,14 @@ impl Raspirus {
             // spacer
             .push(iced::widget::horizontal_space())
             // settings button
-            .push(iced::widget::button(iced::widget::text("SETTINGS")
-                                            .font(font::Font{
-                                                weight: iced::font::Weight::Bold,
-                                                ..font::Font::DEFAULT
-                                            }))
-                                            .on_press(Message::OpenSettings)
-                                            .style(Button::Custom(Box::new(RaspirusButtonSecondary)))
-                                            .padding(10)
+            .push(
+                iced::widget::button(iced::widget::text("SETTINGS").font(font::Font {
+                    weight: iced::font::Weight::Bold,
+                    ..font::Font::DEFAULT
+                }))
+                .on_press(Message::OpenSettings)
+                .style(Button::Custom(Box::new(RaspirusButtonSecondary)))
+                .padding(10),
             )
             // ite allignment
             .align_items(iced::Alignment::Center)
@@ -53,14 +56,15 @@ impl Raspirus {
 
         let title_text = iced::widget::container::Container::new(
             iced::widget::text("RASPIRUS")
-                    .size(120)
-                    .horizontal_alignment(iced::alignment::Horizontal::Center)
-                    .font(font::Font{
-                        weight: iced::font::Weight::Bold,
-                        ..font::Font::DEFAULT
-                    })
-                    .style(color!(0xd7105e)),
-        ).padding([0, 0, 10, 0]);
+                .size(120)
+                .horizontal_alignment(iced::alignment::Horizontal::Center)
+                .font(font::Font {
+                    weight: iced::font::Weight::Bold,
+                    ..font::Font::DEFAULT
+                })
+                .style(color!(0xd7105e)),
+        )
+        .padding([0, 0, 10, 0]);
 
         let mut center_row = iced::widget::Row::new().spacing(5);
 
@@ -147,13 +151,13 @@ impl Raspirus {
 
         center_row = center_row.push(Space::with_width(iced::Length::FillPortion(2)));
 
-        let mut start_button = iced::widget::Button::new(iced::widget::text("START")
-                                                    .font(font::Font{
-                                                        weight: iced::font::Weight::Bold,
-                                                        ..font::Font::DEFAULT
-                                                    }))
-                                        .style(Button::Custom(Box::new(RaspirusButtonPrimary)))
-                                        .padding([15, 20]);
+        let mut start_button =
+            iced::widget::Button::new(iced::widget::text("START").font(font::Font {
+                weight: iced::font::Weight::Bold,
+                ..font::Font::DEFAULT
+            }))
+            .style(Button::Custom(Box::new(RaspirusButtonPrimary)))
+            .padding([15, 20]);
 
         match selection {
             LocationSelection::Usb { usb } => {
@@ -173,15 +177,14 @@ impl Raspirus {
             }
         }
 
-        let info_button = iced::widget::Button::new(iced::widget::text("INFO")
-                                                .font(font::Font{
-                                                    weight: iced::font::Weight::Bold,
-                                                    ..font::Font::DEFAULT
-                                                }))
-                                        .style(Button::Custom(Box::new(RaspirusButtonSecondary)))
-                                        .padding([15, 20])
-                                        .on_press(Message::OpenInformation);
-        
+        let info_button = iced::widget::Button::new(iced::widget::text("INFO").font(font::Font {
+            weight: iced::font::Weight::Bold,
+            ..font::Font::DEFAULT
+        }))
+        .style(Button::Custom(Box::new(RaspirusButtonSecondary)))
+        .padding([15, 20])
+        .on_press(Message::OpenInformation);
+
         let button_row = iced::widget::Row::new()
             .push(info_button)
             .push(start_button)
