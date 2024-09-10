@@ -19,7 +19,10 @@ impl Raspirus {
                 .on_press(Message::OpenMain),
             );
         let mut tagged_list = iced::widget::Column::new()
-            .push(iced::widget::Text::new(format!("Found files ({})", tagged.len())))
+            .push(iced::widget::Text::new(format!(
+                "Found files ({})",
+                tagged.len()
+            )))
             .spacing(5);
 
         for (tag, expanded) in tagged {
@@ -90,7 +93,10 @@ impl Raspirus {
         }
 
         let mut skipped_list = iced::widget::Column::new()
-            .push(iced::widget::Text::new(format!("Skipped files ({})", skipped.len())))
+            .push(iced::widget::Text::new(format!(
+                "Skipped files ({})",
+                skipped.len()
+            )))
             .spacing(5);
 
         for (skip, expanded) in skipped {
@@ -139,19 +145,17 @@ impl Raspirus {
                 card
             });
         }
-        iced::widget::Scrollable::new(
-            wrap(
-                15,
-                iced::widget::Column::new()
-                    .push(top_row)
-                    .push(iced::widget::horizontal_rule(5))
-                    .push(tagged_list)
-                    .push(iced::widget::horizontal_rule(5))
-                    .push(skipped_list)
-                    .spacing(5)
-                    .into(),
-            ),
-        )
+        iced::widget::Scrollable::new(wrap(
+            15,
+            iced::widget::Column::new()
+                .push(top_row)
+                .push(iced::widget::horizontal_rule(5))
+                .push(tagged_list)
+                .push(iced::widget::horizontal_rule(5))
+                .push(skipped_list)
+                .spacing(5)
+                .into(),
+        ))
         .into()
     }
 }
