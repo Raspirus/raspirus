@@ -1,6 +1,11 @@
 use crate::frontend::{
     iced::{wrap, Message, Raspirus},
-    theme::{container::RaspirusCard, icon::RaspirusInfoIcon, GRAY_COLOR},
+    theme::{
+        button::RaspirusButtonPrimary,
+        container::{RaspirusCard, RaspirusIconContainer},
+        icon::{RaspirusInfoIcon, RaspirusWhiteIcon},
+        GRAY_COLOR, PRIMARY_COLOR,
+    },
 };
 
 // Icons from Tabler.io: https://tabler.io/icons
@@ -14,9 +19,15 @@ impl Raspirus {
         iced::widget::container(
             iced::widget::Row::new()
                 .push(
-                    icon.height(64)
-                        .width(64)
-                        .style(iced::theme::Svg::Custom(Box::new(RaspirusInfoIcon))),
+                    iced::widget::container(
+                        icon.height(48)
+                            .width(48)
+                            .style(iced::theme::Svg::Custom(Box::new(RaspirusInfoIcon))),
+                    )
+                    .padding(15)
+                    .style(iced::theme::Container::Custom(Box::new(
+                        RaspirusIconContainer,
+                    ))),
                 )
                 //.push(iced::widget::vertical_rule(5))
                 .push(iced::widget::Space::with_width(10))
@@ -38,13 +49,62 @@ impl Raspirus {
         let top_row = iced::widget::Column::new()
             .push(
                 iced::widget::Row::new()
+                    .push(
+                        iced::widget::Button::new(
+                            iced::widget::Row::new()
+                                .push(
+                                    iced::widget::svg::Svg::from_path("src/assets/icons/home.svg")
+                                        .height(20)
+                                        .width(20)
+                                        .style(iced::theme::Svg::Custom(Box::new(
+                                            RaspirusWhiteIcon,
+                                        ))),
+                                )
+                                .push(
+                                    iced::widget::container(iced::widget::text("HOME"))
+                                        .padding([0, 0, 0, 5]),
+                                ),
+                        )
+                        .on_press(Message::OpenMain)
+                        .style(iced::theme::Button::Custom(Box::new(RaspirusButtonPrimary)))
+                        .padding(7),
+                    )
+                    .push(
+                        iced::widget::container(
+                            iced::widget::text("Information")
+                                .size(30)
+                                .font(iced::font::Font {
+                                    weight: iced::font::Weight::Bold,
+                                    ..iced::font::Font::DEFAULT
+                                })
+                                .style(PRIMARY_COLOR),
+                        )
+                        .padding([0, 10]),
+                    )
+                    .padding([5, 0])
                     .push(iced::widget::horizontal_space())
-                    .push(iced::widget::Button::new("back").on_press(Message::OpenMain)),
+                    .align_items(iced::Alignment::Center),
             )
             .push(iced::widget::horizontal_rule(5))
             .padding(10);
 
         let options = iced::widget::Column::new()
+            .push(
+                iced::widget::container(
+                    iced::widget::Row::new()
+                        .push(
+                            iced::widget::svg::Svg::from_path("src/assets/logo-vector.svg")
+                                .width(iced::Length::FillPortion(2)),
+                        )
+                        .push(
+                            iced::widget::svg::Svg::from_path("src/assets/usb-vector.svg")
+                                .width(iced::Length::FillPortion(2)),
+                        )
+                        .padding(20)
+                        .align_items(iced::Alignment::Center),
+                )
+                .style(iced::theme::Container::Custom(Box::new(RaspirusCard))),
+            )
             .push(Self::info_card(
                 iced::widget::svg::Svg::from_path("src/assets/icons/hexagon-letter-r.svg"),
                 "Name",
