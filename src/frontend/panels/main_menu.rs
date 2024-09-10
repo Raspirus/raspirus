@@ -1,4 +1,4 @@
-use iced::{color, font, theme::Button, widget::Space};
+use iced::{font, theme::Button, widget::Space};
 use iced_aw::SelectionListStyles;
 
 use crate::{
@@ -6,8 +6,12 @@ use crate::{
     frontend::{
         iced::{wrap, LocationSelection, Message, Raspirus},
         theme::{
-            button::{RaspirusButtonOrange, RaspirusButtonPrimary, RaspirusButtonSecondary},
+            button::{
+                RaspirusButtonOrange, RaspirusButtonPrimary, RaspirusButtonSecondary,
+                RaspirusButtonSelect, RaspirusButtonTransparent,
+            },
             selection_list::RaspirusSelectionList,
+            PRIMARY_COLOR,
         },
     },
 };
@@ -42,10 +46,17 @@ impl Raspirus {
             .push(iced::widget::horizontal_space())
             // settings button
             .push(
-                iced::widget::button(iced::widget::text("SETTINGS").font(font::Font {
-                    weight: iced::font::Weight::Bold,
-                    ..font::Font::DEFAULT
-                }))
+                iced::widget::button(
+                    iced::widget::Row::new()
+                        .push(
+                            iced::widget::text(iced_aw::Bootstrap::GearFill)
+                                .font(iced_aw::BOOTSTRAP_FONT),
+                        )
+                        .push(iced::widget::text(" SETTINGS").font(font::Font {
+                            weight: iced::font::Weight::Bold,
+                            ..font::Font::DEFAULT
+                        })),
+                )
                 .on_press(Message::OpenSettings)
                 .style(Button::Custom(Box::new(RaspirusButtonSecondary)))
                 .padding(10),
@@ -62,7 +73,7 @@ impl Raspirus {
                     weight: iced::font::Weight::Bold,
                     ..font::Font::DEFAULT
                 })
-                .style(color!(0xd7105e)),
+                .style(PRIMARY_COLOR),
         )
         .padding([0, 0, 10, 0]);
 
@@ -84,7 +95,8 @@ impl Raspirus {
                         .horizontal_alignment(iced::alignment::Horizontal::Center),
                     )
                     .on_press(Message::ToggleUSBSelection)
-                    .width(iced::Length::FillPortion(4)),
+                    .width(iced::Length::FillPortion(4))
+                    .style(Button::Custom(Box::new(RaspirusButtonSelect))),
                     // list of usb devices
                     iced_aw::widgets::SelectionList::new(usbs, |_idx: usize, usb: UsbDevice| {
                         Message::RequestLocation {
@@ -106,7 +118,8 @@ impl Raspirus {
                 .width(iced::Length::FillPortion(4))
                 .on_press(Message::RequestLocation {
                     selection: LocationSelection::Folder { path: None },
-                }),
+                })
+                .style(Button::Custom(Box::new(RaspirusButtonSelect))),
             ),
             LocationSelection::File { ref path } => center_row.push(
                 iced::widget::Button::new(
@@ -119,7 +132,8 @@ impl Raspirus {
                 .width(iced::Length::FillPortion(4))
                 .on_press(Message::RequestLocation {
                     selection: LocationSelection::File { path: None },
-                }),
+                })
+                .style(Button::Custom(Box::new(RaspirusButtonSelect))),
             ),
         };
 
@@ -188,12 +202,30 @@ impl Raspirus {
         let button_row = iced::widget::Row::new()
             .push(info_button)
             .push(start_button)
-            .spacing(10);
+            .spacing(10)
+            .padding([10, 0]);
+
+        let bottom_text = iced::widget::container(
+            iced::widget::Row::new()
+                .push(
+                    iced::widget::text("By using this app, you accept our")
+                        .horizontal_alignment(iced::alignment::Horizontal::Center),
+                )
+                .push(
+                    iced::widget::button("Terms and Conditions")
+                        .style(Button::Custom(Box::new(RaspirusButtonTransparent)))
+                        // TODO: make this button functional
+                        .on_press(Message::None),
+                )
+                .align_items(iced::Alignment::Center),
+        )
+        .padding([10, 0]);
 
         let middle_row = iced::widget::Column::new()
             .push(title_text)
             .push(center_row)
             .push(button_row)
+            .push(bottom_text)
             .align_items(iced::Alignment::Center)
             .spacing(5);
 
