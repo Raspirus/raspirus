@@ -14,6 +14,8 @@ use std::{
     time::Duration,
 };
 
+use super::theme::RASPIRUS_PALETTE;
+
 pub struct Raspirus {
     pub state: State,
     pub language: String,
@@ -646,6 +648,10 @@ impl iced::Application for Raspirus {
                 iced::Command::none()
             }
         }
+    }
+
+    fn theme(&self) -> iced::Theme {
+        iced::Theme::custom("Raspirus".to_owned(), RASPIRUS_PALETTE)
     }
 
     fn view(&self) -> iced::Element<Message> {
