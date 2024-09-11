@@ -46,6 +46,8 @@ pub struct Paths {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct ConfigFrontend {
     pub logging_is_active: Option<bool>,
+    pub obfuscated_is_active: Option<bool>,
+    pub db_location: Option<String>,
     pub scan_dir: Option<bool>,
     pub min_matches: Option<usize>,
     pub max_matches: Option<usize>,
