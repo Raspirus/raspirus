@@ -1,50 +1,45 @@
 [package]
-name = "raspirus-ui"
+name = "raspirus"
 version = "1.2.1"
+description = "A simple hash-based virus-scanner"
+authors = ["Demetz Benjamin, Hell Björn Felix"]
+license = "GPLv3"
+repository = "https://github.com/Raspirus/Raspirus"
+default-run = "raspirus"
 edition = "2021"
+rust-version = "1.76"
 
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+# generic dependencies
 [dependencies]
-console_error_panic_hook = "0.1.7"
-leptonic = { git = "https://github.com/lpotthast/leptonic", features = ["csr"] }
-leptos = { version = "0.6.12", features = ["csr"] }
-leptos_router = { version = "0.6.12", features = ["csr"] }
-leptos_sweetalert = "1.0.2"
-serde = { version = "1.0.204", features = ["derive"] }
-serde_json = "1.0.120"
-serde-wasm-bindgen = "0.6.5"
-wasm-bindgen = "0.2.92"
-wasm-bindgen-futures = "0.4.42"
-js-sys = "0.3.69"
+threadpool_rs = { git = "https://github.com/GamingGuy003/threadpool_rs.git", features = ["log"] }
 log = "0.4.22"
-leptos_i18n = "0.3.3"
-tauri-wasm = { git = "https://github.com/Benji377/tauri-wasm", features = ["dialog", "core", "event"] }
-futures-util = "0.3.30"
-uuid = { version = "1.10.0", features = ["v4"] }
-time = { version = "0.3.36", features = [
-    "wasm-bindgen",
-    "macros",
-    "serde",
-    "serde-well-known",
-] }
+reqwest = { version = "0.12.5", features = ["blocking", "json"] }
 chrono = "0.4.38"
+directories-next = "2.0.0"
+simplelog = "0.12.2"
+lazy_static = "1.5.0"
+yara-x = "0.6.0"
+num_cpus = "1.16.0"
+sha2 = "0.10.8"
+hex = "0.4.3"
+serde = { version = "1.0.204", features = ["derive"] }
+serde_json = "1.0.122"
+iced = { version = "0.12.1", features = ["tokio", "image", "svg"] }
+iced_aw = { version = "0.9.3", features = ["icons"] }
+native-dialog = "0.7.0"
+futures = "0.3.30"
+open = "5.3.0"
 
-[package.metadata.leptonic]
-# REQUIRED: Leptonic's build-script will copy the Leptonic themes to this directory.
-style-dir = "styles"
-# REQUIRED: Leptonic's build-script will copy static JS dependencies to this directory.
-js-dir = "public/js"
+# usb detection on linux
+[target.'cfg(any(target_os = "linux", target_os = "macos"))'.dependencies]
+lfs-core = "0.11.2"
 
-[package.metadata.leptos-i18n]
-default = "en"
-locales = ["en", "de", "it"]
-locales-dir = "public/locales"
-
-[workspace]
-members = ["src-tauri"]
-
-[profile.release]
-incremental = false
-codegen-units = 1
-panic = "abort"
-opt-level = "s"
-lto = true
+# windows dependencies
+[target.'cfg(target_os = "windows")'.dependencies]
+windows-sys = { version = "0.59.0", features = [
+    "Win32_Foundation",
+    "Win32_System_Console",
+] }
+winapi = "0.3.9"
