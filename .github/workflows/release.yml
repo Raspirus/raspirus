@@ -90,7 +90,7 @@ jobs:
  
           # Move the built binary where you want it
           mkdir -p dist
-          mv "${BIN_OUTPUT}" "./dist/${BIN_RELEASE}"
+          mv "${BIN_OUTPUT}" "./dist/raspirus"
 
       - name: List files
         run: ls -la dist
