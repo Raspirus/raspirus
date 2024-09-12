@@ -30,10 +30,11 @@ jobs:
       - name: Clean install Debian packages
         run: sudo apt-get clean && sudo apt-get update && sudo apt-get upgrade -y
 
-      - name: Add target architecture
-        run: |
-          sudo dpkg --add-architecture ${{ matrix.pkg_arch }}
-          sudo apt-get update
+      - name: Install cross-compile deps
+      - uses: ryankurte/action-apt@v0.4.0
+        with:
+          arch: ${{ matrix.pkg_arch }}
+          packages: "libssl-dev:${{ matrix.pkg_arch }}"
 
       - name: Install dependencies
         run: |
@@ -44,7 +45,6 @@ jobs:
             curl \
             libssl-dev \
             ${{ matrix.apt }} \
-            libssl-dev:${{ matrix.pkg_arch }}
 
       - name: Rust setup
         uses: dtolnay/rust-toolchain@stable
