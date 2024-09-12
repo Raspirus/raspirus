@@ -31,7 +31,7 @@ jobs:
         run: sudo apt-get clean && sudo apt-get update && sudo apt-get upgrade -y
 
       - name: Install cross-compile deps
-      - uses: ryankurte/action-apt@v0.4.0
+        uses: ryankurte/action-apt@v0.4.1
         with:
           arch: ${{ matrix.pkg_arch }}
           packages: "libssl-dev:${{ matrix.pkg_arch }}"
