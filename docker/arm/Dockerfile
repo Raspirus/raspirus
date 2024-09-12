@@ -10,7 +10,7 @@ RUN apt-get update && apt-get install -y pkg-config \
                                            build-essential \
                                            curl \
                                            libssl-dev \
-                                           gcc-aarch64-linux-gnu \
+                                           gcc-aarch64-linux-gnu
 
 # Add architecture
 RUN dpkg --add-architecture arm64 \
