@@ -6,7 +6,6 @@ category = "Utility"
 homepage = "https://raspirus.deno.dev"
 icons = ["src/assets/logo-vector.svg"]
 licenseFile = "LICENSE"
-resources = ["Cargo.toml", "src/**/*"]
 out-dir = "./dist"
 binaries = [{ path = "raspirus", main = true }]
 #before-packaging-command = "cargo build --release"
