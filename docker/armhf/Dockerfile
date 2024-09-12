@@ -19,7 +19,6 @@ RUN dpkg --add-architecture armhf \
 
 # Add Rust target
 RUN rustup target add armv7-unknown-linux-gnueabihf
-RUN rustup target add wasm32-unknown-unknown
 
 # Install cargo packager
 RUN cargo install cargo-packager --locked

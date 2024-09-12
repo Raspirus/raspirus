@@ -19,7 +19,6 @@ RUN dpkg --add-architecture arm64 \
 
 # Add Rust target
 RUN rustup target add aarch64-unknown-linux-gnu
-RUN rustup target add wasm32-unknown-unknown
 
 # Install cargo packager
 RUN cargo install cargo-packager --locked
