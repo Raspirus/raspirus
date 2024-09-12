@@ -1,105 +1,36 @@
-name: Release Build
+name: Release build
 on:
-    workflow_dispatch:
-env:
-  # The project name specified in your Cargo.toml
-  PROJECT_NAME: raspirus
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
 
 jobs:
-  build:
-    # Set the job to run on the platform specified by the matrix below
-    runs-on: ${{ matrix.runner }}
+  release:
     permissions: write-all
- 
-    # Define the build matrix for cross-compilation
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - name: linux-amd64
-            runner: ubuntu-latest
-            target: x86_64-unknown-linux-gnu
-          - name: linux-arm64
-            runner: ubuntu-latest
-            target: aarch64-unknown-linux-gnu
-          - name: linux-arm32
-            runner: ubuntu-latest
-            target: armv7-unknown-linux-gnueabihf
-          - name: win-amd64
-            runner: windows-latest
-            target: x86_64-pc-windows-msvc
-          - name: macos-amd64
-            runner: macos-latest
-            target: x86_64-apple-darwin
-          - name: macos-arm64
-            runner: macos-latest
-            target: aarch64-apple-darwin
- 
-    # The steps to run for each matrix item
+        platform: [macos-latest, ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.platform }}
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
- 
-      - name: Install Rust
+
+      - name: Install dependencies (ubuntu only)
+        if: matrix.platform == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential curl libssl-dev
+
+      - name: Rust setup
         uses: dtolnay/rust-toolchain@stable
-        with:
-          targets: "${{ matrix.target }}"
- 
-      - name: Setup Cache
-        uses: Swatinem/rust-cache@v2
 
-      - name: Install deps for cross-compile
-        run: |
-          if [[ "${{ matrix.target }}" == "armv7-unknown-linux-gnueabihf" ]]; then
-              sudo apt-get update && sudo apt-get --assume-yes upgrade
-              sudo apt-get --assume-yes install gcc-arm-linux-gnueabihf
-              sudo dpkg --add-architecture armhf
-              sudo apt-get update && sudo apt-get --assume-yes install libssl-dev:armhf
-              rustup target add armv7-unknown-linux-gnueabihf
-          fi
-          if [[ "${{ matrix.target }}" == "aarch64-unknown-linux-gnu" ]]; then
-              sudo apt-get update && sudo apt-get --assume-yes upgrade
-              sudo apt-get --assume-yes install gcc-aarch64-linux-gnu
-              sudo dpkg --add-architecture arm64
-              sudo apt-get update && sudo apt-get --assume-yes install libssl-dev:arm64
-              rustup target add aarch64-unknown-linux-gnu
-          fi
-      
-      - name: Install App Packager
+      - name: Rust cache
+        uses: swatinem/rust-cache@v2
+
+      - name: Install app dependencies
         run: cargo install cargo-packager --locked
- 
-      - name: Build Binary
-        run: cargo build --verbose --locked --release --target ${{ matrix.target }}
- 
-      - name: Release Binary
-        shell: bash
-        run: |
-          BIN_SUFFIX=""
-          if [[ "${{ matrix.runner }}" == "windows-latest" ]]; then
-            BIN_SUFFIX=".exe"
-          fi
-
-          echo "BIN_SUFFIX=${BIN_SUFFIX}" >> $GITHUB_ENV
- 
-          # The built binary output location
-          BIN_OUTPUT="target/${{ matrix.target }}/release/${PROJECT_NAME}${BIN_SUFFIX}"
- 
-          # Define a better name for the final binary
-          BIN_RELEASE="${PROJECT_NAME}-${{ matrix.name }}${BIN_SUFFIX}"
-          BIN_RELEASE_VERSIONED="${PROJECT_NAME}-${{ github.ref_name }}-${{ matrix.name }}${BIN_SUFFIX}"
- 
-          # Move the built binary where you want it
-          mkdir -p dist
-          mv "${BIN_OUTPUT}" "./dist/raspirus"
-
-      - name: List files
-        run: ls -la dist
 
       - name: Package Binary
         run: cargo packager --release --verbose
-
-      - name: Upload release assets
-        uses: actions/upload-artifact@v4
-        with:
-          name: raspirus-${{ matrix.name }}-${{ matrix.target }}
-          path: dist/raspirus-${{ matrix.name }}${{ env.BIN_SUFFIX }}
