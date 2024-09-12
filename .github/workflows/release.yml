@@ -1,0 +1,68 @@
+name: Release build
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  release:
+    permissions: write-all
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [macos-latest, ubuntu-latest, windows-latest]
+        target: [x86_64-unknown-linux-gnu, armv7-unknown-linux-gnueabihf, aarch64-unknown-linux-gnu]
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install dependencies for cross-compilation (ubuntu only)
+        if: matrix.platform == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential curl pkg-config \
+            libssl-dev$(if [[ ${{ matrix.target }} == "armv7-unknown-linux-gnueabihf" ]]; then echo ":armhf"; elif [[ ${{ matrix.target }} == "aarch64-unknown-linux-gnu" ]]; then echo ":arm64"; else echo ""; fi) \
+            $(if [[ ${{ matrix.target }} == "armv7-unknown-linux-gnueabihf" ]]; then echo "gcc-arm-linux-gnueabihf"; elif [[ ${{ matrix.target }} == "aarch64-unknown-linux-gnu" ]]; then echo "gcc-aarch64-linux-gnu"; else echo ""; fi)
+
+      - name: Rust setup
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Add Rust target for cross-compilation
+        if: matrix.platform == 'ubuntu-latest'
+        run: rustup target add ${{ matrix.target }}
+
+      - name: Build the project
+        run: |
+          if [[ ${{ matrix.platform }} == 'ubuntu-latest' ]]; then
+            cargo build --release --target ${{ matrix.target }}
+          else
+            cargo build --release
+          fi
+
+      - name: Package the release artifacts
+        run: |
+          mkdir -p dist
+          if [[ ${{ matrix.platform }} == 'ubuntu-latest' ]]; then
+            cp target/${{ matrix.target }}/release/raspirus dist/
+          else
+            cp target/release/raspirus dist/
+          fi
+
+      - name: Upload release assets
+        uses: actions/upload-artifact@v3
+        with:
+          name: raspirus-${{ matrix.platform }}-${{ matrix.target }}
+          path: dist/
+
+      - name: Create GitHub Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref_name }}
+          release_name: 'Raspirus v${{ github.ref_name }}'
+          body: 'See the assets to download and install this version.'
+          draft: true
+          prerelease: false
