@@ -71,7 +71,7 @@ jobs:
           mv "${BIN_OUTPUT}" "./dist/${BIN_RELEASE}"
 
       - name: Upload release assets
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: raspirus-${{ matrix.name }}-${{ matrix.target }}
           path: dist/${BIN_RELEASE}/${BIN_OUTPUT}
