@@ -16,8 +16,6 @@ jobs:
             triple: armv7-unknown-linux-gnueabihf
             dir: armhf
     runs-on: ubuntu-latest
-    outputs:
-      docker_files: ${{ steps.collect_docker_files.outputs.files }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
