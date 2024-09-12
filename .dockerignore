@@ -1,12 +1,9 @@
 .github/
 .vscode/
 target/
-docker/
 .gitignore
 snapcraft.yaml
 Makefile
 CHANGELOG.md
 CODE_OF_CONDUCT.md
-codecov.yml
 renovate.json
-snapcraft.yaml

@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
 
 env:
-  VERSION: 1.2.1
+  VERSION: 1.2.2
 
 jobs:
   release:
@@ -39,6 +39,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           draft: true
+          generate_release_notes: true
           tag_name: Raspirus v${{ env.VERSION }}
           files: |
             ${{ matrix.platform == 'macos-latest' && 'target/release/Raspirus.app' || '' }}
