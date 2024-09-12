@@ -38,7 +38,12 @@ jobs:
       - name: Install Rust target
         run: rustup target add ${{ matrix.target }}
 
+      - name: Set environment variables
+        run: echo "PKG_CONFIG_SYSROOT_DIR=${{ matrix.sysroot }}" >> $GITHUB_ENV
+
       - name: Build Rust project
+        env:
+          PKG_CONFIG_SYSROOT_DIR: ${{ matrix.sysroot }}
         run: cargo build --release --target ${{ matrix.target }}
 
       - name: Package the build
