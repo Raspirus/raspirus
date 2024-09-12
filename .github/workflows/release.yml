@@ -5,6 +5,9 @@ on:
       - 'v*'
   workflow_dispatch:
 
+env:
+  VERSION: 1.2.1
+
 jobs:
   release:
     permissions: write-all
@@ -34,3 +37,17 @@ jobs:
 
       - name: Package Binary
         run: cargo packager --release --verbose
+      
+      - name: Release to GitHub
+        uses: softprops/action-gh-release@v2
+        with:
+          draft: true
+          tag_name: Raspirus v${{ env.VERSION }}
+          files: |
+            ${{ matrix.platform == 'macos-latest' && 'target/release/Raspirus.app' || '' }}
+            ${{ matrix.platform == 'macos-latest' && 'target/release/Raspirus_${{ env.VERSION }}_aarch64.dmg' || '' }}
+            ${{ matrix.platform == 'ubuntu-latest' && 'target/release/PKGBUILD' || '' }}
+            ${{ matrix.platform == 'ubuntu-latest' && 'target/release/raspirus_${{ env.VERSION }}_amd64.deb' || '' }}
+            ${{ matrix.platform == 'ubuntu-latest' && 'target/release/raspirus_${{ env.VERSION }}_x86_64.AppImage' || '' }}
+            ${{ matrix.platform == 'windows-latest' && 'target/release/raspirus_${{ env.VERSION }}_x64_en-US.msi' || '' }}
+            ${{ matrix.platform == 'windows-latest' && 'target/release/raspirus_${{ env.VERSION }}_x64-setup.exe' || '' }}

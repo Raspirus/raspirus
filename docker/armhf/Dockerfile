@@ -15,7 +15,7 @@ RUN apt-get update && apt-get install -y libwebkit2gtk-4.1-dev \
                                            libssl-dev \
                                            libayatana-appindicator3-dev \
                                            librsvg2-dev \
-                                           gcc-aarch64-linux-gnu \
+                                           gcc-arm-linux-gnueabihf \
 
 # Add architecture
 RUN dpkg --add-architecture armhf \
