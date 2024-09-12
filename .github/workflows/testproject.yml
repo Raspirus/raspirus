@@ -16,17 +16,9 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Install dependencies
-      run: sudo apt-get update && sudo apt-get install -y libwebkit2gtk-4.1-dev build-essential curl wget file libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev
-    - name: Create necessary dist directory
-      run: mkdir dist
+      run: sudo apt-get update && sudo apt-get install -y build-essential curl libssl-dev pkg-config
     - name: Install Rust
       run: rustup update stable
-    - name: Install app dependencies
-      run: cargo install tauri-cli trunk
-    - name: Install submodule src-tauri
-      run: cargo install --path src-tauri/
-    - name: Install wasm target
-      run: rustup target add wasm32-unknown-unknown
     - name: Build
       run: cargo build --verbose
     - name: Run tests
