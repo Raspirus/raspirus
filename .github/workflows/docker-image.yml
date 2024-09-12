@@ -1,46 +1,56 @@
-name: Docker Image CI
+name: Rust Cross-Compile CI
 
 on:
   workflow_dispatch:
+
 env:
   VERSION: 1.2.1
+
 jobs:
-  build_docker:
+  build:
     strategy:
       matrix:
         include:
-          - arch: arm64
-            triple: aarch64-unknown-linux-gnu
-            dir: arm
-          - arch: armhf
-            triple: armv7-unknown-linux-gnueabihf
-            dir: armhf
+          - arch: aarch64
+            target: aarch64-unknown-linux-gnu
+            sysroot: /usr/aarch64-linux-gnu/
+          - arch: armv7
+            target: armv7-unknown-linux-gnueabihf
+            sysroot: /usr/arm-linux-gnueabihf/
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Build the Docker image
-        run: docker build -t raspirus-${{ matrix.dir }} -f ./docker/${{ matrix.dir }}/Dockerfile .
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            pkg-config \
+            build-essential \
+            curl \
+            libssl-dev \
+            gcc-${{ matrix.arch }}-linux-gnu \
+            g++-${{ matrix.arch }}-linux-gnu
 
-      - name: Create the Docker container
-        run: docker create --name raspirus raspirus-${{ matrix.dir }}
+      - name: Install Rust target
+        run: rustup target add ${{ matrix.target }}
+
+      - name: Build Rust project
+        run: cargo build --release --target ${{ matrix.target }}
+
+      - name: Package the build
+        run: cargo install cargo-packager --locked
 
       - name: Create output folder
         run: mkdir -p ./output
 
-      - name: List Docker release files
-        run: docker exec raspirus ls /usr/app/raspirus/target/${{ matrix.triple }}/release/
+      - name: List release files
+        run: ls target/${{ matrix.target }}/release/
 
-      - name: List Docker bundle files
-        run: docker exec raspirus ls /usr/app/raspirus/target/${{ matrix.triple }}/release/bundle/
+      - name: Copy files to output
+        run: cp target/${{ matrix.target }}/release/bundle/deb/raspirus_${{ env.VERSION }}_${{ matrix.arch }}.deb ./output/
 
-      - name: List Docker deb files
-        run: docker exec raspirus ls /usr/app/raspirus/target/${{ matrix.triple }}/release/bundle/deb/
-
-      - name: Copy file from Docker container
-        run: docker cp raspirus:/usr/app/raspirus/target/${{ matrix.triple }}/release/bundle/deb/raspirus_${{ env.VERSION }}_${{ matrix.arch }}.deb ./output/
-
-      - name: Collect Docker output
-        id: collect_docker_files
+      - name: Collect build artifacts
+        id: collect_build_files
         run: echo "files=./output/raspirus_${{ env.VERSION }}_${{ matrix.arch }}.deb" >> $GITHUB_ENV
