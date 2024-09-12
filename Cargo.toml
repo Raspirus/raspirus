@@ -43,3 +43,15 @@ windows-sys = { version = "0.59.0", features = [
     "Win32_System_Console",
 ] }
 winapi = "0.3.9"
+
+[target.armv7-unknown-linux-gnueabihf]
+pre-build = [
+  "dpkg --add-architecture armv7-unknown-linux-gnueabihf",
+  "apt-get update && apt-get --assume-yes install libssl-dev:armhf"
+]
+
+[target.aarch64-unknown-linux-gnu]
+pre-build = [
+  "dpkg --add-architecture aarch64-unknown-linux-gnu",
+  "apt-get update && apt-get --assume-yes install libssl-dev:arm64"
+]

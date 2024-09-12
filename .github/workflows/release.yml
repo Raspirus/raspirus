@@ -1,78 +1,77 @@
-name: Release build
+name: Build
 on:
-  push:
-    tags:
-      - 'v*'
-  workflow_dispatch:
+    workflow_dispatch:
+env:
+  # The project name specified in your Cargo.toml
+  PROJECT_NAME: raspirus
 
 jobs:
-  release:
+  build:
+    # Set the job to run on the platform specified by the matrix below
+    runs-on: ${{ matrix.runner }}
     permissions: write-all
+ 
+    # Define the build matrix for cross-compilation
     strategy:
       fail-fast: false
       matrix:
-        platform: [macos-latest, ubuntu-latest, windows-latest]
-        target: [x86_64-unknown-linux-gnu, armv7-unknown-linux-gnueabihf, aarch64-unknown-linux-gnu]
-    runs-on: ${{ matrix.platform }}
+        include:
+          - name: linux-amd64
+            runner: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+          - name: linux-arm64
+            runner: ubuntu-latest
+            target: aarch64-unknown-linux-gnu
+          - name: linux-arm32
+            runner: ubuntu-latest
+            target: armv7-unknown-linux-gnueabihf
+          - name: win-amd64
+            runner: windows-latest
+            target: x86_64-pc-windows-msvc
+          - name: macos-amd64
+            runner: macos-latest
+            target: x86_64-apple-darwin
+          - name: macos-arm64
+            runner: macos-latest
+            target: aarch64-apple-darwin
+ 
+    # The steps to run for each matrix item
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-    
-      - name: Prepare system for cross-compilation (ubuntu only)
-        if: matrix.platform == 'ubuntu-latest' && matrix.target != 'x86_64-unknown-linux-gnu'
-        run: |
-          if [[ ${{ matrix.target }} == "aarch64-unknown-linux-gnu" ]]; then
-            sudo dpkg --add-architecture arm64
-          elif [[ ${{ matrix.target }} == "armv7-unknown-linux-gnueabihf" ]]; then
-            sudo dpkg --add-architecture armhf
-          fi
-          sudo apt-get update
-
-      - name: Install dependencies for cross-compilation (ubuntu only)
-        if: matrix.platform == 'ubuntu-latest'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y build-essential curl pkg-config \
-            libssl-dev$(if [[ ${{ matrix.target }} == "armv7-unknown-linux-gnueabihf" ]]; then echo ":armhf"; elif [[ ${{ matrix.target }} == "aarch64-unknown-linux-gnu" ]]; then echo ":arm64"; else echo ""; fi) \
-            $(if [[ ${{ matrix.target }} == "armv7-unknown-linux-gnueabihf" ]]; then echo "gcc-arm-linux-gnueabihf"; elif [[ ${{ matrix.target }} == "aarch64-unknown-linux-gnu" ]]; then echo "gcc-aarch64-linux-gnu"; else echo ""; fi)
-
-      - name: Rust setup
+      - name: Checkout
+        uses: actions/checkout@v3
+ 
+      - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
-
-      - name: Add Rust target for cross-compilation
-        if: matrix.platform == 'ubuntu-latest'
-        run: rustup target add ${{ matrix.target }}
-
-      - name: Build the project
+        with:
+          targets: "${{ matrix.target }}"
+ 
+      - name: Setup Cache
+        uses: Swatinem/rust-cache@v2
+ 
+      - name: Build Binary
+        run: cargo build --verbose --locked --release --target ${{ matrix.target }}
+ 
+      - name: Release Binary
+        shell: bash
         run: |
-          if [[ ${{ matrix.platform }} == 'ubuntu-latest' ]]; then
-            cargo build --release --target ${{ matrix.target }}
-          else
-            cargo build --release
+          BIN_SUFFIX=""
+          if [[ "${{ matrix.runner }}" == "windows-latest" ]]; then
+            BIN_SUFFIX=".exe"
           fi
-
-      - name: Package the release artifacts
-        run: |
+ 
+          # The built binary output location
+          BIN_OUTPUT="target/${{ matrix.target }}/release/${PROJECT_NAME}${BIN_SUFFIX}"
+ 
+          # Define a better name for the final binary
+          BIN_RELEASE="${PROJECT_NAME}-${{ matrix.name }}${BIN_SUFFIX}"
+          BIN_RELEASE_VERSIONED="${PROJECT_NAME}-${{ github.ref_name }}-${{ matrix.name }}${BIN_SUFFIX}"
+ 
+          # Move the built binary where you want it
           mkdir -p dist
-          if [[ ${{ matrix.platform }} == 'ubuntu-latest' ]]; then
-            cp target/${{ matrix.target }}/release/raspirus dist/
-          else
-            cp target/release/raspirus dist/
-          fi
+          mv "${BIN_OUTPUT}" "./dist/${BIN_RELEASE}"
 
       - name: Upload release assets
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v3
         with:
-          name: raspirus-${{ matrix.platform }}-${{ matrix.target }}
-          path: dist/
-
-      - name: Create GitHub Release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ github.ref_name }}
-          release_name: 'Raspirus v${{ github.ref_name }}'
-          body: 'See the assets to download and install this version.'
-          draft: true
-          prerelease: false
+          name: raspirus-${{ matrix.name }}-${{ matrix.target }}
+          path: dist/${BIN_RELEASE}/${BIN_OUTPUT}
