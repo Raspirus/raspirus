@@ -10,7 +10,7 @@ RUN apt-get update && apt-get install -y pkg-config \
                                            build-essential \
                                            curl \
                                            libssl-dev \
-                                           gcc-arm-linux-gnueabihf \
+                                           gcc-arm-linux-gnueabihf
 
 # Add architecture
 RUN dpkg --add-architecture armhf \
