@@ -51,12 +51,14 @@ jobs:
       - name: Install deps for cross-compile
         run: |
           if [[ "${{ matrix.target }}" == "armv7-unknown-linux-gnueabihf" ]]; then
-              dpkg --add-architecture armv7-unknown-linux-gnueabihf
-              apt-get update && apt-get --assume-yes install libssl-dev:armhf
+              sudo dpkg --add-architecture armv7-unknown-linux-gnueabihf
+              sudo apt-get update && apt-get --assume-yes install libssl-dev:armhf
+              rustup target add armv7-unknown-linux-gnueabihf
           fi
           if [[ "${{ matrix.target }}" == "aarch64-unknown-linux-gnu" ]]; then
-              dpkg --add-architecture aarch64-unknown-linux-gnu
-              apt-get update && apt-get --assume-yes install libssl-dev:arm64
+              sudo dpkg --add-architecture aarch64-unknown-linux-gnu
+              sudo apt-get update && apt-get --assume-yes install libssl-dev:arm64
+              rustup target add aarch64-unknown-linux-gnu
           fi
  
       - name: Build Binary
@@ -80,6 +82,9 @@ jobs:
           # Move the built binary where you want it
           mkdir -p dist
           mv "${BIN_OUTPUT}" "./dist/${BIN_RELEASE}"
+    
+      - name: List artifacts
+        run: ls -la dist
 
       - name: Upload release assets
         uses: actions/upload-artifact@v4
