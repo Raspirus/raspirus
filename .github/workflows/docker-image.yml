@@ -16,14 +16,21 @@ jobs:
             target: aarch64-unknown-linux-gnu
             apt: gcc-aarch64-linux-gnu
             sysroot: /usr/aarch64-linux-gnu/
+            pkg_arch: arm64
           - arch: armv7
             target: armv7-unknown-linux-gnueabihf
             apt: gcc-arm-linux-gnueabihf
             sysroot: /usr/arm-linux-gnueabihf/
+            pkg_arch: armhf
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Add target architecture
+        run: |
+          sudo dpkg --add-architecture ${{ matrix.pkg_arch }}
+          sudo apt-get update
 
       - name: Install dependencies
         run: |
@@ -33,7 +40,8 @@ jobs:
             build-essential \
             curl \
             libssl-dev \
-            ${{ matrix.apt }}
+            ${{ matrix.apt }} \
+            libssl-dev:${{ matrix.pkg_arch }}
 
       - name: Install Rust target
         run: rustup target add ${{ matrix.target }}
@@ -46,8 +54,11 @@ jobs:
           PKG_CONFIG_SYSROOT_DIR: ${{ matrix.sysroot }}
         run: cargo build --release --target ${{ matrix.target }}
 
-      - name: Package the build
+      - name: Install packager
         run: cargo install cargo-packager --locked
+
+      - name: Package the build
+        run: cargo packager --release --verbose
 
       - name: Create output folder
         run: mkdir -p ./output
