@@ -64,9 +64,21 @@ jobs:
               sudo apt-get update && sudo apt-get --assume-yes install libssl-dev:arm64
               rustup target add aarch64-unknown-linux-gnu
           fi
+      
+      - name: Install App Packager
+        run: cargo install cargo-packager --locked
  
       - name: Build Binary
         run: cargo build --verbose --locked --release --target ${{ matrix.target }}
+
+      - name: Create dist directory
+        run: mkdir -p dist
+      
+      - name: Package Binary
+        run: cargo packager --release
+      
+      - name: List files
+        run: ls -la dist
  
       - name: Release Binary
         shell: bash
