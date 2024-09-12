@@ -1,5 +1,9 @@
 name: Rust Cross-Compile CI
 
+# WARNING: This workflow is broken!
+# armhf seems to not be supported and arm64 is failing with linker issues
+# armhf issue: https://github.com/bytecodealliance/wasmtime/issues/5182#issuecomment-1300905007
+
 on:
   workflow_dispatch:
 

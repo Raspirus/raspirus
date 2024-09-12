@@ -1,26 +1,18 @@
 name: Release build
-
 on:
-  push:
-    tags:
-      - 'v*'
   workflow_dispatch:
 
 env:
   VERSION: 1.2.1
 
 jobs:
-  build:
+  release:
     permissions: write-all
     strategy:
       fail-fast: false
       matrix:
         platform: [macos-latest, ubuntu-latest, windows-latest]
     runs-on: ${{ matrix.platform }}
-    outputs:
-      macos_files: ${{ steps.collect_files_macos.outputs.files }}
-      ubuntu_files: ${{ steps.collect_files_ubuntu.outputs.files }}
-      windows_files: ${{ steps.collect_files_windows.outputs.files }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -39,114 +31,20 @@ jobs:
 
       - name: Install app dependencies
         run: cargo install cargo-packager --locked
-      
-      - name: Build Binary
-        run: cargo build --release --verbose
 
       - name: Package Binary
         run: cargo packager --release --verbose
-
-      - name: Collect files (macOS)
-        id: collect_files_macos
-        if: matrix.platform == 'macos-latest'
-        run: echo "files=target/release/Raspirus.app target/release/Raspirus_${{ env.VERSION }}_aarch64.dmg" >> $GITHUB_ENV
-        outputs:
-          files: ${{ env.files }}
-
-      - name: Collect files (Ubuntu)
-        id: collect_files_ubuntu
-        if: matrix.platform == 'ubuntu-latest'
-        run: echo "files=target/release/PKGBUILD target/release/raspirus_${{ env.VERSION }}_amd64.deb target/release/raspirus_${{ env.VERSION }}_x86_64.AppImage" >> $GITHUB_ENV
-        outputs:
-          files: ${{ env.files }}
-
-      - name: Collect files (Windows)
-        id: collect_files_windows
-        if: matrix.platform == 'windows-latest'
-        run: echo "files=target\\release\\raspirus_${{ env.VERSION }}_x64_en-US.msi target\\release\\raspirus_${{ env.VERSION }}_x64-setup.exe" >> $GITHUB_ENV
-        outputs:
-          files: ${{ env.files }}
-
-  docker_build:
-    needs: build
-    strategy:
-      matrix:
-        include:
-          - arch: arm64
-            triple: aarch64-unknown-linux-gnu
-            dir: arm
-          - arch: armhf
-            triple: armv7-unknown-linux-gnueabihf
-            dir: armhf
-    runs-on: ubuntu-latest
-    outputs:
-      docker_files: ${{ steps.collect_docker_files.outputs.files }}
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Build the Docker image
-        run: docker build -t raspirus-${{ matrix.dir }} -f ./docker/${{ matrix.dir }}/Dockerfile .
-
-      - name: Create the Docker container
-        run: docker create --name raspirus raspirus-${{ matrix.dir }}
-
-      - name: Create output folder
-        run: mkdir -p ./output
-
-      - name: List Docker release files
-        run: docker exec raspirus ls /usr/app/raspirus/target/${{ matrix.triple }}/release/
-
-      - name: List Docker bundle files
-        run: docker exec raspirus ls /usr/app/raspirus/target/${{ matrix.triple }}/release/bundle/
-
-      - name: List Docker deb files
-        run: docker exec raspirus ls /usr/app/raspirus/target/${{ matrix.triple }}/release/bundle/deb/
-
-      - name: Copy file from Docker container
-        run: docker cp raspirus:/usr/app/raspirus/target/${{ matrix.triple }}/release/bundle/deb/raspirus_${{ env.VERSION }}_${{ matrix.arch }}.deb ./output/
-
-      - name: Collect Docker output
-        id: collect_docker_files
-        run: echo "files=./output/raspirus_${{ env.VERSION }}_${{ matrix.arch }}.deb" >> $GITHUB_ENV
-        outputs:
-          files: ${{ env.files }}
-
-  release:
-    needs: [build, docker_build]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Release to GitHub (macOS)
-        if: ${{ needs.build.outputs.macos_files != '' }}
+      
+      - name: Release to GitHub
         uses: softprops/action-gh-release@v2
         with:
           draft: true
           tag_name: Raspirus v${{ env.VERSION }}
-          files: ${{ needs.build.outputs.macos_files }}
-
-      - name: Release to GitHub (Ubuntu)
-        if: ${{ needs.build.outputs.ubuntu_files != '' }}
-        uses: softprops/action-gh-release@v2
-        with:
-          draft: true
-          tag_name: Raspirus v${{ env.VERSION }}
-          files: ${{ needs.build.outputs.ubuntu_files }}
-
-      - name: Release to GitHub (Windows)
-        if: ${{ needs.build.outputs.windows_files != '' }}
-        uses: softprops/action-gh-release@v2
-        with:
-          draft: true
-          tag_name: Raspirus v${{ env.VERSION }}
-          files: ${{ needs.build.outputs.windows_files }}
-
-      - name: Release to GitHub (Docker)
-        if: ${{ needs.docker_build.outputs.docker_files != '' }}
-        uses: softprops/action-gh-release@v2
-        with:
-          draft: true
-          tag_name: Raspirus v${{ env.VERSION }}
-          files: ${{ needs.docker_build.outputs.docker_files }}
+          files: |
+            ${{ matrix.platform == 'macos-latest' && 'target/release/Raspirus.app' || '' }}
+            ${{ matrix.platform == 'macos-latest' && 'target/release/Raspirus_*_aarch64.dmg' || '' }}
+            ${{ matrix.platform == 'ubuntu-latest' && 'target/release/PKGBUILD' || '' }}
+            ${{ matrix.platform == 'ubuntu-latest' && 'target/release/raspirus_*_amd64.deb' || '' }}
+            ${{ matrix.platform == 'ubuntu-latest' && 'target/release/raspirus_*_x86_64.AppImage' || '' }}
+            ${{ matrix.platform == 'windows-latest' && 'target/release/raspirus_*_x64_en-US.msi' || '' }}
+            ${{ matrix.platform == 'windows-latest' && 'target/release/raspirus_*_x64-setup.exe' || '' }}
