@@ -43,3 +43,16 @@ windows-sys = { version = "0.59.0", features = [
     "Win32_System_Console",
 ] }
 winapi = "0.3.9"
+
+
+[package.metadata.packager]
+name = "raspirus"
+product-name = "Raspirus"
+identifier = "com.raspirus.app"
+version = "1.2.1"
+category = "Utility"
+homepage = "https://raspirus.deno.dev"
+icons = ["src/assets/logo-vector.svg"]
+licenseFile = "LICENSE"
+formats = ["all"]
+before-packaging-command = "cargo build --release"
