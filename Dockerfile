@@ -6,26 +6,13 @@ COPY . .
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get clean && apt-get update && apt-get upgrade -y
-RUN apt-get update && apt-get install -y libwebkit2gtk-4.1-dev \
+RUN apt-get update && apt-get install -y pkg-config \
                                            build-essential \
                                            curl \
-                                           wget \
-                                           file \
-                                           libxdo-dev \
-                                           libssl-dev \
-                                           libayatana-appindicator3-dev \
-                                           librsvg2-dev
+                                           libssl-dev
 
-# Create the out directory
-RUN mkdir dist
+# Install Rust packager
+RUN cargo install cargo-packager --locked
 
-# Add the rust toolchain
-RUN rustup target add wasm32-unknown-unknown
-
-# Install app deps
-RUN cargo install tauri-cli
-RUN cargo install trunk
-RUN cargo install --path src-tauri/
-
-# Build app
-RUN cargo tauri build -b deb
+# Package app
+RUN cargo packager --release --verbose

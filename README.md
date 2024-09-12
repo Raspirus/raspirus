@@ -1,8 +1,7 @@
 ![Discord](https://img.shields.io/discord/1132753101485514774?logo=discord&label=Join%20the%20Discord)
 [![Test](https://github.com/Raspirus/Raspirus/actions/workflows/testproject.yml/badge.svg)](https://github.com/Raspirus/Raspirus/actions/workflows/testproject.yml)
-[![Codecov](https://codecov.io/gh/Raspirus/Raspirus/branch/main/graph/badge.svg?token=0GFFWY7YBP)](https://codecov.io/gh/Raspirus/Raspirus)
 ![GitHub downloads](https://img.shields.io/github/downloads/Raspirus/Raspirus/total?label=Downloads)
-[![Static Badge](https://img.shields.io/badge/Contact_Us-Gmail-red?style=flat&logo=gmail)](mailto:raspirus.dev@gmail.com)
+[![Gmail](https://img.shields.io/badge/Contact_Us-Gmail-red?style=flat&logo=gmail)](mailto:raspirus.dev@gmail.com)
 [![Say Thanks!](https://img.shields.io/badge/Say%20Thanks-!-1EAEDB.svg)](https://saythanks.io/to/Benji377)
 
 # :rocket: Raspirus

@@ -30,32 +30,18 @@ install:
 	    echo "source \$$HOME/.cargo/env" >> $(HOME)/.bashrc; \
 	    echo "Appended source to ~/.bashrc"; \
 	fi
-	@printf "$(TEXT)🌔 >>>> Installing Tauri deps$(RESET)"
-	sudo apt-get install -y libwebkit2gtk-4.1-dev \
+	@printf "$(TEXT)🌔 >>>> Installing system deps$(RESET)"
+	sudo apt-get install -y pkg-config \
                               build-essential \
-                              curl \
-                              wget \
-                              file \
-                              libxdo-dev \
-                              libssl-dev \
-                              libayatana-appindicator3-dev \
-                              librsvg2-dev
-	@printf "$(TEXT)🌕 >>>> Installing Tauri$(RESET)"
-	source $(HOME)/.cargo/env && cargo install tauri-cli
-	@printf "$(TEXT)🌖 >>>> Adding WASM target$(RESET)"
-	rustup target add wasm32-unknown-unknown
-	@printf "$(TEXT)🌗 >>>> Installing Trunk$(RESET)"
-    source $(HOME)/.cargo/env && cargo install trunk
-	@printf "$(TEXT)🌗 >>>> Setting up required folders$(RESET)"
-	mkdir -p dist
-	@printf "$(TEXT)🌘 >>>> Compiling src-tauri module$(RESET)"
-    source $(HOME)/.cargo/env && cargo install --path src-tauri/
+                              libssl-dev
+	@printf "$(TEXT)🌕 >>>> Checking project$(RESET)"
+    source $(HOME)/.cargo/env && cargo check
 	@printf "$(TEXT)🎉 >>>> Done!$(RESET)"
 
 build:
 	@clear
 	@printf "$(TEXT)>>>> Building release$(RESET)"
-	cargo tauri build
+	cargo build --release --verbose
 	@printf "$(TEXT)>>>> Done!$(RESET)"
 
 test:

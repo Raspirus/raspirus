@@ -44,6 +44,7 @@ Our release schedule is designed to balance feature development, stability, and 
 | 1.1.3   | Improved updater speed and transfered to GitHub signatures |
 | 1.2.0   | Fixed Bugs and added Patch functionality                   |
 | 1.2.1   | Minor bug fixes                                            |
+| 1.2.2   | Highly experimental build with new Rust toolchain          |
 
 
 Please refer to this change log for details on each version's changes and improvements. We appreciate your feedback and contributions as we continue to enhance our antivirus application to meet your security needs.
