@@ -44,5 +44,3 @@ jobs:
       - name: Collect Docker output
         id: collect_docker_files
         run: echo "files=./output/raspirus_${{ env.VERSION }}_${{ matrix.arch }}.deb" >> $GITHUB_ENV
-        outputs:
-          files: ${{ env.files }}
