@@ -55,4 +55,4 @@ homepage = "https://raspirus.deno.dev"
 icons = ["src/assets/logo.png"]
 licenseFile = "LICENSE"
 formats = ["all"]
-before-packaging-command = "cargo build --release"
+#before-packaging-command = "cargo build --release"
