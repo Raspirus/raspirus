@@ -27,6 +27,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Clean install Debian packages
+        run: sudo apt-get clean && sudo apt-get update && sudo apt-get upgrade -y
+
       - name: Add target architecture
         run: |
           sudo dpkg --add-architecture ${{ matrix.pkg_arch }}
@@ -42,6 +45,12 @@ jobs:
             libssl-dev \
             ${{ matrix.apt }} \
             libssl-dev:${{ matrix.pkg_arch }}
+
+      - name: Rust setup
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Rust cache
+        uses: swatinem/rust-cache@v2
 
       - name: Install Rust target
         run: rustup target add ${{ matrix.target }}
