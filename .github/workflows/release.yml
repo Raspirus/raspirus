@@ -1,4 +1,4 @@
-name: Build
+name: Release Build
 on:
     workflow_dispatch:
 env:
@@ -92,11 +92,11 @@ jobs:
           mkdir -p dist
           mv "${BIN_OUTPUT}" "./dist/${BIN_RELEASE}"
 
-      - name: Package Binary
-        run: cargo packager --release
-      
       - name: List files
         run: ls -la dist
+
+      - name: Package Binary
+        run: cargo packager --release --verbose
 
       - name: Upload release assets
         uses: actions/upload-artifact@v4
