@@ -52,12 +52,12 @@ jobs:
         run: |
           if [[ "${{ matrix.target }}" == "armv7-unknown-linux-gnueabihf" ]]; then
               sudo dpkg --add-architecture armv7-unknown-linux-gnueabihf
-              sudo apt-get update && apt-get --assume-yes install libssl-dev:armhf
+              sudo apt-get update && sudo apt-get --assume-yes install libssl-dev:armhf
               rustup target add armv7-unknown-linux-gnueabihf
           fi
           if [[ "${{ matrix.target }}" == "aarch64-unknown-linux-gnu" ]]; then
               sudo dpkg --add-architecture aarch64-unknown-linux-gnu
-              sudo apt-get update && apt-get --assume-yes install libssl-dev:arm64
+              sudo apt-get update && sudo apt-get --assume-yes install libssl-dev:arm64
               rustup target add aarch64-unknown-linux-gnu
           fi
  
@@ -96,4 +96,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: raspirus-${{ matrix.name }}-${{ matrix.target }}
-          path: dist/${BIN_RELEASE}/${BIN_OUTPUT}
+          path: dist/raspirus-${{ matrix.name }}${BIN_SUFFIX}
