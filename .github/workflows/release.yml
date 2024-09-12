@@ -51,12 +51,14 @@ jobs:
       - name: Install deps for cross-compile
         run: |
           if [[ "${{ matrix.target }}" == "armv7-unknown-linux-gnueabihf" ]]; then
-              sudo dpkg --add-architecture armv7-unknown-linux-gnueabihf
+              sudo apt-get --assume-yes install gcc-arm-linux-gnueabihf
+              sudo dpkg --add-architecture armhf
               sudo apt-get update && sudo apt-get --assume-yes install libssl-dev:armhf
               rustup target add armv7-unknown-linux-gnueabihf
           fi
           if [[ "${{ matrix.target }}" == "aarch64-unknown-linux-gnu" ]]; then
-              sudo dpkg --add-architecture aarch64-unknown-linux-gnu
+              sudo apt-get --assume-yes install gcc-aarch64-linux-gnu
+              sudo dpkg --add-architecture arm64
               sudo apt-get update && sudo apt-get --assume-yes install libssl-dev:arm64
               rustup target add aarch64-unknown-linux-gnu
           fi
@@ -71,6 +73,8 @@ jobs:
           if [[ "${{ matrix.runner }}" == "windows-latest" ]]; then
             BIN_SUFFIX=".exe"
           fi
+
+          echo "BIN_SUFFIX=${BIN_SUFFIX}" >> $GITHUB_ENV
  
           # The built binary output location
           BIN_OUTPUT="target/${{ matrix.target }}/release/${PROJECT_NAME}${BIN_SUFFIX}"
@@ -96,4 +100,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: raspirus-${{ matrix.name }}-${{ matrix.target }}
-          path: dist/raspirus-${{ matrix.name }}${BIN_SUFFIX}
+          path: dist/raspirus-${{ matrix.name }}${{ env.BIN_SUFFIX }}
