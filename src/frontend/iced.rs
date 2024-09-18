@@ -6,7 +6,7 @@ use crate::backend::yara_scanner::{Skipped, TaggedFile, YaraScanner};
 use log::{debug, error, info, trace, warn};
 use std::fmt::Display;
 use std::str::FromStr;
-use std::sync::mpsc::{Sender, Receiver, self};
+use std::sync::mpsc::{self, Receiver, Sender};
 use std::{
     path::PathBuf,
     sync::{Arc, Mutex},
@@ -24,10 +24,7 @@ pub struct Raspirus {
     pub language: String,
     pub scan_path: Option<PathBuf>,
     pub usb_devices: Vec<UsbDevice>,
-    pub scan_progress: (
-        ProgressSender,
-        ProgressReceiver,
-    ),
+    pub scan_progress: (ProgressSender, ProgressReceiver),
 }
 
 #[derive(Debug)]
@@ -545,10 +542,9 @@ impl iced::Application for Raspirus {
                                 selection: selection.clone(),
                             }
                         } else {
-                            let usbs = list_usb_drives().map(|usbs| {
+                            let usbs = list_usb_drives().inspect(|usbs| {
                                 self.usb_devices.clone_from(&usbs);
-                                usbs
-                            });
+                            });                            
                             let usb = usbs.unwrap_or_default().first().cloned();
                             self.state = State::MainMenu {
                                 expanded_language: *expanded_language,
