@@ -10,13 +10,16 @@ impl Raspirus {
         &self,
         tagged: Vec<(TaggedFile, bool)>,
         skipped: Vec<(Skipped, bool)>,
-        log_path: PathBuf
+        log_path: PathBuf,
     ) -> iced::Element<Message> {
         let top_row = iced::widget::Row::new()
-            .push(iced::widget::Button::new(
-                iced::widget::Text::new(iced_aw::Bootstrap::Download.to_string())
-                    .font(iced_aw::BOOTSTRAP_FONT),
-            ).on_press(Message::DownloadLog { log_path }))
+            .push(
+                iced::widget::Button::new(
+                    iced::widget::Text::new(iced_aw::Bootstrap::Download.to_string())
+                        .font(iced_aw::BOOTSTRAP_FONT),
+                )
+                .on_press(Message::DownloadLog { log_path }),
+            )
             .push(iced::widget::horizontal_space())
             .push(
                 iced::widget::Button::new(

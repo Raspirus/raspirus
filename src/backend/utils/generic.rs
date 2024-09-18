@@ -123,7 +123,7 @@ pub fn create_pdf(log_file: PathBuf) -> Result<PathBuf, String> {
 
     current_layer.set_text_cursor(printpdf::Mm(10.0), printpdf::Mm(PAGE_HEIGHT - 10.0));
     current_layer.set_line_height(FONT_SIZE + 2.0);
-    
+
     current_layer.write_text(format!("Log {timestamp}"), &font);
     current_layer.add_line_break();
     current_layer.add_line_break();
@@ -134,13 +134,16 @@ pub fn create_pdf(log_file: PathBuf) -> Result<PathBuf, String> {
     debug!("Determined lines per page should be {max_lines_page}");
 
     for (num, line) in std::io::BufReader::new(log).lines().enumerate() {
-        
         if (num + 2) % max_lines_page == 0 && num > 0 {
             // cleanup old page
             current_layer.end_text_section();
 
             debug!("Page end reached, creating new page at line {num}");
-            let (page, layer) = doc.add_page(printpdf::Mm(PAGE_WIDTH), printpdf::Mm(PAGE_HEIGHT), "Layer 1");
+            let (page, layer) = doc.add_page(
+                printpdf::Mm(PAGE_WIDTH),
+                printpdf::Mm(PAGE_HEIGHT),
+                "Layer 1",
+            );
 
             // prepare new page
             current_layer = doc.get_page(page).get_layer(layer);
