@@ -70,7 +70,8 @@ jobs:
         env:
           PKG_CONFIG_SYSROOT_DIR: ${{ matrix.sysroot }}
         run: |
-          cargo packager --release --verbose --config "{\"beforePackagingCommand\": \"cargo build --release --target ${{ matrix.target }}\"}"
+            cargo packager --release --verbose
+#          cargo packager --release --verbose --config "{\"beforePackagingCommand\": \"cargo build --release --target ${{ matrix.target }}\"}"
 
       - name: Create output folder
         run: mkdir -p ./output
