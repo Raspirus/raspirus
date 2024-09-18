@@ -1,13 +1,13 @@
 #[cfg(test)]
 mod tests {
     use regex::Regex;
-    use std::io::Write;
+    use std::{io::Write, path::Path};
 
     use crate::backend::file_log::FileLog;
 
     #[test]
     fn test_create_file() {
-        let log = FileLog::new("log.txt".to_owned()).unwrap();
+        let log = FileLog::new().unwrap();
 
         // Assert that the file is created
         assert!(log.file.is_some());
@@ -15,12 +15,13 @@ mod tests {
 
     #[test]
     fn test_log() {
-        let log = FileLog::new("log.txt".to_owned()).unwrap();
+        let log = FileLog::new().unwrap();
 
         // Log a hash and file path
         log.log(
-            "abc123".to_owned(),
-            "C:/Users/user/Desktop/file.txt".to_owned(),
+            Path::new("C:/Users/user/Desktop/file.txt").to_path_buf(),
+            1,
+            &Vec::new(),
         );
 
         // Assert that the log entry is written to the file
@@ -50,11 +51,10 @@ mod tests {
     }
 
     #[cfg(test)]
-    #[ctor::dtor]
     fn teardown() {
         use log::{error, info};
 
-        let log = FileLog::new("log.txt".to_owned()).unwrap();
+        let log = FileLog::new().unwrap();
         let file = log.file.unwrap();
 
         let mut output = Vec::new();

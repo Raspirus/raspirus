@@ -74,7 +74,10 @@ impl YaraScanner {
     }
 
     /// Starts the scanner in the specified location
-    pub async fn start(&self, path: PathBuf) -> Result<(Vec<TaggedFile>, Vec<Skipped>), String> {
+    pub async fn start(
+        &self,
+        path: PathBuf,
+    ) -> Result<(Vec<TaggedFile>, Vec<Skipped>, PathBuf), String> {
         if !path.exists() {
             return Err("Invalid path".to_owned());
         }
@@ -116,7 +119,9 @@ impl YaraScanner {
             .map_err(|err| format!("Failed to lock skipped: {err}"))?
             .clone();
 
-        Ok((tagged, skipped))
+        let logger = file_log.lock().expect("Failed to lock logger");
+        // return tagged and skipped files aswell as path to the scan log
+        Ok((tagged, skipped, logger.log_path.clone()))
     }
 
     fn evaluate_result(
@@ -149,19 +154,20 @@ impl YaraScanner {
             })
             && (pointers.config.max_matches == 0 || rule_count <= pointers.config.max_matches)
         {
-            let file_log_locked = file_log
+            let tagged_file = TaggedFile {
+                path: path.to_path_buf(),
+                descriptions,
+                rule_count,
+            };
+            let mut file_log_locked = file_log
                 .lock()
                 .map_err(|err| format!("Failed to lock file logger: {err}"))?;
-            file_log_locked.log(path.to_path_buf(), rule_count, &descriptions);
+            file_log_locked.log(&tagged_file);
             let mut tagged_locked = pointers
                 .tagged
                 .lock()
                 .map_err(|err| format!("Failed to lock tagged: {err}"))?;
-            tagged_locked.push(TaggedFile {
-                path: path.to_path_buf(),
-                descriptions,
-                rule_count,
-            })
+            tagged_locked.push(tagged_file)
         }
         Ok(())
     }

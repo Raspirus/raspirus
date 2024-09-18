@@ -75,6 +75,7 @@ fn main() -> Result<(), String> {
             .add_filter_ignore_str("wasmtime")
             .add_filter_ignore_str("aho_corasick")
             .build();
+
         // Terminal logger is always used if logging so we add it right away
         let mut loggers: Vec<Box<dyn simplelog::SharedLogger>> = vec![TermLogger::new(
             LOGGING_FILTER,
