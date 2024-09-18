@@ -679,6 +679,7 @@ impl iced::Application for Raspirus {
                 }
                 iced::Command::none()
             }
+            // start pdf generation
             Message::DownloadLog { log_path } => iced::Command::perform(
                 async move {
                     match create_pdf(log_path) {
@@ -690,6 +691,7 @@ impl iced::Application for Raspirus {
                 },
                 |result| result,
             ),
+            // open pdf log
             Message::Downloaded { pdf_path } => iced::Command::perform(
                 async {
                     open::that(pdf_path).map_err(|message| ErrorCase::Warning {
