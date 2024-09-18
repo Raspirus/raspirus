@@ -515,8 +515,11 @@ impl iced::Application for Raspirus {
                                         .show_open_single_dir()
                                         .expect("Failed to select folder")
                                 },
-                                |result| Message::RequestLocation {
-                                    selection: LocationSelection::Folder { path: result },
+                                |result| match result {
+                                    None => Message::None,
+                                    Some(result) => Message::RequestLocation {
+                                        selection: LocationSelection::Folder { path: Some(result) },
+                                    },
                                 },
                             )
                         }
@@ -542,8 +545,11 @@ impl iced::Application for Raspirus {
                                         .show_open_single_file()
                                         .expect("Failed to select file")
                                 },
-                                |result| Message::RequestLocation {
-                                    selection: LocationSelection::Folder { path: result },
+                                |result| match result {
+                                    None => Message::None,
+                                    Some(result) => Message::RequestLocation {
+                                        selection: LocationSelection::Folder { path: Some(result) },
+                                    },
                                 },
                             )
                         }
@@ -571,7 +577,7 @@ impl iced::Application for Raspirus {
                         } else {
                             let usbs = list_usb_drives().inspect(|usbs| {
                                 self.usb_devices.clone_from(&usbs);
-                            });                            
+                            });
                             let usb = usbs.unwrap_or_default().first().cloned();
                             self.state = State::MainMenu {
                                 expanded_language: *expanded_language,
