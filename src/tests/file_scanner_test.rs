@@ -1,8 +1,6 @@
 #[cfg(test)]
 mod tests {
     use log::debug;
-
-    use crate::backend::scanner::Scanner;
     use std::env;
 
     const DB_FILE_LOC: &str = "signatures.db";
