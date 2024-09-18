@@ -1,6 +1,6 @@
 use crate::backend::config_file::Config;
 use crate::backend::downloader;
-use crate::backend::utils::generic::{generate_virustotal, update_config};
+use crate::backend::utils::generic::{create_pdf, generate_virustotal, update_config};
 use crate::backend::utils::usb_utils::{list_usb_drives, UsbDevice};
 use crate::backend::yara_scanner::{Skipped, TaggedFile, YaraScanner};
 use log::{debug, error, info, trace, warn};
@@ -50,6 +50,7 @@ pub enum State {
         // tagged / skipped files and if the file is expanded in the view
         tagged: Vec<(TaggedFile, bool)>,
         skipped: Vec<(Skipped, bool)>,
+        log: PathBuf,
     },
     Information,
 }
@@ -72,7 +73,7 @@ impl FromStr for LocationSelection {
     type Err = ();
 
     fn from_str(selection: &str) -> Result<Self, Self::Err> {
-        match selection {
+        match selection.trim() {
             _ if selection == iced_aw::Bootstrap::UsbDriveFill.to_string() => {
                 Ok(LocationSelection::Usb { usb: None })
             }
@@ -93,9 +94,12 @@ impl Display for LocationSelection {
             f,
             "{}",
             match self {
-                LocationSelection::Usb { .. } => iced_aw::Bootstrap::UsbDriveFill.to_string(),
-                LocationSelection::Folder { .. } => iced_aw::Bootstrap::FolderFill.to_string(),
-                LocationSelection::File { .. } => iced_aw::Bootstrap::FileEarmarkFill.to_string(),
+                LocationSelection::Usb { .. } =>
+                    format!(" {}", iced_aw::Bootstrap::UsbDriveFill.to_string()),
+                LocationSelection::Folder { .. } =>
+                    format!(" {}", iced_aw::Bootstrap::FolderFill.to_string()),
+                LocationSelection::File { .. } =>
+                    format!(" {}", iced_aw::Bootstrap::FileEarmarkFill.to_string()),
             }
         )
     }
@@ -108,6 +112,9 @@ pub enum Message {
     OpenInformation,
     OpenMain,
     // action messages
+    DownloadLog {
+        log_path: PathBuf,
+    },
     StartScan,
     Shutdown,
     ToggleLanguageSelection,
@@ -118,6 +125,9 @@ pub enum Message {
     },
     UpdateRules,
     // update messages
+    Downloaded {
+        pdf_path: PathBuf,
+    },
     LanguageChanged {
         language: String,
     },
@@ -135,6 +145,7 @@ pub enum Message {
     ScanComplete {
         tagged: Vec<(TaggedFile, bool)>,
         skipped: Vec<(Skipped, bool)>,
+        log: PathBuf,
     },
     ToggleCard {
         card: Card,
@@ -260,9 +271,10 @@ impl iced::Application for Raspirus {
                             .map_err(|err| ErrorCase::Critical { message: err })
                     },
                     |result| match result {
-                        Ok((tagged, skipped)) => Message::ScanComplete {
+                        Ok((tagged, skipped, log)) => Message::ScanComplete {
                             tagged: tagged.iter().map(|tag| (tag.clone(), false)).collect(),
                             skipped: skipped.iter().map(|skip| (skip.clone(), false)).collect(),
+                            log,
                         },
                         Err(err) => Message::Error { case: err },
                     },
@@ -333,8 +345,16 @@ impl iced::Application for Raspirus {
                 ),
             },
             // switch to result page
-            Message::ScanComplete { tagged, skipped } => {
-                self.state = State::Results { tagged, skipped };
+            Message::ScanComplete {
+                tagged,
+                skipped,
+                log,
+            } => {
+                self.state = State::Results {
+                    tagged,
+                    skipped,
+                    log,
+                };
                 iced::Command::none()
             }
             // update local scan percentage
@@ -344,7 +364,12 @@ impl iced::Application for Raspirus {
             }
             // toggle expansion of card in results screen
             Message::ToggleCard { card } => {
-                if let State::Results { tagged, skipped } = &self.state {
+                if let State::Results {
+                    tagged,
+                    skipped,
+                    log,
+                } = &self.state
+                {
                     self.state = match card {
                         Card::Skipped { card } => State::Results {
                             tagged: tagged.to_vec(),
@@ -358,6 +383,7 @@ impl iced::Application for Raspirus {
                                     }
                                 })
                                 .collect(),
+                            log: log.clone(),
                         },
                         Card::Tagged { card } => State::Results {
                             tagged: tagged
@@ -371,6 +397,7 @@ impl iced::Application for Raspirus {
                                 })
                                 .collect(),
                             skipped: skipped.to_vec(),
+                            log: log.clone(),
                         },
                     }
                 }
@@ -646,6 +673,28 @@ impl iced::Application for Raspirus {
                 }
                 iced::Command::none()
             }
+            Message::DownloadLog { log_path } => iced::Command::perform(
+                async move {
+                    match create_pdf(log_path) {
+                        Ok(pdf_path) => Message::Downloaded { pdf_path },
+                        Err(message) => Message::Error {
+                            case: ErrorCase::Warning { message },
+                        },
+                    }
+                },
+                |result| result,
+            ),
+            Message::Downloaded { pdf_path } => iced::Command::perform(
+                async {
+                    open::that(pdf_path).map_err(|message| ErrorCase::Warning {
+                        message: message.to_string(),
+                    })
+                },
+                |result: Result<(), ErrorCase>| match result {
+                    Ok(_) => Message::None,
+                    Err(err) => Message::Error { case: err },
+                },
+            ),
         }
     }
 
@@ -669,7 +718,11 @@ impl iced::Application for Raspirus {
             ),
             State::Scanning { percentage } => self.scanning(*percentage),
             State::Settings { config, update } => self.settings(config, update),
-            State::Results { tagged, skipped } => self.results(tagged.clone(), skipped.clone()),
+            State::Results {
+                tagged,
+                skipped,
+                log,
+            } => self.results(tagged.clone(), skipped.clone(), log.clone()),
             State::Information => self.information(),
         }
     }
