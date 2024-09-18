@@ -21,11 +21,12 @@ jobs:
             apt: gcc-aarch64-linux-gnu
             sysroot: /usr/aarch64-linux-gnu/
             pkg_arch: arm64
-          - arch: armv7
-            target: armv7-unknown-linux-gnueabihf
-            apt: gcc-arm-linux-gnueabihf
-            sysroot: /usr/arm-linux-gnueabihf/
-            pkg_arch: armhf
+# UNSUPPORTED with iced :(
+#          - arch: armv7
+#            target: armv7-unknown-linux-gnueabihf
+#            apt: gcc-arm-linux-gnueabihf
+#            sysroot: /usr/arm-linux-gnueabihf/
+#            pkg_arch: armhf
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -62,16 +63,14 @@ jobs:
       - name: Set environment variables
         run: echo "PKG_CONFIG_SYSROOT_DIR=${{ matrix.sysroot }}" >> $GITHUB_ENV
 
-      - name: Build Rust project
-        env:
-          PKG_CONFIG_SYSROOT_DIR: ${{ matrix.sysroot }}
-        run: cargo build --release --target ${{ matrix.target }}
-
       - name: Install packager
         run: cargo install cargo-packager --locked
 
       - name: Package the build
-        run: cargo packager --release --verbose
+        env:
+          PKG_CONFIG_SYSROOT_DIR: ${{ matrix.sysroot }}
+        run: |
+          cargo packager --release --verbose --config "{\"beforePackagingCommand\": \"cargo build --release --target ${{ matrix.target }}\"}"
 
       - name: Create output folder
         run: mkdir -p ./output
