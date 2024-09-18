@@ -53,5 +53,5 @@ homepage = "https://raspirus.deno.dev"
 icons = ["src/assets/logo.png"]
 licenseFile = "LICENSE"
 formats = ["all"]
-before-packaging-command = "cargo build --release"
+before-packaging-command = "cargo build --release --target aarch64-unknown-linux-gnu"
 # cargo packager --release --verbose --config '{\"beforePackagingCommand\": \"cargo check\"}'
