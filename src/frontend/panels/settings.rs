@@ -3,7 +3,11 @@ use crate::{
     frontend::{
         iced::{wrap, ConfigValue, Message, Raspirus, UpdateState},
         theme::{
-            button::{RaspirusButtonBlue, RaspirusButtonPrimary}, container::RaspirusCard, icon::{RaspirusSettingsIcon, RaspirusWhiteIcon}, toggle::RaspirusToggler, GRAY_COLOR, PRIMARY_COLOR
+            button::{RaspirusButtonBlue, RaspirusButtonPrimary},
+            container::RaspirusCard,
+            icon::{RaspirusSettingsIcon, RaspirusWhiteIcon},
+            toggle::RaspirusToggler,
+            GRAY_COLOR, PRIMARY_COLOR,
         },
     },
 };
@@ -80,29 +84,29 @@ impl Raspirus {
                         .push(
                             iced::widget::Button::new(
                                 iced::widget::Row::new()
-                                    .push(
-                                        iced::widget::Text::new(
-                                            match update {
-                                                UpdateState::Loaded => "UPDATE ",
-                                                UpdateState::Updating => "UPDATING... ",
-                                                UpdateState::Updated => "UPDATED ",
-                                            }
-                                            .to_string(),
-                                        )
-                                    )
+                                    .push(iced::widget::Text::new(
+                                        match update {
+                                            UpdateState::Loaded => "UPDATE ",
+                                            UpdateState::Updating => "UPDATING... ",
+                                            UpdateState::Updated => "UPDATED ",
+                                        }
+                                        .to_string(),
+                                    ))
                                     .push(
                                         iced::widget::Text::new(
                                             match update {
                                                 UpdateState::Loaded => {
                                                     iced_aw::Bootstrap::ArrowUpCircleFill
                                                 }
-                                                UpdateState::Updating => iced_aw::Bootstrap::ArrowClockwise,
+                                                UpdateState::Updating => {
+                                                    iced_aw::Bootstrap::ArrowClockwise
+                                                }
                                                 UpdateState::Updated => iced_aw::Bootstrap::Check,
                                             }
                                             .to_string(),
                                         )
-                                        .font(iced_aw::BOOTSTRAP_FONT)
-                                    )
+                                        .font(iced_aw::BOOTSTRAP_FONT),
+                                    ),
                             )
                             .on_press(Message::UpdateRules)
                             .padding(10)
@@ -250,14 +254,15 @@ impl Raspirus {
                             // TODO: Make this button functional
                             iced::widget::Button::new(
                                 iced::widget::Row::new()
-                                .push(iced::widget::text("DOWNLOAD "))
+                                    .push(iced::widget::text("DOWNLOAD "))
                                     .push(
-                                iced::widget::Text::new(
-                                    iced_aw::Bootstrap::ArrowDownCircleFill.to_string(),
-                                )
-                                .font(iced_aw::BOOTSTRAP_FONT)
+                                        iced::widget::Text::new(
+                                            iced_aw::Bootstrap::ArrowDownCircleFill.to_string(),
+                                        )
+                                        .font(iced_aw::BOOTSTRAP_FONT),
+                                    ),
                             )
-                            ).padding(10)
+                            .padding(10)
                             .style(iced::theme::Button::Custom(Box::new(RaspirusButtonBlue))),
                         )
                         .align_items(iced::Alignment::Center)
