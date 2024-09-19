@@ -53,6 +53,7 @@ pub enum State {
         log: PathBuf,
     },
     Information,
+    Terms,
 }
 
 #[derive(Debug, Clone)]
@@ -110,6 +111,7 @@ pub enum Message {
     // location messages
     OpenSettings,
     OpenInformation,
+    OpenTerms,
     OpenMain,
     // action messages
     DownloadLog {
@@ -226,6 +228,7 @@ impl iced::Application for Raspirus {
             others => debug!("{:?}", others),
         }
         match message {
+            // opens settings page
             Message::OpenSettings => {
                 self.state = State::Settings {
                     config: crate::CONFIG.lock().expect("Failed to lock config").clone(),
@@ -233,6 +236,7 @@ impl iced::Application for Raspirus {
                 };
                 iced::Command::none()
             }
+            // opens information page
             Message::OpenInformation => {
                 self.state = State::Information;
                 iced::Command::none()
@@ -703,6 +707,10 @@ impl iced::Application for Raspirus {
                     Err(err) => Message::Error { case: err },
                 },
             ),
+            Message::OpenTerms => {
+                self.state = State::Terms;
+                iced::Command::none()
+            },
         }
     }
 
@@ -732,6 +740,7 @@ impl iced::Application for Raspirus {
                 log,
             } => self.results(tagged.clone(), skipped.clone(), log.clone()),
             State::Information => self.information(),
+            State::Terms => self.terms()
         }
     }
 
