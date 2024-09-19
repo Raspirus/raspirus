@@ -97,7 +97,7 @@ pub fn create_pdf(log_file: PathBuf) -> Result<PathBuf, String> {
         .map_err(|err| format!("Failed to lock config: {err}"))?
         .paths
         .clone()
-        .map_or(Err("No paths?".to_string()), |paths| Ok(paths))?
+        .ok_or_else(|| "No paths?".to_string())?
         .downloads;
     info!("Creating pdf report for {}", log_file.to_string_lossy());
 
