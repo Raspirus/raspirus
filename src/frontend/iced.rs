@@ -95,11 +95,11 @@ impl Display for LocationSelection {
             "{}",
             match self {
                 LocationSelection::Usb { .. } =>
-                    format!(" {}", iced_aw::Bootstrap::UsbDriveFill.to_string()),
+                    format!(" {}", iced_aw::Bootstrap::UsbDriveFill),
                 LocationSelection::Folder { .. } =>
-                    format!(" {}", iced_aw::Bootstrap::FolderFill.to_string()),
+                    format!(" {}", iced_aw::Bootstrap::FolderFill),
                 LocationSelection::File { .. } =>
-                    format!(" {}", iced_aw::Bootstrap::FileEarmarkFill.to_string()),
+                    format!(" {}", iced_aw::Bootstrap::FileEarmarkFill),
             }
         )
     }
@@ -576,7 +576,7 @@ impl iced::Application for Raspirus {
                             }
                         } else {
                             let usbs = list_usb_drives().inspect(|usbs| {
-                                self.usb_devices.clone_from(&usbs);
+                                self.usb_devices.clone_from(usbs);
                             });
                             let usb = usbs.unwrap_or_default().first().cloned();
                             self.state = State::MainMenu {
