@@ -214,8 +214,7 @@ impl Raspirus {
                 .push(
                     iced::widget::button("Terms and Conditions")
                         .style(Button::Custom(Box::new(RaspirusButtonTransparent)))
-                        // TODO: make this button functional
-                        .on_press(Message::None),
+                        .on_press(Message::OpenTerms),
                 )
                 .align_items(iced::Alignment::Center),
         )
