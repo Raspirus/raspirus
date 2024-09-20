@@ -18,12 +18,12 @@ pub struct Config {
     /// lower and upper threshhold for flagging
     pub min_matches: usize,
     pub max_matches: usize,
+    /// sets the amount of maximum allowed scan threads
+    pub max_threads: usize,
     /// If we should log information to a file
     pub logging_is_active: bool,
     /// mirror to folder with hashfiles for update
     pub mirror: String,
-    /// the filename of the compiled yara rules on remote
-    pub remote_file: String,
     /// various paths in an effort to unify them. are folders expected to be used later
     #[serde(skip)]
     pub paths: Option<Paths>,
@@ -36,6 +36,7 @@ fn default_config() -> String {
 #[derive(Debug, Clone)]
 pub struct Paths {
     pub data: PathBuf,
+    pub temp: PathBuf,
     pub config: PathBuf,
     pub logs_scan: PathBuf,
     pub logs_app: PathBuf,
@@ -59,8 +60,8 @@ impl Default for Config {
             logging_is_active: true,
             min_matches: crate::DEFAULT_MIN_MATCHES,
             max_matches: crate::DEFAULT_MAX_MATCHES,
+            max_threads: num_cpus::get(),
             mirror: crate::DEFAULT_MIRROR.to_owned(),
-            remote_file: crate::DEFAULT_FILE.to_owned(),
             paths: None,
         }
     }
@@ -81,7 +82,7 @@ impl Config {
             .ok_or("Could not get download dir".to_owned())?
             .to_path_buf();
 
-        #[cfg(any(target_os = "linux", target_os = "macos"))]
+        #[cfg(not(target_os = "windows"))]
         let dirs = ProjectDirs::from("com", "Raspirus", "Raspirus")
             .ok_or("Failed to get projectdir".to_owned())?;
         #[cfg(target_os = "windows")]
@@ -91,6 +92,7 @@ impl Config {
         // RoamingData under windows
         let data = dirs.data_dir().to_owned();
         let logs = data.to_owned().join("logs");
+        let temp = dirs.cache_dir().to_path_buf();
 
         let logs_scan = logs.join("scan");
         let mut logs_app = logs.join("application");
@@ -101,6 +103,8 @@ impl Config {
         fs::create_dir_all(&data).map_err(|err| format!("Failed to create data dir: {err}"))?;
         fs::create_dir_all(&logs_scan)
             .map_err(|err| format!("Failed to create scan log dir: {err}"))?;
+        fs::create_dir_all(&temp)
+            .map_err(|err| format!("Failed to create temp dir: {err}"))?;
         fs::create_dir_all(&logs_app)
             .map_err(|err| format!("Failed to create application log dir: {err}"))?;
         fs::create_dir_all(&config).map_err(|err| format!("Failed to create config dir: {err}"))?;
@@ -114,6 +118,7 @@ impl Config {
             logs_scan,
             logs_app,
             downloads,
+            temp,
         });
         Ok(())
     }
