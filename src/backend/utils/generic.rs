@@ -78,6 +78,7 @@ pub fn update_config(value: ConfigValue) -> Result<(), String> {
         ConfigValue::MinMatch(min_matches) => config.min_matches = min_matches,
         ConfigValue::MaxMatch(max_matches) => config.max_matches = max_matches,
         ConfigValue::Logging(logging) => config.logging_is_active = logging,
+        ConfigValue::MaxThreads(max_threads) => config.max_threads = max_threads,
     }
     config.save()?;
     Ok(())

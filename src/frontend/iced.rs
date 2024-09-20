@@ -175,6 +175,7 @@ pub enum ConfigValue {
     MinMatch(usize),
     MaxMatch(usize),
     Logging(bool),
+    MaxThreads(usize),
 }
 
 #[derive(Debug, Clone)]
