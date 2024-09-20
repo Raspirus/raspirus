@@ -25,7 +25,7 @@ struct Release {
     zipball_url: String,
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Debug)]
 pub enum RemoteError {
     Offline,
     Other(String),
