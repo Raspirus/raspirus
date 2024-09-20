@@ -10,8 +10,6 @@ use std::sync::mpsc::{self, Receiver, Sender};
 use std::{
     path::PathBuf,
     sync::{Arc, Mutex},
-    thread::sleep,
-    time::Duration,
 };
 
 use super::theme::RASPIRUS_PALETTE;
@@ -75,13 +73,13 @@ impl FromStr for LocationSelection {
 
     fn from_str(selection: &str) -> Result<Self, Self::Err> {
         match selection.trim() {
-            _ if selection == iced_aw::Bootstrap::UsbDriveFill.to_string() => {
+            _ if selection == iced_fonts::Bootstrap::UsbDriveFill.to_string() => {
                 Ok(LocationSelection::Usb { usb: None })
             }
-            _ if selection == iced_aw::Bootstrap::FolderFill.to_string() => {
+            _ if selection == iced_fonts::Bootstrap::FolderFill.to_string() => {
                 Ok(LocationSelection::Folder { path: None })
             }
-            _ if selection == iced_aw::Bootstrap::FileEarmarkFill.to_string() => {
+            _ if selection == iced_fonts::Bootstrap::FileEarmarkFill.to_string() => {
                 Ok(LocationSelection::File { path: None })
             }
             _ => Err(()),
@@ -95,10 +93,12 @@ impl Display for LocationSelection {
             f,
             "{}",
             match self {
-                LocationSelection::Usb { .. } => format!(" {}", iced_aw::Bootstrap::UsbDriveFill),
-                LocationSelection::Folder { .. } => format!(" {}", iced_aw::Bootstrap::FolderFill),
+                LocationSelection::Usb { .. } =>
+                    format!(" {}", iced_fonts::Bootstrap::UsbDriveFill),
+                LocationSelection::Folder { .. } =>
+                    format!(" {}", iced_fonts::Bootstrap::FolderFill),
                 LocationSelection::File { .. } =>
-                    format!(" {}", iced_aw::Bootstrap::FileEarmarkFill),
+                    format!(" {}", iced_fonts::Bootstrap::FileEarmarkFill),
             }
         )
     }
@@ -184,44 +184,39 @@ pub enum Card {
     Tagged { card: TaggedFile },
 }
 
-impl iced::Application for Raspirus {
+impl Raspirus {
+    /*
     type Executor = iced::executor::Default;
     type Message = Message;
     type Theme = iced::Theme;
     type Flags = ();
+    */
 
-    fn new(_flags: ()) -> (Self, iced::Command<Message>) {
+    fn new() -> Self {
         let channel = mpsc::channel();
         let usb = list_usb_drives().unwrap_or_default().first().cloned();
-        (
-            Self {
-                state: State::MainMenu {
-                    expanded_language: false,
-                    expanded_location: false,
-                    expanded_usb: false,
-                    selection: LocationSelection::Usb { usb: usb.clone() },
-                },
-                language: "en-US".to_owned(),
-                scan_path: if let Some(usb) = usb {
-                    Some(usb.path)
-                } else {
-                    None
-                },
-                scan_progress: (
-                    Arc::new(Mutex::new(channel.0)),
-                    Arc::new(Mutex::new(channel.1)),
-                ),
-                usb_devices: list_usb_drives().unwrap_or_default(),
+        Self {
+            state: State::MainMenu {
+                expanded_language: false,
+                expanded_location: false,
+                expanded_usb: false,
+                selection: LocationSelection::Usb { usb: usb.clone() },
             },
-            iced::Command::none(),
-        )
+            language: "en-US".to_owned(),
+            scan_path: if let Some(usb) = usb {
+                Some(usb.path)
+            } else {
+                None
+            },
+            scan_progress: (
+                Arc::new(Mutex::new(channel.0)),
+                Arc::new(Mutex::new(channel.1)),
+            ),
+            usb_devices: list_usb_drives().unwrap_or_default(),
+        }
     }
 
-    fn title(&self) -> String {
-        "Raspirus".to_owned()
-    }
-
-    fn update(&mut self, message: Message) -> iced::Command<Message> {
+    pub fn update(&mut self, message: Message) -> iced::Task<Message> {
         match &message {
             Message::Event { .. } => {}
             others => debug!("{:?}", others),
@@ -233,12 +228,12 @@ impl iced::Application for Raspirus {
                     config: crate::CONFIG.lock().expect("Failed to lock config").clone(),
                     update: UpdateState::Loaded,
                 };
-                iced::Command::none()
+                iced::Task::none()
             }
             // opens information page
             Message::OpenInformation => {
                 self.state = State::Information;
-                iced::Command::none()
+                iced::Task::none()
             }
             // return back to main menu
             Message::OpenMain => {
@@ -252,7 +247,7 @@ impl iced::Application for Raspirus {
                 if let Some(usb) = usb {
                     self.scan_path = Some(usb.path);
                 }
-                iced::Command::none()
+                iced::Task::none()
             }
             // start scan with current path
             Message::StartScan => {
@@ -260,7 +255,7 @@ impl iced::Application for Raspirus {
                 let scanner_path = self.scan_path.clone();
                 let sender_c = self.scan_progress.0.clone();
 
-                iced::Command::perform(
+                iced::Task::perform(
                     async move {
                         let scanner = YaraScanner::new(sender_c)
                             .map_err(|err| ErrorCase::Critical {
@@ -302,7 +297,7 @@ impl iced::Application for Raspirus {
                         selection: selection.clone(),
                     }
                 }
-                iced::Command::none()
+                iced::Task::none()
             }
             // update locally selected language
             Message::LanguageChanged { language } => {
@@ -322,11 +317,11 @@ impl iced::Application for Raspirus {
                     }
                 }
                 self.language = language;
-                iced::Command::none()
+                iced::Task::none()
             }
             // show popup for warnings and quit for critical errors
             Message::Error { case } => match case {
-                ErrorCase::Critical { message } => iced::Command::perform(
+                ErrorCase::Critical { message } => iced::Task::perform(
                     async move {
                         error!("{message}");
                         native_dialog::MessageDialog::new()
@@ -337,7 +332,7 @@ impl iced::Application for Raspirus {
                     },
                     |_| Message::Shutdown,
                 ),
-                ErrorCase::Warning { message } => iced::Command::perform(
+                ErrorCase::Warning { message } => iced::Task::perform(
                     async move {
                         warn!("{message}");
                         native_dialog::MessageDialog::new()
@@ -360,12 +355,12 @@ impl iced::Application for Raspirus {
                     skipped,
                     log,
                 };
-                iced::Command::none()
+                iced::Task::none()
             }
             // update local scan percentage
             Message::ScanPercentage { percentage } => {
                 self.state = State::Scanning { percentage };
-                iced::Command::none()
+                iced::Task::none()
             }
             // toggle expansion of card in results screen
             Message::ToggleCard { card } => {
@@ -406,15 +401,15 @@ impl iced::Application for Raspirus {
                         },
                     }
                 }
-                iced::Command::none()
+                iced::Task::none()
             }
             // shutdown application
             Message::Shutdown => std::process::exit(0),
             // work with window events
             Message::Event { event } => {
                 match event {
-                    iced::Event::Window(_, iced::window::Event::CloseRequested) => {
-                        return iced::Command::perform(
+                    iced::Event::Window(iced::window::Event::CloseRequested) => {
+                        return iced::Task::perform(
                             async {
                                 info!("Shutting down...");
                             },
@@ -423,7 +418,7 @@ impl iced::Application for Raspirus {
                     }
                     _ => trace!("Ignoring {event:?}"),
                 }
-                iced::Command::none()
+                iced::Task::none()
             }
             // update local scan path to selected media
             Message::LocationChanged { selection } => match &self.state {
@@ -439,7 +434,7 @@ impl iced::Application for Raspirus {
                             }
                         }
                         // if does not contain usb device we do nothing
-                        iced::Command::none()
+                        iced::Task::none()
                     }
                     LocationSelection::Folder { path } => {
                         // if contains path to scan and display it
@@ -450,10 +445,10 @@ impl iced::Application for Raspirus {
                                 expanded_usb: false,
                                 selection: LocationSelection::Folder { path: None },
                             };
-                            iced::Command::none()
+                            iced::Task::none()
                         // if does not contain path we open file dialog to pick one
                         } else {
-                            iced::Command::none()
+                            iced::Task::none()
                         }
                     }
                     LocationSelection::File { path } => {
@@ -465,14 +460,14 @@ impl iced::Application for Raspirus {
                                 expanded_usb: false,
                                 selection: LocationSelection::File { path: None },
                             };
-                            iced::Command::none()
+                            iced::Task::none()
                         // if does not contain path we open file dialog to pick one
                         } else {
-                            iced::Command::none()
+                            iced::Task::none()
                         }
                     }
                 },
-                _ => iced::Command::none(),
+                _ => iced::Task::none(),
             },
             // either change to allow for selection of usb, file or folder
             // or update current path to selection
@@ -497,7 +492,7 @@ impl iced::Application for Raspirus {
                                 selection: LocationSelection::Usb { usb },
                             }
                         }
-                        iced::Command::none()
+                        iced::Task::none()
                     }
                     LocationSelection::Folder { path } => {
                         // if contains path to scan and display it
@@ -509,10 +504,10 @@ impl iced::Application for Raspirus {
                                 expanded_usb: false,
                                 selection: LocationSelection::Folder { path: Some(path) },
                             };
-                            iced::Command::none()
+                            iced::Task::none()
                         // if does not contain path we open file dialog to pick one
                         } else {
-                            iced::Command::perform(
+                            iced::Task::perform(
                                 async {
                                     native_dialog::FileDialog::new()
                                         .set_location("~")
@@ -539,10 +534,10 @@ impl iced::Application for Raspirus {
                                 expanded_usb: false,
                                 selection: LocationSelection::Folder { path: Some(path) },
                             };
-                            iced::Command::none()
+                            iced::Task::none()
                         // if does not contain path we open file dialog to pick one
                         } else {
-                            iced::Command::perform(
+                            iced::Task::perform(
                                 async {
                                     native_dialog::FileDialog::new()
                                         .set_location("~")
@@ -560,7 +555,7 @@ impl iced::Application for Raspirus {
                         }
                     }
                 },
-                _ => iced::Command::none(),
+                _ => iced::Task::none(),
             },
             // expand list with usb drives
             Message::ToggleUSBSelection => {
@@ -596,7 +591,7 @@ impl iced::Application for Raspirus {
                         }
                     }
                 }
-                iced::Command::none()
+                iced::Task::none()
             }
             // expand dropdown to choose folder, file or usb
             Message::ToggleLocationSelection => {
@@ -614,10 +609,10 @@ impl iced::Application for Raspirus {
                         selection: selection.clone(),
                     }
                 }
-                iced::Command::none()
+                iced::Task::none()
             }
             // generate hash for file and open in preferred browser
-            Message::GenerateVirustotal { path } => iced::Command::perform(
+            Message::GenerateVirustotal { path } => iced::Task::perform(
                 async {
                     open::that(
                         generate_virustotal(path)
@@ -633,7 +628,7 @@ impl iced::Application for Raspirus {
                 },
             ),
             // do nothing
-            Message::None => iced::Command::none(),
+            Message::None => iced::Task::none(),
             // send changed config value to backend
             Message::ConfigChanged { value } => match update_config(value) {
                 Ok(_) => {
@@ -641,10 +636,12 @@ impl iced::Application for Raspirus {
                         config: crate::CONFIG.lock().expect("Failed to lock config").clone(),
                         update: UpdateState::Loaded,
                     };
-                    iced::Command::none()
+                    iced::Task::none()
                 }
-                Err(message) => iced::Command::perform(async {}, |_| Message::Error {
-                    case: ErrorCase::Critical { message },
+                Err(message) => iced::Task::perform(async {}, move |_| Message::Error {
+                    case: ErrorCase::Critical {
+                        message: message.clone(),
+                    },
                 }),
             },
             // start rule update
@@ -655,7 +652,7 @@ impl iced::Application for Raspirus {
                         update: UpdateState::Updating,
                     };
                 }
-                iced::Command::perform(
+                iced::Task::perform(
                     async move {
                         match downloader::update().await {
                             Ok(_) => Message::UpdateFinished,
@@ -682,10 +679,10 @@ impl iced::Application for Raspirus {
                         update: UpdateState::Updated,
                     };
                 }
-                iced::Command::none()
+                iced::Task::none()
             }
             // start pdf generation
-            Message::DownloadLog { log_path } => iced::Command::perform(
+            Message::DownloadLog { log_path } => iced::Task::perform(
                 async move {
                     match create_pdf(log_path) {
                         Ok(pdf_path) => Message::Downloaded { pdf_path },
@@ -697,7 +694,7 @@ impl iced::Application for Raspirus {
                 |result| result,
             ),
             // open pdf log
-            Message::Downloaded { pdf_path } => iced::Command::perform(
+            Message::Downloaded { pdf_path } => iced::Task::perform(
                 async {
                     open::that(pdf_path).map_err(|message| ErrorCase::Warning {
                         message: message.to_string(),
@@ -710,7 +707,7 @@ impl iced::Application for Raspirus {
             ),
             Message::OpenTerms => {
                 self.state = State::Terms;
-                iced::Command::none()
+                iced::Task::none()
             }
         }
     }
@@ -719,7 +716,7 @@ impl iced::Application for Raspirus {
         iced::Theme::custom("Raspirus".to_owned(), RASPIRUS_PALETTE)
     }
 
-    fn view(&self) -> iced::Element<Message> {
+    pub fn view(&self) -> iced::Element<Message> {
         match &self.state {
             State::MainMenu {
                 expanded_language,
@@ -745,44 +742,85 @@ impl iced::Application for Raspirus {
         }
     }
 
-    fn subscription(&self) -> iced::Subscription<Message> {
-        // subsribe to the scan progress update or event stream. this also doubles as quit
-        // prevention during scanning
-        match self.state {
-            State::Scanning { .. } => iced::subscription::unfold(
-                "scan_update",
-                self.scan_progress.1.clone(),
-                |receiver| async {
-                    // get receiver
-                    let receiver_c = receiver.clone();
-                    let receiver_l = match receiver_c.lock() {
-                        Ok(receiver_l) => receiver_l,
-                        Err(err) => {
-                            return (
-                                Message::Error {
-                                    case: ErrorCase::Critical {
-                                        message: err.to_string(),
-                                    },
-                                },
-                                receiver,
-                            )
-                        }
-                    };
+    pub fn subscription(&self) -> iced::Subscription<Message> {
+        iced::Subscription::none()
+    }
 
-                    loop {
-                        match receiver_l.recv() {
-                            Ok(message) => return (message, receiver),
-                            Err(_) => {
-                                sleep(Duration::from_millis(100));
-                                continue;
+    /*
+    fn scan_worker(receiver: Arc<Mutex<Receiver<Message>>>) -> impl Stream<Item = Event> {
+        stream::channel(100, |mut output| async move {
+            // Create channel
+            let (sender, mut receiver) = mpsc::channel(100);
+
+            // Send the sender back to the application
+            output.send(Event::Ready(sender)).await;
+
+            loop {
+                use iced_futures::futures::StreamExt;
+
+                // Read next input sent from `Application`
+                let input = receiver.select_next_some().await;
+
+                match input {
+                    Input::DoSomeWork => {
+                        // Do some async work...
+
+                        // Finally, we can optionally produce a message to tell the
+                        // `Application` the work is done
+                        output.send(Event::WorkFinished).await;
+                    }
+                }
+            }
+        })
+    }
+
+    pub fn subscription(&self) -> iced::Subscription<Message> {
+        match self.state {
+            State::Scanning { .. } => {
+                let scan_progress = self.scan_progress.1.clone();
+                iced::Subscription::run(builder)
+                iced::Subscription::run(
+                    "scan_update",
+                    self.scan_progress.1.clone(),
+                    |receiver| async {
+                        // get receiver
+                        let receiver_c = receiver.clone();
+                        let receiver_l = match receiver_c.lock() {
+                            Ok(receiver_l) => receiver_l,
+                            Err(err) => {
+                                return (
+                                    Message::Error {
+                                        case: ErrorCase::Critical {
+                                            message: err.to_string(),
+                                        },
+                                    },
+                                    receiver,
+                                )
+                            }
+                        };
+
+                        loop {
+                            match receiver_l.recv() {
+                                Ok(message) => return (message, receiver),
+                                Err(_) => {
+                                    sleep(Duration::from_millis(100));
+                                    continue;
+                                }
                             }
                         }
-                    }
-                },
-            ),
+                    },
+                )
+            }
             // relay window events as messages
             _ => iced::event::listen().map(|event| Message::Event { event }),
         }
+    }
+    */
+}
+
+impl Default for Raspirus {
+    fn default() -> Self {
+        Self::new()
     }
 }
 

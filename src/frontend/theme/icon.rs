@@ -1,40 +1,24 @@
-use iced::widget::svg;
+use iced::{
+    widget::svg::{self, Status},
+    Theme,
+};
 
 use super::{BLUE_COLOR_LIGHT, SECONDARY_COLOR};
 
-#[derive(Default)]
-pub struct RaspirusInfoIcon;
-#[derive(Default)]
-pub struct RaspirusSettingsIcon;
-#[derive(Default)]
-pub struct RaspirusWhiteIcon;
-
-impl svg::StyleSheet for RaspirusInfoIcon {
-    type Style = iced::Theme;
-
-    fn appearance(&self, _style: &Self::Style) -> svg::Appearance {
-        svg::Appearance {
-            color: Some(SECONDARY_COLOR),
-        }
+pub fn info_icon_style(_theme: &Theme, _status: Status) -> svg::Style {
+    svg::Style {
+        color: Some(SECONDARY_COLOR),
     }
 }
 
-impl svg::StyleSheet for RaspirusSettingsIcon {
-    type Style = iced::Theme;
-
-    fn appearance(&self, _style: &Self::Style) -> svg::Appearance {
-        svg::Appearance {
-            color: Some(BLUE_COLOR_LIGHT),
-        }
+pub fn settings_icon_style(_theme: &Theme, _status: Status) -> svg::Style {
+    svg::Style {
+        color: Some(BLUE_COLOR_LIGHT),
     }
 }
 
-impl svg::StyleSheet for RaspirusWhiteIcon {
-    type Style = iced::Theme;
-
-    fn appearance(&self, _style: &Self::Style) -> svg::Appearance {
-        svg::Appearance {
-            color: Some(iced::Color::WHITE),
-        }
+pub fn white_icon_style(_theme: &Theme, _status: Status) -> svg::Style {
+    svg::Style {
+        color: Some(iced::Color::WHITE),
     }
 }
