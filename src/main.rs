@@ -68,8 +68,10 @@ fn main() -> Result<(), String> {
             .ok_or("No paths set. Is config initialized?".to_owned())?
             .logs_app;
 
-        let log_config = ConfigBuilder::new()
-            .add_filter_ignore_str("reqwest")
+        let mut log_config = ConfigBuilder::new();
+
+        #[cfg(debug_assertions)]
+        let log_config = log_config
             .add_filter_ignore_str("wgpu_core")
             .add_filter_ignore_str("iced_wgpu")
             .add_filter_ignore_str("iced_winit")
@@ -81,8 +83,12 @@ fn main() -> Result<(), String> {
             .add_filter_ignore_str("walrus")
             .add_filter_ignore_str("wgpu_hal")
             .add_filter_ignore_str("Naga")
-            .add_filter_ignore_str("sctk")
-            .build();
+            .add_filter_ignore_str("sctk");
+
+        let log_config = log_config
+            .add_filter_ignore_str("reqwest");
+        
+        let log_config = log_config.build();
 
         // Terminal logger is always used if logging so we add it right away
         let mut loggers: Vec<Box<dyn simplelog::SharedLogger>> = vec![TermLogger::new(
