@@ -89,7 +89,8 @@ impl YaraScanner {
             profile_path(path).map_err(|err| format!("Failed to calculate file tree: {err}"))?;
         let pointers = PointerCollection::new(paths.len());
 
-        let mut threadpool = Threadpool::new(num_cpus::get());
+        let mut threadpool =
+            Threadpool::new(CONFIG.lock().expect("Failed to lock config").max_threads);
         for file in paths {
             let pointers_c = pointers.clone();
             let file_log_c = file_log.clone();
