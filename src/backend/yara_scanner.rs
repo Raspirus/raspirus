@@ -66,39 +66,51 @@ impl PointerCollection {
 #[derive(Clone)]
 pub struct YaraScanner {
     pub progress_channel: Arc<Mutex<mpsc::Sender<Message>>>,
-    pub path: Option<PathBuf>
+    pub path: Option<PathBuf>,
 }
 
 impl YaraScanner {
     /// creates a new scanenr and imports the yara rules
     pub fn new(progress_channel: Arc<Mutex<mpsc::Sender<Message>>>) -> Result<Self, String> {
-        Ok(Self { progress_channel, path: None })
+        Ok(Self {
+            progress_channel,
+            path: None,
+        })
     }
 
     pub fn set_path(&self, path: PathBuf) -> Result<Self, String> {
         if !path.exists() {
             return Err("Invalid path".to_owned());
         }
-        
+
         let mut scanner = self.clone();
         scanner.path = Some(path);
         Ok(scanner)
     }
 
     /// Starts the scanner in the specified location
-    pub async fn start(
-        &self,
-    ) -> Result<(Vec<TaggedFile>, Vec<Skipped>, PathBuf), String> {
+    pub async fn start(&self) -> Result<(Vec<TaggedFile>, Vec<Skipped>, PathBuf), String> {
         let path = match &self.path {
             Some(path) => path,
-            None => return Err("No path set".to_owned())
+            None => return Err("No path set".to_owned()),
         };
+
+        let yarac = CONFIG
+            .lock()
+            .expect("Failed to lock config")
+            .paths
+            .clone()
+            .expect("Paths not set. Is config initialized?")
+            .data
+            .join(crate::DEFAULT_FILE);
+
+        get_rules(yarac)?;
 
         // setup file log
         let file_log = Arc::new(Mutex::new(FileLog::new()?));
 
-        let paths =
-            profile_path(path.to_path_buf()).map_err(|err| format!("Failed to calculate file tree: {err}"))?;
+        let paths = profile_path(path.to_path_buf())
+            .map_err(|err| format!("Failed to calculate file tree: {err}"))?;
         let pointers = PointerCollection::new(paths.len());
 
         let mut threadpool =

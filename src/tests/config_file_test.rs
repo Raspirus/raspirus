@@ -18,6 +18,7 @@ mod tests {
     #[test]
     fn test_load_config() {
         let config = Config::new();
+        dbg!(&config);
         assert!(config.is_ok());
     } 
 }
