@@ -196,7 +196,7 @@ pub fn build_rules(
                 .arg("Bypass")
                 .arg("-File")
                 .arg(script_file)
-                .arg(&target_yarac.parent());
+                .arg(&target_yarac.parent().unwrap_or(&target_yarac));
 
             debug!("Running {:?}", cmd);
 
