@@ -186,13 +186,7 @@ impl YaraScanner {
             .clone()
             .ok_or("No paths set. Is config initialized?")?
             .data
-            .join(
-                CONFIG
-                    .lock()
-                    .expect("Failed to lock config")
-                    .remote_file
-                    .clone(),
-            );
+            .join(crate::DEFAULT_FILE);
         trace!("Loading rules at {}", rule_path.to_string_lossy());
         let rules = get_rules(rule_path)?;
         let mut scanner = Scanner::new(&rules);

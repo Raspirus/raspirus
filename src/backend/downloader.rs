@@ -1,20 +1,25 @@
-use std::{fs::File, io::copy, path::PathBuf};
+use std::{
+    fs::File,
+    io::{copy, BufReader, Read, Write},
+    path::PathBuf, 
+};
 
-use log::{error, info};
+#[cfg(target_os = "windows")]
+use std::{fs, process::{Command, Stdio}};
+
+#[cfg(target_os = "windows")]
+use log::debug;
+
+use log::info;
 use serde::{Deserialize, Serialize};
+use yara_x::Compiler;
 
 use crate::{CONFIG, MAX_TIMEOUT};
 
 #[derive(Deserialize)]
 struct Release {
     tag_name: String,
-    assets: Vec<Asset>,
-}
-
-#[derive(Deserialize, Debug)]
-struct Asset {
-    name: String,
-    browser_download_url: String,
+    zipball_url: String,
 }
 
 #[derive(Serialize)]
@@ -78,7 +83,8 @@ async fn get_remote_version() -> Result<String, RemoteError> {
     Ok(remote)
 }
 
-async fn download_file(url: &str, path: PathBuf) -> Result<(), RemoteError> {
+/// downloads a file from a url to a specific path
+async fn download_file(url: &str, path: &PathBuf) -> Result<(), RemoteError> {
     let response = reqwest::get(url).await.map_err(|err| {
         if err.is_timeout() {
             RemoteError::Offline
@@ -90,7 +96,7 @@ async fn download_file(url: &str, path: PathBuf) -> Result<(), RemoteError> {
         "Starting download of {}mb",
         response.content_length().unwrap_or_default() / 1048576
     );
-    let mut dest = File::create(&path)
+    let mut dest = File::create(path)
         .map_err(|err| RemoteError::Other(format!("Failed to create file: {err}")))?;
     let content = response.bytes().await.map_err(|err| {
         if err.is_timeout() {
@@ -111,33 +117,119 @@ pub async fn update() -> Result<(), RemoteError> {
         return Ok(());
     }
 
-    let config = CONFIG.lock().expect("Failed to lock config").clone();
-    let download_path = config
+    let mut config = CONFIG.lock().expect("Failed to lock config").clone();
+
+    let paths = config
         .paths
         .ok_or("No paths set. Is config initialized?".to_owned())
-        .map_err(RemoteError::Other)?
-        .data
-        .join(config.remote_file.clone());
+        .map_err(RemoteError::Other)?;
+
+    // cache folder
+    let temp = paths.clone().temp;
+    // downloaded temporary file name
+    let download_path = temp.join("latest.zip");
+    // path to compiled yara rules
+    let save_path = paths.data.join(crate::DEFAULT_FILE);
 
     info!("Starting download...");
     let release = get_release().await?;
-    if let Some(asset) = release
-        .assets
-        .iter()
-        .find(|&a| a.name == config.remote_file)
-    {
-        download_file(&asset.browser_download_url, download_path).await?;
-        info!(
-            "Downloaded: {} from {}",
-            asset.name, asset.browser_download_url
-        );
-    } else {
-        error!("Asset not found");
-    }
-    CONFIG.lock().expect("Failed to lock config").rules_version = get_remote_version().await?;
+
+    download_file(&release.zipball_url, &download_path).await?;
+    info!("Downloaded {}", release.zipball_url);
+
+    info!("Building rules. This may take some time...");
+    build_rules(download_path, save_path, temp).map_err(RemoteError::Other)?;
+
+    config.rules_version = get_remote_version().await?;
     let config = CONFIG.lock().expect("Failed to lock config");
     config.save().map_err(RemoteError::Other)?;
     info!("Updated to {}", &config.rules_version);
+    Ok(())
+}
+
+/// builds the rules and saves them to the data folder. also runs a powershell script to exlcude
+/// the rules from being scanned by windows defender
+pub fn build_rules(
+    source_zip: PathBuf,
+    target_yarac: PathBuf,
+    _temp: PathBuf,
+) -> Result<(), String> {
+    let mut compiler = Compiler::new();
+    let mut zip = zip::ZipArchive::new(BufReader::new(
+        File::open(source_zip).map_err(|err| format!("Failed to open downloaded zip: {err}"))?,
+    ))
+    .map_err(|err| format!("Failed to open downloaded zip: {err}"))?;
+
+    for i in 0..zip.len() {
+        let mut file = zip
+            .by_index(i)
+            .map_err(|err| format!("Failed to open file from zip: {err}"))?;
+
+        #[cfg(target_os = "windows")]
+        if file.name().ends_with("windows.ps1") {
+            info!("Updating windows defender rule...");
+            let mut script = String::new();
+            file.read_to_string(&mut script)
+                .map_err(|err| format!("Failed to read script: {err}"))?;
+            let script_file = _temp.join("windows.ps1");
+            fs::write(&script_file, script).map_err(|err| {
+                format!(
+                    "Failed to write script to {}: {err}",
+                    script_file.to_string_lossy()
+                )
+            })?;
+
+            // run the powershell script
+            let mut cmd = Command::new("powershell");
+            cmd.arg("-ExecutionPolicy")
+                .arg("RemoteSigned")
+                .arg("-File")
+                .arg(script_file)
+                .arg(&target_yarac);
+
+            debug!("Running {:?}", cmd);
+
+            cmd.stdout(Stdio::piped()).stderr(Stdio::piped());
+
+            let output = cmd
+                .output()
+                .map_err(|err| format!("Encountered error while running command: {err}"))?;
+            debug!("{output:#?}");
+            continue;
+        }
+
+        if file.name().ends_with(".yar") {
+            let mut content = String::new();
+            file.read_to_string(&mut content)
+                .map_err(|err| format!("Failed to read rule file {}: {err}", file.name()))?;
+            match compiler.add_source(content.as_bytes()) {
+                Ok(_) => {}
+                Err(_) => eprintln!("Failed {}", file.name()),
+            }
+        }
+    }
+
+    println!("Building...");
+    let rules = compiler.build(); // will take at least 5 billion years
+    let mut out = File::create(&target_yarac).map_err(|err| {
+        format!(
+            "Failed to create yarac at {}: {err}",
+            target_yarac.to_string_lossy()
+        )
+    })?;
+    
+    out.write_all(
+        &rules
+            .serialize()
+            .map_err(|err| format!("Failed to serialize rules: {err}"))?,
+    )
+    .map_err(|err| {
+        format!(
+            "Failed to write rules to {}: {err}",
+            target_yarac.to_string_lossy()
+        )
+    })?;
+
     Ok(())
 }
 
