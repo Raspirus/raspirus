@@ -1,11 +1,14 @@
 use std::{
     fs::File,
     io::{copy, BufReader, Read, Write},
-    path::PathBuf, 
+    path::PathBuf,
 };
 
 #[cfg(target_os = "windows")]
-use std::{fs, process::{Command, Stdio}};
+use std::{
+    fs,
+    process::{Command, Stdio},
+};
 
 #[cfg(target_os = "windows")]
 use log::debug;
@@ -85,13 +88,22 @@ async fn get_remote_version() -> Result<String, RemoteError> {
 
 /// downloads a file from a url to a specific path
 async fn download_file(url: &str, path: &PathBuf) -> Result<(), RemoteError> {
-    let response = reqwest::get(url).await.map_err(|err| {
-        if err.is_timeout() {
-            RemoteError::Offline
-        } else {
-            RemoteError::Other(err.to_string())
-        }
-    })?;
+    let client = reqwest::Client::builder()
+        .timeout(std::time::Duration::from_secs(MAX_TIMEOUT))
+        .build()
+        .map_err(|err| RemoteError::Other(format!("Failed to build client: {err}")))?;
+    let response = client
+        .get(url)
+        .header("User-Agent", "reqwest")
+        .send()
+        .await
+        .map_err(|err| {
+            if err.is_timeout() {
+                RemoteError::Offline
+            } else {
+                RemoteError::Other(err.to_string())
+            }
+        })?;
     info!(
         "Starting download of {}mb",
         response.content_length().unwrap_or_default() / 1048576
@@ -217,7 +229,7 @@ pub fn build_rules(
             target_yarac.to_string_lossy()
         )
     })?;
-    
+
     out.write_all(
         &rules
             .serialize()
