@@ -1,35 +1,37 @@
-use iced::widget::toggler;
+use iced::widget::toggler::{self, Status};
 
 use super::RASPIRUS_PALETTE;
 
-#[derive(Default)]
-pub struct RaspirusToggler;
-
-impl toggler::StyleSheet for RaspirusToggler {
-    type Style = iced::Theme;
-
-    fn active(&self, _style: &Self::Style, is_active: bool) -> toggler::Appearance {
-        match is_active {
-            true => toggler::Appearance {
-                background: RASPIRUS_PALETTE.success,
-                background_border_width: 1.0,
-                background_border_color: iced::Color::BLACK,
-                foreground: iced::Color::WHITE,
-                foreground_border_width: 1.0,
-                foreground_border_color: iced::Color::BLACK,
-            },
-            false => toggler::Appearance {
-                background: RASPIRUS_PALETTE.danger,
-                background_border_width: 1.0,
-                background_border_color: iced::Color::BLACK,
-                foreground: iced::Color::WHITE,
-                foreground_border_width: 1.0,
-                foreground_border_color: iced::Color::BLACK,
-            },
+pub fn toggler_style(_theme: &iced::Theme, status: Status) -> toggler::Style {
+    match status {
+        Status::Active { is_toggled } | Status::Hovered { is_toggled } => {
+            if is_toggled {
+                toggler::Style {
+                    background: RASPIRUS_PALETTE.success,
+                    background_border_width: 1.0,
+                    background_border_color: iced::Color::BLACK,
+                    foreground: iced::Color::WHITE,
+                    foreground_border_width: 1.0,
+                    foreground_border_color: iced::Color::BLACK,
+                }
+            } else {
+                toggler::Style {
+                    background: RASPIRUS_PALETTE.danger,
+                    background_border_width: 1.0,
+                    background_border_color: iced::Color::BLACK,
+                    foreground: iced::Color::WHITE,
+                    foreground_border_width: 1.0,
+                    foreground_border_color: iced::Color::BLACK,
+                }
+            }
         }
-    }
-
-    fn hovered(&self, style: &Self::Style, is_active: bool) -> toggler::Appearance {
-        self.active(style, is_active)
+        Status::Disabled => toggler::Style {
+            background: RASPIRUS_PALETTE.danger,
+            background_border_width: 1.0,
+            background_border_color: iced::Color::BLACK,
+            foreground: iced::Color::WHITE,
+            foreground_border_width: 1.0,
+            foreground_border_color: iced::Color::BLACK,
+        },
     }
 }
