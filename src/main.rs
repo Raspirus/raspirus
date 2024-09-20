@@ -74,6 +74,7 @@ fn main() -> Result<(), String> {
             .add_filter_ignore_str("cranelift_codegen")
             .add_filter_ignore_str("wasmtime")
             .add_filter_ignore_str("aho_corasick")
+            .add_filter_ignore_str("walrus")
             .build();
 
         // Terminal logger is always used if logging so we add it right away
