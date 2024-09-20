@@ -1,5 +1,4 @@
-use iced::{font, theme::Button, widget::Space};
-use iced_aw::SelectionListStyles;
+use iced::{font, widget::Space};
 
 use crate::{
     backend::utils::usb_utils::UsbDevice,
@@ -7,10 +6,10 @@ use crate::{
         iced::{wrap, LocationSelection, Message, Raspirus},
         theme::{
             button::{
-                RaspirusButtonOrange, RaspirusButtonPrimary, RaspirusButtonSecondary,
-                RaspirusButtonSelect, RaspirusButtonTransparent,
+                button_orange_style, button_primary_style, button_secondary_style,
+                button_select_style, button_transparent_style,
             },
-            selection_list::RaspirusSelectionList,
+            selection_list::selection_list_style,
             PRIMARY_COLOR,
         },
     },
@@ -49,8 +48,8 @@ impl Raspirus {
                 iced::widget::button(
                     iced::widget::Row::new()
                         .push(
-                            iced::widget::text(iced_aw::Bootstrap::GearFill)
-                                .font(iced_aw::BOOTSTRAP_FONT),
+                            iced::widget::text(iced_fonts::Bootstrap::GearFill.to_string())
+                                .font(iced_fonts::BOOTSTRAP_FONT),
                         )
                         .push(iced::widget::text(" SETTINGS").font(font::Font {
                             weight: iced::font::Weight::Bold,
@@ -58,24 +57,25 @@ impl Raspirus {
                         })),
                 )
                 .on_press(Message::OpenSettings)
-                .style(Button::Custom(Box::new(RaspirusButtonSecondary)))
+                .style(button_secondary_style)
                 .padding(10),
             )
-            // ite allignment
-            .align_items(iced::Alignment::Center)
+            .align_y(iced::Alignment::Center)
             .spacing(5);
 
         let title_text = iced::widget::container::Container::new(
             iced::widget::text("RASPIRUS")
                 .size(120)
-                .horizontal_alignment(iced::alignment::Horizontal::Center)
+                .align_x(iced::alignment::Horizontal::Center)
                 .font(font::Font {
                     weight: iced::font::Weight::Bold,
                     ..font::Font::DEFAULT
                 })
-                .style(PRIMARY_COLOR),
-        )
-        .padding([0, 0, 10, 0]);
+                .style(|_| iced::widget::text::Style {
+                    color: Some(PRIMARY_COLOR),
+                }),
+        );
+        //TODO.padding([0, 0, 10, 0]);
 
         let mut center_row = iced::widget::Row::new().spacing(5);
 
@@ -92,11 +92,11 @@ impl Raspirus {
                                 None => "No mounted USB devices detected".to_owned(),
                             }
                         })
-                        .horizontal_alignment(iced::alignment::Horizontal::Center),
+                        .align_x(iced::alignment::Horizontal::Center),
                     )
                     .on_press(Message::ToggleUSBSelection)
                     .width(iced::Length::FillPortion(4))
-                    .style(Button::Custom(Box::new(RaspirusButtonSelect))),
+                    .style(button_select_style),
                     // list of usb devices
                     iced_aw::widgets::SelectionList::new(usbs, |_idx: usize, usb: UsbDevice| {
                         Message::RequestLocation {
@@ -113,13 +113,13 @@ impl Raspirus {
                         Some(path) => path.to_string_lossy().to_string(),
                         None => "No folder selected".to_owned(),
                     })
-                    .horizontal_alignment(iced::alignment::Horizontal::Center),
+                    .align_x(iced::alignment::Horizontal::Center),
                 )
                 .width(iced::Length::FillPortion(4))
                 .on_press(Message::RequestLocation {
                     selection: LocationSelection::Folder { path: None },
                 })
-                .style(Button::Custom(Box::new(RaspirusButtonSelect))),
+                .style(button_select_style),
             ),
             LocationSelection::File { ref path } => center_row.push(
                 iced::widget::Button::new(
@@ -127,13 +127,13 @@ impl Raspirus {
                         Some(path) => path.to_string_lossy().to_string(),
                         None => "No file selected".to_owned(),
                     })
-                    .horizontal_alignment(iced::alignment::Horizontal::Center),
+                    .align_x(iced::alignment::Horizontal::Center),
                 )
                 .width(iced::Length::FillPortion(4))
                 .on_press(Message::RequestLocation {
                     selection: LocationSelection::File { path: None },
                 })
-                .style(Button::Custom(Box::new(RaspirusButtonSelect))),
+                .style(button_select_style),
             ),
         };
 
@@ -141,24 +141,23 @@ impl Raspirus {
             // button to trigger dropdown
             iced::widget::Row::new().push(
                 iced::widget::Button::new(
-                    iced::widget::Text::new(selection.to_string()).font(iced_aw::BOOTSTRAP_FONT),
+                    iced::widget::Text::new(selection.to_string()).font(iced_fonts::BOOTSTRAP_FONT),
                 )
                 .on_press(Message::ToggleLocationSelection)
-                .style(Button::Custom(Box::new(RaspirusButtonOrange))),
+                .style(button_orange_style),
             ),
             // dropdown selection list
-            iced_aw::widgets::SelectionList::new_with(
+            iced_aw::widget::SelectionList::new_with(
                 &crate::SELECTION_ICONS,
                 |_idx: usize, selection: LocationSelection| Message::LocationChanged { selection },
                 16.0,
-                3.0,
-                iced_aw::SelectionListStyles::default(),
+                5.0,
+                selection_list_style,
                 None,
-                iced_aw::BOOTSTRAP_FONT,
+                iced_fonts::BOOTSTRAP_FONT,
             )
             .height(iced::Length::Shrink)
-            .width(iced::Length::Shrink)
-            .style(SelectionListStyles::custom(RaspirusSelectionList)),
+            .width(iced::Length::Shrink),
             // expanded state
             expanded_location,
         ));
@@ -170,7 +169,7 @@ impl Raspirus {
                 weight: iced::font::Weight::Bold,
                 ..font::Font::DEFAULT
             }))
-            .style(Button::Custom(Box::new(RaspirusButtonPrimary)))
+            .style(button_primary_style)
             .padding([15, 20]);
 
         match selection {
@@ -195,7 +194,7 @@ impl Raspirus {
             weight: iced::font::Weight::Bold,
             ..font::Font::DEFAULT
         }))
-        .style(Button::Custom(Box::new(RaspirusButtonSecondary)))
+        .style(button_secondary_style)
         .padding([15, 20])
         .on_press(Message::OpenInformation);
 
@@ -209,14 +208,14 @@ impl Raspirus {
             iced::widget::Row::new()
                 .push(
                     iced::widget::text("By using this app, you accept our")
-                        .horizontal_alignment(iced::alignment::Horizontal::Center),
+                        .align_x(iced::alignment::Horizontal::Center),
                 )
                 .push(
                     iced::widget::button("Terms and Conditions")
-                        .style(Button::Custom(Box::new(RaspirusButtonTransparent)))
+                        .style(button_transparent_style)
                         .on_press(Message::OpenTerms),
                 )
-                .align_items(iced::Alignment::Center),
+                .align_y(iced::Alignment::Center),
         )
         .padding([10, 0]);
 
@@ -225,7 +224,7 @@ impl Raspirus {
             .push(center_row)
             .push(button_row)
             .push(bottom_text)
-            .align_items(iced::Alignment::Center)
+            .align_x(iced::Alignment::Center)
             .spacing(5);
 
         wrap(

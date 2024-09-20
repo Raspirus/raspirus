@@ -2,8 +2,8 @@
 //#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use backend::config_file::Config;
-use frontend::iced::LocationSelection;
-use iced::{Application, Settings};
+use frontend::iced::{LocationSelection, Raspirus};
+use iced::Settings;
 use lazy_static::lazy_static;
 use log::LevelFilter;
 use simplelog::{
@@ -85,9 +85,8 @@ fn main() -> Result<(), String> {
             .add_filter_ignore_str("Naga")
             .add_filter_ignore_str("sctk");
 
-        let log_config = log_config
-            .add_filter_ignore_str("reqwest");
-        
+        let log_config = log_config.add_filter_ignore_str("reqwest");
+
         let log_config = log_config.build();
 
         // Terminal logger is always used if logging so we add it right away
@@ -109,11 +108,17 @@ fn main() -> Result<(), String> {
 
     const ICON_BYTES: &[u8] = include_bytes!("assets/logo.ico");
     let mut settings = Settings::default();
-    settings.window.exit_on_close_request = false;
+    let mut window_settings = iced::window::Settings::default();
     settings.id = Some("raspirus.app".to_owned());
-    settings.fonts = vec![iced_aw::BOOTSTRAP_FONT_BYTES.into()];
-    settings.window.icon = icon::from_file_data(ICON_BYTES, Option::from(ImageFormat::Ico)).ok();
-    frontend::iced::Raspirus::run(settings).expect("Failed to start frontend");
+    settings.fonts = vec![iced_fonts::BOOTSTRAP_FONT_BYTES.into()];
+    window_settings.icon = icon::from_file_data(ICON_BYTES, Option::from(ImageFormat::Ico)).ok();
+    iced::application("Raspirus", Raspirus::update, Raspirus::view)
+        .settings(settings)
+        .exit_on_close_request(false)
+        .window(window_settings)
+        .subscription(Raspirus::subscription)
+        .run()
+        .unwrap();
 
     Ok(())
 }
