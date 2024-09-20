@@ -1,8 +1,10 @@
 use std::{fmt::Display, path::PathBuf};
 
+use log::info;
 #[cfg(target_os = "windows")]
 use log::warn;
-use log::{debug, info};
+#[cfg(not(target_os = "windows"))]
+use log::debug;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash, Default)]
