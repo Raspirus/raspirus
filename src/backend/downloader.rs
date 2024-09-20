@@ -193,7 +193,7 @@ pub fn build_rules(
             // run the powershell script
             let mut cmd = Command::new("powershell");
             cmd.arg("-ExecutionPolicy")
-                .arg("RemoteSigned")
+                .arg("Bypass")
                 .arg("-File")
                 .arg(script_file)
                 .arg(&target_yarac);
