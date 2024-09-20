@@ -95,10 +95,8 @@ impl Display for LocationSelection {
             f,
             "{}",
             match self {
-                LocationSelection::Usb { .. } =>
-                    format!(" {}", iced_aw::Bootstrap::UsbDriveFill),
-                LocationSelection::Folder { .. } =>
-                    format!(" {}", iced_aw::Bootstrap::FolderFill),
+                LocationSelection::Usb { .. } => format!(" {}", iced_aw::Bootstrap::UsbDriveFill),
+                LocationSelection::Folder { .. } => format!(" {}", iced_aw::Bootstrap::FolderFill),
                 LocationSelection::File { .. } =>
                     format!(" {}", iced_aw::Bootstrap::FileEarmarkFill),
             }
@@ -263,14 +261,16 @@ impl iced::Application for Raspirus {
 
                 iced::Command::perform(
                     async move {
-                        let scanner =
-                            YaraScanner::new(sender_c).map_err(|err| ErrorCase::Critical {
+                        let scanner = YaraScanner::new(sender_c)
+                            .map_err(|err| ErrorCase::Critical {
                                 message: format!("Failed to build scanner: {err}"),
-                            })?;
-                        scanner
-                            .start(scanner_path.ok_or_else(|| ErrorCase::Warning {
+                            })?
+                            .set_path(scanner_path.ok_or_else(|| ErrorCase::Warning {
                                 message: "Select a path first!".to_owned(),
                             })?)
+                            .map_err(|err| ErrorCase::Critical { message: err })?;
+                        scanner
+                            .start()
                             .await
                             .map_err(|err| ErrorCase::Critical { message: err })
                     },
@@ -710,7 +710,7 @@ impl iced::Application for Raspirus {
             Message::OpenTerms => {
                 self.state = State::Terms;
                 iced::Command::none()
-            },
+            }
         }
     }
 
@@ -740,7 +740,7 @@ impl iced::Application for Raspirus {
                 log,
             } => self.results(tagged.clone(), skipped.clone(), log.clone()),
             State::Information => self.information(),
-            State::Terms => self.terms()
+            State::Terms => self.terms(),
         }
     }
 

@@ -63,30 +63,42 @@ impl PointerCollection {
     }
 }
 
+#[derive(Clone)]
 pub struct YaraScanner {
     pub progress_channel: Arc<Mutex<mpsc::Sender<Message>>>,
+    pub path: Option<PathBuf>
 }
 
 impl YaraScanner {
     /// creates a new scanenr and imports the yara rules
     pub fn new(progress_channel: Arc<Mutex<mpsc::Sender<Message>>>) -> Result<Self, String> {
-        Ok(Self { progress_channel })
+        Ok(Self { progress_channel, path: None })
+    }
+
+    pub fn set_path(&self, path: PathBuf) -> Result<Self, String> {
+        if !path.exists() {
+            return Err("Invalid path".to_owned());
+        }
+        
+        let mut scanner = self.clone();
+        scanner.path = Some(path);
+        Ok(scanner)
     }
 
     /// Starts the scanner in the specified location
     pub async fn start(
         &self,
-        path: PathBuf,
     ) -> Result<(Vec<TaggedFile>, Vec<Skipped>, PathBuf), String> {
-        if !path.exists() {
-            return Err("Invalid path".to_owned());
-        }
+        let path = match &self.path {
+            Some(path) => path,
+            None => return Err("No path set".to_owned())
+        };
 
         // setup file log
         let file_log = Arc::new(Mutex::new(FileLog::new()?));
 
         let paths =
-            profile_path(path).map_err(|err| format!("Failed to calculate file tree: {err}"))?;
+            profile_path(path.to_path_buf()).map_err(|err| format!("Failed to calculate file tree: {err}"))?;
         let pointers = PointerCollection::new(paths.len());
 
         let mut threadpool =

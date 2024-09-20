@@ -5,8 +5,6 @@ use std::fs::{self, File};
 use std::io::Read;
 use std::path::PathBuf;
 
-use crate::APPLICATION_LOG;
-
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(default)]
 pub struct Config {
@@ -110,7 +108,7 @@ impl Config {
         fs::create_dir_all(&config).map_err(|err| format!("Failed to create config dir: {err}"))?;
 
         // add launch timestamp to app log path
-        logs_app = logs_app.join(APPLICATION_LOG.clone());
+        logs_app = logs_app.join(crate::APPLICATION_LOG.clone());
 
         self.paths = Some(Paths {
             data,
