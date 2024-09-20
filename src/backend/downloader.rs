@@ -13,7 +13,7 @@ use std::{
 #[cfg(target_os = "windows")]
 use log::debug;
 
-use log::info;
+use log::{info, warn};
 use serde::{Deserialize, Serialize};
 use yara_x::Compiler;
 
@@ -216,7 +216,7 @@ pub fn build_rules(
                 .map_err(|err| format!("Failed to read rule file {}: {err}", file.name()))?;
             match compiler.add_source(content.as_bytes()) {
                 Ok(_) => {}
-                Err(_) => eprintln!("Failed {}", file.name()),
+                Err(_) => warn!("Failed {}", file.name()),
             }
         }
     }
