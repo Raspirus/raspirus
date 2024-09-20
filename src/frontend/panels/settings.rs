@@ -1,7 +1,7 @@
 use crate::{
     backend::config_file::Config,
     frontend::{
-        iced::{wrap, ConfigValue, Message, Raspirus, UpdateState},
+        iced::{wrap, ConfigValue, ErrorCase, Message, Raspirus, UpdateState},
         theme::{
             button::{RaspirusButtonBlue, RaspirusButtonPrimary},
             container::RaspirusCard,
@@ -108,7 +108,14 @@ impl Raspirus {
                                         .font(iced_aw::BOOTSTRAP_FONT),
                                     ),
                             )
-                            .on_press(Message::UpdateRules)
+                            .on_press(match update {
+                                UpdateState::Loaded | UpdateState::Updated => Message::UpdateRules,
+                                _ => Message::Error {
+                                    case: ErrorCase::Warning {
+                                        message: "Already running update!".to_owned(),
+                                    },
+                                },
+                            })
                             .padding(10)
                             .style(iced::theme::Button::Custom(Box::new(RaspirusButtonBlue))),
                         )
