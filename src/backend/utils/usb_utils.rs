@@ -1,10 +1,10 @@
 use std::{fmt::Display, path::PathBuf};
 
+#[cfg(not(target_os = "windows"))]
+use log::debug;
 use log::info;
 #[cfg(target_os = "windows")]
 use log::warn;
-#[cfg(not(target_os = "windows"))]
-use log::debug;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash, Default)]
@@ -28,7 +28,8 @@ pub fn list_usb_drives() -> Result<Vec<UsbDevice>, String> {
         info!("Trying to retrieve USB drives from Unix-like OS");
 
         let options = lfs_core::ReadOptions::default();
-        let mut mounts = lfs_core::read_mounts(&options).unwrap();
+        let mut mounts = lfs_core::read_mounts(&options)
+            .map_err(|err| format!("Failed to list usb drives: {err}"))?;
         // filter not ok / non removable drives
         mounts.retain(|m| {
             m.stats.is_ok()
