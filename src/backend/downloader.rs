@@ -151,7 +151,7 @@ pub async fn update() -> Result<(), RemoteError> {
 
     let new_version = get_remote_version().await?;
 
-    CONFIG.lock().expect("Failed to lock config").rules_version = new_version.clone();
+    CONFIG.lock().expect("Failed to lock config").rules_version.clone_from(&new_version);
     config.rules_version = new_version;
     config.save().map_err(RemoteError::Other)?;
     info!("Updated to {}", &config.rules_version);
