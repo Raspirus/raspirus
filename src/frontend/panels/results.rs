@@ -37,7 +37,7 @@ impl Raspirus {
                     )
                     .push(
                         iced::widget::container(
-                            iced::widget::text("Terms and Conditions")
+                            iced::widget::text("Results")
                                 .size(30)
                                 .font(iced::font::Font {
                                     weight: iced::font::Weight::Bold,
@@ -49,6 +49,11 @@ impl Raspirus {
                     )
                     .padding([5, 0])
                     .push(iced::widget::horizontal_space())
+                    .push(iced::widget::Button::new(
+                        iced::widget::Text::new(iced_aw::Bootstrap::Download.to_string())
+                            .font(iced_aw::BOOTSTRAP_FONT),
+                    )
+                    .on_press(Message::DownloadLog { log_path }))
                     .align_items(iced::Alignment::Center),
             )
             .push(iced::widget::horizontal_rule(5))
