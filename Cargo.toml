@@ -32,6 +32,7 @@ native-dialog = "0.7.0"
 futures = "0.3.30"
 open = "5.3.0"
 printpdf = "0.7.0"
+zip = "2.2.0"
 
 # usb detection on linux
 [target.'cfg(any(target_os = "linux", target_os = "macos"))'.dependencies]
