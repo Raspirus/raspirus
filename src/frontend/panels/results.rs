@@ -2,7 +2,7 @@ use std::path::PathBuf;
 
 use crate::{
     backend::yara_scanner::{Skipped, TaggedFile},
-    frontend::iced::{wrap, Card, Message, Raspirus},
+    frontend::{iced::{wrap, Card, Message, Raspirus}, theme::{button::RaspirusButtonPrimary, icon::RaspirusWhiteIcon, PRIMARY_COLOR}},
 };
 
 impl Raspirus {
@@ -12,22 +12,48 @@ impl Raspirus {
         skipped: Vec<(Skipped, bool)>,
         log_path: PathBuf,
     ) -> iced::Element<Message> {
-        let top_row = iced::widget::Row::new()
+        let top_row = iced::widget::Column::new()
             .push(
-                iced::widget::Button::new(
-                    iced::widget::Text::new(iced_aw::Bootstrap::Download.to_string())
-                        .font(iced_aw::BOOTSTRAP_FONT),
-                )
-                .on_press(Message::DownloadLog { log_path }),
+                iced::widget::Row::new()
+                    .push(
+                        iced::widget::Button::new(
+                            iced::widget::Row::new()
+                                .push(
+                                    iced::widget::svg::Svg::from_path("src/assets/icons/home.svg")
+                                        .height(20)
+                                        .width(20)
+                                        .style(iced::theme::Svg::Custom(Box::new(
+                                            RaspirusWhiteIcon,
+                                        ))),
+                                )
+                                .push(
+                                    iced::widget::container(iced::widget::text("HOME"))
+                                        .padding([0, 0, 0, 5]),
+                                ),
+                        )
+                        .on_press(Message::OpenMain)
+                        .style(iced::theme::Button::Custom(Box::new(RaspirusButtonPrimary)))
+                        .padding(7),
+                    )
+                    .push(
+                        iced::widget::container(
+                            iced::widget::text("Terms and Conditions")
+                                .size(30)
+                                .font(iced::font::Font {
+                                    weight: iced::font::Weight::Bold,
+                                    ..iced::font::Font::DEFAULT
+                                })
+                                .style(PRIMARY_COLOR),
+                        )
+                        .padding([0, 10]),
+                    )
+                    .padding([5, 0])
+                    .push(iced::widget::horizontal_space())
+                    .align_items(iced::Alignment::Center),
             )
-            .push(iced::widget::horizontal_space())
-            .push(
-                iced::widget::Button::new(
-                    iced::widget::Text::new(iced_aw::Bootstrap::House.to_string())
-                        .font(iced_aw::BOOTSTRAP_FONT),
-                )
-                .on_press(Message::OpenMain),
-            );
+            .push(iced::widget::horizontal_rule(5))
+            .padding(10);
+        
         let mut tagged_list = iced::widget::Column::new()
             .push(iced::widget::Text::new(format!(
                 "Found files ({})",
@@ -159,7 +185,6 @@ impl Raspirus {
             15,
             iced::widget::Column::new()
                 .push(top_row)
-                .push(iced::widget::horizontal_rule(5))
                 .push(tagged_list)
                 .push(iced::widget::horizontal_rule(5))
                 .push(skipped_list)
