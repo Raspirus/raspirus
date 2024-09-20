@@ -104,10 +104,6 @@ async fn download_file(url: &str, path: &PathBuf) -> Result<(), RemoteError> {
                 RemoteError::Other(err.to_string())
             }
         })?;
-    info!(
-        "Starting download of {}mb",
-        response.content_length().unwrap_or_default() / 1048576
-    );
     let mut dest = File::create(path)
         .map_err(|err| RemoteError::Other(format!("Failed to create file: {err}")))?;
     let content = response.bytes().await.map_err(|err| {
@@ -117,8 +113,9 @@ async fn download_file(url: &str, path: &PathBuf) -> Result<(), RemoteError> {
             RemoteError::Other(err.to_string())
         }
     })?;
+    info!("Downloaded {}mb", content.len() / 1048576);
     copy(&mut content.as_ref(), &mut dest).map_err(|err| RemoteError::Other(err.to_string()))?;
-    info!("Downloaded to {}", path.to_string_lossy());
+    info!("Downloaded {url} to {}", path.to_string_lossy());
     Ok(())
 }
 
@@ -133,6 +130,7 @@ pub async fn update() -> Result<(), RemoteError> {
 
     let paths = config
         .paths
+        .clone()
         .ok_or("No paths set. Is config initialized?".to_owned())
         .map_err(RemoteError::Other)?;
 
@@ -147,13 +145,14 @@ pub async fn update() -> Result<(), RemoteError> {
     let release = get_release().await?;
 
     download_file(&release.zipball_url, &download_path).await?;
-    info!("Downloaded {}", release.zipball_url);
 
     info!("Building rules. This may take some time...");
     build_rules(download_path, save_path, temp).map_err(RemoteError::Other)?;
 
-    config.rules_version = get_remote_version().await?;
-    let config = CONFIG.lock().expect("Failed to lock config");
+    let new_version = get_remote_version().await?;
+
+    CONFIG.lock().expect("Failed to lock config").rules_version = new_version.clone();
+    config.rules_version = new_version;
     config.save().map_err(RemoteError::Other)?;
     info!("Updated to {}", &config.rules_version);
     Ok(())
@@ -221,7 +220,7 @@ pub fn build_rules(
         }
     }
 
-    println!("Building...");
+    info!("Building...");
     let rules = compiler.build(); // will take at least 5 billion years
     let mut out = File::create(&target_yarac).map_err(|err| {
         format!(

@@ -675,9 +675,9 @@ impl iced::Application for Raspirus {
             }
             // update is finished
             Message::UpdateFinished => {
-                if let State::Settings { config, .. } = &self.state {
+                if let State::Settings { .. } = &self.state {
                     self.state = State::Settings {
-                        config: config.clone(),
+                        config: crate::CONFIG.lock().expect("Failed to lock config").clone(),
                         update: UpdateState::Updated,
                     };
                 }

@@ -35,7 +35,11 @@ static DEFAULT_MAX_MATCHES: usize = 20;
 /// download settings
 static MAX_TIMEOUT: u64 = 120;
 
+#[cfg(debug_assertions)]
 static LOGGING_FILTER: LevelFilter = LevelFilter::Debug;
+
+#[cfg(not(debug_assertions))]
+static LOGGING_FILTER: LevelFilter = LevelFilter::Info;
 
 lazy_static! {
     /// Create string with current time
@@ -75,6 +79,9 @@ fn main() -> Result<(), String> {
             .add_filter_ignore_str("wasmtime")
             .add_filter_ignore_str("aho_corasick")
             .add_filter_ignore_str("walrus")
+            .add_filter_ignore_str("wgpu_hal")
+            .add_filter_ignore_str("Naga")
+            .add_filter_ignore_str("sctk")
             .build();
 
         // Terminal logger is always used if logging so we add it right away
