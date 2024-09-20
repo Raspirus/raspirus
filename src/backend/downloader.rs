@@ -17,7 +17,7 @@ use log::{info, warn};
 use serde::{Deserialize, Serialize};
 use yara_x::Compiler;
 
-use crate::{CONFIG, MAX_TIMEOUT};
+use crate::{backend::utils::generic::get_rules, CONFIG, MAX_TIMEOUT};
 
 #[derive(Deserialize)]
 struct Release {
@@ -121,11 +121,6 @@ async fn download_file(url: &str, path: &PathBuf) -> Result<(), RemoteError> {
 
 /// updates the currently used yara rules to the latest from the repo
 pub async fn update() -> Result<(), RemoteError> {
-    // check if online and update necessary
-    if !check_update().await? {
-        return Ok(());
-    }
-
     let mut config = CONFIG.lock().expect("Failed to lock config").clone();
 
     let paths = config
@@ -141,6 +136,22 @@ pub async fn update() -> Result<(), RemoteError> {
     // path to compiled yara rules
     let save_path = paths.data.join(crate::DEFAULT_FILE);
 
+    let mut update = false;
+
+    // check if online and update necessary
+    if check_update().await? {
+        update = true;
+    }
+
+    // if rules cannot be loaded, update
+    if get_rules(save_path.clone()).is_err() {
+        update = true;
+    } 
+
+    if !update {
+        return Ok(())
+    }
+
     info!("Starting download...");
     let release = get_release().await?;
 
@@ -151,7 +162,11 @@ pub async fn update() -> Result<(), RemoteError> {
 
     let new_version = get_remote_version().await?;
 
-    CONFIG.lock().expect("Failed to lock config").rules_version.clone_from(&new_version);
+    CONFIG
+        .lock()
+        .expect("Failed to lock config")
+        .rules_version
+        .clone_from(&new_version);
     config.rules_version = new_version;
     config.save().map_err(RemoteError::Other)?;
     info!("Updated to {}", &config.rules_version);
