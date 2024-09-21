@@ -17,8 +17,17 @@ pub fn button_primary_style(_theme: &Theme, status: Status) -> button::Style {
                 color: Color::BLACK,
                 offset: DEFAULT_SHADOW_OFFSET,
                 blur_radius: 2.0,
+            }
+        },
+        Status::Disabled => button::Style {
+            background: Some(iced::Background::Color(GRAY_COLOR)),
+            text_color: Color::WHITE,
+            border: Border::default().rounded(DEFAULT_BUTTON_RADIUS),
+            shadow: Shadow {
+                color: Color::BLACK,
+                offset: DEFAULT_SHADOW_OFFSET,
+                blur_radius: 5.0,
             },
-            ..Default::default()
         },
         _ => button::Style {
             background: Some(iced::Background::Color(PRIMARY_COLOR_DARK)),
@@ -29,27 +38,43 @@ pub fn button_primary_style(_theme: &Theme, status: Status) -> button::Style {
                 offset: DEFAULT_SHADOW_OFFSET,
                 blur_radius: 5.0,
             },
-            ..Default::default()
         },
     }
 }
 
-pub fn button_secondary_style(_theme: &Theme, status: Status) -> button::Style {
+pub fn button_secondary_style(theme: &Theme, status: Status) -> button::Style {
     match status {
-        Status::Active => button::Style {
-            background: Some(iced::Background::Color(GRAY_BACKGROUND)),
-            text_color: SECONDARY_COLOR,
-            border: Border {
-                color: SECONDARY_COLOR,
-                width: DEFAULT_BORDER_WIDTH,
-                radius: DEFAULT_BUTTON_RADIUS.into(),
-            },
-            shadow: Shadow {
-                color: Color::BLACK,
-                offset: DEFAULT_SHADOW_OFFSET,
-                blur_radius: 2.0,
-            },
-            ..Default::default()
+        Status::Active => {
+            match theme {
+                Theme::Dark => button::Style {
+                    background: Some(iced::Background::Color(Color::BLACK)),
+                    text_color: SECONDARY_COLOR,
+                    border: Border {
+                        color: SECONDARY_COLOR,
+                        width: DEFAULT_BORDER_WIDTH,
+                        radius: DEFAULT_BUTTON_RADIUS.into(),
+                    },
+                    shadow: Shadow {
+                        color: Color::BLACK,
+                        offset: DEFAULT_SHADOW_OFFSET,
+                        blur_radius: 2.0,
+                    },
+                },
+                _ => button::Style {
+                    background: Some(iced::Background::Color(GRAY_BACKGROUND)),
+                    text_color: SECONDARY_COLOR,
+                    border: Border {
+                        color: SECONDARY_COLOR,
+                        width: DEFAULT_BORDER_WIDTH,
+                        radius: DEFAULT_BUTTON_RADIUS.into(),
+                    },
+                    shadow: Shadow {
+                        color: Color::BLACK,
+                        offset: DEFAULT_SHADOW_OFFSET,
+                        blur_radius: 2.0,
+                    },
+                }
+            }
         },
         _ => button::Style {
             background: Some(iced::Background::Color(Color::WHITE)),
@@ -64,7 +89,6 @@ pub fn button_secondary_style(_theme: &Theme, status: Status) -> button::Style {
                 offset: DEFAULT_SHADOW_OFFSET,
                 blur_radius: 5.0,
             },
-            ..Default::default()
         },
     }
 }
@@ -80,7 +104,16 @@ pub fn button_blue_style(_theme: &Theme, status: Status) -> button::Style {
                 offset: DEFAULT_SHADOW_OFFSET,
                 blur_radius: 2.0,
             },
-            ..Default::default()
+        },
+        Status::Disabled => button::Style {
+            background: Some(iced::Background::Color(GRAY_COLOR)),
+            text_color: Color::WHITE,
+            border: Border::default().rounded(DEFAULT_BUTTON_RADIUS),
+            shadow: Shadow {
+                color: Color::BLACK,
+                offset: DEFAULT_SHADOW_OFFSET,
+                blur_radius: 5.0,
+            },
         },
         _ => button::Style {
             background: Some(iced::Background::Color(BLUE_COLOR_DARK)),
@@ -91,7 +124,6 @@ pub fn button_blue_style(_theme: &Theme, status: Status) -> button::Style {
                 offset: DEFAULT_SHADOW_OFFSET,
                 blur_radius: 5.0,
             },
-            ..Default::default()
         },
     }
 }
@@ -107,7 +139,6 @@ pub fn button_orange_style(_theme: &Theme, status: Status) -> button::Style {
                 offset: DEFAULT_SHADOW_OFFSET,
                 blur_radius: 2.0,
             },
-            ..Default::default()
         },
         _ => button::Style {
             background: Some(iced::Background::Color(ORANGE_COLOR_DARK)),
@@ -118,7 +149,6 @@ pub fn button_orange_style(_theme: &Theme, status: Status) -> button::Style {
                 offset: DEFAULT_SHADOW_OFFSET,
                 blur_radius: 5.0,
             },
-            ..Default::default()
         },
     }
 }
@@ -138,7 +168,6 @@ pub fn button_select_style(_theme: &Theme, status: Status) -> button::Style {
                 offset: DEFAULT_SHADOW_OFFSET,
                 blur_radius: 2.0,
             },
-            ..Default::default()
         },
         _ => button::Style {
             background: Some(iced::Background::Color(GRAY_COLOR)),
@@ -153,7 +182,6 @@ pub fn button_select_style(_theme: &Theme, status: Status) -> button::Style {
                 offset: DEFAULT_SHADOW_OFFSET,
                 blur_radius: 5.0,
             },
-            ..Default::default()
         },
     }
 }
@@ -173,7 +201,6 @@ pub fn button_transparent_style(_theme: &Theme, status: Status) -> button::Style
                 offset: DEFAULT_SHADOW_OFFSET,
                 blur_radius: 0.0,
             },
-            ..Default::default()
         },
         _ => button::Style {
             background: Some(iced::Background::Color(Color::TRANSPARENT)),
@@ -188,7 +215,6 @@ pub fn button_transparent_style(_theme: &Theme, status: Status) -> button::Style
                 offset: DEFAULT_SHADOW_OFFSET,
                 blur_radius: 0.0,
             },
-            ..Default::default()
         },
     }
 }

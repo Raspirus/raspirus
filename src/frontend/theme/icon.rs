@@ -3,6 +3,8 @@ use iced::{
     Theme,
 };
 
+// Icons from Tabler.io: https://tabler.io/icons
+
 use super::{BLUE_COLOR_LIGHT, SECONDARY_COLOR};
 
 pub fn info_icon_style(_theme: &Theme, _status: Status) -> svg::Style {

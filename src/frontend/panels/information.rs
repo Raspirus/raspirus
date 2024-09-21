@@ -2,13 +2,11 @@ use crate::frontend::{
     iced::{wrap, Message, Raspirus},
     theme::{
         button::button_primary_style,
-        container::{card_container_style, icon_container_style},
+        container::card_container_style,
         icon::{info_icon_style, white_icon_style},
         GRAY_COLOR, PRIMARY_COLOR,
     },
 };
-
-// Icons from Tabler.io: https://tabler.io/icons
 
 impl Raspirus {
     fn info_card<'a>(
@@ -19,9 +17,7 @@ impl Raspirus {
         iced::widget::container(
             iced::widget::Row::new()
                 .push(
-                    iced::widget::container(icon.height(48).width(48).style(info_icon_style))
-                        .padding(15)
-                        .style(icon_container_style),
+                    icon.height(64).width(64).style(info_icon_style),
                 )
                 //.push(iced::widget::vertical_rule(5))
                 .push(iced::widget::Space::with_width(10))
@@ -41,6 +37,7 @@ impl Raspirus {
                 .padding(7),
         )
         .style(card_container_style)
+        .padding(5)
     }
 
     pub fn information(&self) -> iced::Element<Message> {
