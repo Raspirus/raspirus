@@ -93,6 +93,7 @@ impl YaraScanner {
 
     /// Starts the scanner in the specified location
     pub fn start(&self) -> Result<(Vec<TaggedFile>, Vec<Skipped>, PathBuf), String> {
+        let start_time = std::time::Instant::now();
         let path = match &self.path {
             Some(path) => path,
             None => return Err("No path set".to_owned()),
@@ -115,6 +116,7 @@ impl YaraScanner {
 
         let paths = profile_path(path.to_path_buf())
             .map_err(|err| format!("Failed to calculate file tree: {err}"))?;
+        let paths_count = paths.len();
         let pointers = PointerCollection::new(paths.len());
 
         let mut threadpool =
@@ -151,6 +153,12 @@ impl YaraScanner {
             .clone();
 
         let logger = file_log.lock().expect("Failed to lock logger");
+        info!(
+            "Scanned {paths_count} files in {:.2}s",
+            std::time::Instant::now()
+                .duration_since(start_time)
+                .as_secs_f32()
+        );
         // return tagged and skipped files aswell as path to the scan log
         Ok((tagged, skipped, logger.log_path.clone()))
     }
