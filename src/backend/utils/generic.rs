@@ -34,6 +34,9 @@ pub fn profile_path(path: PathBuf) -> Result<Vec<PathBuf>, std::io::Error> {
 pub fn profile_folder(paths: &mut Vec<PathBuf>, path: PathBuf) -> Result<(), std::io::Error> {
     for entry in fs::read_dir(path)? {
         let entry = entry?;
+        if entry.path().is_symlink() {
+            continue;
+        }
         if entry.path().is_dir() {
             profile_folder(paths, entry.path())?;
         } else {
