@@ -92,7 +92,7 @@ impl YaraScanner {
     }
 
     /// Starts the scanner in the specified location
-    pub fn start(&self) -> Result<(Vec<TaggedFile>, Vec<Skipped>, PathBuf), String> {
+    pub async fn start(&self) -> Result<(Vec<TaggedFile>, Vec<Skipped>, PathBuf), String> {
         let path = match &self.path {
             Some(path) => path,
             None => return Err("No path set".to_owned()),
@@ -136,6 +136,13 @@ impl YaraScanner {
             });
         }
         threadpool.join();
+        self.progress_sender.clone().and_then(|sender| {
+            sender
+                .lock()
+                .expect("Failed to lock channel")
+                .close_channel();
+            Some(())
+        });
         let tagged = pointers
             .tagged
             .lock()

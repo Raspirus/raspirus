@@ -4534,6 +4534,7 @@ dependencies = [
  "sha2",
  "simplelog",
  "threadpool_rs",
+ "tokio",
  "winapi",
  "windows-sys 0.59.0",
  "yara-x",

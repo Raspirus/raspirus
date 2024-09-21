@@ -3,7 +3,7 @@ use crate::backend::downloader;
 use crate::backend::utils::generic::{create_pdf, generate_virustotal, update_config};
 use crate::backend::utils::usb_utils::{list_usb_drives, UsbDevice};
 use crate::backend::yara_scanner::{Skipped, TaggedFile, YaraScanner};
-use futures::SinkExt;
+use futures::{FutureExt, SinkExt};
 use iced::{
     futures::{channel::mpsc, Stream},
     stream,
@@ -751,6 +751,8 @@ impl Raspirus {
                 .await
                 .expect("Failed to send job input to stream");
 
+            let mut scanner_channel = mpsc::channel(1);
+
             loop {
                 use iced::futures::StreamExt;
 
@@ -771,9 +773,22 @@ impl Raspirus {
                     }
                 };
 
-                scanner.progress_sender = Some(Arc::new(Mutex::new(output.clone())));
+                scanner.progress_sender = Some(Arc::new(Mutex::new(scanner_channel.0.clone())));
+                let scanner = Arc::new(scanner);
 
-                let result = scanner.start();
+                let handle = tokio::task::spawn({
+                    let scanner_c = scanner.clone();
+                    async move { scanner_c.start().await }
+                });
+
+                while let Some(value) = scanner_channel.1.next().await {
+                    output
+                        .send(value)
+                        .await
+                        .expect("Failed to send scan result");
+                }
+
+                let result = handle.await.expect("Failed to wait for handle");
 
                 let message = match result {
                     Ok(message) => Message::ScanComplete {
@@ -793,7 +808,6 @@ impl Raspirus {
                         case: ErrorCase::Warning { message },
                     },
                 };
-
                 output
                     .send(Worker::Message { message })
                     .await
