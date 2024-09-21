@@ -15,14 +15,15 @@ impl Raspirus {
                         iced::widget::container::Container::new(
                             iced::widget::text("Scanning...")
                                 .size(80)
-                                .horizontal_alignment(iced::alignment::Horizontal::Center)
+                                .align_x(iced::alignment::Horizontal::Center)
                                 .font(font::Font {
                                     weight: iced::font::Weight::Bold,
                                     ..font::Font::DEFAULT
                                 })
-                                .style(SECONDARY_COLOR),
-                        )
-                        .padding([0, 0, 10, 0]),
+                                .style(|_| iced::widget::text::Style {
+                                    color: Some(SECONDARY_COLOR),
+                                }),
+                        ), //TODO.padding([0, 0, 10, 0]),
                     )
                     .push(iced::widget::horizontal_space())
                     .spacing(5),

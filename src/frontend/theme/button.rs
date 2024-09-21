@@ -1,5 +1,5 @@
-use iced::widget::button;
-use iced::{Border, Color, Shadow};
+use iced::widget::button::{self, Status};
+use iced::{Border, Color, Shadow, Theme};
 
 use super::{
     BLUE_COLOR, BLUE_COLOR_DARK, BLUE_COLOR_LIGHT, DEFAULT_BORDER_WIDTH, DEFAULT_BUTTON_RADIUS,
@@ -7,75 +7,76 @@ use super::{
     PRIMARY_COLOR, PRIMARY_COLOR_DARK, SECONDARY_COLOR, SECONDARY_COLOR_DARK,
 };
 
-#[derive(Default)]
-pub struct RaspirusButtonPrimary;
-#[derive(Default)]
-pub struct RaspirusButtonSecondary;
-#[derive(Default)]
-pub struct RaspirusButtonBlue;
-#[derive(Default)]
-pub struct RaspirusButtonOrange;
-#[derive(Default)]
-pub struct RaspirusButtonSelect;
-#[derive(Default)]
-pub struct RaspirusButtonTransparent;
-
-impl iced::widget::button::StyleSheet for RaspirusButtonPrimary {
-    type Style = iced::Theme;
-
-    fn active(&self, _style: &Self::Style) -> button::Appearance {
-        button::Appearance {
+pub fn button_primary_style(_theme: &Theme, status: Status) -> button::Style {
+    match status {
+        Status::Active => button::Style {
             background: Some(iced::Background::Color(PRIMARY_COLOR)),
             text_color: Color::WHITE,
-            border: Border::with_radius(DEFAULT_BUTTON_RADIUS),
+            border: Border::default().rounded(DEFAULT_BUTTON_RADIUS),
             shadow: Shadow {
                 color: Color::BLACK,
                 offset: DEFAULT_SHADOW_OFFSET,
                 blur_radius: 2.0,
-            },
-            ..Default::default()
-        }
-    }
-    fn hovered(&self, _style: &Self::Style) -> button::Appearance {
-        button::Appearance {
-            background: Some(iced::Background::Color(PRIMARY_COLOR_DARK)),
+            }
+        },
+        Status::Disabled => button::Style {
+            background: Some(iced::Background::Color(GRAY_COLOR)),
             text_color: Color::WHITE,
-            border: Border::with_radius(DEFAULT_BUTTON_RADIUS),
+            border: Border::default().rounded(DEFAULT_BUTTON_RADIUS),
             shadow: Shadow {
                 color: Color::BLACK,
                 offset: DEFAULT_SHADOW_OFFSET,
                 blur_radius: 5.0,
             },
-            ..Default::default()
-        }
-    }
-    fn pressed(&self, _style: &Self::Style) -> button::Appearance {
-        self.hovered(_style)
-    }
-}
-
-impl iced::widget::button::StyleSheet for RaspirusButtonSecondary {
-    type Style = iced::Theme;
-
-    fn active(&self, _style: &Self::Style) -> button::Appearance {
-        button::Appearance {
-            background: Some(iced::Background::Color(GRAY_BACKGROUND)),
-            text_color: SECONDARY_COLOR,
-            border: Border {
-                color: SECONDARY_COLOR,
-                width: DEFAULT_BORDER_WIDTH,
-                radius: DEFAULT_BUTTON_RADIUS.into(),
-            },
+        },
+        _ => button::Style {
+            background: Some(iced::Background::Color(PRIMARY_COLOR_DARK)),
+            text_color: Color::WHITE,
+            border: Border::default().rounded(DEFAULT_BUTTON_RADIUS),
             shadow: Shadow {
                 color: Color::BLACK,
                 offset: DEFAULT_SHADOW_OFFSET,
-                blur_radius: 2.0,
+                blur_radius: 5.0,
             },
-            ..Default::default()
-        }
+        },
     }
-    fn hovered(&self, _style: &Self::Style) -> button::Appearance {
-        button::Appearance {
+}
+
+pub fn button_secondary_style(theme: &Theme, status: Status) -> button::Style {
+    match status {
+        Status::Active => {
+            match theme {
+                Theme::Dark => button::Style {
+                    background: Some(iced::Background::Color(Color::BLACK)),
+                    text_color: SECONDARY_COLOR,
+                    border: Border {
+                        color: SECONDARY_COLOR,
+                        width: DEFAULT_BORDER_WIDTH,
+                        radius: DEFAULT_BUTTON_RADIUS.into(),
+                    },
+                    shadow: Shadow {
+                        color: Color::BLACK,
+                        offset: DEFAULT_SHADOW_OFFSET,
+                        blur_radius: 2.0,
+                    },
+                },
+                _ => button::Style {
+                    background: Some(iced::Background::Color(GRAY_BACKGROUND)),
+                    text_color: SECONDARY_COLOR,
+                    border: Border {
+                        color: SECONDARY_COLOR,
+                        width: DEFAULT_BORDER_WIDTH,
+                        radius: DEFAULT_BUTTON_RADIUS.into(),
+                    },
+                    shadow: Shadow {
+                        color: Color::BLACK,
+                        offset: DEFAULT_SHADOW_OFFSET,
+                        blur_radius: 2.0,
+                    },
+                }
+            }
+        },
+        _ => button::Style {
             background: Some(iced::Background::Color(Color::WHITE)),
             text_color: SECONDARY_COLOR_DARK,
             border: Border {
@@ -88,105 +89,106 @@ impl iced::widget::button::StyleSheet for RaspirusButtonSecondary {
                 offset: DEFAULT_SHADOW_OFFSET,
                 blur_radius: 5.0,
             },
-            ..Default::default()
-        }
-    }
-    fn pressed(&self, _style: &Self::Style) -> button::Appearance {
-        self.hovered(_style)
+        },
     }
 }
 
-impl iced::widget::button::StyleSheet for RaspirusButtonBlue {
-    type Style = iced::Theme;
-
-    fn active(&self, _style: &Self::Style) -> button::Appearance {
-        button::Appearance {
+pub fn button_blue_style(_theme: &Theme, status: Status) -> button::Style {
+    match status {
+        Status::Active => button::Style {
             background: Some(iced::Background::Color(BLUE_COLOR)),
             text_color: Color::WHITE,
-            border: Border::with_radius(DEFAULT_BUTTON_RADIUS),
+            border: Border::default().rounded(DEFAULT_BUTTON_RADIUS),
             shadow: Shadow {
                 color: Color::BLACK,
                 offset: DEFAULT_SHADOW_OFFSET,
                 blur_radius: 2.0,
             },
-            ..Default::default()
-        }
-    }
-    fn hovered(&self, _style: &Self::Style) -> button::Appearance {
-        button::Appearance {
+        },
+        Status::Disabled => button::Style {
+            background: Some(iced::Background::Color(GRAY_COLOR)),
+            text_color: Color::WHITE,
+            border: Border::default().rounded(DEFAULT_BUTTON_RADIUS),
+            shadow: Shadow {
+                color: Color::BLACK,
+                offset: DEFAULT_SHADOW_OFFSET,
+                blur_radius: 5.0,
+            },
+        },
+        _ => button::Style {
             background: Some(iced::Background::Color(BLUE_COLOR_DARK)),
             text_color: Color::WHITE,
-            border: Border::with_radius(DEFAULT_BUTTON_RADIUS),
+            border: Border::default().rounded(DEFAULT_BUTTON_RADIUS),
             shadow: Shadow {
                 color: Color::BLACK,
                 offset: DEFAULT_SHADOW_OFFSET,
                 blur_radius: 5.0,
             },
-            ..Default::default()
-        }
-    }
-    fn pressed(&self, _style: &Self::Style) -> button::Appearance {
-        self.hovered(_style)
+        },
     }
 }
 
-impl iced::widget::button::StyleSheet for RaspirusButtonOrange {
-    type Style = iced::Theme;
-
-    fn active(&self, _style: &Self::Style) -> button::Appearance {
-        button::Appearance {
+pub fn button_orange_style(_theme: &Theme, status: Status) -> button::Style {
+    match status {
+        Status::Active => button::Style {
             background: Some(iced::Background::Color(ORANGE_COLOR)),
-            text_color: Color::WHITE,
-            border: Border::with_radius(DEFAULT_BUTTON_RADIUS),
+            border: Border::default().rounded(DEFAULT_BUTTON_RADIUS),
             shadow: Shadow {
                 color: Color::BLACK,
                 offset: DEFAULT_SHADOW_OFFSET,
                 blur_radius: 2.0,
             },
             ..Default::default()
-        }
-    }
-    fn hovered(&self, _style: &Self::Style) -> button::Appearance {
-        button::Appearance {
+        },
+        _ => button::Style {
             background: Some(iced::Background::Color(ORANGE_COLOR_DARK)),
-            text_color: Color::WHITE,
-            border: Border::with_radius(DEFAULT_BUTTON_RADIUS),
+            border: Border::default().rounded(DEFAULT_BUTTON_RADIUS),
             shadow: Shadow {
                 color: Color::BLACK,
                 offset: DEFAULT_SHADOW_OFFSET,
                 blur_radius: 5.0,
             },
             ..Default::default()
-        }
-    }
-    fn pressed(&self, _style: &Self::Style) -> button::Appearance {
-        self.hovered(_style)
+        },
     }
 }
 
-impl iced::widget::button::StyleSheet for RaspirusButtonSelect {
-    type Style = iced::Theme;
-
-    fn active(&self, _style: &Self::Style) -> button::Appearance {
-        button::Appearance {
-            background: Some(iced::Background::Color(Color::WHITE)),
-            text_color: Color::BLACK,
-            border: Border {
-                color: BLUE_COLOR_LIGHT,
-                width: DEFAULT_BORDER_WIDTH,
-                radius: 0.5.into(),
-            },
-            shadow: Shadow {
-                color: Color::BLACK,
-                offset: DEFAULT_SHADOW_OFFSET,
-                blur_radius: 2.0,
-            },
-            ..Default::default()
-        }
-    }
-    fn hovered(&self, _style: &Self::Style) -> button::Appearance {
-        button::Appearance {
-            background: Some(iced::Background::Color(GRAY_COLOR)),
+pub fn button_select_style(theme: &Theme, status: Status) -> button::Style {
+    match status {
+        Status::Active => {
+            match theme {
+                Theme::Dark => button::Style {
+                    background: Some(iced::Background::Color(Color::BLACK)),
+                    text_color: Color::WHITE,
+                    border: Border {
+                        color: BLUE_COLOR_LIGHT,
+                        width: DEFAULT_BORDER_WIDTH,
+                        radius: 0.5.into(),
+                    },
+                    shadow: Shadow {
+                        color: Color::BLACK,
+                        offset: DEFAULT_SHADOW_OFFSET,
+                        blur_radius: 2.0,
+                    },
+                },
+                _ => button::Style {
+                    background: Some(iced::Background::Color(Color::WHITE)),
+                    text_color: Color::BLACK,
+                    border: Border {
+                        color: BLUE_COLOR_LIGHT,
+                        width: DEFAULT_BORDER_WIDTH,
+                        radius: 0.5.into(),
+                    },
+                    shadow: Shadow {
+                        color: Color::BLACK,
+                        offset: DEFAULT_SHADOW_OFFSET,
+                        blur_radius: 2.0,
+                    },
+                }
+            }
+        },
+        _ => button::Style {
+            background: Some(iced::Background::Color(GRAY_BACKGROUND)),
             text_color: Color::BLACK,
             border: Border {
                 color: BLUE_COLOR_DARK,
@@ -198,19 +200,13 @@ impl iced::widget::button::StyleSheet for RaspirusButtonSelect {
                 offset: DEFAULT_SHADOW_OFFSET,
                 blur_radius: 5.0,
             },
-            ..Default::default()
-        }
-    }
-    fn pressed(&self, _style: &Self::Style) -> button::Appearance {
-        self.hovered(_style)
+        },
     }
 }
 
-impl iced::widget::button::StyleSheet for RaspirusButtonTransparent {
-    type Style = iced::Theme;
-
-    fn active(&self, _style: &Self::Style) -> button::Appearance {
-        button::Appearance {
+pub fn button_transparent_style(_theme: &Theme, status: Status) -> button::Style {
+    match status {
+        Status::Active => button::Style {
             background: Some(iced::Background::Color(Color::TRANSPARENT)),
             text_color: PRIMARY_COLOR,
             border: Border {
@@ -223,11 +219,8 @@ impl iced::widget::button::StyleSheet for RaspirusButtonTransparent {
                 offset: DEFAULT_SHADOW_OFFSET,
                 blur_radius: 0.0,
             },
-            ..Default::default()
-        }
-    }
-    fn hovered(&self, _style: &Self::Style) -> button::Appearance {
-        button::Appearance {
+        },
+        _ => button::Style {
             background: Some(iced::Background::Color(Color::TRANSPARENT)),
             text_color: PRIMARY_COLOR_DARK,
             border: Border {
@@ -240,10 +233,6 @@ impl iced::widget::button::StyleSheet for RaspirusButtonTransparent {
                 offset: DEFAULT_SHADOW_OFFSET,
                 blur_radius: 0.0,
             },
-            ..Default::default()
-        }
-    }
-    fn pressed(&self, _style: &Self::Style) -> button::Appearance {
-        self.hovered(_style)
+        },
     }
 }

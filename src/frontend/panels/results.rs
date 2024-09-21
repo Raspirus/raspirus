@@ -1,8 +1,13 @@
 use std::path::PathBuf;
 
+use iced::widget::text::Wrapping;
+
 use crate::{
     backend::yara_scanner::{Skipped, TaggedFile},
-    frontend::{iced::{wrap, Card, Message, Raspirus}, theme::{button::RaspirusButtonPrimary, icon::RaspirusWhiteIcon, PRIMARY_COLOR}},
+    frontend::{
+        iced::{wrap, Card, Message, Raspirus},
+        theme::{button::button_primary_style, icon::white_icon_style, PRIMARY_COLOR},
+    },
 };
 
 impl Raspirus {
@@ -22,17 +27,14 @@ impl Raspirus {
                                     iced::widget::svg::Svg::from_path("src/assets/icons/home.svg")
                                         .height(20)
                                         .width(20)
-                                        .style(iced::theme::Svg::Custom(Box::new(
-                                            RaspirusWhiteIcon,
-                                        ))),
+                                        .style(white_icon_style),
                                 )
                                 .push(
-                                    iced::widget::container(iced::widget::text("HOME"))
-                                        .padding([0, 0, 0, 5]),
+                                    iced::widget::container(iced::widget::text("HOME")), //TODO.padding([0, 0, 0, 5]),
                                 ),
                         )
                         .on_press(Message::OpenMain)
-                        .style(iced::theme::Button::Custom(Box::new(RaspirusButtonPrimary)))
+                        .style(button_primary_style)
                         .padding(7),
                     )
                     .push(
@@ -43,22 +45,26 @@ impl Raspirus {
                                     weight: iced::font::Weight::Bold,
                                     ..iced::font::Font::DEFAULT
                                 })
-                                .style(PRIMARY_COLOR),
+                                .style(|_| iced::widget::text::Style {
+                                    color: Some(PRIMARY_COLOR),
+                                }),
                         )
                         .padding([0, 10]),
                     )
                     .padding([5, 0])
                     .push(iced::widget::horizontal_space())
-                    .push(iced::widget::Button::new(
-                        iced::widget::Text::new(iced_aw::Bootstrap::Download.to_string())
-                            .font(iced_aw::BOOTSTRAP_FONT),
+                    .push(
+                        iced::widget::Button::new(
+                            iced::widget::Text::new(iced_fonts::Bootstrap::Download.to_string())
+                                .font(iced_fonts::BOOTSTRAP_FONT),
+                        )
+                        .on_press(Message::DownloadLog { log_path }),
                     )
-                    .on_press(Message::DownloadLog { log_path }))
-                    .align_items(iced::Alignment::Center),
+                    .align_y(iced::Alignment::Center),
             )
             .push(iced::widget::horizontal_rule(5))
             .padding(10);
-        
+
         let mut tagged_list = iced::widget::Column::new()
             .push(iced::widget::Text::new(format!(
                 "Found files ({})",
@@ -86,10 +92,10 @@ impl Raspirus {
             tagged_list = tagged_list.push({
                 let mut card = iced_aw::widgets::Card::new(
                     iced::widget::Row::new()
-                        .push(iced::widget::Text::new(format!(
-                            "{}",
-                            tag.path.to_string_lossy()
-                        )))
+                        .push(
+                            iced::widget::Text::new(format!("{}", tag.path.to_string_lossy()))
+                                .wrapping(Wrapping::Glyph),
+                        )
                         .push(iced::widget::horizontal_space())
                         .push(iced_aw::widgets::Badge::new(iced::widget::Text::new(
                             format!("{}", tag.rule_count),
@@ -98,13 +104,13 @@ impl Raspirus {
                             iced::widget::Button::new(
                                 iced::widget::Text::new(
                                     if expanded {
-                                        iced_aw::Bootstrap::CaretDownFill
+                                        iced_fonts::Bootstrap::CaretDownFill
                                     } else {
-                                        iced_aw::Bootstrap::CaretLeftFill
+                                        iced_fonts::Bootstrap::CaretLeftFill
                                     }
                                     .to_string(),
                                 )
-                                .font(iced_aw::BOOTSTRAP_FONT),
+                                .font(iced_fonts::BOOTSTRAP_FONT),
                             )
                             .on_press(Message::ToggleCard {
                                 card: Card::Tagged { card: tag.clone() },
@@ -113,9 +119,9 @@ impl Raspirus {
                         .push(
                             iced::widget::Button::new(
                                 iced::widget::Text::new(
-                                    iced_aw::Bootstrap::BoxArrowUpLeft.to_string(),
+                                    iced_fonts::Bootstrap::BoxArrowUpLeft.to_string(),
                                 )
-                                .font(iced_aw::BOOTSTRAP_FONT),
+                                .font(iced_fonts::BOOTSTRAP_FONT),
                             )
                             .on_press(Message::GenerateVirustotal { path: tag.path }),
                         )
@@ -152,22 +158,22 @@ impl Raspirus {
             skipped_list = skipped_list.push({
                 let mut card = iced_aw::widgets::Card::new(
                     iced::widget::Row::new()
-                        .push(iced::widget::Text::new(format!(
-                            "{}",
-                            skip.path.to_string_lossy()
-                        )))
+                        .push(
+                            iced::widget::Text::new(format!("{}", skip.path.to_string_lossy()))
+                                .wrapping(Wrapping::Glyph),
+                        )
                         .push(iced::widget::horizontal_space())
                         .push(
                             iced::widget::Button::new(
                                 iced::widget::Text::new(
                                     if expanded {
-                                        iced_aw::Bootstrap::CaretDownFill
+                                        iced_fonts::Bootstrap::CaretDownFill
                                     } else {
-                                        iced_aw::Bootstrap::CaretLeftFill
+                                        iced_fonts::Bootstrap::CaretLeftFill
                                     }
                                     .to_string(),
                                 )
-                                .font(iced_aw::BOOTSTRAP_FONT),
+                                .font(iced_fonts::BOOTSTRAP_FONT),
                             )
                             .on_press(Message::ToggleCard {
                                 card: Card::Skipped { card: skip.clone() },
