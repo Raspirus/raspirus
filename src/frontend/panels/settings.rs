@@ -281,7 +281,7 @@ impl Raspirus {
                         .push(
                             iced_aw::widgets::NumberInput::new(
                                 config.max_threads,
-                                0..num_cpus::get(),
+                                1..num_cpus::get(),
                                 |threads| Message::ConfigChanged {
                                     value: ConfigValue::MaxThreads(threads),
                                 },
