@@ -258,6 +258,45 @@ impl Raspirus {
                 iced::widget::container(
                     iced::widget::Row::new()
                         .push(
+                            iced::widget::svg::Svg::from_path("src/assets/icons/cpu.svg")
+                                .height(64)
+                                .width(64)
+                                .style(settings_icon_style),
+                        )
+                        .push(iced::widget::Space::with_width(10))
+                        .push(
+                            iced::widget::Column::new()
+                                .push(iced::widget::text("Set Threads").size(20))
+                                .push(iced::widget::Space::with_height(5))
+                                .push(
+                                    iced::widget::text("Amount of parallel threads to use for scanning")
+                                        .size(14)
+                                        .style(|_| iced::widget::text::Style {
+                                            color: Some(GRAY_COLOR),
+                                        }),
+                                )
+                                .width(iced::Length::Fill),
+                        )
+                        .push(iced::widget::horizontal_space())
+                        .push(
+                            iced_aw::widgets::NumberInput::new(
+                                config.max_threads,
+                                0..num_cpus::get(),
+                                |threads| Message::ConfigChanged {
+                                    value: ConfigValue::MaxThreads(threads),
+                                },
+                            )
+                            .font(iced_fonts::BOOTSTRAP_FONT),
+                        )
+                        .align_y(iced::Alignment::Center)
+                        .padding(iced::padding::Padding::new(7.0).right),
+                )
+                .style(card_container_style),
+            )
+            .push(
+                iced::widget::container(
+                    iced::widget::Row::new()
+                        .push(
                             iced::widget::svg::Svg::from_path("src/assets/icons/file-download.svg")
                                 .height(64)
                                 .width(64)

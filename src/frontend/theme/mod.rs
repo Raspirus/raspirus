@@ -12,7 +12,6 @@ pub const PRIMARY_COLOR_DARK: Color = color!(0x960b42);
 
 pub const SECONDARY_COLOR: Color = color!(0x01a56d);
 pub const SECONDARY_COLOR_DARK: Color = color!(0x01734c);
-pub const SECONDARY_COLOR_LIGHT: Color = color!(0xc8ffec);
 
 pub const BLUE_COLOR: Color = color!(0x2181d4);
 pub const BLUE_COLOR_DARK: Color = color!(0x1a67aa);
@@ -31,6 +30,7 @@ pub const DEFAULT_SHADOW_OFFSET: iced::Vector = iced::Vector::new(1.0, 1.0);
 pub const CARD_SHADOW_OFFSET: iced::Vector = iced::Vector::new(0.5, 0.5);
 pub const DEFAULT_BORDER_WIDTH: f32 = 3.0;
 pub const DEFAULT_BORDER_RADIUS: f32 = 10.0;
+// pub const DEFAULT_DARK_BACKGROUND: Color = color!(0x202225);
 
 /// Theme color palette
 pub const RASPIRUS_PALETTE: iced::theme::Palette = iced::theme::Palette {
