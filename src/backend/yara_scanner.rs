@@ -92,7 +92,7 @@ impl YaraScanner {
     }
 
     /// Starts the scanner in the specified location
-    pub async fn start(&self) -> Result<(Vec<TaggedFile>, Vec<Skipped>, PathBuf), String> {
+    pub fn start(&self) -> Result<(Vec<TaggedFile>, Vec<Skipped>, PathBuf), String> {
         let path = match &self.path {
             Some(path) => path,
             None => return Err("No path set".to_owned()),
