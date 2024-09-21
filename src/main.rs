@@ -36,6 +36,8 @@ static DEFAULT_FILE: &str = "rulepirus.yarac";
 static DEFAULT_MIN_MATCHES: usize = 0;
 static DEFAULT_MAX_MATCHES: usize = 20;
 
+static MAX_ZIP_FILE_SIZE: u64 = 1073741824;
+
 /// download settings
 static MAX_TIMEOUT: u64 = 120;
 
