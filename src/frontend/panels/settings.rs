@@ -14,6 +14,7 @@ use crate::{
 
 impl Raspirus {
     pub fn settings(&self, config: &Config, update: &UpdateState) -> iced::Element<Message> {
+        let cpus = num_cpus::get();
         let top_row = iced::widget::Column::new()
             .push(
                 iced::widget::Row::new()
@@ -269,11 +270,15 @@ impl Raspirus {
                                 .push(iced::widget::text("Set Threads").size(20))
                                 .push(iced::widget::Space::with_height(5))
                                 .push(
-                                    iced::widget::text("Amount of parallel threads to use for scanning")
-                                        .size(14)
-                                        .style(|_| iced::widget::text::Style {
+                                    iced::widget::text(
+                                        format!("Amount of parallel threads to use for scanning. ({cpus} recommended)"),
+                                    )
+                                    .size(14)
+                                    .style(|_| {
+                                        iced::widget::text::Style {
                                             color: Some(GRAY_COLOR),
-                                        }),
+                                        }
+                                    }),
                                 )
                                 .width(iced::Length::Fill),
                         )
@@ -281,7 +286,7 @@ impl Raspirus {
                         .push(
                             iced_aw::widgets::NumberInput::new(
                                 config.max_threads,
-                                1..num_cpus::get(),
+                                1..cpus * 2 + 1,
                                 |threads| Message::ConfigChanged {
                                     value: ConfigValue::MaxThreads(threads),
                                 },

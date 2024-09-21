@@ -1,5 +1,7 @@
 use std::{
-    fs::{self, File}, hash::Hash, io::{BufRead, BufReader, BufWriter, Read}, path::PathBuf
+    fs::{self, File},
+    io::{BufRead, BufReader, BufWriter, Read},
+    path::{Path, PathBuf},
 };
 
 use log::{debug, info};
@@ -16,44 +18,44 @@ pub fn get_rules(yar_path: PathBuf) -> Result<Rules, String> {
 }
 
 /// yields all file paths and the total size of them
-pub fn profile_path(path: PathBuf) -> Result<Vec<PathBuf>, std::io::Error> {
+pub fn profile_path(path: PathBuf) -> Result<(u64, Vec<PathBuf>), std::io::Error> {
     info!("Starting indexing...");
     let mut paths = Vec::new();
-    if path.is_dir() {
-        profile_folder(&mut paths, path)?;
+    let size = if path.is_dir() {
+        profile_folder(&mut paths, path)?
     } else {
-        paths.push(path);
-    }
+        paths.push(path.clone());
+        path.metadata()?.len()
+    };
     info!("Finished indexing {} files", paths.len());
-    Ok(paths)
+    Ok((size, paths))
 }
 
 /// adds files or files in subfolders to paths and adds their sizes to the total
-pub fn profile_folder(paths: &mut Vec<PathBuf>, path: PathBuf) -> Result<(), std::io::Error> {
+pub fn profile_folder(paths: &mut Vec<PathBuf>, path: PathBuf) -> Result<u64, std::io::Error> {
+    let mut size = 0;
     for entry in fs::read_dir(path)? {
         let entry = entry?;
         if entry.path().is_symlink() {
             continue;
         }
         if entry.path().is_dir() {
-            profile_folder(paths, entry.path())?;
+            size += profile_folder(paths, entry.path())?;
         } else {
             paths.push(entry.path().clone());
+            size += entry.path().metadata()?.len();
         }
     }
-    Ok(())
+    Ok(size)
 }
 
-/// calculates sha256 hash and generates virustotal search link
-pub fn generate_virustotal(file: PathBuf) -> Result<String, String> {
-    if !file.exists() {
-        // check if inside zip
-        file.components().filter(|element| element)
-        return Err("File is not accessible. Is it archived?".to_string());
-    } 
-    info!("Starting hash compute for {}", file.to_string_lossy());
-    let file =
-        File::open(file).map_err(|err| format!("Failed to open file for computing hash: {err}"))?;
+/// computes the hash of a file contained in a zip
+pub fn hash_in_zip(root_file: File, target_path: PathBuf) -> Result<String, String> {
+    let mut zip =
+        zip::ZipArchive::new(root_file).map_err(|err| format!("Failed to open archive: {err}"))?;
+    let file = zip
+        .by_name_seek(&target_path.to_string_lossy())
+        .map_err(|err| format!("Could not find file in zip: {err}"))?;
 
     let mut reader = BufReader::new(file);
     let mut sha256 = Sha256::new();
@@ -68,11 +70,56 @@ pub fn generate_virustotal(file: PathBuf) -> Result<String, String> {
         }
         sha256.update(&buffer[..read]);
     }
-    let result = sha256.finalize();
-    Ok(format!(
-        "https://virustotal.com/gui/search/{}",
-        hex::encode(result)
-    ))
+    Ok(hex::encode(sha256.finalize()))
+}
+
+/// calculates sha256 hash and generates virustotal search link
+pub fn generate_virustotal(file: PathBuf) -> Result<String, String> {
+    let hash = if !file.exists() {
+        let mut hash = String::new();
+        // check if inside archive
+        let mut path = Path::new("/").to_path_buf();
+        for component in file.components() {
+            path = path.join(component);
+            if let Some(extension) = path.extension() {
+                // path is archive
+                if crate::SUPPORTED_ARCHIVES.contains(&extension.to_string_lossy().to_string()) {
+                    let target = file
+                        .strip_prefix(&path)
+                        .map_err(|err| format!("Failed to strip path prefix: {err}"))?;
+                    hash = hash_in_zip(
+                        File::open(&path)
+                            .map_err(|err| format!("Failed to open archive: {err}"))?,
+                        target.to_path_buf(),
+                    )?;
+                }
+            }
+        }
+        if hash.is_empty() {
+            return Err("File is not accessible".to_string());
+        }
+        hash
+    } else {
+        info!("Starting hash compute for {}", file.to_string_lossy());
+        let file = File::open(file)
+            .map_err(|err| format!("Failed to open file for computing hash: {err}"))?;
+
+        let mut reader = BufReader::new(file);
+        let mut sha256 = Sha256::new();
+
+        loop {
+            let mut buffer = [0; 524288];
+            let read = reader
+                .read(&mut buffer)
+                .map_err(|err| format!("Failed to read into buffer: {err}"))?;
+            if read == 0 {
+                break;
+            }
+            sha256.update(&buffer[..read]);
+        }
+        hex::encode(sha256.finalize())
+    };
+    Ok(format!("https://virustotal.com/gui/search/{}", hash))
 }
 
 /// updates the global config to what it should be
