@@ -26,7 +26,7 @@ pub const GRAY_COLOR: Color = color!(0x808080);
 pub const GRAY_BACKGROUND: Color = color!(0xE5E7EB);
 
 /// Default settings
-pub const DEFAULT_BUTTON_RADIUS: f32 = 2.5;
+pub const DEFAULT_BUTTON_RADIUS: f32 = 5.0;
 pub const DEFAULT_SHADOW_OFFSET: iced::Vector = iced::Vector::new(1.0, 1.0);
 pub const CARD_SHADOW_OFFSET: iced::Vector = iced::Vector::new(0.5, 0.5);
 pub const DEFAULT_BORDER_WIDTH: f32 = 3.0;

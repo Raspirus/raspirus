@@ -72,11 +72,18 @@ impl Raspirus {
                             iced::widget::Column::new()
                                 .push(iced::widget::text("Updated").size(20))
                                 .push(iced::widget::Space::with_height(5))
-                                .push(iced::widget::text("Updates the Rules").size(14).style(
-                                    |_| iced::widget::text::Style {
-                                        color: Some(GRAY_COLOR),
-                                    },
-                                ))
+                                .push(
+                                    iced::widget::text(format!(
+                                        "Updates the Rules. Currently on: {}",
+                                        config.rules_version
+                                    ))
+                                    .size(14)
+                                    .style(|_| {
+                                        iced::widget::text::Style {
+                                            color: Some(GRAY_COLOR),
+                                        }
+                                    }),
+                                )
                                 .width(iced::Length::Fill),
                         )
                         .push(iced::widget::horizontal_space())
@@ -151,13 +158,16 @@ impl Raspirus {
                                 .width(iced::Length::Fill),
                         )
                         .push(iced::widget::horizontal_space())
-                        .push(iced_aw::widgets::NumberInput::new(
-                            config.max_matches,
-                            config.min_matches + 1..usize::MAX,
-                            |matches| Message::ConfigChanged {
-                                value: ConfigValue::MaxMatch(matches),
-                            },
-                        ))
+                        .push(
+                            iced_aw::widgets::NumberInput::new(
+                                config.max_matches,
+                                config.min_matches + 1..usize::MAX,
+                                |matches| Message::ConfigChanged {
+                                    value: ConfigValue::MaxMatch(matches),
+                                },
+                            )
+                            .font(iced_fonts::BOOTSTRAP_FONT),
+                        )
                         .align_y(iced::Alignment::Center)
                         .padding(iced::padding::Padding::new(7.0).right),
                 )
@@ -189,13 +199,16 @@ impl Raspirus {
                                 .width(iced::Length::Fill),
                         )
                         .push(iced::widget::horizontal_space())
-                        .push(iced_aw::widgets::NumberInput::new(
-                            config.min_matches,
-                            0..config.max_matches,
-                            |matches| Message::ConfigChanged {
-                                value: ConfigValue::MinMatch(matches),
-                            },
-                        ))
+                        .push(
+                            iced_aw::widgets::NumberInput::new(
+                                config.min_matches,
+                                0..config.max_matches,
+                                |matches| Message::ConfigChanged {
+                                    value: ConfigValue::MinMatch(matches),
+                                },
+                            )
+                            .font(iced_fonts::BOOTSTRAP_FONT),
+                        )
                         .align_y(iced::Alignment::Center)
                         .padding(iced::padding::Padding::new(7.0).right),
                 )
