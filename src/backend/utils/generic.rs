@@ -1,7 +1,5 @@
 use std::{
-    fs::{self, File},
-    io::{BufRead, BufReader, BufWriter, Read},
-    path::PathBuf,
+    fs::{self, File}, hash::Hash, io::{BufRead, BufReader, BufWriter, Read}, path::PathBuf
 };
 
 use log::{debug, info};
@@ -49,6 +47,8 @@ pub fn profile_folder(paths: &mut Vec<PathBuf>, path: PathBuf) -> Result<(), std
 /// calculates sha256 hash and generates virustotal search link
 pub fn generate_virustotal(file: PathBuf) -> Result<String, String> {
     if !file.exists() {
+        // check if inside zip
+        file.components().filter(|element| element)
         return Err("File is not accessible. Is it archived?".to_string());
     } 
     info!("Starting hash compute for {}", file.to_string_lossy());
