@@ -75,7 +75,6 @@ impl Raspirus {
                     color: Some(PRIMARY_COLOR),
                 }),
         );
-        //TODO.padding([0, 0, 10, 0]);
 
         let mut center_row = iced::widget::Row::new().spacing(5);
 

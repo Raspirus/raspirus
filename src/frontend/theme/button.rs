@@ -132,45 +132,63 @@ pub fn button_orange_style(_theme: &Theme, status: Status) -> button::Style {
     match status {
         Status::Active => button::Style {
             background: Some(iced::Background::Color(ORANGE_COLOR)),
-            text_color: Color::WHITE,
             border: Border::default().rounded(DEFAULT_BUTTON_RADIUS),
             shadow: Shadow {
                 color: Color::BLACK,
                 offset: DEFAULT_SHADOW_OFFSET,
                 blur_radius: 2.0,
             },
+            ..Default::default()
         },
         _ => button::Style {
             background: Some(iced::Background::Color(ORANGE_COLOR_DARK)),
-            text_color: Color::WHITE,
             border: Border::default().rounded(DEFAULT_BUTTON_RADIUS),
             shadow: Shadow {
                 color: Color::BLACK,
                 offset: DEFAULT_SHADOW_OFFSET,
                 blur_radius: 5.0,
             },
+            ..Default::default()
         },
     }
 }
 
-pub fn button_select_style(_theme: &Theme, status: Status) -> button::Style {
+pub fn button_select_style(theme: &Theme, status: Status) -> button::Style {
     match status {
-        Status::Active => button::Style {
-            background: Some(iced::Background::Color(Color::WHITE)),
-            text_color: Color::BLACK,
-            border: Border {
-                color: BLUE_COLOR_LIGHT,
-                width: DEFAULT_BORDER_WIDTH,
-                radius: 0.5.into(),
-            },
-            shadow: Shadow {
-                color: Color::BLACK,
-                offset: DEFAULT_SHADOW_OFFSET,
-                blur_radius: 2.0,
-            },
+        Status::Active => {
+            match theme {
+                Theme::Dark => button::Style {
+                    background: Some(iced::Background::Color(Color::BLACK)),
+                    text_color: Color::WHITE,
+                    border: Border {
+                        color: BLUE_COLOR_LIGHT,
+                        width: DEFAULT_BORDER_WIDTH,
+                        radius: 0.5.into(),
+                    },
+                    shadow: Shadow {
+                        color: Color::BLACK,
+                        offset: DEFAULT_SHADOW_OFFSET,
+                        blur_radius: 2.0,
+                    },
+                },
+                _ => button::Style {
+                    background: Some(iced::Background::Color(Color::WHITE)),
+                    text_color: Color::BLACK,
+                    border: Border {
+                        color: BLUE_COLOR_LIGHT,
+                        width: DEFAULT_BORDER_WIDTH,
+                        radius: 0.5.into(),
+                    },
+                    shadow: Shadow {
+                        color: Color::BLACK,
+                        offset: DEFAULT_SHADOW_OFFSET,
+                        blur_radius: 2.0,
+                    },
+                }
+            }
         },
         _ => button::Style {
-            background: Some(iced::Background::Color(GRAY_COLOR)),
+            background: Some(iced::Background::Color(GRAY_BACKGROUND)),
             text_color: Color::BLACK,
             border: Border {
                 color: BLUE_COLOR_DARK,
