@@ -114,7 +114,7 @@ fn main() -> Result<(), String> {
     window_settings.icon = icon::from_file_data(ICON_BYTES, Option::from(ImageFormat::Ico)).ok();
     iced::application("Raspirus", Raspirus::update, Raspirus::view)
         .settings(settings)
-        .exit_on_close_request(false)
+        .exit_on_close_request(true)
         .window(window_settings)
         .subscription(Raspirus::subscription)
         .run()
