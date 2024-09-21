@@ -1,5 +1,7 @@
 use std::path::PathBuf;
 
+use iced::widget::text::Wrapping;
+
 use crate::{
     backend::yara_scanner::{Skipped, TaggedFile},
     frontend::{
@@ -90,10 +92,10 @@ impl Raspirus {
             tagged_list = tagged_list.push({
                 let mut card = iced_aw::widgets::Card::new(
                     iced::widget::Row::new()
-                        .push(iced::widget::Text::new(format!(
-                            "{}",
-                            tag.path.to_string_lossy()
-                        )))
+                        .push(
+                            iced::widget::Text::new(format!("{}", tag.path.to_string_lossy()))
+                                .wrapping(Wrapping::Glyph),
+                        )
                         .push(iced::widget::horizontal_space())
                         .push(iced_aw::widgets::Badge::new(iced::widget::Text::new(
                             format!("{}", tag.rule_count),
@@ -156,10 +158,10 @@ impl Raspirus {
             skipped_list = skipped_list.push({
                 let mut card = iced_aw::widgets::Card::new(
                     iced::widget::Row::new()
-                        .push(iced::widget::Text::new(format!(
-                            "{}",
-                            skip.path.to_string_lossy()
-                        )))
+                        .push(
+                            iced::widget::Text::new(format!("{}", skip.path.to_string_lossy()))
+                                .wrapping(Wrapping::Glyph),
+                        )
                         .push(iced::widget::horizontal_space())
                         .push(
                             iced::widget::Button::new(
