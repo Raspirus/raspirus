@@ -773,13 +773,7 @@ impl Raspirus {
 
                 scanner.progress_sender = Some(Arc::new(Mutex::new(output.clone())));
 
-                let result = std::thread::spawn(|| async move {
-                    println!("Starting scan");
-                    scanner.start().await
-                })
-                .join()
-                .expect("Could not join thread")
-                .await;
+                let result = scanner.start();
 
                 let message = match result {
                     Ok(message) => Message::ScanComplete {
