@@ -48,6 +48,9 @@ pub fn profile_folder(paths: &mut Vec<PathBuf>, path: PathBuf) -> Result<(), std
 
 /// calculates sha256 hash and generates virustotal search link
 pub fn generate_virustotal(file: PathBuf) -> Result<String, String> {
+    if !file.exists() {
+        return Err("File is not accessible. Is it archived?".to_string());
+    } 
     info!("Starting hash compute for {}", file.to_string_lossy());
     let file =
         File::open(file).map_err(|err| format!("Failed to open file for computing hash: {err}"))?;
