@@ -1,7 +1,4 @@
-use iced::{
-    futures::{channel::mpsc, SinkExt, Stream},
-    stream::try_channel,
-};
+use iced::futures::{channel::mpsc, SinkExt};
 use log::{error, info, trace, warn};
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
@@ -13,6 +10,7 @@ use std::{
 use threadpool_rs::threadpool::pool::Threadpool;
 use yara_x::{ScanResults, Scanner};
 
+use crate::frontend::iced::Worker;
 use crate::{backend::utils::generic::get_rules, frontend::iced::Message, CONFIG};
 
 use super::{config_file::Config, file_log::FileLog, utils::generic::profile_path};
@@ -68,25 +66,16 @@ impl PointerCollection {
 #[derive(Clone, Debug)]
 pub struct YaraScanner {
     /// given to threads to send their progress when done
-    pub progress_sender: Arc<Mutex<mpsc::Sender<Message>>>,
-    /// given to the caller to read progress
-    pub progress_output: Arc<Mutex<mpsc::Receiver<Message>>>,
+    pub progress_sender: Option<Arc<Mutex<mpsc::Sender<Worker>>>>,
     /// current path being scanned
     pub path: Option<PathBuf>,
-}
-
-pub enum Progress {
-    Percentage(f32),
-    Done((Vec<TaggedFile>, Vec<Skipped>, PathBuf)),
 }
 
 impl YaraScanner {
     /// creates a new scanenr and imports the yara rules
     pub fn new() -> Self {
-        let channel = mpsc::channel(100);
         Self {
-            progress_sender: Arc::new(Mutex::new(channel.0)),
-            progress_output: Arc::new(Mutex::new(channel.1)),
+            progress_sender: None,
             path: None,
         }
     }
@@ -103,8 +92,11 @@ impl YaraScanner {
     }
 
     /// Starts the scanner in the specified location
-    pub fn start(&self) -> impl Stream<Item = Result<Message, String>> {
-        let path = self.path.clone();
+    pub async fn start(&self) -> Result<(Vec<TaggedFile>, Vec<Skipped>, PathBuf), String> {
+        let path = match &self.path {
+            Some(path) => path,
+            None => return Err("No path set".to_owned()),
+        };
 
         let yarac = CONFIG
             .lock()
@@ -115,63 +107,49 @@ impl YaraScanner {
             .data
             .join(crate::DEFAULT_FILE);
 
-        try_channel(100, move |mut output| async move {
-            let path = path.ok_or("No path set")?;
+        get_rules(yarac)?;
 
-            // check if rules can load
-            get_rules(yarac)?;
+        // setup file log
+        let file_log = Arc::new(Mutex::new(FileLog::new()?));
 
-            // setup file log
-            let file_log = Arc::new(Mutex::new(FileLog::new()?));
+        let paths = profile_path(path.to_path_buf())
+            .map_err(|err| format!("Failed to calculate file tree: {err}"))?;
+        let pointers = PointerCollection::new(paths.len());
 
-            let paths = profile_path(path.to_path_buf())
-                .map_err(|err| format!("Failed to calculate file tree: {err}"))?;
-            let pointers = PointerCollection::new(paths.len());
-
-            let mut threadpool =
-                Threadpool::new(CONFIG.lock().expect("Failed to lock config").max_threads);
-            for file in paths {
-                let pointers_c = pointers.clone();
-                let file_log_c = file_log.clone();
-                let progress_c = Arc::new(Mutex::new(output.clone()));
-                threadpool.execute(move || {
-                    let scan_result = || async {
-                        Self::scan_file(file.as_path(), file_log_c, progress_c, pointers_c).await
-                    };
-                    match futures::executor::block_on(scan_result()) {
-                        Ok(_) => {}
-                        Err(err) => error!(
-                            "Failed to scan file {}: {err}",
-                            file.to_str().unwrap_or_default()
-                        ),
-                    }
-                });
-            }
-            threadpool.join();
-            let tagged = pointers
-                .tagged
-                .lock()
-                .map_err(|err| format!("Failed to lock final tagged vec: {err}"))?
-                .clone();
-            let skipped = pointers
-                .skipped
-                .lock()
-                .map_err(|err| format!("Failed to lock skipped: {err}"))?
-                .clone();
-
-            let log = file_log
-                .lock()
-                .expect("Failed to lock logger")
-                .log_path
-                .clone();
-            // return tagged and skipped files aswell as path to the scan log
-            output.send(Message::ScanComplete {
-                tagged: tagged.iter().map(|tag| (tag.clone(), false)).collect(),
-                skipped: skipped.iter().map(|skip| (skip.clone(), false)).collect(),
-                log,
+        let mut threadpool =
+            Threadpool::new(CONFIG.lock().expect("Failed to lock config").max_threads);
+        for file in paths {
+            let pointers_c = pointers.clone();
+            let file_log_c = file_log.clone();
+            let progress_c = self.progress_sender.clone().ok_or("Channel not set")?;
+            threadpool.execute(move || {
+                let scan_result = || async {
+                    Self::scan_file(file.as_path(), file_log_c, progress_c, pointers_c).await
+                };
+                match futures::executor::block_on(scan_result()) {
+                    Ok(_) => {}
+                    Err(err) => error!(
+                        "Failed to scan file {}: {err}",
+                        file.to_str().unwrap_or_default()
+                    ),
+                }
             });
-            Ok(())
-        })
+        }
+        threadpool.join();
+        let tagged = pointers
+            .tagged
+            .lock()
+            .map_err(|err| format!("Failed to lock final tagged vec: {err}"))?
+            .clone();
+        let skipped = pointers
+            .skipped
+            .lock()
+            .map_err(|err| format!("Failed to lock skipped: {err}"))?
+            .clone();
+
+        let logger = file_log.lock().expect("Failed to lock logger");
+        // return tagged and skipped files aswell as path to the scan log
+        Ok((tagged, skipped, logger.log_path.clone()))
     }
 
     fn evaluate_result(
@@ -226,7 +204,7 @@ impl YaraScanner {
     async fn scan_file(
         path: &Path,
         file_log: Arc<Mutex<FileLog>>,
-        progress_channel: Arc<Mutex<mpsc::Sender<Message>>>,
+        progress_channel: Arc<Mutex<mpsc::Sender<Worker>>>,
         pointers: PointerCollection,
     ) -> Result<(), String> {
         info!("Scanning {}", path.to_string_lossy());
@@ -286,7 +264,7 @@ impl YaraScanner {
 
     async fn progress(
         pointers: &PointerCollection,
-        progress_channel: Arc<Mutex<mpsc::Sender<Message>>>,
+        progress_channel: Arc<Mutex<mpsc::Sender<Worker>>>,
     ) -> Result<(), String> {
         let analysed_locked = pointers
             .analysed
@@ -306,7 +284,11 @@ impl YaraScanner {
         progress_channel
             .lock()
             .map_err(|err| format!("Failed to lock progress sender: {err}"))?
-            .send(Message::ScanPercentage { percentage });
+            .send(Worker::Message {
+                message: Message::ScanPercentage { percentage },
+            })
+            .await
+            .expect("Failed to send progress");
         trace!("Scan progress: {percentage:.2}%");
         Ok(())
     }
