@@ -16,15 +16,11 @@ use std::{
     sync::{Arc, Mutex},
 };
 
-type ProgressSender = Arc<Mutex<mpsc::Sender<Message>>>;
-type ProgressReceiver = Arc<Mutex<mpsc::Receiver<Message>>>;
-
 pub struct Raspirus {
     pub state: State,
     pub language: String,
     pub scan_path: Option<PathBuf>,
     pub usb_devices: Vec<UsbDevice>,
-    pub scan_progress: (ProgressSender, ProgressReceiver),
     pub sender: Option<mpsc::Sender<PathBuf>>,
 }
 
@@ -71,19 +67,6 @@ pub enum LocationSelection {
     File { path: Option<PathBuf> },
 }
 
-enum SubscriptionEvent {
-    ChannelReady {
-        sender: iced::futures::channel::mpsc::Sender<PathBuf>,
-    },
-    ScanProgress {
-        message: Message,
-    },
-    SubscriptionError {
-        error: ErrorCase,
-    },
-    SubscriptionClose,
-}
-
 impl FromStr for LocationSelection {
     type Err = ();
 
@@ -124,7 +107,6 @@ pub enum Worker {
     Ready { sender: mpsc::Sender<PathBuf> },
     Message { message: Message },
     Error { error: ErrorCase },
-    ScanComplete {},
 }
 
 #[derive(Debug, Clone)]
@@ -212,7 +194,6 @@ pub enum Card {
 
 impl Raspirus {
     fn new() -> Self {
-        let channel = mpsc::channel(100);
         let usb = list_usb_drives().unwrap_or_default().first().cloned();
         Self {
             state: State::MainMenu {
@@ -227,10 +208,6 @@ impl Raspirus {
             } else {
                 None
             },
-            scan_progress: (
-                Arc::new(Mutex::new(channel.0)),
-                Arc::new(Mutex::new(channel.1)),
-            ),
             usb_devices: list_usb_drives().unwrap_or_default(),
             sender: None,
         }
@@ -711,7 +688,10 @@ impl Raspirus {
                         if let Some(sender) = &mut sender {
                             match path {
                                 Some(path) => {
-                                    sender.send(path).await.expect("Failed to send to stream");
+                                    sender
+                                        .send(path)
+                                        .await
+                                        .expect("Failed to send path to stream");
                                     Ok(())
                                 }
                                 None => Err(ErrorCase::Warning {
@@ -769,15 +749,16 @@ impl Raspirus {
             output
                 .send(Worker::Ready { sender })
                 .await
-                .expect("Failed to send to stream");
+                .expect("Failed to send job input to stream");
 
             loop {
                 use iced::futures::StreamExt;
 
                 let input = receiver.select_next_some().await;
+                info!("Starting scan on {}", input.to_string_lossy());
 
                 // create scanner. if path valid, start scan otherwise abort
-                let scanner = match YaraScanner::new().set_path(input) {
+                let mut scanner = match YaraScanner::new().set_path(input) {
                     Ok(scanner) => scanner,
                     Err(message) => {
                         output
@@ -785,37 +766,54 @@ impl Raspirus {
                                 error: ErrorCase::Warning { message },
                             })
                             .await
-                            .expect("Failed to send to stream");
+                            .expect("Failed to send scanner error to stream");
                         continue;
                     }
                 };
-                scanner.start();
+
+                scanner.progress_sender = Some(Arc::new(Mutex::new(output.clone())));
+
+                let result = std::thread::spawn(|| async move {
+                    println!("Starting scan");
+                    scanner.start().await
+                })
+                .join()
+                .expect("Could not join thread")
+                .await;
+
+                let message = match result {
+                    Ok(message) => Message::ScanComplete {
+                        tagged: message
+                            .0
+                            .iter()
+                            .map(|value| (value.clone(), false))
+                            .collect(),
+                        skipped: message
+                            .1
+                            .iter()
+                            .map(|value| (value.clone(), false))
+                            .collect(),
+                        log: message.2,
+                    },
+                    Err(message) => Message::Error {
+                        case: ErrorCase::Warning { message },
+                    },
+                };
+
+                output
+                    .send(Worker::Message { message })
+                    .await
+                    .expect("Failed to send scan result");
             }
         })
     }
 
     pub fn subscription(&self) -> iced::Subscription<Message> {
-        match self.state {
-            State::Scanning { .. } => {
-                iced::Subscription::run(Self::scan).map(|worker| match worker {
-                    Worker::Ready { sender } => Message::ScannerReady { sender },
-                    Worker::Message { message } => message,
-                    Worker::Error { error } => Message::Error { case: error },
-                    Worker::ScanComplete {} => Message::None,
-                })
-            }
-            State::MainMenu { .. } => {
-                if self.sender.is_none() {
-                    iced::Subscription::run(Self::scan).map(|worker| match worker {
-                        Worker::Ready { sender } => Message::ScannerReady { sender },
-                        _ => Message::None,
-                    })
-                } else {
-                    iced::Subscription::none()
-                }
-            }
-            _ => iced::Subscription::none(),
-        }
+        iced::Subscription::run(Self::scan).map(|worker| match worker {
+            Worker::Ready { sender } => Message::ScannerReady { sender },
+            Worker::Message { message } => message,
+            Worker::Error { error } => Message::Error { case: error },
+        })
     }
 
     /*
