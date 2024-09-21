@@ -120,7 +120,8 @@ impl Raspirus {
                             .padding(10)
                             .style(button_blue_style),
                         )
-                        .align_y(iced::Alignment::Center), //TODO.padding([7, 20, 7, 7]),
+                        .align_y(iced::Alignment::Center)
+                        .padding(iced::Padding::new(7.0).right),
                 )
                 .style(card_container_style),
             )
@@ -152,12 +153,13 @@ impl Raspirus {
                         .push(iced::widget::horizontal_space())
                         .push(iced_aw::widgets::NumberInput::new(
                             config.max_matches,
-                            0..usize::MAX,
+                            config.min_matches + 1..usize::MAX,
                             |matches| Message::ConfigChanged {
                                 value: ConfigValue::MaxMatch(matches),
                             },
                         ))
-                        .align_y(iced::Alignment::Center), //TODO.padding([7, 20, 7, 7]),
+                        .align_y(iced::Alignment::Center)
+                        .padding(iced::padding::Padding::new(7.0).right),
                 )
                 .style(card_container_style),
             )
@@ -194,7 +196,8 @@ impl Raspirus {
                                 value: ConfigValue::MinMatch(matches),
                             },
                         ))
-                        .align_y(iced::Alignment::Center), //TODO.padding([7, 20, 7, 7]),
+                        .align_y(iced::Alignment::Center)
+                        .padding(iced::padding::Padding::new(7.0).right),
                 )
                 .style(card_container_style),
             )
@@ -254,7 +257,10 @@ impl Raspirus {
                                 .push(iced::widget::Space::with_height(5))
                                 .push(
                                     iced::widget::text("Copies the Logs to your Downloads folder")
-                                        .size(14), //TODO.style(GRAY_COLOR),
+                                        .size(14)
+                                        .style(|_| iced::widget::text::Style {
+                                            color: Some(GRAY_COLOR),
+                                        }),
                                 )
                                 .width(iced::Length::Fill),
                         )
@@ -274,7 +280,8 @@ impl Raspirus {
                             .padding(10)
                             .style(button_blue_style),
                         )
-                        .align_y(iced::Alignment::Center), //TODO.padding([7, 20, 7, 7]),
+                        .align_y(iced::Alignment::Center)
+                        .padding(iced::padding::Padding::new(7.0).right),
                 )
                 .style(card_container_style),
             )
