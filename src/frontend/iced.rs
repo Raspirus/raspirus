@@ -3,19 +3,21 @@ use crate::backend::downloader;
 use crate::backend::utils::generic::{create_pdf, generate_virustotal, update_config};
 use crate::backend::utils::usb_utils::{list_usb_drives, UsbDevice};
 use crate::backend::yara_scanner::{Skipped, TaggedFile, YaraScanner};
+use futures::SinkExt;
+use iced::{
+    futures::{channel::mpsc, Stream},
+    stream,
+};
 use log::{debug, error, info, trace, warn};
 use std::fmt::Display;
 use std::str::FromStr;
-use std::sync::mpsc::{self, Receiver, Sender};
 use std::{
     path::PathBuf,
     sync::{Arc, Mutex},
 };
 
-use super::theme::RASPIRUS_PALETTE;
-
-type ProgressSender = Arc<Mutex<Sender<Message>>>;
-type ProgressReceiver = Arc<Mutex<Receiver<Message>>>;
+type ProgressSender = Arc<Mutex<mpsc::Sender<Message>>>;
+type ProgressReceiver = Arc<Mutex<mpsc::Receiver<Message>>>;
 
 pub struct Raspirus {
     pub state: State,
@@ -23,6 +25,7 @@ pub struct Raspirus {
     pub scan_path: Option<PathBuf>,
     pub usb_devices: Vec<UsbDevice>,
     pub scan_progress: (ProgressSender, ProgressReceiver),
+    pub sender: Option<mpsc::Sender<PathBuf>>,
 }
 
 #[derive(Debug)]
@@ -68,6 +71,19 @@ pub enum LocationSelection {
     File { path: Option<PathBuf> },
 }
 
+enum SubscriptionEvent {
+    ChannelReady {
+        sender: iced::futures::channel::mpsc::Sender<PathBuf>,
+    },
+    ScanProgress {
+        message: Message,
+    },
+    SubscriptionError {
+        error: ErrorCase,
+    },
+    SubscriptionClose,
+}
+
 impl FromStr for LocationSelection {
     type Err = ();
 
@@ -104,6 +120,13 @@ impl Display for LocationSelection {
     }
 }
 
+pub enum Worker {
+    Ready { sender: mpsc::Sender<PathBuf> },
+    Message { message: Message },
+    Error { error: ErrorCase },
+    ScanComplete {},
+}
+
 #[derive(Debug, Clone)]
 pub enum Message {
     // location messages
@@ -115,8 +138,8 @@ pub enum Message {
     DownloadLog {
         log_path: PathBuf,
     },
-    StartScan,
     Shutdown,
+    StartScan,
     ToggleLanguageSelection,
     ToggleUSBSelection,
     ToggleLocationSelection,
@@ -130,6 +153,9 @@ pub enum Message {
     },
     LanguageChanged {
         language: String,
+    },
+    ScannerReady {
+        sender: mpsc::Sender<PathBuf>,
     },
     /// contains empty enum if just type changed and enum with content if something has been selected
     LocationChanged {
@@ -185,15 +211,8 @@ pub enum Card {
 }
 
 impl Raspirus {
-    /*
-    type Executor = iced::executor::Default;
-    type Message = Message;
-    type Theme = iced::Theme;
-    type Flags = ();
-    */
-
     fn new() -> Self {
-        let channel = mpsc::channel();
+        let channel = mpsc::channel(100);
         let usb = list_usb_drives().unwrap_or_default().first().cloned();
         Self {
             state: State::MainMenu {
@@ -213,6 +232,7 @@ impl Raspirus {
                 Arc::new(Mutex::new(channel.1)),
             ),
             usb_devices: list_usb_drives().unwrap_or_default(),
+            sender: None,
         }
     }
 
@@ -248,37 +268,6 @@ impl Raspirus {
                     self.scan_path = Some(usb.path);
                 }
                 iced::Task::none()
-            }
-            // start scan with current path
-            Message::StartScan => {
-                self.state = State::Scanning { percentage: 0.0 };
-                let scanner_path = self.scan_path.clone();
-                let sender_c = self.scan_progress.0.clone();
-
-                iced::Task::perform(
-                    async move {
-                        let scanner = YaraScanner::new(sender_c)
-                            .map_err(|err| ErrorCase::Critical {
-                                message: format!("Failed to build scanner: {err}"),
-                            })?
-                            .set_path(scanner_path.ok_or_else(|| ErrorCase::Warning {
-                                message: "Select a path first!".to_owned(),
-                            })?)
-                            .map_err(|err| ErrorCase::Critical { message: err })?;
-                        scanner
-                            .start()
-                            .await
-                            .map_err(|err| ErrorCase::Critical { message: err })
-                    },
-                    |result| match result {
-                        Ok((tagged, skipped, log)) => Message::ScanComplete {
-                            tagged: tagged.iter().map(|tag| (tag.clone(), false)).collect(),
-                            skipped: skipped.iter().map(|skip| (skip.clone(), false)).collect(),
-                            log,
-                        },
-                        Err(err) => Message::Error { case: err },
-                    },
-                )
             }
             // expand language dropdown
             Message::ToggleLanguageSelection => {
@@ -709,11 +698,42 @@ impl Raspirus {
                 self.state = State::Terms;
                 iced::Task::none()
             }
+            Message::ScannerReady { sender } => {
+                self.sender = Some(sender);
+                iced::Task::none()
+            }
+            Message::StartScan => {
+                self.state = State::Scanning { percentage: 0.0 };
+                let path = self.scan_path.clone();
+                let mut sender = self.sender.clone();
+                iced::Task::perform(
+                    async move {
+                        if let Some(sender) = &mut sender {
+                            match path {
+                                Some(path) => {
+                                    sender.send(path).await.expect("Failed to send to stream");
+                                    Ok(())
+                                }
+                                None => Err(ErrorCase::Warning {
+                                    message: "No path selected".to_owned(),
+                                }),
+                            }
+                        } else {
+                            Err(ErrorCase::Critical {
+                                message: "No channel ready".to_owned(),
+                            })
+                        }
+                    },
+                    |result| {
+                        if let Err(case) = result {
+                            Message::Error { case }
+                        } else {
+                            Message::None
+                        }
+                    },
+                )
+            }
         }
-    }
-
-    fn theme(&self) -> iced::Theme {
-        iced::Theme::custom("Raspirus".to_owned(), RASPIRUS_PALETTE)
     }
 
     pub fn view(&self) -> iced::Element<Message> {
@@ -730,7 +750,7 @@ impl Raspirus {
                 selection.clone(),
                 &self.usb_devices,
             ),
-            State::Scanning { percentage } => self.scanning(*percentage),
+            State::Scanning { percentage, .. } => self.scanning(*percentage),
             State::Settings { config, update } => self.settings(config, update),
             State::Results {
                 tagged,
@@ -742,8 +762,60 @@ impl Raspirus {
         }
     }
 
+    fn scan() -> impl Stream<Item = Worker> {
+        stream::channel(100, |mut output| async move {
+            // create channel to receive scan commands
+            let (sender, mut receiver) = mpsc::channel(100);
+            output
+                .send(Worker::Ready { sender })
+                .await
+                .expect("Failed to send to stream");
+
+            loop {
+                use iced::futures::StreamExt;
+
+                let input = receiver.select_next_some().await;
+
+                // create scanner. if path valid, start scan otherwise abort
+                let scanner = match YaraScanner::new().set_path(input) {
+                    Ok(scanner) => scanner,
+                    Err(message) => {
+                        output
+                            .send(Worker::Error {
+                                error: ErrorCase::Warning { message },
+                            })
+                            .await
+                            .expect("Failed to send to stream");
+                        continue;
+                    }
+                };
+                scanner.start();
+            }
+        })
+    }
+
     pub fn subscription(&self) -> iced::Subscription<Message> {
-        iced::Subscription::none()
+        match self.state {
+            State::Scanning { .. } => {
+                iced::Subscription::run(Self::scan).map(|worker| match worker {
+                    Worker::Ready { sender } => Message::ScannerReady { sender },
+                    Worker::Message { message } => message,
+                    Worker::Error { error } => Message::Error { case: error },
+                    Worker::ScanComplete {} => Message::None,
+                })
+            }
+            State::MainMenu { .. } => {
+                if self.sender.is_none() {
+                    iced::Subscription::run(Self::scan).map(|worker| match worker {
+                        Worker::Ready { sender } => Message::ScannerReady { sender },
+                        _ => Message::None,
+                    })
+                } else {
+                    iced::Subscription::none()
+                }
+            }
+            _ => iced::Subscription::none(),
+        }
     }
 
     /*

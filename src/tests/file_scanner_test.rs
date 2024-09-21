@@ -1,28 +1,19 @@
 #[cfg(test)]
 mod tests {
     use futures::executor::block_on;
-    use std::{
-        path::Path,
-        sync::{mpsc, Arc, Mutex},
-    };
+    use std::path::Path;
 
     use crate::backend::yara_scanner::YaraScanner;
 
     #[test]
     fn test_new_filescanner() {
-        let channel = mpsc::channel();
-        let scanner = YaraScanner::new(Arc::new(Mutex::new(channel.0)));
-
-        assert!(scanner.is_ok());
+        let scanner = YaraScanner::new();
     }
 
     #[test]
     fn test_filescanner_invalid_path() {
         let path = Path::new("/this/path/does/not/exist");
-        let channel = mpsc::channel();
-        let scanner = YaraScanner::new(Arc::new(Mutex::new(channel.0)))
-            .unwrap()
-            .set_path(path.to_path_buf());
+        let scanner = YaraScanner::new().set_path(path.to_path_buf());
 
         assert!(scanner.is_err());
     }
@@ -30,10 +21,7 @@ mod tests {
     #[test]
     fn test_filescanner_valid_path() {
         let path = Path::new("./");
-        let channel = mpsc::channel();
-        let scanner = YaraScanner::new(Arc::new(Mutex::new(channel.0)))
-            .unwrap()
-            .set_path(path.to_path_buf());
+        let scanner = YaraScanner::new().set_path(path.to_path_buf());
 
         assert!(scanner.is_ok());
     }
@@ -45,9 +33,7 @@ mod tests {
             "Test content of a file with no particular malicious intent".to_owned(),
         )
         .unwrap();
-        let channel = mpsc::channel();
-        let scanner = YaraScanner::new(Arc::new(Mutex::new(channel.0)))
-            .unwrap()
+        let scanner = YaraScanner::new()
             .set_path(Path::new("./clean").to_path_buf())
             .unwrap();
 
@@ -65,9 +51,7 @@ mod tests {
             "X5O!P%@AP[4\\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*".to_owned(),
         )
         .unwrap();
-        let channel = mpsc::channel();
-        let scanner = YaraScanner::new(Arc::new(Mutex::new(channel.0)))
-            .unwrap()
+        let scanner = YaraScanner::new()
             .set_path(Path::new("./tag").to_path_buf())
             .unwrap();
 
