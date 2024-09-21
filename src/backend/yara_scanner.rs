@@ -1,16 +1,18 @@
+use iced::futures::{channel::mpsc, SinkExt};
+use log::{error, info, trace};
+use serde::{Deserialize, Serialize};
+use std::fs::File;
+use std::io::{BufReader, Read};
+use std::sync::Arc;
 use std::{
     fmt::Display,
     path::{Path, PathBuf},
     sync::Mutex,
 };
-
-use log::{error, info, trace, warn};
-use serde::{Deserialize, Serialize};
-use std::sync::mpsc;
-use std::sync::Arc;
 use threadpool_rs::threadpool::pool::Threadpool;
-use yara_x::{ScanResults, Scanner};
+use yara_x::{Rules, ScanResults, Scanner};
 
+use crate::frontend::iced::Worker;
 use crate::{backend::utils::generic::get_rules, frontend::iced::Message, CONFIG};
 
 use super::{config_file::Config, file_log::FileLog, utils::generic::profile_path};
@@ -63,21 +65,24 @@ impl PointerCollection {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct YaraScanner {
-    pub progress_channel: Arc<Mutex<mpsc::Sender<Message>>>,
+    /// given to threads to send their progress when done
+    pub progress_sender: Option<Arc<Mutex<mpsc::Sender<Worker>>>>,
+    /// current path being scanned
     pub path: Option<PathBuf>,
 }
 
 impl YaraScanner {
     /// creates a new scanenr and imports the yara rules
-    pub fn new(progress_channel: Arc<Mutex<mpsc::Sender<Message>>>) -> Result<Self, String> {
-        Ok(Self {
-            progress_channel,
+    pub fn new() -> Self {
+        Self {
+            progress_sender: None,
             path: None,
-        })
+        }
     }
 
+    /// sets the path to scan
     pub fn set_path(&self, path: PathBuf) -> Result<Self, String> {
         if !path.exists() {
             return Err("Invalid path".to_owned());
@@ -89,7 +94,8 @@ impl YaraScanner {
     }
 
     /// Starts the scanner in the specified location
-    pub async fn start(&self) -> Result<(Vec<TaggedFile>, Vec<Skipped>, PathBuf), String> {
+    pub fn start(&self) -> Result<(Vec<TaggedFile>, Vec<Skipped>, PathBuf), String> {
+        let start_time = std::time::Instant::now();
         let path = match &self.path {
             Some(path) => path,
             None => return Err("No path set".to_owned()),
@@ -104,13 +110,15 @@ impl YaraScanner {
             .data
             .join(crate::DEFAULT_FILE);
 
-        get_rules(yarac)?;
+        // check if rules load and cache them for threads
+        let rules = Arc::new(get_rules(yarac)?);
 
         // setup file log
         let file_log = Arc::new(Mutex::new(FileLog::new()?));
 
         let paths = profile_path(path.to_path_buf())
             .map_err(|err| format!("Failed to calculate file tree: {err}"))?;
+        let paths_count = paths.len();
         let pointers = PointerCollection::new(paths.len());
 
         let mut threadpool =
@@ -118,10 +126,12 @@ impl YaraScanner {
         for file in paths {
             let pointers_c = pointers.clone();
             let file_log_c = file_log.clone();
-            let progress_c = self.progress_channel.clone();
+            let progress_c = self.progress_sender.clone().ok_or("Channel not set")?;
+            let rules_c = rules.clone();
             threadpool.execute(move || {
                 let scan_result = || async {
-                    Self::scan_file(file.as_path(), file_log_c, progress_c, pointers_c).await
+                    Self::scan_file(file.as_path(), file_log_c, progress_c, pointers_c, rules_c)
+                        .await
                 };
                 match futures::executor::block_on(scan_result()) {
                     Ok(_) => {}
@@ -145,6 +155,12 @@ impl YaraScanner {
             .clone();
 
         let logger = file_log.lock().expect("Failed to lock logger");
+        info!(
+            "Scanned {paths_count} files in {:.2}s",
+            std::time::Instant::now()
+                .duration_since(start_time)
+                .as_secs_f32()
+        );
         // return tagged and skipped files aswell as path to the scan log
         Ok((tagged, skipped, logger.log_path.clone()))
     }
@@ -201,32 +217,95 @@ impl YaraScanner {
     async fn scan_file(
         path: &Path,
         file_log: Arc<Mutex<FileLog>>,
-        progress_channel: Arc<Mutex<mpsc::Sender<Message>>>,
+        progress_channel: Arc<Mutex<mpsc::Sender<Worker>>>,
         pointers: PointerCollection,
+        rules: Arc<Rules>,
     ) -> Result<(), String> {
         info!("Scanning {}", path.to_string_lossy());
-        let rule_path = pointers
-            .config
-            .paths
-            .clone()
-            .ok_or("No paths set. Is config initialized?")?
-            .data
-            .join(crate::DEFAULT_FILE);
-        trace!("Loading rules at {}", rule_path.to_string_lossy());
-        let rules = get_rules(rule_path)?;
         let mut scanner = Scanner::new(&rules);
         scanner.max_matches_per_pattern(pointers.config.max_matches);
         match path.extension().unwrap_or_default().to_str() {
             Some("zip") => {
-                warn!("Zip files are not supported at the moment and will not be scanned!");
                 let mut skipped_locked = pointers
                     .skipped
                     .lock()
                     .map_err(|err| format!("Failed to lock skipped: {err}"))?;
-                skipped_locked.push(Skipped {
-                    path: path.to_path_buf(),
-                    reason: "Zip files unsupported for now".to_owned(),
-                });
+
+                let mut zip =
+                    zip::ZipArchive::new(BufReader::new(File::open(path).map_err(|err| {
+                        skipped_locked.push(Skipped {
+                            path: path.to_path_buf(),
+                            reason: format!("Could not open zip file: {err}"),
+                        });
+                        format!("Failed to open downloaded zip: {err}")
+                    })?))
+                    .map_err(|err| {
+                        skipped_locked.push(Skipped {
+                            path: path.to_path_buf(),
+                            reason: format!("Could not open zip file: {err}"),
+                        });
+                        format!("Failed to open downloaded zip: {err}")
+                    })?;
+
+                for i in 0..zip.len() {
+                    let mut file = match zip.by_index(i) {
+                        Ok(file) => file,
+                        Err(err) => {
+                            skipped_locked.push(Skipped {
+                                path: path.to_path_buf(),
+                                reason: format!("Could not get file in zip: {err}"),
+                            });
+                            continue;
+                        }
+                    };
+
+                    let path = path
+                        .to_path_buf()
+                        .join(file.enclosed_name().unwrap_or(Path::new("").to_path_buf()));
+
+                    info!("Scanning {}", path.to_string_lossy());
+                    // compressed file is larger than threshhold
+                    if file.size() > crate::MAX_ZIP_FILE_SIZE {
+                        skipped_locked.push(Skipped {
+                            path,
+                            reason: "File in zip exceeds size threshhold".to_owned(),
+                        });
+                        continue;
+                    }
+
+                    let mut content = Vec::new();
+                    match file.read_to_end(&mut content).map_err(|err| {
+                        format!(
+                            "Failed to read zipped file {}: {err}",
+                            path.to_string_lossy()
+                        )
+                    }) {
+                        Ok(_) => {}
+                        Err(reason) => {
+                            skipped_locked.push(Skipped { path, reason });
+                            continue;
+                        }
+                    };
+
+                    let result = match scanner.scan(&content).map_err(|err| {
+                        format!("Could not scan file {}: {err}", path.to_string_lossy())
+                    }) {
+                        Ok(result) => result,
+                        Err(reason) => {
+                            skipped_locked.push(Skipped { path, reason });
+                            continue;
+                        }
+                    };
+                    Self::evaluate_result(&pointers, file_log.clone(), result, &path)?;
+                }
+                // update shared variables
+                {
+                    let mut analysed_locked = pointers
+                        .analysed
+                        .lock()
+                        .map_err(|err| format!("Failed to lock analysed: {err}"))?;
+                    *analysed_locked += 1;
+                }
             }
             None | Some(_) => {
                 let result = scanner.scan_file(path).map_err(|err| {
@@ -261,7 +340,7 @@ impl YaraScanner {
 
     async fn progress(
         pointers: &PointerCollection,
-        progress_channel: Arc<Mutex<mpsc::Sender<Message>>>,
+        progress_channel: Arc<Mutex<mpsc::Sender<Worker>>>,
     ) -> Result<(), String> {
         let analysed_locked = pointers
             .analysed
@@ -281,8 +360,11 @@ impl YaraScanner {
         progress_channel
             .lock()
             .map_err(|err| format!("Failed to lock progress sender: {err}"))?
-            .send(Message::ScanPercentage { percentage })
-            .map_err(|err| format!("Failed to send progress: {err}"))?;
+            .send(Worker::Message {
+                message: Message::ScanPercentage { percentage },
+            })
+            .await
+            .expect("Failed to send progress");
         trace!("Scan progress: {percentage:.2}%");
         Ok(())
     }

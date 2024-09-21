@@ -7,15 +7,17 @@ license = "GPLv3"
 repository = "https://github.com/Raspirus/Raspirus"
 default-run = "raspirus"
 edition = "2021"
-rust-version = "1.76"
+rust-version = "1.80"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 # generic dependencies
 [dependencies]
-threadpool_rs = { git = "https://github.com/GamingGuy003/threadpool_rs.git", features = ["log"] }
+threadpool_rs = { git = "https://github.com/GamingGuy003/threadpool_rs.git", features = [
+    "log",
+] }
 log = "0.4.22"
-reqwest = { version = "0.12.5", features = ["blocking", "json"] }
+reqwest = { version = "0.12.7", features = ["blocking", "json"] }
 chrono = "0.4.38"
 directories-next = "2.0.0"
 simplelog = "0.12.2"
@@ -24,15 +26,18 @@ yara-x = "0.8.0"
 num_cpus = "1.16.0"
 sha2 = "0.10.8"
 hex = "0.4.3"
-serde = { version = "1.0.204", features = ["derive"] }
-serde_json = "1.0.122"
-iced = { version = "0.12.1", features = ["tokio", "image", "svg"] }
-iced_aw = { version = "0.9.3", features = ["icons"] }
+serde = { version = "1.0.210", features = ["derive"] }
+serde_json = "1.0.128"
+iced = { version = "0.13.1", features = ["tokio", "image", "svg"] }
+iced_aw = "0.11.0"
 native-dialog = "0.7.0"
 futures = "0.3.30"
 open = "5.3.0"
 printpdf = "0.7.0"
 zip = "2.2.0"
+iced_fonts = { version = "0.1.1", features = ["bootstrap"] }
+tokio = "1.40.0"
+rust-i18n = "3.1.2"
 
 # usb detection on linux
 [target.'cfg(any(target_os = "linux", target_os = "macos"))'.dependencies]

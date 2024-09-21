@@ -2,8 +2,8 @@
 //#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use backend::config_file::Config;
-use frontend::iced::LocationSelection;
-use iced::{Application, Settings};
+use frontend::iced::{LocationSelection, Raspirus};
+use iced::Settings;
 use lazy_static::lazy_static;
 use log::LevelFilter;
 use simplelog::{
@@ -20,6 +20,10 @@ mod backend;
 mod frontend;
 mod tests;
 
+/// Macro for locale, allows to use t!() for string translations
+#[macro_use]
+extern crate rust_i18n;
+
 /// config
 static CONFIG_FILENAME: &str = "Raspirus.json";
 static CONFIG_VERSION: &str = "4";
@@ -31,6 +35,8 @@ static DEFAULT_FILE: &str = "rulepirus.yarac";
 /// default scan params
 static DEFAULT_MIN_MATCHES: usize = 0;
 static DEFAULT_MAX_MATCHES: usize = 20;
+
+static MAX_ZIP_FILE_SIZE: u64 = 1073741824;
 
 /// download settings
 static MAX_TIMEOUT: u64 = 120;
@@ -47,12 +53,16 @@ lazy_static! {
     /// Global config instance
     static ref CONFIG: Mutex<Config> = Mutex::new(Config::new().expect("Failed to load config"));
     /// Supported languages
-    static ref SUPPORTED_LANGUAGES: Vec<String> = vec!["en-US".to_owned(), "de-DE".to_owned(), "fr-FR".to_owned()];
+    static ref SUPPORTED_LANGUAGES: Vec<String> = vec!["en".to_owned(), "de".to_owned(), "it".to_owned()];
     /// Symbols for selection
     static ref SELECTION_ICONS: Vec<LocationSelection> = vec![LocationSelection::Usb { usb: None }, LocationSelection::Folder { path: None }, LocationSelection::File { path: None }];
 }
 
 fn main() -> Result<(), String> {
+    // Set locale
+    // TODO: https://github.com/longbridgeapp/rust-i18n?tab=readme-ov-file#usage
+    i18n!("src/assets/locales", fallback = "en");
+
     // We check if we should log the application messages to a file or not, default is yes. Defined in the Config
     if CONFIG
         .lock()
@@ -85,9 +95,8 @@ fn main() -> Result<(), String> {
             .add_filter_ignore_str("Naga")
             .add_filter_ignore_str("sctk");
 
-        let log_config = log_config
-            .add_filter_ignore_str("reqwest");
-        
+        let log_config = log_config.add_filter_ignore_str("reqwest");
+
         let log_config = log_config.build();
 
         // Terminal logger is always used if logging so we add it right away
@@ -109,11 +118,17 @@ fn main() -> Result<(), String> {
 
     const ICON_BYTES: &[u8] = include_bytes!("assets/logo.ico");
     let mut settings = Settings::default();
-    settings.window.exit_on_close_request = false;
+    let mut window_settings = iced::window::Settings::default();
     settings.id = Some("raspirus.app".to_owned());
-    settings.fonts = vec![iced_aw::BOOTSTRAP_FONT_BYTES.into()];
-    settings.window.icon = icon::from_file_data(ICON_BYTES, Option::from(ImageFormat::Ico)).ok();
-    frontend::iced::Raspirus::run(settings).expect("Failed to start frontend");
+    settings.fonts = vec![iced_fonts::BOOTSTRAP_FONT_BYTES.into()];
+    window_settings.icon = icon::from_file_data(ICON_BYTES, Option::from(ImageFormat::Ico)).ok();
+    iced::application("Raspirus", Raspirus::update, Raspirus::view)
+        .settings(settings)
+        .exit_on_close_request(true)
+        .window(window_settings)
+        .subscription(Raspirus::subscription)
+        .run()
+        .unwrap();
 
     Ok(())
 }

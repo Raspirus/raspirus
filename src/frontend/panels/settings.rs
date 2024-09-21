@@ -3,10 +3,10 @@ use crate::{
     frontend::{
         iced::{wrap, ConfigValue, ErrorCase, Message, Raspirus, UpdateState},
         theme::{
-            button::{RaspirusButtonBlue, RaspirusButtonPrimary},
-            container::RaspirusCard,
-            icon::{RaspirusSettingsIcon, RaspirusWhiteIcon},
-            toggle::RaspirusToggler,
+            button::{button_blue_style, button_primary_style},
+            container::card_container_style,
+            icon::{settings_icon_style, white_icon_style},
+            toggle::toggler_style,
             GRAY_COLOR, PRIMARY_COLOR,
         },
     },
@@ -24,17 +24,14 @@ impl Raspirus {
                                     iced::widget::svg::Svg::from_path("src/assets/icons/home.svg")
                                         .height(20)
                                         .width(20)
-                                        .style(iced::theme::Svg::Custom(Box::new(
-                                            RaspirusWhiteIcon,
-                                        ))),
+                                        .style(white_icon_style),
                                 )
                                 .push(
-                                    iced::widget::container(iced::widget::text("HOME"))
-                                        .padding([0, 0, 0, 5]),
+                                    iced::widget::container(iced::widget::text("HOME")), //TODO.padding([0, 0, 0, 5]),
                                 ),
                         )
                         .on_press(Message::OpenMain)
-                        .style(iced::theme::Button::Custom(Box::new(RaspirusButtonPrimary)))
+                        .style(button_primary_style)
                         .padding(7),
                     )
                     .push(
@@ -45,13 +42,15 @@ impl Raspirus {
                                     weight: iced::font::Weight::Bold,
                                     ..iced::font::Font::DEFAULT
                                 })
-                                .style(PRIMARY_COLOR),
+                                .style(|_| iced::widget::text::Style {
+                                    color: Some(PRIMARY_COLOR),
+                                }),
                         )
                         .padding([0, 10]),
                     )
                     .padding([5, 0])
                     .push(iced::widget::horizontal_space())
-                    .align_items(iced::Alignment::Center),
+                    .align_y(iced::Alignment::Center),
             )
             .push(iced::widget::horizontal_rule(5))
             .padding(10);
@@ -66,7 +65,7 @@ impl Raspirus {
                             )
                             .height(64)
                             .width(64)
-                            .style(iced::theme::Svg::Custom(Box::new(RaspirusSettingsIcon))),
+                            .style(settings_icon_style),
                         )
                         .push(iced::widget::Space::with_width(10))
                         .push(
@@ -74,9 +73,16 @@ impl Raspirus {
                                 .push(iced::widget::text("Updated").size(20))
                                 .push(iced::widget::Space::with_height(5))
                                 .push(
-                                    iced::widget::text("Updates the Rules")
-                                        .size(14)
-                                        .style(GRAY_COLOR),
+                                    iced::widget::text(format!(
+                                        "Updates the Rules. Currently on: {}",
+                                        config.rules_version
+                                    ))
+                                    .size(14)
+                                    .style(|_| {
+                                        iced::widget::text::Style {
+                                            color: Some(GRAY_COLOR),
+                                        }
+                                    }),
                                 )
                                 .width(iced::Length::Fill),
                         )
@@ -96,16 +102,18 @@ impl Raspirus {
                                         iced::widget::Text::new(
                                             match update {
                                                 UpdateState::Loaded => {
-                                                    iced_aw::Bootstrap::ArrowUpCircleFill
+                                                    iced_fonts::Bootstrap::ArrowUpCircleFill
                                                 }
                                                 UpdateState::Updating => {
-                                                    iced_aw::Bootstrap::ArrowClockwise
+                                                    iced_fonts::Bootstrap::ArrowClockwise
                                                 }
-                                                UpdateState::Updated => iced_aw::Bootstrap::Check,
+                                                UpdateState::Updated => {
+                                                    iced_fonts::Bootstrap::Check
+                                                }
                                             }
                                             .to_string(),
                                         )
-                                        .font(iced_aw::BOOTSTRAP_FONT),
+                                        .font(iced_fonts::BOOTSTRAP_FONT),
                                     ),
                             )
                             .on_press(match update {
@@ -117,12 +125,12 @@ impl Raspirus {
                                 },
                             })
                             .padding(10)
-                            .style(iced::theme::Button::Custom(Box::new(RaspirusButtonBlue))),
+                            .style(button_blue_style),
                         )
-                        .align_items(iced::Alignment::Center)
-                        .padding([7, 20, 7, 7]),
+                        .align_y(iced::Alignment::Center)
+                        .padding(iced::Padding::new(7.0).right),
                 )
-                .style(iced::theme::Container::Custom(Box::new(RaspirusCard))),
+                .style(card_container_style),
             )
             .push(
                 iced::widget::container(
@@ -133,7 +141,7 @@ impl Raspirus {
                             )
                             .height(64)
                             .width(64)
-                            .style(iced::theme::Svg::Custom(Box::new(RaspirusSettingsIcon))),
+                            .style(settings_icon_style),
                         )
                         .push(iced::widget::Space::with_width(10))
                         .push(
@@ -143,22 +151,27 @@ impl Raspirus {
                                 .push(
                                     iced::widget::text("Maximum amount of Rules that should match")
                                         .size(14)
-                                        .style(GRAY_COLOR),
+                                        .style(|_| iced::widget::text::Style {
+                                            color: Some(GRAY_COLOR),
+                                        }),
                                 )
                                 .width(iced::Length::Fill),
                         )
                         .push(iced::widget::horizontal_space())
-                        .push(iced_aw::widgets::NumberInput::new(
-                            config.max_matches,
-                            usize::MAX,
-                            |matches| Message::ConfigChanged {
-                                value: ConfigValue::MaxMatch(matches),
-                            },
-                        ))
-                        .align_items(iced::Alignment::Center)
-                        .padding([7, 20, 7, 7]),
+                        .push(
+                            iced_aw::widgets::NumberInput::new(
+                                config.max_matches,
+                                config.min_matches + 1..usize::MAX,
+                                |matches| Message::ConfigChanged {
+                                    value: ConfigValue::MaxMatch(matches),
+                                },
+                            )
+                            .font(iced_fonts::BOOTSTRAP_FONT),
+                        )
+                        .align_y(iced::Alignment::Center)
+                        .padding(iced::padding::Padding::new(7.0).right),
                 )
-                .style(iced::theme::Container::Custom(Box::new(RaspirusCard))),
+                .style(card_container_style),
             )
             .push(
                 iced::widget::container(
@@ -169,7 +182,7 @@ impl Raspirus {
                             )
                             .height(64)
                             .width(64)
-                            .style(iced::theme::Svg::Custom(Box::new(RaspirusSettingsIcon))),
+                            .style(settings_icon_style),
                         )
                         .push(iced::widget::Space::with_width(10))
                         .push(
@@ -179,22 +192,27 @@ impl Raspirus {
                                 .push(
                                     iced::widget::text("Minumum amount of Rules that should match")
                                         .size(14)
-                                        .style(GRAY_COLOR),
+                                        .style(|_| iced::widget::text::Style {
+                                            color: Some(GRAY_COLOR),
+                                        }),
                                 )
                                 .width(iced::Length::Fill),
                         )
                         .push(iced::widget::horizontal_space())
-                        .push(iced_aw::widgets::NumberInput::new(
-                            config.min_matches,
-                            config.max_matches,
-                            |matches| Message::ConfigChanged {
-                                value: ConfigValue::MinMatch(matches),
-                            },
-                        ))
-                        .align_items(iced::Alignment::Center)
-                        .padding([7, 20, 7, 7]),
+                        .push(
+                            iced_aw::widgets::NumberInput::new(
+                                config.min_matches,
+                                0..config.max_matches,
+                                |matches| Message::ConfigChanged {
+                                    value: ConfigValue::MinMatch(matches),
+                                },
+                            )
+                            .font(iced_fonts::BOOTSTRAP_FONT),
+                        )
+                        .align_y(iced::Alignment::Center)
+                        .padding(iced::padding::Padding::new(7.0).right),
                 )
-                .style(iced::theme::Container::Custom(Box::new(RaspirusCard))),
+                .style(card_container_style),
             )
             .push(
                 iced::widget::container(
@@ -205,7 +223,7 @@ impl Raspirus {
                             )
                             .height(64)
                             .width(64)
-                            .style(iced::theme::Svg::Custom(Box::new(RaspirusSettingsIcon))),
+                            .style(settings_icon_style),
                         )
                         .push(iced::widget::Space::with_width(10))
                         .push(
@@ -215,25 +233,65 @@ impl Raspirus {
                                 .push(
                                     iced::widget::text("Activates debug logging")
                                         .size(14)
-                                        .style(GRAY_COLOR),
+                                        .style(|_| iced::widget::text::Style {
+                                            color: Some(GRAY_COLOR),
+                                        }),
                                 )
                                 .width(iced::Length::Fill),
                         )
                         .push(iced::widget::horizontal_space())
                         .push(
-                            iced::widget::Toggler::new(None, config.logging_is_active, |logging| {
-                                Message::ConfigChanged {
+                            iced::widget::Toggler::new(config.logging_is_active)
+                                .on_toggle(|logging| Message::ConfigChanged {
                                     value: ConfigValue::Logging(logging),
-                                }
-                            })
-                            .width(iced::Length::Shrink)
-                            .size(25)
-                            .style(iced::theme::Toggler::Custom(Box::new(RaspirusToggler))),
+                                })
+                                .width(iced::Length::Shrink)
+                                .size(25)
+                                .style(toggler_style),
                         )
-                        .align_items(iced::Alignment::Center)
+                        .align_y(iced::Alignment::Center)
                         .padding(7),
                 )
-                .style(iced::theme::Container::Custom(Box::new(RaspirusCard))),
+                .style(card_container_style),
+            )
+            .push(
+                iced::widget::container(
+                    iced::widget::Row::new()
+                        .push(
+                            iced::widget::svg::Svg::from_path("src/assets/icons/cpu.svg")
+                                .height(64)
+                                .width(64)
+                                .style(settings_icon_style),
+                        )
+                        .push(iced::widget::Space::with_width(10))
+                        .push(
+                            iced::widget::Column::new()
+                                .push(iced::widget::text("Set Threads").size(20))
+                                .push(iced::widget::Space::with_height(5))
+                                .push(
+                                    iced::widget::text("Amount of parallel threads to use for scanning")
+                                        .size(14)
+                                        .style(|_| iced::widget::text::Style {
+                                            color: Some(GRAY_COLOR),
+                                        }),
+                                )
+                                .width(iced::Length::Fill),
+                        )
+                        .push(iced::widget::horizontal_space())
+                        .push(
+                            iced_aw::widgets::NumberInput::new(
+                                config.max_threads,
+                                1..num_cpus::get(),
+                                |threads| Message::ConfigChanged {
+                                    value: ConfigValue::MaxThreads(threads),
+                                },
+                            )
+                            .font(iced_fonts::BOOTSTRAP_FONT),
+                        )
+                        .align_y(iced::Alignment::Center)
+                        .padding(iced::padding::Padding::new(7.0).right),
+                )
+                .style(card_container_style),
             )
             .push(
                 iced::widget::container(
@@ -242,7 +300,7 @@ impl Raspirus {
                             iced::widget::svg::Svg::from_path("src/assets/icons/file-download.svg")
                                 .height(64)
                                 .width(64)
-                                .style(iced::theme::Svg::Custom(Box::new(RaspirusSettingsIcon))),
+                                .style(settings_icon_style),
                         )
                         .push(iced::widget::Space::with_width(10))
                         .push(
@@ -252,7 +310,9 @@ impl Raspirus {
                                 .push(
                                     iced::widget::text("Copies the Logs to your Downloads folder")
                                         .size(14)
-                                        .style(GRAY_COLOR),
+                                        .style(|_| iced::widget::text::Style {
+                                            color: Some(GRAY_COLOR),
+                                        }),
                                 )
                                 .width(iced::Length::Fill),
                         )
@@ -264,18 +324,18 @@ impl Raspirus {
                                     .push(iced::widget::text("DOWNLOAD "))
                                     .push(
                                         iced::widget::Text::new(
-                                            iced_aw::Bootstrap::ArrowDownCircleFill.to_string(),
+                                            iced_fonts::Bootstrap::ArrowDownCircleFill.to_string(),
                                         )
-                                        .font(iced_aw::BOOTSTRAP_FONT),
+                                        .font(iced_fonts::BOOTSTRAP_FONT),
                                     ),
                             )
                             .padding(10)
-                            .style(iced::theme::Button::Custom(Box::new(RaspirusButtonBlue))),
+                            .style(button_blue_style),
                         )
-                        .align_items(iced::Alignment::Center)
-                        .padding([7, 20, 7, 7]),
+                        .align_y(iced::Alignment::Center)
+                        .padding(iced::padding::Padding::new(7.0).right),
                 )
-                .style(iced::theme::Container::Custom(Box::new(RaspirusCard))),
+                .style(card_container_style),
             )
             .spacing(20);
         let content = iced::widget::Scrollable::new(wrap(15, options.into()));

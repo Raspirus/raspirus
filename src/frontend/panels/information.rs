@@ -1,33 +1,23 @@
 use crate::frontend::{
     iced::{wrap, Message, Raspirus},
     theme::{
-        button::RaspirusButtonPrimary,
-        container::{RaspirusCard, RaspirusIconContainer},
-        icon::{RaspirusInfoIcon, RaspirusWhiteIcon},
+        button::button_primary_style,
+        container::card_container_style,
+        icon::{info_icon_style, white_icon_style},
         GRAY_COLOR, PRIMARY_COLOR,
     },
 };
 
-// Icons from Tabler.io: https://tabler.io/icons
-
 impl Raspirus {
     fn info_card<'a>(
-        icon: iced::widget::svg::Svg,
+        icon: iced::widget::Svg<'a>,
         title: &'a str,
         value: &'a str,
     ) -> iced::widget::Container<'a, Message> {
         iced::widget::container(
             iced::widget::Row::new()
                 .push(
-                    iced::widget::container(
-                        icon.height(48)
-                            .width(48)
-                            .style(iced::theme::Svg::Custom(Box::new(RaspirusInfoIcon))),
-                    )
-                    .padding(15)
-                    .style(iced::theme::Container::Custom(Box::new(
-                        RaspirusIconContainer,
-                    ))),
+                    icon.height(64).width(64).style(info_icon_style),
                 )
                 //.push(iced::widget::vertical_rule(5))
                 .push(iced::widget::Space::with_width(10))
@@ -35,14 +25,19 @@ impl Raspirus {
                     iced::widget::Column::new()
                         .push(iced::widget::text(title).size(20))
                         .push(iced::widget::Space::with_height(5))
-                        .push(iced::widget::text(value).size(14).style(GRAY_COLOR))
+                        .push(iced::widget::text(value).size(14).style(|_| {
+                            iced::widget::text::Style {
+                                color: Some(GRAY_COLOR),
+                            }
+                        }))
                         .width(iced::Length::Fill),
                 )
-                .align_items(iced::Alignment::Center)
+                .align_y(iced::Alignment::Center)
                 .width(iced::Length::Fill)
                 .padding(7),
         )
-        .style(iced::theme::Container::Custom(Box::new(RaspirusCard)))
+        .style(card_container_style)
+        .padding(5)
     }
 
     pub fn information(&self) -> iced::Element<Message> {
@@ -53,20 +48,17 @@ impl Raspirus {
                         iced::widget::Button::new(
                             iced::widget::Row::new()
                                 .push(
-                                    iced::widget::svg::Svg::from_path("src/assets/icons/home.svg")
+                                    iced::widget::Svg::from_path("src/assets/icons/home.svg")
                                         .height(20)
                                         .width(20)
-                                        .style(iced::theme::Svg::Custom(Box::new(
-                                            RaspirusWhiteIcon,
-                                        ))),
+                                        .style(white_icon_style),
                                 )
                                 .push(
-                                    iced::widget::container(iced::widget::text("HOME"))
-                                        .padding([0, 0, 0, 5]),
+                                    iced::widget::container(iced::widget::text("HOME")), //TODO.padding([0, 0, 0, 5]),
                                 ),
                         )
                         .on_press(Message::OpenMain)
-                        .style(iced::theme::Button::Custom(Box::new(RaspirusButtonPrimary)))
+                        .style(button_primary_style)
                         .padding(7),
                     )
                     .push(
@@ -77,13 +69,15 @@ impl Raspirus {
                                     weight: iced::font::Weight::Bold,
                                     ..iced::font::Font::DEFAULT
                                 })
-                                .style(PRIMARY_COLOR),
+                                .style(|_| iced::widget::text::Style {
+                                    color: Some(PRIMARY_COLOR),
+                                }),
                         )
                         .padding([0, 10]),
                     )
                     .padding([5, 0])
                     .push(iced::widget::horizontal_space())
-                    .align_items(iced::Alignment::Center),
+                    .align_y(iced::Alignment::Center),
             )
             .push(iced::widget::horizontal_rule(5))
             .padding(10);
@@ -93,45 +87,45 @@ impl Raspirus {
                 iced::widget::container(
                     iced::widget::Row::new()
                         .push(
-                            iced::widget::svg::Svg::from_path("src/assets/logo-vector.svg")
+                            iced::widget::Svg::from_path("src/assets/logo-vector.svg")
                                 .width(iced::Length::FillPortion(2)),
                         )
                         .push(
-                            iced::widget::svg::Svg::from_path("src/assets/usb-vector.svg")
+                            iced::widget::Svg::from_path("src/assets/usb-vector.svg")
                                 .width(iced::Length::FillPortion(2)),
                         )
                         .padding(20)
-                        .align_items(iced::Alignment::Center),
+                        .align_y(iced::Alignment::Center),
                 )
-                .style(iced::theme::Container::Custom(Box::new(RaspirusCard))),
+                .style(card_container_style),
             )
             .push(Self::info_card(
-                iced::widget::svg::Svg::from_path("src/assets/icons/hexagon-letter-r.svg"),
+                iced::widget::Svg::from_path("src/assets/icons/hexagon-letter-r.svg"),
                 "Name",
                 "Raspirus",
             ))
             .push(Self::info_card(
-                iced::widget::svg::Svg::from_path("src/assets/icons/file-description.svg"),
+                iced::widget::Svg::from_path("src/assets/icons/file-description.svg"),
                 "Description",
                 "Simple signatures-based antivirus for single-board computers like Raspberry Pi",
             ))
             .push(Self::info_card(
-                iced::widget::svg::Svg::from_path("src/assets/icons/user-code.svg"),
+                iced::widget::Svg::from_path("src/assets/icons/user-code.svg"),
                 "Maintainers",
                 "Benjamin Demetz, Felix Hell Björn",
             ))
             .push(Self::info_card(
-                iced::widget::svg::Svg::from_path("src/assets/icons/git-commit.svg"),
+                iced::widget::Svg::from_path("src/assets/icons/git-commit.svg"),
                 "Version",
                 env!("CARGO_PKG_VERSION"),
             ))
             .push(Self::info_card(
-                iced::widget::svg::Svg::from_path("src/assets/icons/license.svg"),
+                iced::widget::Svg::from_path("src/assets/icons/license.svg"),
                 "License",
                 "Open Source GPLv3",
             ))
             .push(Self::info_card(
-                iced::widget::svg::Svg::from_path("src/assets/icons/globe.svg"),
+                iced::widget::Svg::from_path("src/assets/icons/globe.svg"),
                 "Website",
                 "https://raspirus.deno.dev",
             ))
