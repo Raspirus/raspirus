@@ -20,6 +20,10 @@ mod backend;
 mod frontend;
 mod tests;
 
+/// Macro for locale, allows to use t!() for string translations
+#[macro_use]
+extern crate rust_i18n;
+
 /// config
 static CONFIG_FILENAME: &str = "Raspirus.json";
 static CONFIG_VERSION: &str = "4";
@@ -47,12 +51,16 @@ lazy_static! {
     /// Global config instance
     static ref CONFIG: Mutex<Config> = Mutex::new(Config::new().expect("Failed to load config"));
     /// Supported languages
-    static ref SUPPORTED_LANGUAGES: Vec<String> = vec!["en-US".to_owned(), "de-DE".to_owned(), "fr-FR".to_owned()];
+    static ref SUPPORTED_LANGUAGES: Vec<String> = vec!["en".to_owned(), "de".to_owned(), "it".to_owned()];
     /// Symbols for selection
     static ref SELECTION_ICONS: Vec<LocationSelection> = vec![LocationSelection::Usb { usb: None }, LocationSelection::Folder { path: None }, LocationSelection::File { path: None }];
 }
 
 fn main() -> Result<(), String> {
+    // Set locale
+    // TODO: https://github.com/longbridgeapp/rust-i18n?tab=readme-ov-file#usage
+    i18n!("src/assets/locales", fallback = "en");
+
     // We check if we should log the application messages to a file or not, default is yes. Defined in the Config
     if CONFIG
         .lock()
