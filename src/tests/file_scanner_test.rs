@@ -1,6 +1,5 @@
 #[cfg(test)]
 mod tests {
-    use futures::executor::block_on;
     use std::path::Path;
 
     use crate::backend::yara_scanner::YaraScanner;
@@ -37,7 +36,7 @@ mod tests {
             .set_path(Path::new("./clean").to_path_buf())
             .unwrap();
 
-        let result = block_on(async { scanner.start().await });
+        let result = scanner.start();
 
         assert!(result.is_ok());
         assert_eq!(result.unwrap().0.len(), 0);
@@ -55,7 +54,7 @@ mod tests {
             .set_path(Path::new("./tag").to_path_buf())
             .unwrap();
 
-        let result = block_on(async { scanner.start().await });
+        let result = scanner.start();
 
         assert!(result.is_ok());
         assert_eq!(result.unwrap().0.len(), 1);
