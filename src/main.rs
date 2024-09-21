@@ -54,6 +54,8 @@ lazy_static! {
     static ref CONFIG: Mutex<Config> = Mutex::new(Config::new().expect("Failed to load config"));
     /// Supported languages
     static ref SUPPORTED_LANGUAGES: Vec<String> = vec!["en".to_owned(), "de".to_owned(), "it".to_owned()];
+    /// Supported archives
+    static ref SUPPORTED_ARCHIVES: Vec<String> = vec!["zip".to_owned(), "xz".to_owned(), "zstd".to_owned(), "bzip2".to_owned(), "deflate64".to_owned()];
     /// Symbols for selection
     static ref SELECTION_ICONS: Vec<LocationSelection> = vec![LocationSelection::Usb { usb: None }, LocationSelection::Folder { path: None }, LocationSelection::File { path: None }];
 }
