@@ -48,13 +48,13 @@ pub struct Skipped {
 pub struct PointerCollection {
     tagged: Arc<Mutex<Vec<TaggedFile>>>,
     skipped: Arc<Mutex<Vec<Skipped>>>,
-    analysed: Arc<Mutex<usize>>,
-    total: Arc<Mutex<usize>>,
+    analysed: Arc<Mutex<u64>>,
+    total: Arc<Mutex<u64>>,
     config: Arc<Config>,
 }
 
 impl PointerCollection {
-    fn new(path_len: usize) -> Self {
+    fn new(path_len: u64) -> Self {
         Self {
             tagged: Arc::new(Mutex::new(Vec::new())),
             skipped: Arc::new(Mutex::new(Vec::new())),
@@ -118,12 +118,12 @@ impl YaraScanner {
 
         let paths = profile_path(path.to_path_buf())
             .map_err(|err| format!("Failed to calculate file tree: {err}"))?;
-        let paths_count = paths.len();
-        let pointers = PointerCollection::new(paths.len());
+        let paths_count = paths.1.len();
+        let pointers = PointerCollection::new(paths.0);
 
         let mut threadpool =
             Threadpool::new(CONFIG.lock().expect("Failed to lock config").max_threads);
-        for file in paths {
+        for file in paths.1 {
             let pointers_c = pointers.clone();
             let file_log_c = file_log.clone();
             let progress_c = self.progress_sender.clone().ok_or("Channel not set")?;
@@ -224,116 +224,175 @@ impl YaraScanner {
         info!("Scanning {}", path.to_string_lossy());
         let mut scanner = Scanner::new(&rules);
         scanner.max_matches_per_pattern(pointers.config.max_matches);
-        match path.extension().unwrap_or_default().to_str() {
-            Some("zip") => {
-                let mut skipped_locked = pointers
-                    .skipped
-                    .lock()
-                    .map_err(|err| format!("Failed to lock skipped: {err}"))?;
 
-                let mut zip =
-                    zip::ZipArchive::new(BufReader::new(File::open(path).map_err(|err| {
-                        skipped_locked.push(Skipped {
-                            path: path.to_path_buf(),
-                            reason: format!("Could not open zip file: {err}"),
-                        });
-                        format!("Failed to open downloaded zip: {err}")
-                    })?))
-                    .map_err(|err| {
-                        skipped_locked.push(Skipped {
-                            path: path.to_path_buf(),
-                            reason: format!("Could not open zip file: {err}"),
-                        });
-                        format!("Failed to open downloaded zip: {err}")
-                    })?;
+        // check if archive format is supported
+        let archive = if let Some(extension) = path.extension().unwrap_or_default().to_str() {
+            crate::SUPPORTED_ARCHIVES.contains(&extension.to_owned())
+        } else {
+            false
+        };
 
-                for i in 0..zip.len() {
-                    let mut file = match zip.by_index(i) {
-                        Ok(file) => file,
-                        Err(err) => {
-                            skipped_locked.push(Skipped {
+        let size = path
+            .metadata()
+            .map_err(|err| format!("Failed to fetch file metadata: {err}"))?
+            .len();
+
+        if archive {
+            // open zip file
+            let mut zip = match zip::ZipArchive::new(BufReader::new(match File::open(path) {
+                Ok(file) => file,
+                Err(err) => {
+                    let err = format!("Could not open archive: {err}");
+                    pointers
+                        .skipped
+                        .lock()
+                        .map_err(|err| format!("Failed to lock skipped: {err}"))?
+                        .push(Skipped {
+                            path: path.to_path_buf(),
+                            reason: err.clone(),
+                        });
+                    return Err(err);
+                }
+            })) {
+                Ok(zip) => zip,
+                Err(err) => {
+                    let err = format!("Could not open archive: {err}");
+                    pointers
+                        .skipped
+                        .lock()
+                        .map_err(|err| format!("Failed to lock skipped: {err}"))?
+                        .push(Skipped {
+                            path: path.to_path_buf(),
+                            reason: err.clone(),
+                        });
+                    return Err(err);
+                }
+            };
+
+            for i in 0..zip.len() {
+                let size = zip.len();
+                let mut file = match zip.by_index(i) {
+                    Ok(file) => file,
+                    Err(err) => {
+                        pointers
+                            .skipped
+                            .lock()
+                            .map_err(|err| format!("Failed to lock skipped: {err}"))?
+                            .push(Skipped {
                                 path: path.to_path_buf(),
                                 reason: format!("Could not get file in zip: {err}"),
                             });
-                            continue;
-                        }
-                    };
+                        continue;
+                    }
+                };
 
-                    let path = path
-                        .to_path_buf()
-                        .join(file.enclosed_name().unwrap_or(Path::new("").to_path_buf()));
+                let path = path
+                    .to_path_buf()
+                    .join(file.enclosed_name().unwrap_or(Path::new("").to_path_buf()));
 
-                    info!("Scanning {}", path.to_string_lossy());
-                    // compressed file is larger than threshhold
-                    if file.size() > crate::MAX_ZIP_FILE_SIZE {
-                        skipped_locked.push(Skipped {
+                if let Some(extension) = path.extension() {
+                    if crate::SUPPORTED_ARCHIVES.contains(&extension.to_string_lossy().to_string())
+                    {
+                        pointers
+                            .skipped
+                            .lock()
+                            .map_err(|err| format!("Failed to lock skipped: {err}"))?
+                            .push(Skipped {
+                                path: path.to_path_buf(),
+                                reason: format!("Nested archives unsupported currently"),
+                            });
+                        continue;
+                    }
+                }
+
+                // compressed file is larger than threshhold
+                if file.size() > crate::MAX_ZIP_FILE_SIZE {
+                    pointers
+                        .skipped
+                        .lock()
+                        .map_err(|err| format!("Failed to lock skipped: {err}"))?
+                        .push(Skipped {
                             path,
                             reason: "File in zip exceeds size threshhold".to_owned(),
                         });
+                    continue;
+                }
+
+                info!(
+                    "Scanning {}/{} archived file {}",
+                    i + 1,
+                    size + 1,
+                    path.to_string_lossy()
+                );
+                let mut content = Vec::new();
+                match file.read_to_end(&mut content).map_err(|err| {
+                    format!(
+                        "Failed to read zipped file {}: {err}",
+                        path.to_string_lossy()
+                    )
+                }) {
+                    Ok(_) => {}
+                    Err(reason) => {
+                        pointers
+                            .skipped
+                            .lock()
+                            .map_err(|err| format!("Failed to lock skipped: {err}"))?
+                            .push(Skipped { path, reason });
                         continue;
                     }
+                };
 
-                    let mut content = Vec::new();
-                    match file.read_to_end(&mut content).map_err(|err| {
-                        format!(
-                            "Failed to read zipped file {}: {err}",
-                            path.to_string_lossy()
-                        )
-                    }) {
-                        Ok(_) => {}
-                        Err(reason) => {
-                            skipped_locked.push(Skipped { path, reason });
-                            continue;
-                        }
-                    };
-
-                    let result = match scanner.scan(&content).map_err(|err| {
-                        format!("Could not scan file {}: {err}", path.to_string_lossy())
-                    }) {
-                        Ok(result) => result,
-                        Err(reason) => {
-                            skipped_locked.push(Skipped { path, reason });
-                            continue;
-                        }
-                    };
-                    Self::evaluate_result(&pointers, file_log.clone(), result, &path)?;
-                }
-                // update shared variables
+                let result = match scanner
+                    .scan(&content)
+                    .map_err(|err| format!("Could not scan file {}: {err}", path.to_string_lossy()))
                 {
-                    let mut analysed_locked = pointers
-                        .analysed
-                        .lock()
-                        .map_err(|err| format!("Failed to lock analysed: {err}"))?;
-                    *analysed_locked += 1;
-                }
-            }
-            None | Some(_) => {
-                let result = scanner.scan_file(path).map_err(|err| {
-                    let reason = format!("Skipping file {}: {err}", path.to_string_lossy());
-                    match pointers.skipped.lock() {
-                        Ok(mut skipped_locked) => {
-                            skipped_locked.push(Skipped {
-                                path: path.to_path_buf(),
-                                reason: reason.clone(),
-                            });
-                            reason
-                        }
-                        Err(err) => format!("Failed to lock skipped: {err}"),
+                    Ok(result) => result,
+                    Err(reason) => {
+                        pointers
+                            .skipped
+                            .lock()
+                            .map_err(|err| format!("Failed to lock skipped: {err}"))?
+                            .push(Skipped { path, reason });
+                        continue;
                     }
-                })?;
-                Self::evaluate_result(&pointers, file_log, result, path)?;
-
+                };
+                Self::evaluate_result(&pointers, file_log.clone(), result, &path)?;
                 // update shared variables
                 {
                     let mut analysed_locked = pointers
                         .analysed
                         .lock()
                         .map_err(|err| format!("Failed to lock analysed: {err}"))?;
-                    *analysed_locked += 1;
+                    *analysed_locked += file.compressed_size();
+                    // send progress to frontend
                 }
-                // send progress to frontend
-                Self::progress(&pointers, progress_channel).await?;
+                Self::progress(&pointers, progress_channel.clone()).await?;
             }
+        } else {
+            let result = scanner.scan_file(path).map_err(|err| {
+                let reason = format!("Skipping file {}: {err}", path.to_string_lossy());
+                match pointers.skipped.lock() {
+                    Ok(mut skipped_locked) => {
+                        skipped_locked.push(Skipped {
+                            path: path.to_path_buf(),
+                            reason: reason.clone(),
+                        });
+                        reason
+                    }
+                    Err(err) => format!("Failed to lock skipped: {err}"),
+                }
+            })?;
+            Self::evaluate_result(&pointers, file_log, result, path)?;
+            // update shared variables
+            {
+                let mut analysed_locked = pointers
+                    .analysed
+                    .lock()
+                    .map_err(|err| format!("Failed to lock analysed: {err}"))?;
+                *analysed_locked += size;
+                // send progress to frontend
+            }
+            Self::progress(&pointers, progress_channel).await?;
         }
         Ok(())
     }
@@ -345,17 +404,20 @@ impl YaraScanner {
         let analysed_locked = pointers
             .analysed
             .lock()
-            .map_err(|err| format!("Failed to lock analysed: {err}"))?;
+            .map_err(|err| format!("Failed to lock analysed: {err}"))?
+            .clone();
         let skipped_locked = pointers
             .skipped
             .lock()
-            .map_err(|err| format!("Failed to lock skipped: {err}"))?;
-        let scanned = *analysed_locked + skipped_locked.len();
+            .map_err(|err| format!("Failed to lock skipped: {err}"))?
+            .clone();
+        let scanned = analysed_locked + skipped_locked.len() as u64;
         let total_locked = pointers
             .total
             .lock()
-            .map_err(|err| format!("Failed to lock total: {err}"))?;
-        let percentage = (scanned as f32 / *total_locked as f32) * 100.0;
+            .map_err(|err| format!("Failed to lock total: {err}"))?
+            .clone();
+        let percentage = (scanned as f32 / total_locked as f32) * 100.0;
 
         progress_channel
             .lock()
