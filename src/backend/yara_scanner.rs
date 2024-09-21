@@ -8,7 +8,7 @@ use std::{
     sync::Mutex,
 };
 use threadpool_rs::threadpool::pool::Threadpool;
-use yara_x::{ScanResults, Scanner};
+use yara_x::{Rules, ScanResults, Scanner};
 
 use crate::frontend::iced::Worker;
 use crate::{backend::utils::generic::get_rules, frontend::iced::Message, CONFIG};
@@ -92,7 +92,7 @@ impl YaraScanner {
     }
 
     /// Starts the scanner in the specified location
-    pub async fn start(&self) -> Result<(Vec<TaggedFile>, Vec<Skipped>, PathBuf), String> {
+    pub fn start(&self) -> Result<(Vec<TaggedFile>, Vec<Skipped>, PathBuf), String> {
         let path = match &self.path {
             Some(path) => path,
             None => return Err("No path set".to_owned()),
@@ -107,7 +107,8 @@ impl YaraScanner {
             .data
             .join(crate::DEFAULT_FILE);
 
-        get_rules(yarac)?;
+        // check if rules load and cache them for threads
+        let rules = Arc::new(get_rules(yarac)?);
 
         // setup file log
         let file_log = Arc::new(Mutex::new(FileLog::new()?));
@@ -122,9 +123,11 @@ impl YaraScanner {
             let pointers_c = pointers.clone();
             let file_log_c = file_log.clone();
             let progress_c = self.progress_sender.clone().ok_or("Channel not set")?;
+            let rules_c = rules.clone();
             threadpool.execute(move || {
                 let scan_result = || async {
-                    Self::scan_file(file.as_path(), file_log_c, progress_c, pointers_c).await
+                    Self::scan_file(file.as_path(), file_log_c, progress_c, pointers_c, rules_c)
+                        .await
                 };
                 match futures::executor::block_on(scan_result()) {
                     Ok(_) => {}
@@ -136,13 +139,6 @@ impl YaraScanner {
             });
         }
         threadpool.join();
-        self.progress_sender.clone().and_then(|sender| {
-            sender
-                .lock()
-                .expect("Failed to lock channel")
-                .close_channel();
-            Some(())
-        });
         let tagged = pointers
             .tagged
             .lock()
@@ -213,17 +209,9 @@ impl YaraScanner {
         file_log: Arc<Mutex<FileLog>>,
         progress_channel: Arc<Mutex<mpsc::Sender<Worker>>>,
         pointers: PointerCollection,
+        rules: Arc<Rules>,
     ) -> Result<(), String> {
         info!("Scanning {}", path.to_string_lossy());
-        let rule_path = pointers
-            .config
-            .paths
-            .clone()
-            .ok_or("No paths set. Is config initialized?")?
-            .data
-            .join(crate::DEFAULT_FILE);
-        trace!("Loading rules at {}", rule_path.to_string_lossy());
-        let rules = get_rules(rule_path)?;
         let mut scanner = Scanner::new(&rules);
         scanner.max_matches_per_pattern(pointers.config.max_matches);
         match path.extension().unwrap_or_default().to_str() {

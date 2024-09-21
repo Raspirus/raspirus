@@ -3,12 +3,12 @@ use crate::backend::downloader;
 use crate::backend::utils::generic::{create_pdf, generate_virustotal, update_config};
 use crate::backend::utils::usb_utils::{list_usb_drives, UsbDevice};
 use crate::backend::yara_scanner::{Skipped, TaggedFile, YaraScanner};
-use futures::{FutureExt, SinkExt};
+use futures::SinkExt;
 use iced::{
     futures::{channel::mpsc, Stream},
     stream,
 };
-use log::{debug, error, info, trace, warn};
+use log::{debug, error, info, warn};
 use std::fmt::Display;
 use std::str::FromStr;
 use std::{
@@ -158,9 +158,6 @@ pub enum Message {
     ToggleCard {
         card: Card,
     },
-    Event {
-        event: iced::Event,
-    },
     UpdateFinished,
     // data messages
     ScanPercentage {
@@ -214,10 +211,7 @@ impl Raspirus {
     }
 
     pub fn update(&mut self, message: Message) -> iced::Task<Message> {
-        match &message {
-            Message::Event { .. } => {}
-            others => debug!("{:?}", others),
-        }
+        debug!("{:?}", message);
         match message {
             // opens settings page
             Message::OpenSettings => {
@@ -371,21 +365,6 @@ impl Raspirus {
             }
             // shutdown application
             Message::Shutdown => std::process::exit(0),
-            // work with window events
-            Message::Event { event } => {
-                match event {
-                    iced::Event::Window(iced::window::Event::CloseRequested) => {
-                        return iced::Task::perform(
-                            async {
-                                info!("Shutting down...");
-                            },
-                            |_| Message::Shutdown,
-                        )
-                    }
-                    _ => trace!("Ignoring {event:?}"),
-                }
-                iced::Task::none()
-            }
             // update local scan path to selected media
             Message::LocationChanged { selection } => match &self.state {
                 State::MainMenu { .. } => match selection {
@@ -751,8 +730,6 @@ impl Raspirus {
                 .await
                 .expect("Failed to send job input to stream");
 
-            let mut scanner_channel = mpsc::channel(1);
-
             loop {
                 use iced::futures::StreamExt;
 
@@ -773,20 +750,13 @@ impl Raspirus {
                     }
                 };
 
-                scanner.progress_sender = Some(Arc::new(Mutex::new(scanner_channel.0.clone())));
+                scanner.progress_sender = Some(Arc::new(Mutex::new(output.clone())));
                 let scanner = Arc::new(scanner);
 
                 let handle = tokio::task::spawn({
                     let scanner_c = scanner.clone();
-                    async move { scanner_c.start().await }
+                    async move { scanner_c.start() }
                 });
-
-                while let Some(value) = scanner_channel.1.next().await {
-                    output
-                        .send(value)
-                        .await
-                        .expect("Failed to send scan result");
-                }
 
                 let result = handle.await.expect("Failed to wait for handle");
 
@@ -823,77 +793,6 @@ impl Raspirus {
             Worker::Error { error } => Message::Error { case: error },
         })
     }
-
-    /*
-    fn scan_worker(receiver: Arc<Mutex<Receiver<Message>>>) -> impl Stream<Item = Event> {
-        stream::channel(100, |mut output| async move {
-            // Create channel
-            let (sender, mut receiver) = mpsc::channel(100);
-
-            // Send the sender back to the application
-            output.send(Event::Ready(sender)).await;
-
-            loop {
-                use iced_futures::futures::StreamExt;
-
-                // Read next input sent from `Application`
-                let input = receiver.select_next_some().await;
-
-                match input {
-                    Input::DoSomeWork => {
-                        // Do some async work...
-
-                        // Finally, we can optionally produce a message to tell the
-                        // `Application` the work is done
-                        output.send(Event::WorkFinished).await;
-                    }
-                }
-            }
-        })
-    }
-
-    pub fn subscription(&self) -> iced::Subscription<Message> {
-        match self.state {
-            State::Scanning { .. } => {
-                let scan_progress = self.scan_progress.1.clone();
-                iced::Subscription::run(builder)
-                iced::Subscription::run(
-                    "scan_update",
-                    self.scan_progress.1.clone(),
-                    |receiver| async {
-                        // get receiver
-                        let receiver_c = receiver.clone();
-                        let receiver_l = match receiver_c.lock() {
-                            Ok(receiver_l) => receiver_l,
-                            Err(err) => {
-                                return (
-                                    Message::Error {
-                                        case: ErrorCase::Critical {
-                                            message: err.to_string(),
-                                        },
-                                    },
-                                    receiver,
-                                )
-                            }
-                        };
-
-                        loop {
-                            match receiver_l.recv() {
-                                Ok(message) => return (message, receiver),
-                                Err(_) => {
-                                    sleep(Duration::from_millis(100));
-                                    continue;
-                                }
-                            }
-                        }
-                    },
-                )
-            }
-            // relay window events as messages
-            _ => iced::event::listen().map(|event| Message::Event { event }),
-        }
-    }
-    */
 }
 
 impl Default for Raspirus {

@@ -5,11 +5,6 @@ mod tests {
     use crate::backend::yara_scanner::YaraScanner;
 
     #[test]
-    fn test_new_filescanner() {
-        let scanner = YaraScanner::new();
-    }
-
-    #[test]
     fn test_filescanner_invalid_path() {
         let path = Path::new("/this/path/does/not/exist");
         let scanner = YaraScanner::new().set_path(path.to_path_buf());
