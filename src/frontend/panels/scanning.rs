@@ -1,4 +1,5 @@
 use iced::font;
+use rust_i18n::t;
 
 use crate::frontend::{
     iced::{wrap, Message, Raspirus, ScanState},
@@ -14,7 +15,7 @@ impl Raspirus {
                         .push(iced::widget::horizontal_space())
                         .push(
                             iced::widget::container::Container::new(
-                                iced::widget::text("Scanning...")
+                                iced::widget::text(t!("scanner_scanning"))
                                     .size(80)
                                     .align_x(iced::alignment::Horizontal::Center)
                                     .font(font::Font {
@@ -24,7 +25,7 @@ impl Raspirus {
                                     .style(|_| iced::widget::text::Style {
                                         color: Some(SECONDARY_COLOR),
                                     }),
-                            ), //TODO.padding([0, 0, 10, 0]),
+                            ),
                         )
                         .push(iced::widget::horizontal_space())
                         .spacing(5),
@@ -60,7 +61,7 @@ impl Raspirus {
                         .push(iced::widget::horizontal_space())
                         .push(
                             iced::widget::container::Container::new(
-                                iced::widget::text("Indexing...")
+                                iced::widget::text(t!("scanner_indexing"))
                                     .size(80)
                                     .align_x(iced::alignment::Horizontal::Center)
                                     .font(font::Font {
@@ -70,7 +71,7 @@ impl Raspirus {
                                     .style(|_| iced::widget::text::Style {
                                         color: Some(SECONDARY_COLOR),
                                     }),
-                            ), //TODO.padding([0, 0, 10, 0]),
+                            ),
                         )
                         .push(iced::widget::horizontal_space())
                         .spacing(5),
