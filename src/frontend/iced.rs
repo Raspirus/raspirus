@@ -3,6 +3,7 @@ use crate::backend::downloader;
 use crate::backend::utils::generic::{create_pdf, generate_virustotal, update_config};
 use crate::backend::utils::usb_utils::{list_usb_drives, UsbDevice};
 use crate::backend::yara_scanner::{Skipped, TaggedFile, YaraScanner};
+use crate::CONFIG;
 use futures::SinkExt;
 use iced::{
     futures::{channel::mpsc, Stream},
@@ -18,7 +19,6 @@ use std::{
 
 pub struct Raspirus {
     pub state: State,
-    pub language: String,
     pub scan_path: Option<PathBuf>,
     pub usb_devices: Vec<UsbDevice>,
     pub sender: Option<mpsc::Sender<PathBuf>>,
@@ -204,7 +204,6 @@ impl Raspirus {
                 expanded_location: false,
                 expanded_usb: false,
             },
-            language: "en".to_owned(),
             scan_path: usb.as_ref().map(|usb| usb.path.clone()),
             usb_devices: list_usb_drives().unwrap_or_default(),
             sender: None,
@@ -271,10 +270,11 @@ impl Raspirus {
                         expanded_language: false,
                         expanded_location: *expanded_location,
                         expanded_usb: *expanded_usb,
-                    }
+                    };
+                    let mut config = CONFIG.lock().expect("Failed to lock config");
+                    config.language = language;
+                    config.save().expect("Failed to save config");
                 }
-                rust_i18n::set_locale(&language);
-                self.language = language;
                 iced::Task::none()
             }
             // show popup for warnings and quit for critical errors
