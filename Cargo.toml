@@ -60,10 +60,4 @@ homepage = "https://raspirus.deno.dev"
 icons = ["src/assets/logo.png"]
 licenseFile = "LICENSE"
 formats = ["all"]
-resources = [
-  "LICENSE",
-  "README.md",
-  "src/assets/"
-]
 before-packaging-command = "cargo build --release"
-# cargo packager --release --verbose --config '{\"beforePackagingCommand\": \"cargo check\"}'
