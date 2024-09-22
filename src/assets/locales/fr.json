@@ -4,6 +4,7 @@
     "back_btn": "ACCUEIL",
     "description": "Description",
     "description_val": "Un antivirus simple basé sur des règles YARA, axé sur l'efficacité des ressources, la facilité d'utilisation et l'efficacité",
+    "error_title": "Erreur",
     "folder_selection_not": "Aucun dossier sélectionné",
     "file_selection_not": "Aucun fichier sélectionné",
     "info": "Info",
@@ -11,8 +12,11 @@
     "license": "Licence",
     "license_val": "Open Source GPLv3",
     "maintainers": "Responsables",
+    "notice_title": "Avis",
     "permissions_title": "Accord de l'utilisateur",
     "permissions_text": "Ce programme est conçu pour scanner les logiciels malveillants sur les périphériques USB insérés dans votre ordinateur. En utilisant ce programme, vous reconnaissez être responsable du contenu du périphérique USB et de tout dommage potentiel qu'il pourrait causer à votre système informatique. Vous reconnaissez également que le programme ne garantit pas de détecter tous les logiciels malveillants et ne peut être tenu responsable de tout malware non détecté. En insérant un périphérique USB dans votre ordinateur et en exécutant le programme, vous donnez votre consentement pour que le périphérique soit scanné pour détecter des logiciels malveillants. Si vous ne consentez pas à cela, n'insérez pas le périphérique USB et n'exécutez pas le programme. Les résultats du scan sont à titre informatif uniquement et doivent être examinés attentivement par l'utilisateur. Le programme ne donne aucune garantie quant à l'exactitude ou à l'exhaustivité des résultats du scan. Il est de la responsabilité de l'utilisateur de s'assurer qu'il est conscient des risques potentiels liés à l'utilisation d'un périphérique USB, y compris le risque d'infection par des logiciels malveillants. Les utilisateurs doivent utiliser uniquement des périphériques USB provenant de sources fiables et faire preuve de prudence lorsqu'ils insèrent des périphériques inconnus dans leur ordinateur. Le programme Raspirus est fourni en l'état et ne peut être tenu responsable de tout dommage, y compris, mais sans s'y limiter, la perte de données, les pannes de système ou tout autre dommage résultant de l'utilisation du programme. En utilisant le programme Raspirus, vous acceptez ces termes et conditions. Si vous n'acceptez pas ces termes et conditions, n'utilisez pas le programme.",
+    "pick_file": "Choisir un fichier",
+    "pick_folder": "Choisir un dossier",
     "results": "Résultats",
     "results_found": "Fichiers trouvés :",
     "results_skipped": "Fichiers ignorés :",
@@ -41,5 +45,7 @@
     "updater_updated": "Mis à jour",
     "updater_updating": "Mise à jour en cours...",
     "version": "Version",
+    "warn_no_path": "Aucun chemin n'a été sélectionné",
+    "warn_offline": "Vous semblez être hors ligne",
     "website": "Site web"
 }

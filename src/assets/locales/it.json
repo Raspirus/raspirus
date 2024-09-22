@@ -3,6 +3,7 @@
     "app_title": "Raspirus",
     "back_btn": "HOME",
     "description": "Descrizione",
+    "error_title": "Errore",
     "description_val": "Un semplice antivirus basato su regole YARA, incentrato sull'efficienza delle risorse, la facilità d'uso e l'efficacia",
     "folder_selection_not": "Nessuna cartella selezionata",
     "file_selection_not": "Nessun file selezionato",
@@ -11,8 +12,11 @@
     "license": "Licenza",
     "license_val": "Open Source GPLv3",
     "maintainers": "Manutentori",
+    "notice_title": "Avviso",
     "permissions_title": "Accordo con l'utente",
     "permissions_text": "Questo programma è progettato per eseguire la scansione di software dannoso sui dispositivi USB inseriti nel computer. Utilizzando questo programma, riconosci che sei responsabile del contenuto del dispositivo USB e di eventuali danni che potrebbe causare al tuo sistema informatico. Riconosci inoltre che il programma non garantisce di rilevare tutti i malware e non può essere ritenuto responsabile per eventuali malware non rilevati. Inserendo un dispositivo USB nel computer ed eseguendo il programma, dai il tuo consenso affinché il dispositivo venga scansionato per malware. Se non acconsenti a questo, non inserire il dispositivo USB o non eseguire il programma. I risultati della scansione sono a scopo puramente informativo e dovrebbero essere attentamente esaminati dall'utente. Il programma non fornisce alcuna garanzia sull'accuratezza o completezza dei risultati della scansione. È responsabilità dell'utente essere consapevole di eventuali rischi associati all'utilizzo di un dispositivo USB, incluso il rischio di infezione da malware. Gli utenti dovrebbero utilizzare solo dispositivi USB provenienti da fonti affidabili e prestare attenzione quando inseriscono dispositivi sconosciuti nel computer. Il programma Raspirus viene fornito \"così com'è\" e non può essere ritenuto responsabile per eventuali danni, inclusi, ma non limitati a, perdita di dati, crash di sistema o altri danni derivanti dall'uso del programma. Utilizzando il programma Raspirus, accetti questi termini e condizioni. Se non accetti questi termini e condizioni, non utilizzare il programma.",
+    "pick_file": "Seleziona un file",
+    "pick_folder": "Seleziona una cartella",
     "results": "Risultati",
     "results_found": "File trovati:",
     "results_skipped": "File saltati:",
@@ -41,5 +45,7 @@
     "updater_updated": "Aggiornato",
     "updater_updating": "Aggiornamento in corso...",
     "version": "Versione",
+    "warn_no_path": "Nessun percorso è stato selezionato",
+    "warn_offline": "Sembri essere offline",
     "website": "Sito web"
 }
