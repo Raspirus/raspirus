@@ -1,59 +1,82 @@
 use iced::font;
 
 use crate::frontend::{
-    iced::{wrap, Message, Raspirus},
+    iced::{wrap, Message, Raspirus, ScanState},
     theme::SECONDARY_COLOR,
 };
 
 impl Raspirus {
-    pub fn scanning(&self, percentage: f32) -> iced::Element<Message> {
-        let middle_row = iced::widget::Column::new()
-            .push(
-                iced::widget::Row::new()
-                    .push(iced::widget::horizontal_space())
-                    .push(
-                        iced::widget::container::Container::new(
-                            iced::widget::text("Scanning...")
-                                .size(80)
-                                .align_x(iced::alignment::Horizontal::Center)
+    pub fn scanning(&self, scan_state: ScanState) -> iced::Element<Message> {
+        let middle_row = match scan_state {
+            ScanState::Percentage(percentage) => iced::widget::Column::new()
+                .push(
+                    iced::widget::Row::new()
+                        .push(iced::widget::horizontal_space())
+                        .push(
+                            iced::widget::container::Container::new(
+                                iced::widget::text("Scanning...")
+                                    .size(80)
+                                    .align_x(iced::alignment::Horizontal::Center)
+                                    .font(font::Font {
+                                        weight: iced::font::Weight::Bold,
+                                        ..font::Font::DEFAULT
+                                    })
+                                    .style(|_| iced::widget::text::Style {
+                                        color: Some(SECONDARY_COLOR),
+                                    }),
+                            ), //TODO.padding([0, 0, 10, 0]),
+                        )
+                        .push(iced::widget::horizontal_space())
+                        .spacing(5),
+                )
+                .push(
+                    iced::widget::Row::new()
+                        .push(
+                            iced::widget::container::Container::new(
+                                iced::widget::ProgressBar::new(0.0..=100.0, percentage),
+                            )
+                            .padding([10, 20]),
+                        )
+                        .spacing(5),
+                )
+                .push(
+                    iced::widget::Row::new()
+                        .push(iced::widget::horizontal_space())
+                        .push(
+                            iced::widget::Text::new(format!("{percentage:.2}%"))
                                 .font(font::Font {
                                     weight: iced::font::Weight::Bold,
                                     ..font::Font::DEFAULT
                                 })
-                                .style(|_| iced::widget::text::Style {
-                                    color: Some(SECONDARY_COLOR),
-                                }),
-                        ), //TODO.padding([0, 0, 10, 0]),
-                    )
-                    .push(iced::widget::horizontal_space())
-                    .spacing(5),
-            )
-            .push(
-                iced::widget::Row::new()
-                    .push(
-                        iced::widget::container::Container::new(iced::widget::ProgressBar::new(
-                            0.0..=100.0,
-                            percentage,
-                        ))
-                        .padding([10, 20]),
-                    )
-                    .spacing(5),
-            )
-            .push(
-                iced::widget::Row::new()
-                    .push(iced::widget::horizontal_space())
-                    .push(
-                        iced::widget::Text::new(format!("{percentage:.2}%"))
-                            .font(font::Font {
-                                weight: iced::font::Weight::Bold,
-                                ..font::Font::DEFAULT
-                            })
-                            .size(30),
-                    )
-                    .push(iced::widget::horizontal_space())
-                    .spacing(5),
-            )
-            .spacing(5);
+                                .size(30),
+                        )
+                        .push(iced::widget::horizontal_space())
+                        .spacing(5),
+                )
+                .spacing(5),
+            ScanState::Indexing => iced::widget::Column::new()
+                .push(
+                    iced::widget::Row::new()
+                        .push(iced::widget::horizontal_space())
+                        .push(
+                            iced::widget::container::Container::new(
+                                iced::widget::text("Indexing...")
+                                    .size(80)
+                                    .align_x(iced::alignment::Horizontal::Center)
+                                    .font(font::Font {
+                                        weight: iced::font::Weight::Bold,
+                                        ..font::Font::DEFAULT
+                                    })
+                                    .style(|_| iced::widget::text::Style {
+                                        color: Some(SECONDARY_COLOR),
+                                    }),
+                            ), //TODO.padding([0, 0, 10, 0]),
+                        )
+                        .push(iced::widget::horizontal_space())
+                        .spacing(5),
+                )
+                .spacing(5),
+        };
 
         wrap(
             10,

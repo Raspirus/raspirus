@@ -37,7 +37,7 @@ pub enum State {
     },
     Scanning {
         // current displayed percentage
-        percentage: f32,
+        scan_state: ScanState,
     },
     Settings {
         config: Config,
@@ -58,6 +58,12 @@ pub enum UpdateState {
     Loaded,
     Updating,
     Updated,
+}
+
+#[derive(Debug, Clone)]
+pub enum ScanState {
+    Percentage(f32),
+    Indexing,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -319,7 +325,9 @@ impl Raspirus {
             }
             // update local scan percentage
             Message::ScanPercentage { percentage } => {
-                self.state = State::Scanning { percentage };
+                self.state = State::Scanning {
+                    scan_state: ScanState::Percentage(percentage),
+                };
                 iced::Task::none()
             }
             // toggle expansion of card in results screen
@@ -659,7 +667,9 @@ impl Raspirus {
                 iced::Task::none()
             }
             Message::StartScan => {
-                self.state = State::Scanning { percentage: 0.0 };
+                self.state = State::Scanning {
+                    scan_state: ScanState::Indexing,
+                };
                 let path = self.scan_path.clone();
                 let mut sender = self.sender.clone();
                 iced::Task::perform(
@@ -709,7 +719,7 @@ impl Raspirus {
                 selection.clone(),
                 &self.usb_devices,
             ),
-            State::Scanning { percentage, .. } => self.scanning(*percentage),
+            State::Scanning { scan_state, .. } => self.scanning(scan_state.clone()),
             State::Settings { config, update } => self.settings(config, update),
             State::Results {
                 tagged,
