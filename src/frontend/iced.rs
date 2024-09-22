@@ -3,12 +3,14 @@ use crate::backend::downloader;
 use crate::backend::utils::generic::{create_pdf, generate_virustotal, update_config};
 use crate::backend::utils::usb_utils::{list_usb_drives, UsbDevice};
 use crate::backend::yara_scanner::{Skipped, TaggedFile, YaraScanner};
+use crate::CONFIG;
 use futures::SinkExt;
 use iced::{
     futures::{channel::mpsc, Stream},
     stream,
 };
 use log::{debug, error, info, warn};
+use rust_i18n::t;
 use std::fmt::Display;
 use std::str::FromStr;
 use std::{
@@ -18,7 +20,6 @@ use std::{
 
 pub struct Raspirus {
     pub state: State,
-    pub language: String,
     pub scan_path: Option<PathBuf>,
     pub usb_devices: Vec<UsbDevice>,
     pub sender: Option<mpsc::Sender<PathBuf>>,
@@ -40,7 +41,7 @@ pub enum State {
         scan_state: ScanState,
     },
     Settings {
-        config: Config,
+        config: Box<Config>,
         update: UpdateState,
     },
     Results {
@@ -204,7 +205,6 @@ impl Raspirus {
                 expanded_location: false,
                 expanded_usb: false,
             },
-            language: "en".to_owned(),
             scan_path: usb.as_ref().map(|usb| usb.path.clone()),
             usb_devices: list_usb_drives().unwrap_or_default(),
             sender: None,
@@ -218,7 +218,7 @@ impl Raspirus {
             // opens settings page
             Message::OpenSettings => {
                 self.state = State::Settings {
-                    config: crate::CONFIG.lock().expect("Failed to lock config").clone(),
+                    config: Box::new(crate::CONFIG.lock().expect("Failed to lock config").clone()),
                     update: UpdateState::Loaded,
                 };
                 iced::Task::none()
@@ -271,10 +271,11 @@ impl Raspirus {
                         expanded_language: false,
                         expanded_location: *expanded_location,
                         expanded_usb: *expanded_usb,
-                    }
+                    };
+                    let mut config = CONFIG.lock().expect("Failed to lock config");
+                    config.language = language;
+                    config.save().expect("Failed to save config");
                 }
-                rust_i18n::set_locale(&language);
-                self.language = language;
                 iced::Task::none()
             }
             // show popup for warnings and quit for critical errors
@@ -284,7 +285,7 @@ impl Raspirus {
                         error!("{message}");
                         rfd::MessageDialog::new()
                             .set_description(&message)
-                            .set_title("Error occurred")
+                            .set_title(t!("error_title"))
                             .set_level(rfd::MessageLevel::Error)
                             .show()
                     },
@@ -307,7 +308,7 @@ impl Raspirus {
                             warn!("{message}");
                             rfd::MessageDialog::new()
                                 .set_description(&message)
-                                .set_title("Notice")
+                                .set_title(t!("notice_title"))
                                 .set_level(rfd::MessageLevel::Warning)
                                 .show()
                         },
@@ -470,7 +471,7 @@ impl Raspirus {
                                 async {
                                     rfd::FileDialog::new()
                                         .set_directory("~")
-                                        .set_title("Pick a folder")
+                                        .set_title(t!("pick_folder"))
                                         .pick_folder()
                                 },
                                 |result| match result {
@@ -500,7 +501,7 @@ impl Raspirus {
                                 async {
                                     rfd::FileDialog::new()
                                         .set_directory("~")
-                                        .set_title("Pick a file")
+                                        .set_title(t!("pick_file"))
                                         .pick_file()
                                 },
                                 |result| match result {
@@ -587,7 +588,9 @@ impl Raspirus {
             Message::ConfigChanged { value } => match update_config(value) {
                 Ok(_) => {
                     self.state = State::Settings {
-                        config: crate::CONFIG.lock().expect("Failed to lock config").clone(),
+                        config: Box::new(
+                            crate::CONFIG.lock().expect("Failed to lock config").clone(),
+                        ),
                         update: UpdateState::Loaded,
                     };
                     iced::Task::none()
@@ -613,7 +616,7 @@ impl Raspirus {
                             Err(err) => match err {
                                 downloader::RemoteError::Offline => Message::Error {
                                     case: ErrorCase::Warning {
-                                        message: "You appear to be offline".to_owned(),
+                                        message: t!("warn_offline").to_string(),
                                     },
                                 },
                                 downloader::RemoteError::Other(message) => Message::Error {
@@ -629,7 +632,9 @@ impl Raspirus {
             Message::UpdateFinished => {
                 if let State::Settings { .. } = &self.state {
                     self.state = State::Settings {
-                        config: crate::CONFIG.lock().expect("Failed to lock config").clone(),
+                        config: Box::new(
+                            crate::CONFIG.lock().expect("Failed to lock config").clone(),
+                        ),
                         update: UpdateState::Updated,
                     };
                 }
@@ -685,7 +690,7 @@ impl Raspirus {
                                     Ok(())
                                 }
                                 None => Err(ErrorCase::Warning {
-                                    message: "No path selected".to_owned(),
+                                    message: t!("warn_no_path").to_string(),
                                 }),
                             }
                         } else {
