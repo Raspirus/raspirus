@@ -20,5 +20,5 @@ mod tests {
         let config = Config::new();
         dbg!(&config);
         assert!(config.is_ok());
-    } 
+    }
 }
