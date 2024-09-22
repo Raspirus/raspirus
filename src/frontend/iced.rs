@@ -202,7 +202,7 @@ impl Raspirus {
             state: State::MainMenu {
                 expanded_language: false,
                 expanded_location: false,
-                expanded_usb: false, 
+                expanded_usb: false,
             },
             language: "en-US".to_owned(),
             scan_path: if let Some(usb) = &usb {
@@ -285,17 +285,19 @@ impl Raspirus {
                 ErrorCase::Critical { message } => iced::Task::perform(
                     async move {
                         error!("{message}");
-                        native_dialog::MessageDialog::new()
-                            .set_text(&message)
+                        rfd::MessageDialog::new()
+                            .set_description(&message)
                             .set_title("Error occurred")
-                            .set_type(native_dialog::MessageType::Error)
-                            .show_alert()
+                            .set_level(rfd::MessageLevel::Error)
+                            .show()
                     },
                     |_| Message::Shutdown,
                 ),
                 ErrorCase::Warning { message } => {
                     match self.state {
-                        State::Scanning { scan_state: ScanState::Indexing } => {
+                        State::Scanning {
+                            scan_state: ScanState::Indexing,
+                        } => {
                             self.state = State::MainMenu {
                                 expanded_language: false,
                                 expanded_location: false,
@@ -307,11 +309,11 @@ impl Raspirus {
                     iced::Task::perform(
                         async move {
                             warn!("{message}");
-                            native_dialog::MessageDialog::new()
-                                .set_text(&message)
+                            rfd::MessageDialog::new()
+                                .set_description(&message)
                                 .set_title("Notice")
-                                .set_type(native_dialog::MessageType::Warning)
-                                .show_alert()
+                                .set_level(rfd::MessageLevel::Warning)
+                                .show()
                         },
                         |_| Message::None,
                     )
@@ -404,7 +406,7 @@ impl Raspirus {
                                 expanded_location: false,
                                 expanded_usb: false,
                             };
-                            self.location_selection =  LocationSelection::Folder { path: None };
+                            self.location_selection = LocationSelection::Folder { path: None };
                             iced::Task::none()
                         // if does not contain path we open file dialog to pick one
                         } else {
@@ -450,7 +452,7 @@ impl Raspirus {
                                 expanded_location: false,
                                 expanded_usb: false,
                             };
-                            self.location_selection = LocationSelection::Usb { usb  }
+                            self.location_selection = LocationSelection::Usb { usb }
                         }
                         iced::Task::none()
                     }
@@ -463,17 +465,17 @@ impl Raspirus {
                                 expanded_location: false,
                                 expanded_usb: false,
                             };
-                            self.location_selection = LocationSelection::Folder { path: Some(path) };
+                            self.location_selection =
+                                LocationSelection::Folder { path: Some(path) };
                             iced::Task::none()
                         // if does not contain path we open file dialog to pick one
                         } else {
                             iced::Task::perform(
                                 async {
-                                    native_dialog::FileDialog::new()
-                                        .set_location("~")
+                                    rfd::FileDialog::new()
+                                        .set_directory("~")
                                         .set_title("Pick a folder")
-                                        .show_open_single_dir()
-                                        .expect("Failed to select folder")
+                                        .pick_folder() 
                                 },
                                 |result| match result {
                                     None => Message::None,
@@ -493,17 +495,17 @@ impl Raspirus {
                                 expanded_location: false,
                                 expanded_usb: false,
                             };
-                            self.location_selection = LocationSelection::Folder { path: Some(path) };
+                            self.location_selection =
+                                LocationSelection::Folder { path: Some(path) };
                             iced::Task::none()
                         // if does not contain path we open file dialog to pick one
                         } else {
                             iced::Task::perform(
                                 async {
-                                    native_dialog::FileDialog::new()
-                                        .set_location("~")
+                                    rfd::FileDialog::new()
+                                        .set_directory("~")
                                         .set_title("Pick a file")
-                                        .show_open_single_file()
-                                        .expect("Failed to select file")
+                                        .pick_file() 
                                 },
                                 |result| match result {
                                     None => Message::None,
