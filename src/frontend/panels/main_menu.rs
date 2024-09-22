@@ -94,7 +94,7 @@ impl Raspirus {
                         iced::widget::Text::new({
                             match usb {
                                 Some(usb) => usb.to_string(),
-                                None => t!("usb_list_not_found").to_owned().to_string(),
+                                None => t!("usb_list_not_found").to_string(),
                             }
                         })
                         .align_x(iced::alignment::Horizontal::Center),
@@ -130,7 +130,7 @@ impl Raspirus {
                 iced::widget::Button::new(
                     iced::widget::Text::new(match path {
                         Some(path) => path.to_string_lossy().to_string(),
-                        None => t!("file_selection_not").to_owned().to_string(),
+                        None => t!("file_selection_not").to_string(),
                     })
                     .align_x(iced::alignment::Horizontal::Center),
                 )
