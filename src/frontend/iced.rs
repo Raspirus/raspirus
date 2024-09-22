@@ -10,6 +10,7 @@ use iced::{
     stream,
 };
 use log::{debug, error, info, warn};
+use rust_i18n::t;
 use std::fmt::Display;
 use std::str::FromStr;
 use std::{
@@ -613,7 +614,7 @@ impl Raspirus {
                             Err(err) => match err {
                                 downloader::RemoteError::Offline => Message::Error {
                                     case: ErrorCase::Warning {
-                                        message: "You appear to be offline".to_owned(),
+                                        message: t!("warn_offline").to_owned(),
                                     },
                                 },
                                 downloader::RemoteError::Other(message) => Message::Error {
@@ -685,7 +686,7 @@ impl Raspirus {
                                     Ok(())
                                 }
                                 None => Err(ErrorCase::Warning {
-                                    message: "No path selected".to_owned(),
+                                    message: t!("warn_no_path").to_owned(),
                                 }),
                             }
                         } else {
