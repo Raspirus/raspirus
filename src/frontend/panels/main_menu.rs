@@ -30,13 +30,18 @@ impl Raspirus {
             .push(iced_aw::widgets::DropDown::new(
                 // button to trigger dropdown
                 iced::widget::Row::new().push(
-                    iced::widget::Button::new(iced::widget::Text::new(&self.language))
-                        .on_press(Message::ToggleLanguageSelection),
+                    iced::widget::Button::new(iced::widget::Text::new(
+                        rust_i18n::locale().to_string(),
+                    ))
+                    .on_press(Message::ToggleLanguageSelection),
                 ),
                 // dropdown selection list
                 iced_aw::widgets::SelectionList::new(
                     &crate::SUPPORTED_LANGUAGES,
-                    |_idx: usize, language: String| Message::LanguageChanged { language },
+                    |_idx: usize, language: String| {
+                        rust_i18n::set_locale(&language);
+                        Message::LanguageChanged { language }
+                    },
                 )
                 .height(iced::Length::Shrink),
                 // expanded state
@@ -52,7 +57,7 @@ impl Raspirus {
                             iced::widget::text(iced_fonts::Bootstrap::GearFill.to_string())
                                 .font(iced_fonts::BOOTSTRAP_FONT),
                         )
-                        .push(iced::widget::text(format!(" {}", t!("settings"))).font(font::Font {
+                        .push(iced::widget::text(t!("settings")).font(font::Font {
                             weight: iced::font::Weight::Bold,
                             ..font::Font::DEFAULT
                         })),
@@ -89,7 +94,7 @@ impl Raspirus {
                         iced::widget::Text::new({
                             match usb {
                                 Some(usb) => usb.to_string(),
-                                None => t!("usb_list_not_found").to_owned().to_string(),
+                                None => t!("usb_list_not_found").to_string(),
                             }
                         })
                         .align_x(iced::alignment::Horizontal::Center),
@@ -125,7 +130,7 @@ impl Raspirus {
                 iced::widget::Button::new(
                     iced::widget::Text::new(match path {
                         Some(path) => path.to_string_lossy().to_string(),
-                        None => t!("file_selection_not").to_owned().to_string(),
+                        None => t!("file_selection_not").to_string(),
                     })
                     .align_x(iced::alignment::Horizontal::Center),
                 )
@@ -164,13 +169,14 @@ impl Raspirus {
 
         center_row = center_row.push(Space::with_width(iced::Length::FillPortion(2)));
 
-        let mut start_button =
-            iced::widget::Button::new(iced::widget::text(t!("start").to_uppercase()).font(font::Font {
+        let mut start_button = iced::widget::Button::new(
+            iced::widget::text(t!("start").to_uppercase()).font(font::Font {
                 weight: iced::font::Weight::Bold,
                 ..font::Font::DEFAULT
-            }))
-            .style(button_primary_style)
-            .padding([15, 20]);
+            }),
+        )
+        .style(button_primary_style)
+        .padding([15, 20]);
 
         match selection {
             LocationSelection::Usb { usb } => {
@@ -190,11 +196,12 @@ impl Raspirus {
             }
         }
 
-        let info_button = iced::widget::Button::new(iced::widget::text(t!("info").to_uppercase())
-        .font(font::Font {
-            weight: iced::font::Weight::Bold,
-            ..font::Font::DEFAULT
-        }))
+        let info_button = iced::widget::Button::new(
+            iced::widget::text(t!("info").to_uppercase()).font(font::Font {
+                weight: iced::font::Weight::Bold,
+                ..font::Font::DEFAULT
+            }),
+        )
         .style(button_secondary_style)
         .padding([15, 20])
         .on_press(Message::OpenInformation);

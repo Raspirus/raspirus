@@ -29,9 +29,7 @@ impl Raspirus {
                                         .width(20)
                                         .style(white_icon_style),
                                 )
-                                .push(
-                                    iced::widget::container(iced::widget::text(t!("back_btn"))),
-                                ),
+                                .push(iced::widget::container(iced::widget::text(t!("back_btn")))),
                         )
                         .on_press(Message::OpenMain)
                         .style(button_primary_style)
@@ -96,10 +94,11 @@ impl Raspirus {
                                 iced::widget::Row::new()
                                     .push(iced::widget::Text::new(
                                         match update {
-                                            UpdateState::Loaded => format!("{} ", t!("updater_update").to_uppercase()),
-                                            UpdateState::Updating => format!("{} ", t!("updater_updating").to_uppercase()),
-                                            UpdateState::Updated => format!("{} ", t!("updater_updated").to_uppercase()),
+                                            UpdateState::Loaded => t!("updater_update"),
+                                            UpdateState::Updating => t!("updater_updating"),
+                                            UpdateState::Updated => t!("updater_updated"),
                                         }
+                                        .to_uppercase()
                                         .to_string(),
                                     ))
                                     .push(
@@ -124,7 +123,7 @@ impl Raspirus {
                                 UpdateState::Loaded | UpdateState::Updated => Message::UpdateRules,
                                 _ => Message::Error {
                                     case: ErrorCase::Warning {
-                                        message: t!("updater_running").to_string().to_owned(),
+                                        message: t!("updater_running").to_string(),
                                     },
                                 },
                             })
@@ -234,13 +233,11 @@ impl Raspirus {
                             iced::widget::Column::new()
                                 .push(iced::widget::text(t!("set_logging")).size(20))
                                 .push(iced::widget::Space::with_height(5))
-                                .push(
-                                    iced::widget::text(t!("set_logging_desc"))
-                                        .size(14)
-                                        .style(|_| iced::widget::text::Style {
-                                            color: Some(GRAY_COLOR),
-                                        }),
-                                )
+                                .push(iced::widget::text(t!("set_logging_desc")).size(14).style(
+                                    |_| iced::widget::text::Style {
+                                        color: Some(GRAY_COLOR),
+                                    },
+                                ))
                                 .width(iced::Length::Fill),
                         )
                         .push(iced::widget::horizontal_space())
@@ -270,16 +267,15 @@ impl Raspirus {
                         .push(iced::widget::Space::with_width(10))
                         .push(
                             iced::widget::Column::new()
-                                .push(iced::widget::text("Set Threads").size(20))
+                                .push(iced::widget::text(t!("set_threads")).size(20))
                                 .push(iced::widget::Space::with_height(5))
                                 .push(
-                                    iced::widget::text(
-                                        format!("{} ({} {})",
-                                            t!("set_threads_desc"),
-                                            cpus,
-                                            t!("set_threads_desc_rec")
-                                        ),
-                                    )
+                                    iced::widget::text(format!(
+                                        "{} ({} {})",
+                                        t!("set_threads_desc"),
+                                        cpus,
+                                        t!("set_threads_desc_rec")
+                                    ))
                                     .size(14)
                                     .style(|_| {
                                         iced::widget::text::Style {
