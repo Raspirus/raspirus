@@ -614,7 +614,7 @@ impl Raspirus {
                             Err(err) => match err {
                                 downloader::RemoteError::Offline => Message::Error {
                                     case: ErrorCase::Warning {
-                                        message: t!("warn_offline").to_owned(),
+                                        message: t!("warn_offline").to_string(),
                                     },
                                 },
                                 downloader::RemoteError::Other(message) => Message::Error {
@@ -686,7 +686,7 @@ impl Raspirus {
                                     Ok(())
                                 }
                                 None => Err(ErrorCase::Warning {
-                                    message: t!("warn_no_path").to_owned(),
+                                    message: t!("warn_no_path").to_string(),
                                 }),
                             }
                         } else {
