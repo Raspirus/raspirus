@@ -1,6 +1,5 @@
 #[cfg(test)]
 mod tests {
-    use crate::backend::downloader;
 
     #[test]
     fn test_filescanner_invalid_path() {
