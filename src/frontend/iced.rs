@@ -205,7 +205,7 @@ impl Raspirus {
                 expanded_usb: false,
                 selection: LocationSelection::Usb { usb: usb.clone() },
             },
-            language: "en-US".to_owned(),
+            language: "en".to_owned(),
             scan_path: if let Some(usb) = usb {
                 Some(usb.path)
             } else {
@@ -282,6 +282,7 @@ impl Raspirus {
                         selection: selection.clone(),
                     }
                 }
+                rust_i18n::set_locale(&language);
                 self.language = language;
                 iced::Task::none()
             }

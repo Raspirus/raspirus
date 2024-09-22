@@ -1,3 +1,5 @@
+use rust_i18n::t;
+
 use crate::frontend::{
     iced::{wrap, Message, Raspirus},
     theme::{button::button_primary_style, icon::white_icon_style, PRIMARY_COLOR},
@@ -46,7 +48,11 @@ impl Raspirus {
             .push(iced::widget::horizontal_rule(5))
             .padding(10);
 
-        let text = iced::widget::Container::new(iced::widget::text("Hello"));
+        let text = iced::widget::Container::new(
+            iced::widget::text(t!("permissions_text"))
+            .size(20)
+            .wrapping(iced::widget::text::Wrapping::Word)
+        ).padding([10, 20]);
 
         let content = iced::widget::Scrollable::new(wrap(15, text.into()));
         iced::widget::Column::new()

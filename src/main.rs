@@ -20,9 +20,8 @@ mod backend;
 mod frontend;
 mod tests;
 
-/// Macro for locale, allows to use t!() for string translations
-#[macro_use]
-extern crate rust_i18n;
+// Sets the locale globally
+rust_i18n::i18n!("src/assets/locales", fallback = "en");
 
 /// config
 static CONFIG_FILENAME: &str = "Raspirus.json";
@@ -61,10 +60,6 @@ lazy_static! {
 }
 
 fn main() -> Result<(), String> {
-    // Set locale
-    // TODO: https://github.com/longbridgeapp/rust-i18n?tab=readme-ov-file#usage
-    i18n!("src/assets/locales", fallback = "en");
-
     // We check if we should log the application messages to a file or not, default is yes. Defined in the Config
     if CONFIG
         .lock()
