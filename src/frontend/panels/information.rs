@@ -57,7 +57,8 @@ impl Raspirus {
                                     .width(20)
                                     .style(white_icon_style),
                                 )
-                                .push(iced::widget::container(iced::widget::text(t!("back_btn")))),
+                                .push(iced::widget::container(iced::widget::text(t!("back_btn"))))
+                                .spacing(10),
                         )
                         .on_press(Message::OpenMain)
                         .style(button_primary_style)
