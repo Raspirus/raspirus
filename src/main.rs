@@ -52,7 +52,7 @@ lazy_static! {
     /// Global config instance
     static ref CONFIG: Mutex<Config> = Mutex::new(Config::new().expect("Failed to load config"));
     /// Supported languages
-    static ref SUPPORTED_LANGUAGES: Vec<String> = vec!["en".to_owned(), "de".to_owned(), "it".to_owned()];
+    static ref SUPPORTED_LANGUAGES: Vec<String> = vec!["en".to_owned(), "de".to_owned(), "it".to_owned(), "fr".to_owned()];
     /// Supported archives
     static ref SUPPORTED_ARCHIVES: Vec<String> = vec!["zip".to_owned(), "xz".to_owned(), "zstd".to_owned(), "bzip2".to_owned(), "deflate64".to_owned()];
     /// Symbols for selection
