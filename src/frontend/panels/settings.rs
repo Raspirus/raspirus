@@ -24,12 +24,15 @@ impl Raspirus {
                         iced::widget::Button::new(
                             iced::widget::Row::new()
                                 .push(
-                                    iced::widget::svg::Svg::from_path("src/assets/icons/home.svg")
-                                        .height(20)
-                                        .width(20)
-                                        .style(white_icon_style),
+                                    iced::widget::svg(iced::widget::svg::Handle::from_memory(
+                                        include_bytes!("../../assets/icons/home.svg").as_slice(),
+                                    ))
+                                    .height(20)
+                                    .width(20)
+                                    .style(white_icon_style),
                                 )
-                                .push(iced::widget::container(iced::widget::text(t!("back_btn")))),
+                                .push(iced::widget::container(iced::widget::text(t!("back_btn"))))
+                                .spacing(10),
                         )
                         .on_press(Message::OpenMain)
                         .style(button_primary_style)
@@ -61,9 +64,9 @@ impl Raspirus {
                 iced::widget::container(
                     iced::widget::Row::new()
                         .push(
-                            iced::widget::svg::Svg::from_path(
-                                "src/assets/icons/database-import.svg",
-                            )
+                            iced::widget::svg(iced::widget::svg::Handle::from_memory(
+                                include_bytes!("../../assets/icons/database-import.svg").as_slice(),
+                            ))
                             .height(64)
                             .width(64)
                             .style(settings_icon_style),
@@ -117,7 +120,8 @@ impl Raspirus {
                                             .to_string(),
                                         )
                                         .font(iced_fonts::BOOTSTRAP_FONT),
-                                    ),
+                                    )
+                                    .spacing(10),
                             )
                             .on_press(match update {
                                 UpdateState::Loaded | UpdateState::Updated => Message::UpdateRules,
@@ -139,9 +143,9 @@ impl Raspirus {
                 iced::widget::container(
                     iced::widget::Row::new()
                         .push(
-                            iced::widget::svg::Svg::from_path(
-                                "src/assets/icons/arrow-badge-up.svg",
-                            )
+                            iced::widget::svg(iced::widget::svg::Handle::from_memory(
+                                include_bytes!("../../assets/icons/arrow-badge-up.svg").as_slice(),
+                            ))
                             .height(64)
                             .width(64)
                             .style(settings_icon_style),
@@ -180,9 +184,10 @@ impl Raspirus {
                 iced::widget::container(
                     iced::widget::Row::new()
                         .push(
-                            iced::widget::svg::Svg::from_path(
-                                "src/assets/icons/arrow-badge-down.svg",
-                            )
+                            iced::widget::svg(iced::widget::svg::Handle::from_memory(
+                                include_bytes!("../../assets/icons/arrow-badge-down.svg")
+                                    .as_slice(),
+                            ))
                             .height(64)
                             .width(64)
                             .style(settings_icon_style),
@@ -221,9 +226,9 @@ impl Raspirus {
                 iced::widget::container(
                     iced::widget::Row::new()
                         .push(
-                            iced::widget::svg::Svg::from_path(
-                                "src/assets/icons/clipboard-data.svg",
-                            )
+                            iced::widget::svg(iced::widget::svg::Handle::from_memory(
+                                include_bytes!("../../assets/icons/clipboard-data.svg").as_slice(),
+                            ))
                             .height(64)
                             .width(64)
                             .style(settings_icon_style),
@@ -259,10 +264,12 @@ impl Raspirus {
                 iced::widget::container(
                     iced::widget::Row::new()
                         .push(
-                            iced::widget::svg::Svg::from_path("src/assets/icons/cpu.svg")
-                                .height(64)
-                                .width(64)
-                                .style(settings_icon_style),
+                            iced::widget::svg(iced::widget::svg::Handle::from_memory(
+                                include_bytes!("../../assets/icons/cpu.svg").as_slice(),
+                            ))
+                            .height(64)
+                            .width(64)
+                            .style(settings_icon_style),
                         )
                         .push(iced::widget::Space::with_width(10))
                         .push(
@@ -305,10 +312,12 @@ impl Raspirus {
                 iced::widget::container(
                     iced::widget::Row::new()
                         .push(
-                            iced::widget::svg::Svg::from_path("src/assets/icons/file-download.svg")
-                                .height(64)
-                                .width(64)
-                                .style(settings_icon_style),
+                            iced::widget::svg(iced::widget::svg::Handle::from_memory(
+                                include_bytes!("../../assets/icons/file-download.svg").as_slice(),
+                            ))
+                            .height(64)
+                            .width(64)
+                            .style(settings_icon_style),
                         )
                         .push(iced::widget::Space::with_width(10))
                         .push(
@@ -335,7 +344,8 @@ impl Raspirus {
                                             iced_fonts::Bootstrap::ArrowDownCircleFill.to_string(),
                                         )
                                         .font(iced_fonts::BOOTSTRAP_FONT),
-                                    ),
+                                    )
+                                    .spacing(10),
                             )
                             .padding(10)
                             .style(button_blue_style),

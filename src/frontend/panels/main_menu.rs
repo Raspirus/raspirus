@@ -10,7 +10,7 @@ use crate::{
                 button_orange_style, button_primary_style, button_secondary_style,
                 button_select_style, button_transparent_style,
             },
-            selection_list::selection_list_style,
+            selection_list::{lang_selection_list_style, selection_list_style},
             PRIMARY_COLOR,
         },
     },
@@ -36,12 +36,19 @@ impl Raspirus {
                     .on_press(Message::ToggleLanguageSelection),
                 ),
                 // dropdown selection list
-                iced_aw::widgets::SelectionList::new(
+                iced_aw::widget::SelectionList::new_with(
                     &crate::SUPPORTED_LANGUAGES,
                     |_idx: usize, language: String| {
                         rust_i18n::set_locale(&language);
                         Message::LanguageChanged { language }
                     },
+                    16.0,
+                    5.0,
+                    lang_selection_list_style,
+                    crate::SUPPORTED_LANGUAGES
+                        .iter()
+                        .position(|elem| elem.eq(&rust_i18n::locale().to_string())),
+                    iced_fonts::BOOTSTRAP_FONT,
                 )
                 .height(iced::Length::Shrink),
                 // expanded state
@@ -60,7 +67,8 @@ impl Raspirus {
                         .push(iced::widget::text(t!("settings")).font(font::Font {
                             weight: iced::font::Weight::Bold,
                             ..font::Font::DEFAULT
-                        })),
+                        }))
+                        .spacing(10),
                 )
                 .on_press(Message::OpenSettings)
                 .style(button_secondary_style)

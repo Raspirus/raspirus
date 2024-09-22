@@ -14,14 +14,15 @@ impl Raspirus {
                         iced::widget::Button::new(
                             iced::widget::Row::new()
                                 .push(
-                                    iced::widget::svg::Svg::from_path("src/assets/icons/home.svg")
-                                        .height(20)
-                                        .width(20)
-                                        .style(white_icon_style),
+                                    iced::widget::svg(iced::widget::svg::Handle::from_memory(
+                                        include_bytes!("../../assets/icons/home.svg").as_slice(),
+                                    ))
+                                    .height(20)
+                                    .width(20)
+                                    .style(white_icon_style),
                                 )
-                                .push(
-                                    iced::widget::container(iced::widget::text(t!("back_btn"))),
-                                ),
+                                .spacing(10)
+                                .push(iced::widget::container(iced::widget::text(t!("back_btn")))),
                         )
                         .on_press(Message::OpenMain)
                         .style(button_primary_style)
@@ -50,9 +51,10 @@ impl Raspirus {
 
         let text = iced::widget::Container::new(
             iced::widget::text(t!("permissions_text"))
-            .size(20)
-            .wrapping(iced::widget::text::Wrapping::Word)
-        ).padding([10, 20]);
+                .size(20)
+                .wrapping(iced::widget::text::Wrapping::Word),
+        )
+        .padding([10, 20]);
 
         let content = iced::widget::Scrollable::new(wrap(15, text.into()));
         iced::widget::Column::new()
