@@ -4,7 +4,7 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use log::{debug, info};
+use log::{debug, info, warn};
 use printpdf::PdfDocument;
 use sha2::{Digest, Sha256};
 use yara_x::Rules;
@@ -18,35 +18,80 @@ pub fn get_rules(yar_path: PathBuf) -> Result<Rules, String> {
 }
 
 /// yields all file paths and the total size of them
-pub fn profile_path(path: PathBuf) -> Result<(u64, Vec<PathBuf>), std::io::Error> {
+pub fn profile_path(path: PathBuf) -> (u64, Vec<PathBuf>) {
     info!("Starting indexing...");
     let mut paths = Vec::new();
     let size = if path.is_dir() {
-        profile_folder(&mut paths, path)?
+        // path is folder
+        profile_folder(&mut paths, path)
     } else {
-        paths.push(path.clone());
-        path.metadata()?.len()
+        // path is file
+        match path.metadata() {
+            Ok(metadata) => {
+                paths.push(path.clone());
+                metadata.len()
+            }
+            Err(err) => {
+                warn!(
+                    "Failed to get metadata for {}: {err}",
+                    path.to_string_lossy()
+                );
+                0
+            }
+        }
     };
     info!("Finished indexing {} files", paths.len());
-    Ok((size, paths))
+    (size, paths)
 }
 
 /// adds files or files in subfolders to paths and adds their sizes to the total
-pub fn profile_folder(paths: &mut Vec<PathBuf>, path: PathBuf) -> Result<u64, std::io::Error> {
+pub fn profile_folder(paths: &mut Vec<PathBuf>, path: PathBuf) -> u64 {
     let mut size = 0;
-    for entry in fs::read_dir(path)? {
-        let entry = entry?;
+    // get all entries in folder
+    let entries = match fs::read_dir(&path) {
+        Ok(entries) => entries,
+        Err(err) => {
+            warn!(
+                "Failed to get entries for {}: {err}",
+                path.to_string_lossy()
+            );
+            return 0;
+        }
+    };
+
+    for entry in entries {
+        // get entry without error
+        let entry = match entry {
+            Ok(entry) => entry,
+            Err(ref err) => {
+                warn!("Failed to get entry {:?}: {err}", entry);
+                continue;
+            }
+        };
+        // skip symlinks
         if entry.path().is_symlink() {
             continue;
         }
-        if entry.path().is_dir() {
-            size += profile_folder(paths, entry.path())?;
+
+        size += if entry.path().is_dir() {
+            profile_folder(paths, entry.path())
         } else {
-            paths.push(entry.path().clone());
-            size += entry.path().metadata()?.len();
+            match entry.path().metadata() {
+                Ok(metadata) => {
+                    paths.push(entry.path().clone());
+                    metadata.len()
+                }
+                Err(err) => {
+                    warn!(
+                        "Failed to get metadata for {}: {err}",
+                        entry.path().to_string_lossy()
+                    );
+                    0
+                }
+            }
         }
     }
-    Ok(size)
+    size
 }
 
 /// computes the hash of a file contained in a zip

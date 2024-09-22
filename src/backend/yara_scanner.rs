@@ -116,8 +116,7 @@ impl YaraScanner {
         // setup file log
         let file_log = Arc::new(Mutex::new(FileLog::new()?));
 
-        let paths = profile_path(path.to_path_buf())
-            .map_err(|err| format!("Failed to calculate file tree: {err}"))?;
+        let paths = profile_path(path.to_path_buf());
         let paths_count = paths.1.len();
         let pointers = PointerCollection::new(paths.0);
 
@@ -129,11 +128,13 @@ impl YaraScanner {
             let progress_c = self.progress_sender.clone().ok_or("Channel not set")?;
             let rules_c = rules.clone();
             threadpool.execute(move || {
-                let scan_result = || async {
-                    Self::scan_file(file.as_path(), file_log_c, progress_c, pointers_c, rules_c)
-                        .await
-                };
-                match futures::executor::block_on(scan_result()) {
+                match futures::executor::block_on(Self::scan_file(
+                    file.as_path(),
+                    file_log_c,
+                    progress_c,
+                    pointers_c,
+                    rules_c,
+                )) {
                     Ok(_) => {}
                     Err(err) => error!(
                         "Failed to scan file {}: {err}",
@@ -242,30 +243,30 @@ impl YaraScanner {
             let mut zip = match zip::ZipArchive::new(BufReader::new(match File::open(path) {
                 Ok(file) => file,
                 Err(err) => {
-                    let err = format!("Could not open archive: {err}");
                     pointers
                         .skipped
                         .lock()
                         .map_err(|err| format!("Failed to lock skipped: {err}"))?
                         .push(Skipped {
                             path: path.to_path_buf(),
-                            reason: err.clone(),
+                            reason: format!("Could not open archive: {err}"),
                         });
-                    return Err(err);
+                    error!("Could not open archive file {}: {err}", path.to_string_lossy());
+                    return Ok(());
                 }
             })) {
                 Ok(zip) => zip,
                 Err(err) => {
-                    let err = format!("Could not open archive: {err}");
                     pointers
                         .skipped
                         .lock()
                         .map_err(|err| format!("Failed to lock skipped: {err}"))?
                         .push(Skipped {
                             path: path.to_path_buf(),
-                            reason: err.clone(),
+                            reason: format!("Could not open archive: {err}"),
                         });
-                    return Err(err);
+                    error!("Could not open archive {}: {err}", path.to_string_lossy());
+                    return Ok(());
                 }
             };
 
@@ -321,7 +322,7 @@ impl YaraScanner {
                 info!(
                     "Scanning {}/{} archived file {}",
                     i + 1,
-                    size + 1,
+                    size,
                     path.to_string_lossy()
                 );
                 let mut content = Vec::new();
