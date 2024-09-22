@@ -13,8 +13,8 @@ use crate::frontend::iced::ConfigValue;
 
 pub fn get_rules(yar_path: PathBuf) -> Result<Rules, String> {
     // setup rules
-    let reader = File::open(yar_path).map_err(|err| format!("Failed to load yar file: {err}"))?;
-    Rules::deserialize_from(reader).map_err(|err| format!("Failed to deserialize yar file: {err}"))
+    let reader = File::open(yar_path).map_err(|err| format!("Failed to open yar file: {err}. Please update and try again"))?;
+    Rules::deserialize_from(reader).map_err(|err| format!("Failed to deserialize yar file: {err}. Please update and try again"))
 }
 
 /// yields all file paths and the total size of them
