@@ -30,7 +30,6 @@ serde = { version = "1.0.210", features = ["derive"] }
 serde_json = "1.0.128"
 iced = { version = "0.13.1", features = ["tokio", "image", "svg"] }
 iced_aw = "0.11.0"
-native-dialog = "0.7.0"
 futures = "0.3.30"
 open = "5.3.0"
 printpdf = "0.7.0"
@@ -38,6 +37,7 @@ zip = "2.2.0"
 iced_fonts = { version = "0.1.1", features = ["bootstrap"] }
 tokio = "1.40.0"
 rust-i18n = "3.1.2"
+rfd = "0.15.0"
 
 # usb detection on linux
 [target.'cfg(any(target_os = "linux", target_os = "macos"))'.dependencies]
