@@ -22,6 +22,7 @@ pub struct Raspirus {
     pub scan_path: Option<PathBuf>,
     pub usb_devices: Vec<UsbDevice>,
     pub sender: Option<mpsc::Sender<PathBuf>>,
+    pub location_selection: LocationSelection,
 }
 
 #[derive(Debug)]
@@ -33,7 +34,6 @@ pub enum State {
         expanded_location: bool,
         /// dropdown for selecting usb
         expanded_usb: bool,
-        selection: LocationSelection,
     },
     Scanning {
         // current displayed percentage
@@ -202,17 +202,17 @@ impl Raspirus {
             state: State::MainMenu {
                 expanded_language: false,
                 expanded_location: false,
-                expanded_usb: false,
-                selection: LocationSelection::Usb { usb: usb.clone() },
+                expanded_usb: false, 
             },
             language: "en-US".to_owned(),
-            scan_path: if let Some(usb) = usb {
-                Some(usb.path)
+            scan_path: if let Some(usb) = &usb {
+                Some(usb.path.clone())
             } else {
                 None
             },
             usb_devices: list_usb_drives().unwrap_or_default(),
             sender: None,
+            location_selection: LocationSelection::Usb { usb: usb.clone() },
         }
     }
 
@@ -239,7 +239,6 @@ impl Raspirus {
                     expanded_language: false,
                     expanded_location: false,
                     expanded_usb: false,
-                    selection: LocationSelection::Usb { usb: usb.clone() },
                 };
                 if let Some(usb) = usb {
                     self.scan_path = Some(usb.path);
@@ -253,14 +252,12 @@ impl Raspirus {
                     expanded_language,
                     expanded_location,
                     expanded_usb,
-                    selection,
                 } = &self.state
                 {
                     self.state = State::MainMenu {
                         expanded_language: !expanded_language,
                         expanded_location: *expanded_location,
                         expanded_usb: *expanded_usb,
-                        selection: selection.clone(),
                     }
                 }
                 iced::Task::none()
@@ -271,7 +268,6 @@ impl Raspirus {
                 if let State::MainMenu {
                     expanded_location,
                     expanded_usb,
-                    selection,
                     ..
                 } = &self.state
                 {
@@ -279,7 +275,6 @@ impl Raspirus {
                         expanded_language: false,
                         expanded_location: *expanded_location,
                         expanded_usb: *expanded_usb,
-                        selection: selection.clone(),
                     }
                 }
                 self.language = language;
@@ -298,17 +293,29 @@ impl Raspirus {
                     },
                     |_| Message::Shutdown,
                 ),
-                ErrorCase::Warning { message } => iced::Task::perform(
-                    async move {
-                        warn!("{message}");
-                        native_dialog::MessageDialog::new()
-                            .set_text(&message)
-                            .set_title("Notice")
-                            .set_type(native_dialog::MessageType::Warning)
-                            .show_alert()
-                    },
-                    |_| Message::None,
-                ),
+                ErrorCase::Warning { message } => {
+                    match self.state {
+                        State::Scanning { scan_state: ScanState::Indexing } => {
+                            self.state = State::MainMenu {
+                                expanded_language: false,
+                                expanded_location: false,
+                                expanded_usb: false,
+                            }
+                        }
+                        _ => {}
+                    }
+                    iced::Task::perform(
+                        async move {
+                            warn!("{message}");
+                            native_dialog::MessageDialog::new()
+                                .set_text(&message)
+                                .set_title("Notice")
+                                .set_type(native_dialog::MessageType::Warning)
+                                .show_alert()
+                        },
+                        |_| Message::None,
+                    )
+                }
             },
             // switch to result page
             Message::ScanComplete {
@@ -383,8 +390,8 @@ impl Raspirus {
                                 expanded_language: false,
                                 expanded_location: false,
                                 expanded_usb: false,
-                                selection: LocationSelection::Usb { usb: None },
-                            }
+                            };
+                            self.location_selection = LocationSelection::Usb { usb: None };
                         }
                         // if does not contain usb device we do nothing
                         iced::Task::none()
@@ -396,8 +403,8 @@ impl Raspirus {
                                 expanded_language: false,
                                 expanded_location: false,
                                 expanded_usb: false,
-                                selection: LocationSelection::Folder { path: None },
                             };
+                            self.location_selection =  LocationSelection::Folder { path: None };
                             iced::Task::none()
                         // if does not contain path we open file dialog to pick one
                         } else {
@@ -411,8 +418,8 @@ impl Raspirus {
                                 expanded_language: false,
                                 expanded_location: false,
                                 expanded_usb: false,
-                                selection: LocationSelection::File { path: None },
                             };
+                            self.location_selection = LocationSelection::File { path: None };
                             iced::Task::none()
                         // if does not contain path we open file dialog to pick one
                         } else {
@@ -434,16 +441,16 @@ impl Raspirus {
                                 expanded_language: false,
                                 expanded_location: false,
                                 expanded_usb: false,
-                                selection: LocationSelection::Usb { usb: Some(usb) },
-                            }
+                            };
+                            self.location_selection = LocationSelection::Usb { usb: Some(usb) }
                         // if does not contain usb device we just update to show
                         } else {
                             self.state = State::MainMenu {
                                 expanded_language: false,
                                 expanded_location: false,
                                 expanded_usb: false,
-                                selection: LocationSelection::Usb { usb },
-                            }
+                            };
+                            self.location_selection = LocationSelection::Usb { usb  }
                         }
                         iced::Task::none()
                     }
@@ -455,8 +462,8 @@ impl Raspirus {
                                 expanded_language: false,
                                 expanded_location: false,
                                 expanded_usb: false,
-                                selection: LocationSelection::Folder { path: Some(path) },
                             };
+                            self.location_selection = LocationSelection::Folder { path: Some(path) };
                             iced::Task::none()
                         // if does not contain path we open file dialog to pick one
                         } else {
@@ -485,8 +492,8 @@ impl Raspirus {
                                 expanded_language: false,
                                 expanded_location: false,
                                 expanded_usb: false,
-                                selection: LocationSelection::Folder { path: Some(path) },
                             };
+                            self.location_selection = LocationSelection::Folder { path: Some(path) };
                             iced::Task::none()
                         // if does not contain path we open file dialog to pick one
                         } else {
@@ -516,17 +523,15 @@ impl Raspirus {
                     expanded_language,
                     expanded_location,
                     expanded_usb,
-                    selection,
                 } = &self.state
                 {
-                    if let LocationSelection::Usb { usb } = &selection {
+                    if let LocationSelection::Usb { usb } = &self.location_selection {
                         if usb.is_some() {
                             self.state = State::MainMenu {
                                 expanded_language: *expanded_language,
                                 expanded_location: *expanded_location,
                                 expanded_usb: !*expanded_usb,
-                                selection: selection.clone(),
-                            }
+                            };
                         } else {
                             let usbs = list_usb_drives().inspect(|usbs| {
                                 self.usb_devices.clone_from(usbs);
@@ -536,8 +541,8 @@ impl Raspirus {
                                 expanded_language: *expanded_language,
                                 expanded_location: *expanded_location,
                                 expanded_usb: !*expanded_usb,
-                                selection: LocationSelection::Usb { usb: usb.clone() },
                             };
+                            self.location_selection = LocationSelection::Usb { usb: usb.clone() };
                             if let Some(usb) = usb {
                                 self.scan_path = Some(usb.path);
                             }
@@ -552,14 +557,12 @@ impl Raspirus {
                     expanded_language,
                     expanded_location,
                     expanded_usb,
-                    selection,
                 } = &self.state
                 {
                     self.state = State::MainMenu {
                         expanded_language: *expanded_language,
                         expanded_location: !*expanded_location,
                         expanded_usb: *expanded_usb,
-                        selection: selection.clone(),
                     }
                 }
                 iced::Task::none()
@@ -711,12 +714,11 @@ impl Raspirus {
                 expanded_language,
                 expanded_location,
                 expanded_usb,
-                selection,
             } => self.main_menu(
                 *expanded_language,
                 *expanded_location,
                 *expanded_usb,
-                selection.clone(),
+                self.location_selection.clone(),
                 &self.usb_devices,
             ),
             State::Scanning { scan_state, .. } => self.scanning(scan_state.clone()),
