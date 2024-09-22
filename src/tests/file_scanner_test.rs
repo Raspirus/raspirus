@@ -34,6 +34,7 @@ mod tests {
         };
 
         let runtime = tokio::runtime::Builder::new_current_thread()
+            .enable_all()
             .build()
             .unwrap();
         let update = runtime.block_on(downloader::update());
@@ -69,6 +70,7 @@ mod tests {
         };
 
         let runtime = tokio::runtime::Builder::new_current_thread()
+            .enable_all()
             .build()
             .unwrap();
         let update = runtime.block_on(downloader::update());
