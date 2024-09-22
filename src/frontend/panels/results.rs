@@ -193,7 +193,7 @@ impl Raspirus {
                 card
             });
         }
-        let column = wrap(
+        let scrollable = iced::widget::Scrollable::new(wrap(
             15,
             iced::widget::Column::new()
                 .push(tagged_list)
@@ -201,33 +201,10 @@ impl Raspirus {
                 .push(skipped_list)
                 .spacing(5)
                 .into(),
-        );
-        iced::widget::Scrollable::new(
-            iced::widget::Column::new()
-                .push(top_row)
-                .push(column)
-                .spacing(5),
-        )
-        .style(|_, _1| iced::widget::scrollable::Style {
-            vertical_rail: iced::widget::scrollable::Rail {
-                scroller: iced::widget::scrollable::Scroller {
-                    color: iced::Color::TRANSPARENT,
-                    border: iced::Border::default(),
-                },
-                background: None,
-                border: iced::Border::default(),
-            },
-            container: iced::widget::container::Style::default(),
-            horizontal_rail: iced::widget::scrollable::Rail {
-                scroller: iced::widget::scrollable::Scroller {
-                    color: iced::Color::TRANSPARENT,
-                    border: iced::Border::default(),
-                },
-                background: None,
-                border: iced::Border::default(),
-            },
-            gap: None,
-        })
-        .into()
+        ));
+        iced::widget::Column::new()
+            .push(top_row)
+            .push(scrollable)
+            .into()
     }
 }
