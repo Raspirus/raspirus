@@ -44,6 +44,8 @@ jobs:
           files: |
             ${{ matrix.platform == 'macos-latest' && 'target/release/Raspirus.app' || '' }}
             ${{ matrix.platform == 'macos-latest' && 'target/release/Raspirus_*_aarch64.dmg' || '' }}
+            ${{ matrix.platform == 'macos-13' && 'target/release/Raspirus.app' || '' }}
+            ${{ matrix.platform == 'macos-13' && 'target/release/Raspirus_*_x64.dmg' || '' }}
             ${{ matrix.platform == 'ubuntu-latest' && 'target/release/PKGBUILD' || '' }}
             ${{ matrix.platform == 'ubuntu-latest' && 'target/release/raspirus_*_amd64.deb' || '' }}
             ${{ matrix.platform == 'ubuntu-latest' && 'target/release/raspirus_*_x86_64.AppImage' || '' }}
