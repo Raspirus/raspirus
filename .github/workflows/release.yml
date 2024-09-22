@@ -34,6 +34,20 @@ jobs:
 
       - name: Package Binary
         run: cargo packager --release --verbose
+
+      - name: Create attestation
+        uses: actions/attest-build-provenance@v1
+        with:
+          subject-path: |
+            ${{ matrix.platform == 'macos-latest' && 'target/release/Raspirus.app' || '' }}
+            ${{ matrix.platform == 'macos-latest' && 'target/release/Raspirus_*_aarch64.dmg' || '' }}
+            ${{ matrix.platform == 'macos-13' && 'target/release/Raspirus.app' || '' }}
+            ${{ matrix.platform == 'macos-13' && 'target/release/Raspirus_*_x64.dmg' || '' }}
+            ${{ matrix.platform == 'ubuntu-latest' && 'target/release/PKGBUILD' || '' }}
+            ${{ matrix.platform == 'ubuntu-latest' && 'target/release/raspirus_*_amd64.deb' || '' }}
+            ${{ matrix.platform == 'ubuntu-latest' && 'target/release/raspirus_*_x86_64.AppImage' || '' }}
+            ${{ matrix.platform == 'windows-latest' && 'target/release/raspirus_*_x64_en-US.msi' || '' }}
+            ${{ matrix.platform == 'windows-latest' && 'target/release/raspirus_*_x64-setup.exe' || '' }}
       
       - name: Release to GitHub
         uses: softprops/action-gh-release@v2
