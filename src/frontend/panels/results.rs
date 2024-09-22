@@ -202,6 +202,26 @@ impl Raspirus {
                 .spacing(5)
                 .into(),
         ))
+        .style(|_, _1| iced::widget::scrollable::Style {
+            vertical_rail: iced::widget::scrollable::Rail {
+                scroller: iced::widget::scrollable::Scroller {
+                    color: iced::Color::TRANSPARENT,
+                    border: iced::Border::default(),
+                },
+                background: None,
+                border: iced::Border::default(),
+            },
+            container: iced::widget::container::Style::default(),
+            horizontal_rail: iced::widget::scrollable::Rail {
+                scroller: iced::widget::scrollable::Scroller {
+                    color: iced::Color::TRANSPARENT,
+                    border: iced::Border::default(),
+                },
+                background: None,
+                border: iced::Border::default(),
+            },
+            gap: None,
+        })
         .into()
     }
 }

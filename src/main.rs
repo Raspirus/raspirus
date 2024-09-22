@@ -82,22 +82,23 @@ fn main() -> Result<(), String> {
 
         let mut log_config = ConfigBuilder::new();
 
-        #[cfg(debug_assertions)]
+        #[cfg(not(debug_assertions))]
         let log_config = log_config
-            .add_filter_ignore_str("wgpu_core")
-            .add_filter_ignore_str("iced_wgpu")
-            .add_filter_ignore_str("iced_winit")
-            .add_filter_ignore_str("cosmic_text")
             .add_filter_ignore_str("naga")
-            .add_filter_ignore_str("cranelift_codegen")
-            .add_filter_ignore_str("wasmtime")
             .add_filter_ignore_str("aho_corasick")
             .add_filter_ignore_str("walrus")
             .add_filter_ignore_str("wgpu_hal")
             .add_filter_ignore_str("Naga")
             .add_filter_ignore_str("sctk");
 
-        let log_config = log_config.add_filter_ignore_str("reqwest");
+        let log_config = log_config
+            .add_filter_ignore_str("iced_wgpu")
+            .add_filter_ignore_str("cosmic_text")
+            .add_filter_ignore_str("cranelift_codegen")
+            .add_filter_ignore_str("wasmtime")
+            .add_filter_ignore_str("iced_winit")
+            .add_filter_ignore_str("wgpu_core")
+            .add_filter_ignore_str("reqwest");
 
         let log_config = log_config.build();
 
