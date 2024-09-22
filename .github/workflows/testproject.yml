@@ -1,4 +1,4 @@
-name: Test backend
+name: Test project
 
 on:
   push:
@@ -9,19 +9,32 @@ on:
 
 env:
   CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: 1
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     steps:
     - uses: actions/checkout@v4
-    - name: Install dependencies
-      run: sudo apt-get update && sudo apt-get install -y build-essential curl libssl-dev pkg-config
+    
     - name: Install Rust
       run: rustup update stable
+    
+    - name: Set up user environment on macOS
+      run: |
+        mkdir -p $HOME/Downloads
+        mkdir -p $HOME/Desktop
+        mkdir -p $HOME/Documents
+        echo "XDG_DOWNLOAD_DIR=$HOME/Downloads" >> $GITHUB_ENV
+        echo "XDG_DESKTOP_DIR=$HOME/Desktop" >> $GITHUB_ENV
+        echo "XDG_DOCUMENTS_DIR=$HOME/Documents" >> $GITHUB_ENV
+        echo "HOME_DIR set to $HOME"
+        ls -la $HOME  # Verify the user directories
+
     - name: Build
-      run: cargo build --verbose
+      run: cargo build --verbose --release
+    
     - name: Run tests
-      run: cargo test --workspace --verbose
+      run: cargo test --verbose --release
       env:
         IGNORE_PANICS: true
