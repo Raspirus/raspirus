@@ -1,3 +1,5 @@
+use rust_i18n::t;
+
 use crate::{
     backend::config_file::Config,
     frontend::{
@@ -28,7 +30,7 @@ impl Raspirus {
                                         .style(white_icon_style),
                                 )
                                 .push(
-                                    iced::widget::container(iced::widget::text("HOME")), //TODO.padding([0, 0, 0, 5]),
+                                    iced::widget::container(iced::widget::text(t!("back_btn"))),
                                 ),
                         )
                         .on_press(Message::OpenMain)
@@ -37,7 +39,7 @@ impl Raspirus {
                     )
                     .push(
                         iced::widget::container(
-                            iced::widget::text("Settings")
+                            iced::widget::text(t!("settings"))
                                 .size(30)
                                 .font(iced::font::Font {
                                     weight: iced::font::Weight::Bold,
@@ -71,11 +73,12 @@ impl Raspirus {
                         .push(iced::widget::Space::with_width(10))
                         .push(
                             iced::widget::Column::new()
-                                .push(iced::widget::text("Updated").size(20))
+                                .push(iced::widget::text(t!("updater_updated")).size(20))
                                 .push(iced::widget::Space::with_height(5))
                                 .push(
                                     iced::widget::text(format!(
-                                        "Updates the Rules. Currently on: {}",
+                                        "{} {}",
+                                        t!("updater_description"),
                                         config.rules_version
                                     ))
                                     .size(14)
@@ -93,9 +96,9 @@ impl Raspirus {
                                 iced::widget::Row::new()
                                     .push(iced::widget::Text::new(
                                         match update {
-                                            UpdateState::Loaded => "UPDATE ",
-                                            UpdateState::Updating => "UPDATING... ",
-                                            UpdateState::Updated => "UPDATED ",
+                                            UpdateState::Loaded => format!("{} ", t!("updater_update").to_uppercase()),
+                                            UpdateState::Updating => format!("{} ", t!("updater_updating").to_uppercase()),
+                                            UpdateState::Updated => format!("{} ", t!("updater_updated").to_uppercase()),
                                         }
                                         .to_string(),
                                     ))
@@ -121,7 +124,7 @@ impl Raspirus {
                                 UpdateState::Loaded | UpdateState::Updated => Message::UpdateRules,
                                 _ => Message::Error {
                                     case: ErrorCase::Warning {
-                                        message: "Already running update!".to_owned(),
+                                        message: t!("updater_running").to_string().to_owned(),
                                     },
                                 },
                             })
@@ -147,10 +150,10 @@ impl Raspirus {
                         .push(iced::widget::Space::with_width(10))
                         .push(
                             iced::widget::Column::new()
-                                .push(iced::widget::text("Max Matches").size(20))
+                                .push(iced::widget::text(t!("set_max_matches")).size(20))
                                 .push(iced::widget::Space::with_height(5))
                                 .push(
-                                    iced::widget::text("Maximum amount of Rules that should match")
+                                    iced::widget::text(t!("set_max_matches_desc"))
                                         .size(14)
                                         .style(|_| iced::widget::text::Style {
                                             color: Some(GRAY_COLOR),
@@ -188,10 +191,10 @@ impl Raspirus {
                         .push(iced::widget::Space::with_width(10))
                         .push(
                             iced::widget::Column::new()
-                                .push(iced::widget::text("Min Matches").size(20))
+                                .push(iced::widget::text(t!("set_min_matches")).size(20))
                                 .push(iced::widget::Space::with_height(5))
                                 .push(
-                                    iced::widget::text("Minumum amount of Rules that should match")
+                                    iced::widget::text(t!("set_min_matches_desc"))
                                         .size(14)
                                         .style(|_| iced::widget::text::Style {
                                             color: Some(GRAY_COLOR),
@@ -229,10 +232,10 @@ impl Raspirus {
                         .push(iced::widget::Space::with_width(10))
                         .push(
                             iced::widget::Column::new()
-                                .push(iced::widget::text("Logging").size(20))
+                                .push(iced::widget::text(t!("set_logging")).size(20))
                                 .push(iced::widget::Space::with_height(5))
                                 .push(
-                                    iced::widget::text("Activates debug logging")
+                                    iced::widget::text(t!("set_logging_desc"))
                                         .size(14)
                                         .style(|_| iced::widget::text::Style {
                                             color: Some(GRAY_COLOR),
@@ -271,7 +274,11 @@ impl Raspirus {
                                 .push(iced::widget::Space::with_height(5))
                                 .push(
                                     iced::widget::text(
-                                        format!("Amount of parallel threads to use for scanning. ({cpus} recommended)"),
+                                        format!("{} ({} {})",
+                                            t!("set_threads_desc"),
+                                            cpus,
+                                            t!("set_threads_desc_rec")
+                                        ),
                                     )
                                     .size(14)
                                     .style(|_| {
@@ -310,10 +317,10 @@ impl Raspirus {
                         .push(iced::widget::Space::with_width(10))
                         .push(
                             iced::widget::Column::new()
-                                .push(iced::widget::text("Download Logs").size(20))
+                                .push(iced::widget::text(t!("set_download_logs")).size(20))
                                 .push(iced::widget::Space::with_height(5))
                                 .push(
-                                    iced::widget::text("Copies the Logs to your Downloads folder")
+                                    iced::widget::text(t!("set_download_logs_desc"))
                                         .size(14)
                                         .style(|_| iced::widget::text::Style {
                                             color: Some(GRAY_COLOR),
@@ -326,7 +333,7 @@ impl Raspirus {
                             // TODO: Make this button functional
                             iced::widget::Button::new(
                                 iced::widget::Row::new()
-                                    .push(iced::widget::text("DOWNLOAD "))
+                                    .push(iced::widget::text(t!("set_download_logs_btn")))
                                     .push(
                                         iced::widget::Text::new(
                                             iced_fonts::Bootstrap::ArrowDownCircleFill.to_string(),
