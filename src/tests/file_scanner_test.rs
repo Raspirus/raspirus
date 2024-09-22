@@ -1,5 +1,6 @@
 #[cfg(test)]
 mod tests {
+
     #[test]
     fn test_filescanner_invalid_path() {
         use crate::backend::yara_scanner::YaraScanner;
@@ -24,12 +25,19 @@ mod tests {
 
     #[test]
     fn test_scan_file_found_none() {
-        use crate::backend::yara_scanner::YaraScanner;
+        use crate::backend::{downloader, yara_scanner::YaraScanner};
         use iced::futures::channel::mpsc;
         use std::{
             path::Path,
             sync::{Arc, Mutex},
         };
+
+        let runtime = tokio::runtime::Builder::new_current_thread()
+            .enable_all()
+            .build()
+            .unwrap();
+        let update = runtime.block_on(downloader::update());
+        dbg!(&update);
 
         std::fs::write(
             Path::new("./clean"),
@@ -53,12 +61,19 @@ mod tests {
 
     #[test]
     fn test_scan_file_found_one() {
-        use crate::backend::yara_scanner::YaraScanner;
+        use crate::backend::{downloader, yara_scanner::YaraScanner};
         use iced::futures::channel::mpsc;
         use std::{
             path::Path,
             sync::{Arc, Mutex},
         };
+
+        let runtime = tokio::runtime::Builder::new_current_thread()
+            .enable_all()
+            .build()
+            .unwrap();
+        let update = runtime.block_on(downloader::update());
+        dbg!(&update);
 
         std::fs::write(
             Path::new("./tag"),
