@@ -251,7 +251,10 @@ impl YaraScanner {
                             path: path.to_path_buf(),
                             reason: format!("Could not open archive: {err}"),
                         });
-                    error!("Could not open archive file {}: {err}", path.to_string_lossy());
+                    error!(
+                        "Could not open archive file {}: {err}",
+                        path.to_string_lossy()
+                    );
                     return Ok(());
                 }
             })) {
@@ -300,7 +303,7 @@ impl YaraScanner {
                             .map_err(|err| format!("Failed to lock skipped: {err}"))?
                             .push(Skipped {
                                 path: path.to_path_buf(),
-                                reason: format!("Nested archives unsupported currently"),
+                                reason: "Nested archives unsupported currently".to_owned(),
                             });
                         continue;
                     }
@@ -402,27 +405,27 @@ impl YaraScanner {
         pointers: &PointerCollection,
         progress_channel: Arc<Mutex<mpsc::Sender<Worker>>>,
     ) -> Result<(), String> {
-        let analysed_locked = pointers
+        let analysed_locked = *pointers
             .analysed
             .lock()
-            .map_err(|err| format!("Failed to lock analysed: {err}"))?
-            .clone();
+            .map_err(|err| format!("Failed to lock analysed: {err}"))?;
         let skipped_locked = pointers
             .skipped
             .lock()
             .map_err(|err| format!("Failed to lock skipped: {err}"))?
             .clone();
         let scanned = analysed_locked + skipped_locked.len() as u64;
-        let total_locked = pointers
+        let total_locked = *pointers
             .total
             .lock()
-            .map_err(|err| format!("Failed to lock total: {err}"))?
-            .clone();
+            .map_err(|err| format!("Failed to lock total: {err}"))?;
         let percentage = (scanned as f32 / total_locked as f32) * 100.0;
 
-        progress_channel
+        let mut progress_channel_locked = progress_channel
             .lock()
             .map_err(|err| format!("Failed to lock progress sender: {err}"))?
+            .clone();
+        progress_channel_locked
             .send(Worker::Message {
                 message: Message::ScanPercentage { percentage },
             })

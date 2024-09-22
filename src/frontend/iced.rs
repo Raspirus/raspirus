@@ -205,11 +205,7 @@ impl Raspirus {
                 expanded_usb: false,
             },
             language: "en-US".to_owned(),
-            scan_path: if let Some(usb) = &usb {
-                Some(usb.path.clone())
-            } else {
-                None
-            },
+            scan_path: usb.as_ref().map(|usb| usb.path.clone()),
             usb_devices: list_usb_drives().unwrap_or_default(),
             sender: None,
             location_selection: LocationSelection::Usb { usb: usb.clone() },
@@ -294,18 +290,17 @@ impl Raspirus {
                     |_| Message::Shutdown,
                 ),
                 ErrorCase::Warning { message } => {
-                    match self.state {
-                        State::Scanning {
-                            scan_state: ScanState::Indexing,
-                        } => {
-                            self.state = State::MainMenu {
-                                expanded_language: false,
-                                expanded_location: false,
-                                expanded_usb: false,
-                            }
+                    if let State::Scanning {
+                        scan_state: ScanState::Indexing,
+                    } = self.state
+                    {
+                        self.state = State::MainMenu {
+                            expanded_language: false,
+                            expanded_location: false,
+                            expanded_usb: false,
                         }
-                        _ => {}
                     }
+
                     iced::Task::perform(
                         async move {
                             warn!("{message}");
@@ -475,7 +470,7 @@ impl Raspirus {
                                     rfd::FileDialog::new()
                                         .set_directory("~")
                                         .set_title("Pick a folder")
-                                        .pick_folder() 
+                                        .pick_folder()
                                 },
                                 |result| match result {
                                     None => Message::None,
@@ -505,7 +500,7 @@ impl Raspirus {
                                     rfd::FileDialog::new()
                                         .set_directory("~")
                                         .set_title("Pick a file")
-                                        .pick_file() 
+                                        .pick_file()
                                 },
                                 |result| match result {
                                     None => Message::None,
