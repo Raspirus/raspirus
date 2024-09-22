@@ -94,9 +94,9 @@ impl Raspirus {
                     iced::widget::Row::new()
                         .push(
                             iced::widget::Text::new(format!("{}", tag.path.to_string_lossy()))
-                                .wrapping(Wrapping::Glyph),
+                                .wrapping(Wrapping::Glyph)
+                                .width(iced::Length::Fill),
                         )
-                        .push(iced::widget::horizontal_space())
                         .push(iced_aw::widgets::Badge::new(iced::widget::Text::new(
                             format!("{}", tag.rule_count),
                         )))
@@ -161,9 +161,9 @@ impl Raspirus {
                     iced::widget::Row::new()
                         .push(
                             iced::widget::Text::new(format!("{}", skip.path.to_string_lossy()))
-                                .wrapping(Wrapping::Glyph),
+                                .wrapping(Wrapping::Glyph)
+                                .width(iced::Length::Fill),
                         )
-                        .push(iced::widget::horizontal_space())
                         .push(
                             iced::widget::Button::new(
                                 iced::widget::Text::new(
