@@ -70,17 +70,13 @@ jobs:
         env:
           PKG_CONFIG_SYSROOT_DIR: ${{ matrix.sysroot }}
         run: |
-            cargo packager --release --verbose --formats "deb" --config "{\"beforePackagingCommand\": \"cargo build --release --target aarch64-unknown-linux-gnu\", \"targetTriple\": \"aarch64-unknown-linux-gnu\"}"
-#          cargo packager --release --verbose --config "{\"beforePackagingCommand\": \"cargo build --release --target ${{ matrix.target }}\"}"
+            cargo packager --release --verbose --formats "deb" --config "{\"beforePackagingCommand\": \"cargo build --release --target aarch64-unknown-linux-gnu && mv target/aarch64-unknown-linux-gnu/release/raspirus target/raspirus\"}"
 
       - name: Create output folder
         run: mkdir -p ./output
 
       - name: List release files
-        run: ls target/${{ matrix.target }}/release/
-
-      - name: Copy files to output
-        run: cp target/${{ matrix.target }}/release/bundle/deb/raspirus_${{ env.VERSION }}_${{ matrix.arch }}.deb ./output/
+        run: ls target/
 
       - name: Collect build artifacts
         id: collect_build_files
