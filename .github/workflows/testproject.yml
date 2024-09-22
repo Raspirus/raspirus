@@ -32,9 +32,9 @@ jobs:
         ls -la $HOME  # Verify the user directories
 
     - name: Build
-      run: cargo build --verbose
+      run: cargo build --verbose --release
     
     - name: Run tests
-      run: cargo test --verbose
+      run: cargo test --verbose --release
       env:
         IGNORE_PANICS: true
