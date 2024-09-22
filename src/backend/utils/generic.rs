@@ -13,8 +13,11 @@ use crate::frontend::iced::ConfigValue;
 
 pub fn get_rules(yar_path: PathBuf) -> Result<Rules, String> {
     // setup rules
-    let reader = File::open(yar_path).map_err(|err| format!("Failed to open yar file: {err}. Please update and try again"))?;
-    Rules::deserialize_from(reader).map_err(|err| format!("Failed to deserialize yar file: {err}. Please update and try again"))
+    let reader = File::open(yar_path)
+        .map_err(|err| format!("Failed to open yar file: {err}. Please update and try again"))?;
+    Rules::deserialize_from(reader).map_err(|err| {
+        format!("Failed to deserialize yar file: {err}. Please update and try again")
+    })
 }
 
 /// yields all file paths and the total size of them
@@ -184,7 +187,7 @@ pub fn update_config(value: ConfigValue) -> Result<(), String> {
 
 static PAGE_HEIGHT: f32 = 297.0;
 static PAGE_WIDTH: f32 = 210.0;
-static FONT_SIZE: f32 = 14.0;
+static FONT_SIZE: f32 = 7.0;
 
 pub fn create_pdf(log_file: PathBuf) -> Result<PathBuf, String> {
     // fetch filename from log path
@@ -229,15 +232,20 @@ pub fn create_pdf(log_file: PathBuf) -> Result<PathBuf, String> {
 
     // weird code with magic numbers but what can you do /shrug
     let pt_in_mm = (FONT_SIZE + 2.0) * 0.3537778;
-    let max_lines_page = ((PAGE_HEIGHT - 20.0) / pt_in_mm) as usize;
-    debug!("Determined lines per page should be {max_lines_page}");
+    let max_lines_page = ((PAGE_HEIGHT - 10.0) / pt_in_mm) as usize;
+    let max_chars_per_line = (PAGE_WIDTH - 10.0) / (FONT_SIZE * 0.5 * 0.3537778);
+    debug!("Determined lines per page should be {max_lines_page}, and max chars per line should be {max_chars_per_line}");
 
-    for (num, line) in std::io::BufReader::new(log).lines().enumerate() {
-        if (num + 2) % max_lines_page == 0 && num > 0 {
+    // title + empty line
+    let mut current_line = 1;
+
+    for line in std::io::BufReader::new(log).lines() {
+        // if we reach the maximum lines per page we create a new one
+        if current_line % max_lines_page == 0 && current_line > 0 {
             // cleanup old page
             current_layer.end_text_section();
 
-            debug!("Page end reached, creating new page at line {num}");
+            debug!("Page end reached, creating new page at line {current_line}");
             let (page, layer) = doc.add_page(
                 printpdf::Mm(PAGE_WIDTH),
                 printpdf::Mm(PAGE_HEIGHT),
@@ -247,15 +255,31 @@ pub fn create_pdf(log_file: PathBuf) -> Result<PathBuf, String> {
             // prepare new page
             current_layer = doc.get_page(page).get_layer(layer);
             current_layer.begin_text_section();
-            current_layer.set_font(&font, 14.0);
+            current_layer.set_font(&font, FONT_SIZE);
 
-            current_layer.set_text_cursor(printpdf::Mm(10.0), printpdf::Mm(287.0));
-            current_layer.set_line_height(14.0);
+            current_layer.set_text_cursor(printpdf::Mm(10.0), printpdf::Mm(PAGE_HEIGHT - 10.0));
+            current_layer.set_line_height(FONT_SIZE + 2.0);
         }
+
+        // write the current line to pdf
         match line {
             Ok(line) => {
-                current_layer.write_text(line, &font);
-                current_layer.add_line_break();
+                let mut lines = Vec::new();
+
+                // split line into pieces that fit on the page
+                lines.extend(
+                    line.chars()
+                        .collect::<Vec<char>>()
+                        .chunks(max_chars_per_line as usize)
+                        .map(|chars| chars.iter().collect())
+                        .collect::<Vec<String>>(),
+                );
+
+                for line in lines {
+                    current_layer.write_text(line, &font);
+                    current_layer.add_line_break();
+                    current_line += 1;
+                }
             }
             Err(err) => return Err(format!("Could not read log file line: {err}")),
         }
