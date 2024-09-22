@@ -1,4 +1,5 @@
 use iced::{font, widget::Space};
+use rust_i18n::t;
 
 use crate::{
     backend::utils::usb_utils::UsbDevice,
@@ -51,7 +52,7 @@ impl Raspirus {
                             iced::widget::text(iced_fonts::Bootstrap::GearFill.to_string())
                                 .font(iced_fonts::BOOTSTRAP_FONT),
                         )
-                        .push(iced::widget::text(" SETTINGS").font(font::Font {
+                        .push(iced::widget::text(format!(" {}", t!("settings"))).font(font::Font {
                             weight: iced::font::Weight::Bold,
                             ..font::Font::DEFAULT
                         })),
@@ -88,7 +89,7 @@ impl Raspirus {
                         iced::widget::Text::new({
                             match usb {
                                 Some(usb) => usb.to_string(),
-                                None => "No mounted USB devices detected".to_owned(),
+                                None => t!("usb_list_not_found").to_owned().to_string(),
                             }
                         })
                         .align_x(iced::alignment::Horizontal::Center),
@@ -110,7 +111,7 @@ impl Raspirus {
                 iced::widget::Button::new(
                     iced::widget::Text::new(match path {
                         Some(path) => path.to_string_lossy().to_string(),
-                        None => "No folder selected".to_owned(),
+                        None => t!("folder_selection_not").to_owned().to_string(),
                     })
                     .align_x(iced::alignment::Horizontal::Center),
                 )
@@ -124,7 +125,7 @@ impl Raspirus {
                 iced::widget::Button::new(
                     iced::widget::Text::new(match path {
                         Some(path) => path.to_string_lossy().to_string(),
-                        None => "No file selected".to_owned(),
+                        None => t!("file_selection_not").to_owned().to_string(),
                     })
                     .align_x(iced::alignment::Horizontal::Center),
                 )
@@ -164,7 +165,7 @@ impl Raspirus {
         center_row = center_row.push(Space::with_width(iced::Length::FillPortion(2)));
 
         let mut start_button =
-            iced::widget::Button::new(iced::widget::text("START").font(font::Font {
+            iced::widget::Button::new(iced::widget::text(t!("start").to_uppercase()).font(font::Font {
                 weight: iced::font::Weight::Bold,
                 ..font::Font::DEFAULT
             }))
@@ -189,7 +190,8 @@ impl Raspirus {
             }
         }
 
-        let info_button = iced::widget::Button::new(iced::widget::text("INFO").font(font::Font {
+        let info_button = iced::widget::Button::new(iced::widget::text(t!("info").to_uppercase())
+        .font(font::Font {
             weight: iced::font::Weight::Bold,
             ..font::Font::DEFAULT
         }))
@@ -206,11 +208,11 @@ impl Raspirus {
         let bottom_text = iced::widget::container(
             iced::widget::Row::new()
                 .push(
-                    iced::widget::text("By using this app, you accept our")
+                    iced::widget::text(t!("terms_part_1"))
                         .align_x(iced::alignment::Horizontal::Center),
                 )
                 .push(
-                    iced::widget::button("Terms and Conditions")
+                    iced::widget::button(iced::widget::text(t!("terms_part_2")))
                         .style(button_transparent_style)
                         .on_press(Message::OpenTerms),
                 )

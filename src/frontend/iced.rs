@@ -204,7 +204,7 @@ impl Raspirus {
                 expanded_location: false,
                 expanded_usb: false,
             },
-            language: "en-US".to_owned(),
+            language: "en".to_owned(),
             scan_path: usb.as_ref().map(|usb| usb.path.clone()),
             usb_devices: list_usb_drives().unwrap_or_default(),
             sender: None,
@@ -273,6 +273,7 @@ impl Raspirus {
                         expanded_usb: *expanded_usb,
                     }
                 }
+                rust_i18n::set_locale(&language);
                 self.language = language;
                 iced::Task::none()
             }

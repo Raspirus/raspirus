@@ -1,6 +1,7 @@
 use std::path::PathBuf;
 
 use iced::widget::text::Wrapping;
+use rust_i18n::t;
 
 use crate::{
     backend::yara_scanner::{Skipped, TaggedFile},
@@ -30,7 +31,7 @@ impl Raspirus {
                                         .style(white_icon_style),
                                 )
                                 .push(
-                                    iced::widget::container(iced::widget::text("HOME")), //TODO.padding([0, 0, 0, 5]),
+                                    iced::widget::container(iced::widget::text(t!("back_btn"))),
                                 ),
                         )
                         .on_press(Message::OpenMain)
@@ -39,7 +40,7 @@ impl Raspirus {
                     )
                     .push(
                         iced::widget::container(
-                            iced::widget::text("Results")
+                            iced::widget::text(t!("results"))
                                 .size(30)
                                 .font(iced::font::Font {
                                     weight: iced::font::Weight::Bold,
@@ -67,7 +68,8 @@ impl Raspirus {
 
         let mut tagged_list = iced::widget::Column::new()
             .push(iced::widget::Text::new(format!(
-                "Found files ({})",
+                "{} ({})",
+                t!("results_found"),
                 tagged.len()
             )))
             .spacing(5);
@@ -141,7 +143,8 @@ impl Raspirus {
 
         let mut skipped_list = iced::widget::Column::new()
             .push(iced::widget::Text::new(format!(
-                "Skipped files ({})",
+                "{} ({})",
+                t!("results_skipped"),
                 skipped.len()
             )))
             .spacing(5);
