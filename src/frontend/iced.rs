@@ -41,7 +41,7 @@ pub enum State {
         scan_state: ScanState,
     },
     Settings {
-        config: Config,
+        config: Box<Config>,
         update: UpdateState,
     },
     Results {
@@ -218,7 +218,7 @@ impl Raspirus {
             // opens settings page
             Message::OpenSettings => {
                 self.state = State::Settings {
-                    config: crate::CONFIG.lock().expect("Failed to lock config").clone(),
+                    config: Box::new(crate::CONFIG.lock().expect("Failed to lock config").clone()),
                     update: UpdateState::Loaded,
                 };
                 iced::Task::none()
@@ -588,7 +588,9 @@ impl Raspirus {
             Message::ConfigChanged { value } => match update_config(value) {
                 Ok(_) => {
                     self.state = State::Settings {
-                        config: crate::CONFIG.lock().expect("Failed to lock config").clone(),
+                        config: Box::new(
+                            crate::CONFIG.lock().expect("Failed to lock config").clone(),
+                        ),
                         update: UpdateState::Loaded,
                     };
                     iced::Task::none()
@@ -630,7 +632,9 @@ impl Raspirus {
             Message::UpdateFinished => {
                 if let State::Settings { .. } = &self.state {
                     self.state = State::Settings {
-                        config: crate::CONFIG.lock().expect("Failed to lock config").clone(),
+                        config: Box::new(
+                            crate::CONFIG.lock().expect("Failed to lock config").clone(),
+                        ),
                         update: UpdateState::Updated,
                     };
                 }
