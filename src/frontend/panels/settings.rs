@@ -1,3 +1,5 @@
+use rust_i18n::t;
+
 use crate::{
     backend::config_file::Config,
     frontend::{
@@ -28,7 +30,7 @@ impl Raspirus {
                                         .style(white_icon_style),
                                 )
                                 .push(
-                                    iced::widget::container(iced::widget::text("HOME")), //TODO.padding([0, 0, 0, 5]),
+                                    iced::widget::container(iced::widget::text(t!("back_btn"))),
                                 ),
                         )
                         .on_press(Message::OpenMain)
