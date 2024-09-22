@@ -284,7 +284,7 @@ impl Raspirus {
                         error!("{message}");
                         rfd::MessageDialog::new()
                             .set_description(&message)
-                            .set_title("Error occurred")
+                            .set_title(t!("error_title"))
                             .set_level(rfd::MessageLevel::Error)
                             .show()
                     },
@@ -307,7 +307,7 @@ impl Raspirus {
                             warn!("{message}");
                             rfd::MessageDialog::new()
                                 .set_description(&message)
-                                .set_title("Notice")
+                                .set_title(t!("notice_title"))
                                 .set_level(rfd::MessageLevel::Warning)
                                 .show()
                         },
@@ -470,7 +470,7 @@ impl Raspirus {
                                 async {
                                     rfd::FileDialog::new()
                                         .set_directory("~")
-                                        .set_title("Pick a folder")
+                                        .set_title(t!("pick_folder"))
                                         .pick_folder()
                                 },
                                 |result| match result {
@@ -500,7 +500,7 @@ impl Raspirus {
                                 async {
                                     rfd::FileDialog::new()
                                         .set_directory("~")
-                                        .set_title("Pick a file")
+                                        .set_title(t!("pick_file"))
                                         .pick_file()
                                 },
                                 |result| match result {
