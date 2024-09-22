@@ -50,14 +50,14 @@ impl Raspirus {
                         iced::widget::Button::new(
                             iced::widget::Row::new()
                                 .push(
-                                    iced::widget::Svg::from_path("src/assets/icons/home.svg")
-                                        .height(20)
-                                        .width(20)
-                                        .style(white_icon_style),
+                                    iced::widget::svg(iced::widget::svg::Handle::from_memory(
+                                        include_bytes!("../../assets/icons/home.svg").as_slice(),
+                                    ))
+                                    .height(20)
+                                    .width(20)
+                                    .style(white_icon_style),
                                 )
-                                .push(
-                                    iced::widget::container(iced::widget::text(t!("back_btn"))),
-                                ),
+                                .push(iced::widget::container(iced::widget::text(t!("back_btn")))),
                         )
                         .on_press(Message::OpenMain)
                         .style(button_primary_style)
@@ -89,12 +89,16 @@ impl Raspirus {
                 iced::widget::container(
                     iced::widget::Row::new()
                         .push(
-                            iced::widget::Svg::from_path("src/assets/logo-vector.svg")
-                                .width(iced::Length::FillPortion(2)),
+                            iced::widget::svg(iced::widget::svg::Handle::from_memory(
+                                include_bytes!("../../assets/logo-vector.svg").as_slice(),
+                            ))
+                            .width(iced::Length::FillPortion(2)),
                         )
                         .push(
-                            iced::widget::Svg::from_path("src/assets/usb-vector.svg")
-                                .width(iced::Length::FillPortion(2)),
+                            iced::widget::svg(iced::widget::svg::Handle::from_memory(
+                                include_bytes!("../../assets/usb-vector.svg").as_slice(),
+                            ))
+                            .width(iced::Length::FillPortion(2)),
                         )
                         .padding(20)
                         .align_y(iced::Alignment::Center),
@@ -102,32 +106,44 @@ impl Raspirus {
                 .style(card_container_style),
             )
             .push(Self::info_card(
-                iced::widget::Svg::from_path("src/assets/icons/hexagon-letter-r.svg"),
+                iced::widget::svg(iced::widget::svg::Handle::from_memory(
+                    include_bytes!("../../assets/icons/hexagon-letter-r.svg").as_slice(),
+                )),
                 t!("app_name"),
                 t!("app_title"),
             ))
             .push(Self::info_card(
-                iced::widget::Svg::from_path("src/assets/icons/file-description.svg"),
+                iced::widget::svg(iced::widget::svg::Handle::from_memory(
+                    include_bytes!("../../assets/icons/file-description.svg").as_slice(),
+                )),
                 t!("description"),
                 t!("description_val"),
             ))
             .push(Self::info_card(
-                iced::widget::Svg::from_path("src/assets/icons/user-code.svg"),
+                iced::widget::svg(iced::widget::svg::Handle::from_memory(
+                    include_bytes!("../../assets/icons/user-code.svg").as_slice(),
+                )),
                 t!("maintainers"),
                 "Benjamin Demetz, Felix Hell Björn".into(),
             ))
             .push(Self::info_card(
-                iced::widget::Svg::from_path("src/assets/icons/git-commit.svg"),
+                iced::widget::svg(iced::widget::svg::Handle::from_memory(
+                    include_bytes!("../../assets/icons/git-commit.svg").as_slice(),
+                )),
                 t!("version"),
                 env!("CARGO_PKG_VERSION").into(),
             ))
             .push(Self::info_card(
-                iced::widget::Svg::from_path("src/assets/icons/license.svg"),
+                iced::widget::svg(iced::widget::svg::Handle::from_memory(
+                    include_bytes!("../../assets/icons/license.svg").as_slice(),
+                )),
                 t!("license"),
                 t!("license_val"),
             ))
             .push(Self::info_card(
-                iced::widget::Svg::from_path("src/assets/icons/globe.svg"),
+                iced::widget::svg(iced::widget::svg::Handle::from_memory(
+                    include_bytes!("../../assets/icons/globe.svg").as_slice(),
+                )),
                 t!("website"),
                 "https://raspirus.deno.dev".into(),
             ))
