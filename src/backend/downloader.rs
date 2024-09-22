@@ -146,10 +146,10 @@ pub async fn update() -> Result<(), RemoteError> {
     // if rules cannot be loaded, update
     if get_rules(save_path.clone()).is_err() {
         update = true;
-    } 
+    }
 
     if !update {
-        return Ok(())
+        return Ok(());
     }
 
     info!("Starting download...");

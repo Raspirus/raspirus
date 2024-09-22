@@ -16,9 +16,7 @@ impl Raspirus {
     ) -> iced::widget::Container<'a, Message> {
         iced::widget::container(
             iced::widget::Row::new()
-                .push(
-                    icon.height(64).width(64).style(info_icon_style),
-                )
+                .push(icon.height(64).width(64).style(info_icon_style))
                 //.push(iced::widget::vertical_rule(5))
                 .push(iced::widget::Space::with_width(10))
                 .push(
