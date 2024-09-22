@@ -1,4 +1,4 @@
-name: Test backend
+name: Test project
 
 on:
   push:
@@ -9,6 +9,7 @@ on:
 
 env:
   CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: 1
 
 jobs:
   build:
@@ -19,9 +20,13 @@ jobs:
       run: sudo apt-get update && sudo apt-get install -y build-essential curl libssl-dev pkg-config
     - name: Install Rust
       run: rustup update stable
+    - name: Create required directories
+      run: |
+        mkdir -p $HOME/Downloads
+        echo "Created Downloads directory at $HOME/Downloads"
     - name: Build
       run: cargo build --verbose
     - name: Run tests
-      run: cargo test --workspace --verbose
+      run: cargo test --verbose
       env:
         IGNORE_PANICS: true
