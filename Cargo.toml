@@ -61,10 +61,9 @@ icons = ["src/assets/logo.png"]
 licenseFile = "LICENSE"
 formats = ["all"]
 resources = [
-  "Cargo.toml",
   "LICENSE",
   "README.md",
-  "src"
+  "src/assets/"
 ]
 before-packaging-command = "cargo build --release"
 # cargo packager --release --verbose --config '{\"beforePackagingCommand\": \"cargo check\"}'
