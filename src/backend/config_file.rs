@@ -22,6 +22,8 @@ pub struct Config {
     pub logging_is_active: bool,
     /// mirror to folder with hashfiles for update
     pub mirror: String,
+    /// stores the language
+    pub language: String,
     /// various paths in an effort to unify them. are folders expected to be used later
     #[serde(skip)]
     pub paths: Option<Paths>,
@@ -61,6 +63,7 @@ impl Default for Config {
             max_threads: num_cpus::get(),
             mirror: crate::DEFAULT_MIRROR.to_owned(),
             paths: None,
+            language: "en".to_string(),
         }
     }
 }

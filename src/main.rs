@@ -25,7 +25,7 @@ rust_i18n::i18n!("src/assets/locales", fallback = "en");
 
 /// config
 static CONFIG_FILENAME: &str = "Raspirus.json";
-static CONFIG_VERSION: &str = "4";
+static CONFIG_VERSION: &str = "5";
 
 /// remote params
 static DEFAULT_MIRROR: &str = "https://api.github.com/repos/Raspirus/yara-rules/releases/latest";
@@ -52,7 +52,7 @@ lazy_static! {
     /// Global config instance
     static ref CONFIG: Mutex<Config> = Mutex::new(Config::new().expect("Failed to load config"));
     /// Supported languages
-    static ref SUPPORTED_LANGUAGES: Vec<String> = vec!["en".to_owned(), "de".to_owned(), "it".to_owned(), "fr".to_owned()];
+    static ref SUPPORTED_LANGUAGES: Vec<String> = rust_i18n::available_locales!().iter().cloned().map(|locale| locale.to_owned()).collect();
     /// Supported archives
     static ref SUPPORTED_ARCHIVES: Vec<String> = vec!["zip".to_owned(), "xz".to_owned(), "zstd".to_owned(), "bzip2".to_owned(), "deflate64".to_owned()];
     /// Symbols for selection
@@ -113,6 +113,8 @@ fn main() -> Result<(), String> {
         // Start loggers
         CombinedLogger::init(loggers).expect("Failed to initialize CombinedLogger");
     }
+
+    rust_i18n::set_locale(&CONFIG.lock().expect("Failed to lock config").language);
 
     const ICON_BYTES: &[u8] = include_bytes!("assets/logo.ico");
     let mut settings = Settings::default();
