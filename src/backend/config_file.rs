@@ -101,8 +101,7 @@ impl Config {
         fs::create_dir_all(&data).map_err(|err| format!("Failed to create data dir: {err}"))?;
         fs::create_dir_all(&logs_scan)
             .map_err(|err| format!("Failed to create scan log dir: {err}"))?;
-        fs::create_dir_all(&temp)
-            .map_err(|err| format!("Failed to create temp dir: {err}"))?;
+        fs::create_dir_all(&temp).map_err(|err| format!("Failed to create temp dir: {err}"))?;
         fs::create_dir_all(&logs_app)
             .map_err(|err| format!("Failed to create application log dir: {err}"))?;
         fs::create_dir_all(&config).map_err(|err| format!("Failed to create config dir: {err}"))?;

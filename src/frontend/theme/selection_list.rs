@@ -16,6 +16,6 @@ pub fn selection_list_style(_theme: &Theme, status: Status) -> selection_list::S
         _ => selection_list::Style {
             background: iced::Background::Color(ORANGE_COLOR_LIGHT),
             ..Default::default()
-        }
+        },
     }
 }
