@@ -1,3 +1,7 @@
+use std::borrow::Cow;
+
+use rust_i18n::t;
+
 use crate::frontend::{
     iced::{wrap, Message, Raspirus},
     theme::{
@@ -11,8 +15,8 @@ use crate::frontend::{
 impl Raspirus {
     fn info_card<'a>(
         icon: iced::widget::Svg<'a>,
-        title: &'a str,
-        value: &'a str,
+        title: Cow<'a, str>,
+        value: Cow<'a, str>,
     ) -> iced::widget::Container<'a, Message> {
         iced::widget::container(
             iced::widget::Row::new()
@@ -52,7 +56,7 @@ impl Raspirus {
                                         .style(white_icon_style),
                                 )
                                 .push(
-                                    iced::widget::container(iced::widget::text("HOME")), //TODO.padding([0, 0, 0, 5]),
+                                    iced::widget::container(iced::widget::text(t!("back_btn"))),
                                 ),
                         )
                         .on_press(Message::OpenMain)
@@ -61,7 +65,7 @@ impl Raspirus {
                     )
                     .push(
                         iced::widget::container(
-                            iced::widget::text("Information")
+                            iced::widget::text(t!("info_title"))
                                 .size(30)
                                 .font(iced::font::Font {
                                     weight: iced::font::Weight::Bold,
@@ -99,33 +103,33 @@ impl Raspirus {
             )
             .push(Self::info_card(
                 iced::widget::Svg::from_path("src/assets/icons/hexagon-letter-r.svg"),
-                "Name",
-                "Raspirus",
+                t!("app_name"),
+                t!("app_title"),
             ))
             .push(Self::info_card(
                 iced::widget::Svg::from_path("src/assets/icons/file-description.svg"),
-                "Description",
-                "Simple signatures-based antivirus for single-board computers like Raspberry Pi",
+                t!("description"),
+                t!("description_val"),
             ))
             .push(Self::info_card(
                 iced::widget::Svg::from_path("src/assets/icons/user-code.svg"),
-                "Maintainers",
-                "Benjamin Demetz, Felix Hell Björn",
+                t!("maintainers"),
+                "Benjamin Demetz, Felix Hell Björn".into(),
             ))
             .push(Self::info_card(
                 iced::widget::Svg::from_path("src/assets/icons/git-commit.svg"),
-                "Version",
-                env!("CARGO_PKG_VERSION"),
+                t!("version"),
+                env!("CARGO_PKG_VERSION").into(),
             ))
             .push(Self::info_card(
                 iced::widget::Svg::from_path("src/assets/icons/license.svg"),
-                "License",
-                "Open Source GPLv3",
+                t!("license"),
+                t!("license_val"),
             ))
             .push(Self::info_card(
                 iced::widget::Svg::from_path("src/assets/icons/globe.svg"),
-                "Website",
-                "https://raspirus.deno.dev",
+                t!("website"),
+                "https://raspirus.deno.dev".into(),
             ))
             .spacing(20);
         let content = iced::widget::Scrollable::new(wrap(15, options.into()));
