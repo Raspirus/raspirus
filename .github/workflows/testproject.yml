@@ -13,19 +13,31 @@ env:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest  # You can switch to macOS by changing this to macos-latest
     steps:
     - uses: actions/checkout@v4
+    
     - name: Install dependencies
-      run: sudo apt-get update && sudo apt-get install -y build-essential curl libssl-dev pkg-config
+      run: sudo apt-get update && sudo apt-get install -y build-essential curl libssl-dev pkg-config xdg-user-dirs  # xdg-user-dirs for user directories
+
     - name: Install Rust
       run: rustup update stable
-    - name: Create required directories
+    
+    - name: Set up user environment on macOS
       run: |
         mkdir -p $HOME/Downloads
-        echo "Created Downloads directory at $HOME/Downloads"
+        mkdir -p $HOME/Desktop
+        mkdir -p $HOME/Documents
+        echo "XDG_DOWNLOAD_DIR=$HOME/Downloads" >> $GITHUB_ENV
+        echo "XDG_DESKTOP_DIR=$HOME/Desktop" >> $GITHUB_ENV
+        echo "XDG_DOCUMENTS_DIR=$HOME/Documents" >> $GITHUB_ENV
+        echo "HOME_DIR set to $HOME"
+        ls -la $HOME  # Verify the user directories
+
+
     - name: Build
       run: cargo build --verbose
+    
     - name: Run tests
       run: cargo test --verbose
       env:
