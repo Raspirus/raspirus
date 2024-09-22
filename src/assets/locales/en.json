@@ -3,8 +3,7 @@
     "app_title": "Raspirus",
     "back_btn": "HOME",
     "description": "Description",
-    "description_val": "Simple signatures-based antivirus for single-board computers like Raspberry Pi",
-
+    "description_val": "A simple YARA rule-based antivirus focused on resource efficiency, ease of use, and effectiveness",
     "folder_selection_not": "No folder selected",
     "file_selection_not": "No file selected",
     "info": "Info",
@@ -21,83 +20,26 @@
     "scanner_indexing": "Indexing...",
     "settings": "Settings",
     "start": "Start",
+    "set_download_logs": "Download Logs",
+    "set_download_logs_desc": "Copies the Logs to your Downloads folder",
+    "set_download_logs_btn": "DOWNLOAD ",
+    "set_logging": "Logging",
+    "set_logging_desc": "Turns On/Off the debug logs",
+    "set_max_matches": "Max Matches",
+    "set_max_matches_desc": "Maximum amount of YARA rules that will match",
+    "set_min_matches": "Min Matches",
+    "set_min_matches_desc": "Minimum amount of YARA rules that must match",
+    "set_threads": "Threads",
+    "set_threads_desc": "Number of threads to use for parallel scanning.",
+    "set_threads_desc_rec": "recommended",
     "terms_part_1": "By using this app, you accept our",
     "terms_part_2": "Terms and Conditions.",
     "usb_list_not_found": "No mounted USB devices detected",
+    "updater_description": "Updates the Rules. Currently on:",
+    "updater_running": "Already running update!",
+    "updater_update": "Update",
+    "updater_updated": "Updated",
+    "updater_updating": "Updating...",
     "version": "Version",
-    "website": "Website",
-
-
-
-
-
-
-
-
-
-
-    "activate_logs": "Activate Logging",
-    "activate_logs_val": "Activates the writing of logs",
-    "add_patch_action": "Add Patch",
-    "add_patch_desc": "Allows to patch the DB with custom data",
-    "add_patch_desc2": "Use: https://github.com/Raspirus/signature-builder",
-    "add_patch_failed": "Patch failed",
-    "add_patch_result_inserted": "Inserted",
-    "add_patch_result_removed": "Removed",
-    "add_patch_result_skipped": "Skipped",
-    "add_patch_success": "Patch successful",
-    "add_patch_title": "Add a patch",
-
-
-    "clean_title": "No Virus found",
-    "custom_db": "Database path",
-    "custom_db_1": "Currently",
-    "custom_db_2": "Default",
-    "custom_db_action": "Change",
-    "custom_db_val": "Set the path to the .db file",
-    "db_update_notif": "New DB update!",
-    "db_update_stage_check": "Checking for updates...",
-    "db_update_stage_index": "Indexing...",
-    "db_update_stage_download": "Downloading...",
-    "db_update_stage_install": "Installing...",
-
-    "download_logs": "Download Logs",
-    "download_logs_action": "Download",
-    "download_logs_desc": "Download the logs file",
-    "file_dialog_opt": "File dialog option",
-    "file_dialog_opt_val": "When on, will scan folders instead of a single file",
-    "file_dialog_opt_val2": "This option only affects the file picker",
-    "infected_title": "Virus found!",
-
-    
-
-    "loading_text": "Loading... Please wait",
-    "logs_download_dialog": "Logs downloaded",
-    "logs_download_dialog_text": "Location: ",
-    "logs_download_dialog_failed": "Logs download failed",
-
-
-
-
-    "target_selection_error": "No target selected",
-    "target_selection_error_msg": "Please select a target to scan",
-
-    "unexpected_error": "Unexpected error",
-    "ui_update_title": "UI Updated",
-    "ui_update_text": "USB drives reloaded",
-    "usb_list_error": "USB-list error",
-    "usb_list_error_msg": "Couldn't search for USBs on this device",
-
-    "update_db": "Update Database",
-    "update_db_1": "Hashes in DB",
-    "update_db_2": "Database date",
-    "update_db_action": "Update",
-    "update_db_completed": "Update completed",
-    "update_db_completed_val": "Database is up-to-date",
-    "update_db_failed": "Update error",
-    "update_db_val": "Updates the database (requires an internet connection)",
-
-    "welcome_title": "Welcome to Raspirus",
-    "welcome_text": "It seems like you are using the application for the first time. Please make sure to update the database before scanning. You can do this in the settings.",
-    "welcome_footer": "This message will go away after the first update."
+    "website": "Website"
 }
