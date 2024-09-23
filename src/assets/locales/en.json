@@ -36,7 +36,7 @@
     "set_threads": "Threads",
     "set_threads_desc": "Number of threads to use for parallel scanning.",
     "set_threads_desc_rec": "recommended",
-    "set_toggle_theme": "Toggle Theme",
+    "set_toggle_theme": "Enables Dark-Mode",
     "set_toggle_theme_desc": "Switch between light and dark mode",
     "terms_part_1": "By using this app, you accept our",
     "terms_part_2": "Terms and Conditions.",
