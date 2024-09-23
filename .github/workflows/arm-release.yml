@@ -1,4 +1,4 @@
-name: Rust Cross-Compile CI
+name: Cross Compiler
 
 # WARNING: This workflow is broken!
 # armhf seems to not be supported and arm64 is failing with linker issues
@@ -21,12 +21,17 @@ jobs:
             apt: gcc-aarch64-linux-gnu
             sysroot: /usr/aarch64-linux-gnu/
             pkg_arch: arm64
-# UNSUPPORTED with iced :(
-#          - arch: armv7
-#            target: armv7-unknown-linux-gnueabihf
-#            apt: gcc-arm-linux-gnueabihf
-#            sysroot: /usr/arm-linux-gnueabihf/
-#            pkg_arch: armhf
+          - arch: riscv64
+            target: riscv64gc-unknown-linux-gnu
+            apt: gcc-riscv64-linux-gnu
+            sysroot: /usr/riscv64-linux-gnu/
+            pkg_arch: riscv64
+          # UNSUPPORTED with iced :(
+          - arch: armv7
+            target: armv7-unknown-linux-gnueabihf
+            apt: gcc-arm-linux-gnueabihf
+            sysroot: /usr/arm-linux-gnueabihf/
+            pkg_arch: armhf
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -72,8 +77,10 @@ jobs:
         run: |
             cargo deb --target=${{ matrix.target }}
 
-      - name: List release files
-        run: ls target/${{ matrix.target }}/debian/
+      - name: Create attestation
+        uses: actions/attest-build-provenance@v1
+        with:
+          subject-path: target/${{ matrix.target }}/debian/*.deb
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
