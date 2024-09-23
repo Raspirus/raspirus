@@ -11,8 +11,7 @@ use iced::{
 };
 use log::{debug, error, info, warn};
 use rust_i18n::t;
-use std::fmt::Display;
-use std::str::FromStr;
+use std::borrow::Cow;
 use std::{
     path::PathBuf,
     sync::{Arc, Mutex},
@@ -74,39 +73,24 @@ pub enum LocationSelection {
     File { path: Option<PathBuf> },
 }
 
-impl FromStr for LocationSelection {
-    type Err = ();
-
-    fn from_str(selection: &str) -> Result<Self, Self::Err> {
-        match selection.trim() {
-            _ if selection == iced_fonts::Bootstrap::UsbDriveFill.to_string() => {
-                Ok(LocationSelection::Usb { usb: None })
-            }
-            _ if selection == iced_fonts::Bootstrap::FolderFill.to_string() => {
-                Ok(LocationSelection::Folder { path: None })
-            }
-            _ if selection == iced_fonts::Bootstrap::FileEarmarkFill.to_string() => {
-                Ok(LocationSelection::File { path: None })
-            }
-            _ => Err(()),
-        }
-    }
+#[derive(Clone)]
+pub struct Language {
+    pub file_name: String,
+    pub display_name: String,
+    pub flag: iced::widget::svg::Handle,
 }
 
-impl Display for LocationSelection {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(
-            f,
-            "{}",
-            match self {
-                LocationSelection::Usb { .. } =>
-                    format!(" {}", iced_fonts::Bootstrap::UsbDriveFill),
-                LocationSelection::Folder { .. } =>
-                    format!(" {}", iced_fonts::Bootstrap::FolderFill),
-                LocationSelection::File { .. } =>
-                    format!(" {}", iced_fonts::Bootstrap::FileEarmarkFill),
-            }
-        )
+impl Language {
+    pub fn new(
+        file_name: impl std::fmt::Display,
+        display_name: impl std::fmt::Display,
+        bytes: impl Into<Cow<'static, [u8]>>,
+    ) -> Self {
+        Self {
+            file_name: file_name.to_string(),
+            display_name: display_name.to_string(),
+            flag: iced::widget::svg::Handle::from_memory(bytes),
+        }
     }
 }
 
@@ -273,9 +257,10 @@ impl Raspirus {
                         expanded_usb: *expanded_usb,
                     };
                     let mut config = CONFIG.lock().expect("Failed to lock config");
-                    config.language = language;
+                    config.language = language.clone();
                     config.save().expect("Failed to save config");
                 }
+                rust_i18n::set_locale(&language);
                 iced::Task::none()
             }
             // show popup for warnings and quit for critical errors

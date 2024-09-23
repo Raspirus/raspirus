@@ -4514,7 +4514,6 @@ dependencies = [
  "hex",
  "iced",
  "iced_aw",
- "iced_fonts",
  "lazy_static",
  "lfs-core",
  "log",

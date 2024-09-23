@@ -2,7 +2,7 @@
 //#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use backend::config_file::Config;
-use frontend::iced::{LocationSelection, Raspirus};
+use frontend::iced::{Language, LocationSelection, Raspirus};
 use iced::Settings;
 use lazy_static::lazy_static;
 use log::LevelFilter;
@@ -46,13 +46,62 @@ static LOGGING_FILTER: LevelFilter = LevelFilter::Debug;
 #[cfg(not(debug_assertions))]
 static LOGGING_FILTER: LevelFilter = LevelFilter::Info;
 
+/// icons
+static ONLINE: &[u8] = include_bytes!("./assets/icons/online.svg").as_slice();
+static CHEVRON_DOWN: &[u8] = include_bytes!("./assets/icons/chevron-down.svg").as_slice();
+static CHEVRON_LEFT: &[u8] = include_bytes!("./assets/icons/chevron-left.svg").as_slice();
+static ARROW_BADGE_DOWN: &[u8] = include_bytes!("./assets/icons/arrow-badge-down.svg").as_slice();
+static ARROW_BADGE_UP: &[u8] = include_bytes!("./assets/icons/arrow-badge-up.svg").as_slice();
+static CHECK: &[u8] = include_bytes!("./assets/icons/check.svg").as_slice();
+static CLIPBOARD_DATA: &[u8] = include_bytes!("./assets/icons/clipboard-data.svg").as_slice();
+static CPU: &[u8] = include_bytes!("./assets/icons/cpu.svg").as_slice();
+static DATABASE_IMPORT: &[u8] = include_bytes!("./assets/icons/database-import.svg").as_slice();
+static USB: &[u8] = include_bytes!("./assets/icons/usb.svg").as_slice();
+static HOURGLASS_HIGH: &[u8] = include_bytes!("./assets/icons/hourglass-high.svg").as_slice();
+static DOWNLOAD: &[u8] = include_bytes!("./assets/icons/download.svg").as_slice();
+static EXCLAMATION_CIRCLE: &[u8] =
+    include_bytes!("./assets/icons/exclamation-circle.svg").as_slice();
+static FILE: &[u8] = include_bytes!("./assets/icons/file.svg").as_slice();
+static FILE_DESCRIPTION: &[u8] = include_bytes!("./assets/icons/file-description.svg").as_slice();
+static FILE_DOWNLOAD: &[u8] = include_bytes!("./assets/icons/file-download.svg").as_slice();
+static FOLDER: &[u8] = include_bytes!("./assets/icons/folder.svg").as_slice();
+static GIT_COMMIT: &[u8] = include_bytes!("./assets/icons/git-commit.svg").as_slice();
+static GLOBE: &[u8] = include_bytes!("./assets/icons/globe.svg").as_slice();
+static HEXAGON_LETTER: &[u8] = include_bytes!("./assets/icons/hexagon-letter-r.svg").as_slice();
+static HOME: &[u8] = include_bytes!("./assets/icons/home.svg").as_slice();
+static LICENSE: &[u8] = include_bytes!("./assets/icons/license.svg").as_slice();
+static REFRESH: &[u8] = include_bytes!("./assets/icons/refresh.svg").as_slice();
+static SETTINGS: &[u8] = include_bytes!("./assets/icons/settings.svg").as_slice();
+static USER_CODE: &[u8] = include_bytes!("./assets/icons/user-code.svg").as_slice();
+
+/// flags
+static FLAG_DE: &[u8] = include_bytes!("./assets/flags/de.svg").as_slice();
+static FLAG_EN: &[u8] = include_bytes!("./assets/flags/en.svg").as_slice();
+static FLAG_IT: &[u8] = include_bytes!("./assets/flags/it.svg").as_slice();
+static FLAG_FR: &[u8] = include_bytes!("./assets/flags/fr.svg").as_slice();
+
+/// logo
+static USB_VECTOR: &[u8] = include_bytes!("./assets/usb-vector.svg").as_slice();
+static LOGO_VECTOR: &[u8] = include_bytes!("./assets/logo-vector.svg").as_slice();
+
 lazy_static! {
     /// Create string with current time
     static ref APPLICATION_LOG: String = format!("{}.log", Local::now().format("%Y_%m_%d_%H_%M_%S"));
     /// Global config instance
     static ref CONFIG: Mutex<Config> = Mutex::new(Config::new().expect("Failed to load config"));
     /// Supported languages
-    static ref SUPPORTED_LANGUAGES: Vec<String> = rust_i18n::available_locales!().iter().cloned().map(|locale| locale.to_owned()).collect();
+    static ref SUPPORTED_LANGUAGES: Vec<Language> = vec![
+        Language::new("de", "Deutsch", FLAG_DE),
+        Language::new("en", "English", FLAG_EN),
+        Language::new("it", "Italiano", FLAG_IT),
+        Language::new("fr", "Français", FLAG_FR)
+    ];
+    //
+    static ref TARGET_SELECTIONS: Vec<(LocationSelection, &'static [u8])> = vec![
+        (LocationSelection::Usb { usb: None }, crate::USB),
+        (LocationSelection::Folder { path: None }, crate::FOLDER),
+        (LocationSelection::File { path: None }, crate::FILE)
+    ];
     /// Supported archives
     static ref SUPPORTED_ARCHIVES: Vec<String> = vec!["zip".to_owned(), "xz".to_owned(), "zstd".to_owned(), "bzip2".to_owned(), "deflate64".to_owned()];
     /// Symbols for selection
@@ -120,7 +169,6 @@ fn main() -> Result<(), String> {
     let mut settings = Settings::default();
     let mut window_settings = iced::window::Settings::default();
     settings.id = Some("raspirus.app".to_owned());
-    settings.fonts = vec![iced_fonts::BOOTSTRAP_FONT_BYTES.into()];
     window_settings.icon = icon::from_file_data(ICON_BYTES, Option::from(ImageFormat::Ico)).ok();
     iced::application("Raspirus", Raspirus::update, Raspirus::view)
         .settings(settings)

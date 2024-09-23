@@ -8,6 +8,7 @@ use crate::{
             button::{button_blue_style, button_primary_style},
             container::card_container_style,
             icon::{settings_icon_style, white_icon_style},
+            svg::{svg_icon, svg_plain},
             toggle::toggler_style,
             GRAY_COLOR, PRIMARY_COLOR,
         },
@@ -23,16 +24,10 @@ impl Raspirus {
                     .push(
                         iced::widget::Button::new(
                             iced::widget::Row::new()
-                                .push(
-                                    iced::widget::svg(iced::widget::svg::Handle::from_memory(
-                                        include_bytes!("../../assets/icons/home.svg").as_slice(),
-                                    ))
-                                    .height(20)
-                                    .width(20)
-                                    .style(white_icon_style),
-                                )
+                                .push(svg_icon(crate::HOME).style(white_icon_style))
                                 .push(iced::widget::container(iced::widget::text(t!("back_btn"))))
-                                .spacing(10),
+                                .spacing(10)
+                                .align_y(iced::Alignment::Center),
                         )
                         .on_press(Message::OpenMain)
                         .style(button_primary_style)
@@ -64,12 +59,10 @@ impl Raspirus {
                 iced::widget::container(
                     iced::widget::Row::new()
                         .push(
-                            iced::widget::svg(iced::widget::svg::Handle::from_memory(
-                                include_bytes!("../../assets/icons/database-import.svg").as_slice(),
-                            ))
-                            .height(64)
-                            .width(64)
-                            .style(settings_icon_style),
+                            svg_plain(crate::DATABASE_IMPORT)
+                                .height(64)
+                                .width(64)
+                                .style(settings_icon_style),
                         )
                         .push(iced::widget::Space::with_width(10))
                         .push(
@@ -105,21 +98,14 @@ impl Raspirus {
                                         .to_string(),
                                     ))
                                     .push(
-                                        iced::widget::Text::new(
-                                            match update {
-                                                UpdateState::Loaded => {
-                                                    iced_fonts::Bootstrap::ArrowUpCircleFill
-                                                }
-                                                UpdateState::Updating => {
-                                                    iced_fonts::Bootstrap::ArrowClockwise
-                                                }
-                                                UpdateState::Updated => {
-                                                    iced_fonts::Bootstrap::Check
-                                                }
+                                        match update {
+                                            UpdateState::Loaded => svg_icon(crate::REFRESH),
+                                            UpdateState::Updating => {
+                                                svg_icon(crate::HOURGLASS_HIGH)
                                             }
-                                            .to_string(),
-                                        )
-                                        .font(iced_fonts::BOOTSTRAP_FONT),
+                                            UpdateState::Updated => svg_icon(crate::CHECK),
+                                        }
+                                        .style(white_icon_style),
                                     )
                                     .spacing(10),
                             )
@@ -143,12 +129,10 @@ impl Raspirus {
                 iced::widget::container(
                     iced::widget::Row::new()
                         .push(
-                            iced::widget::svg(iced::widget::svg::Handle::from_memory(
-                                include_bytes!("../../assets/icons/arrow-badge-up.svg").as_slice(),
-                            ))
-                            .height(64)
-                            .width(64)
-                            .style(settings_icon_style),
+                            svg_plain(crate::ARROW_BADGE_UP)
+                                .height(64)
+                                .width(64)
+                                .style(settings_icon_style),
                         )
                         .push(iced::widget::Space::with_width(10))
                         .push(
@@ -165,16 +149,13 @@ impl Raspirus {
                                 .width(iced::Length::Fill),
                         )
                         .push(iced::widget::horizontal_space())
-                        .push(
-                            iced_aw::widgets::NumberInput::new(
-                                config.max_matches,
-                                config.min_matches + 1..usize::MAX,
-                                |matches| Message::ConfigChanged {
-                                    value: ConfigValue::MaxMatch(matches),
-                                },
-                            )
-                            .font(iced_fonts::BOOTSTRAP_FONT),
-                        )
+                        .push(iced_aw::widgets::NumberInput::new(
+                            config.max_matches,
+                            config.min_matches + 1..usize::MAX,
+                            |matches| Message::ConfigChanged {
+                                value: ConfigValue::MaxMatch(matches),
+                            },
+                        ))
                         .align_y(iced::Alignment::Center)
                         .padding(iced::padding::Padding::new(7.0).right),
                 )
@@ -184,13 +165,10 @@ impl Raspirus {
                 iced::widget::container(
                     iced::widget::Row::new()
                         .push(
-                            iced::widget::svg(iced::widget::svg::Handle::from_memory(
-                                include_bytes!("../../assets/icons/arrow-badge-down.svg")
-                                    .as_slice(),
-                            ))
-                            .height(64)
-                            .width(64)
-                            .style(settings_icon_style),
+                            svg_plain(crate::ARROW_BADGE_DOWN)
+                                .height(64)
+                                .width(64)
+                                .style(settings_icon_style),
                         )
                         .push(iced::widget::Space::with_width(10))
                         .push(
@@ -207,16 +185,13 @@ impl Raspirus {
                                 .width(iced::Length::Fill),
                         )
                         .push(iced::widget::horizontal_space())
-                        .push(
-                            iced_aw::widgets::NumberInput::new(
-                                config.min_matches,
-                                0..config.max_matches,
-                                |matches| Message::ConfigChanged {
-                                    value: ConfigValue::MinMatch(matches),
-                                },
-                            )
-                            .font(iced_fonts::BOOTSTRAP_FONT),
-                        )
+                        .push(iced_aw::widgets::NumberInput::new(
+                            config.min_matches,
+                            0..config.max_matches,
+                            |matches| Message::ConfigChanged {
+                                value: ConfigValue::MinMatch(matches),
+                            },
+                        ))
                         .align_y(iced::Alignment::Center)
                         .padding(iced::padding::Padding::new(7.0).right),
                 )
@@ -226,12 +201,10 @@ impl Raspirus {
                 iced::widget::container(
                     iced::widget::Row::new()
                         .push(
-                            iced::widget::svg(iced::widget::svg::Handle::from_memory(
-                                include_bytes!("../../assets/icons/clipboard-data.svg").as_slice(),
-                            ))
-                            .height(64)
-                            .width(64)
-                            .style(settings_icon_style),
+                            svg_plain(crate::CLIPBOARD_DATA)
+                                .height(64)
+                                .width(64)
+                                .style(settings_icon_style),
                         )
                         .push(iced::widget::Space::with_width(10))
                         .push(
@@ -264,12 +237,10 @@ impl Raspirus {
                 iced::widget::container(
                     iced::widget::Row::new()
                         .push(
-                            iced::widget::svg(iced::widget::svg::Handle::from_memory(
-                                include_bytes!("../../assets/icons/cpu.svg").as_slice(),
-                            ))
-                            .height(64)
-                            .width(64)
-                            .style(settings_icon_style),
+                            svg_plain(crate::CPU)
+                                .height(64)
+                                .width(64)
+                                .style(settings_icon_style),
                         )
                         .push(iced::widget::Space::with_width(10))
                         .push(
@@ -293,16 +264,13 @@ impl Raspirus {
                                 .width(iced::Length::Fill),
                         )
                         .push(iced::widget::horizontal_space())
-                        .push(
-                            iced_aw::widgets::NumberInput::new(
-                                config.max_threads,
-                                1..cpus * 2 + 1,
-                                |threads| Message::ConfigChanged {
-                                    value: ConfigValue::MaxThreads(threads),
-                                },
-                            )
-                            .font(iced_fonts::BOOTSTRAP_FONT),
-                        )
+                        .push(iced_aw::widgets::NumberInput::new(
+                            config.max_threads,
+                            1..cpus * 2 + 1,
+                            |threads| Message::ConfigChanged {
+                                value: ConfigValue::MaxThreads(threads),
+                            },
+                        ))
                         .align_y(iced::Alignment::Center)
                         .padding(iced::padding::Padding::new(7.0).right),
                 )
@@ -312,12 +280,10 @@ impl Raspirus {
                 iced::widget::container(
                     iced::widget::Row::new()
                         .push(
-                            iced::widget::svg(iced::widget::svg::Handle::from_memory(
-                                include_bytes!("../../assets/icons/file-download.svg").as_slice(),
-                            ))
-                            .height(64)
-                            .width(64)
-                            .style(settings_icon_style),
+                            svg_plain(crate::FILE_DOWNLOAD)
+                                .height(64)
+                                .width(64)
+                                .style(settings_icon_style),
                         )
                         .push(iced::widget::Space::with_width(10))
                         .push(
@@ -339,12 +305,7 @@ impl Raspirus {
                             iced::widget::Button::new(
                                 iced::widget::Row::new()
                                     .push(iced::widget::text(t!("set_download_logs_btn")))
-                                    .push(
-                                        iced::widget::Text::new(
-                                            iced_fonts::Bootstrap::ArrowDownCircleFill.to_string(),
-                                        )
-                                        .font(iced_fonts::BOOTSTRAP_FONT),
-                                    )
+                                    .push(svg_icon(crate::DOWNLOAD).style(white_icon_style))
                                     .spacing(10),
                             )
                             .padding(10)
