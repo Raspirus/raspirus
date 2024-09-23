@@ -11,7 +11,7 @@ use sha2::{Digest, Sha256};
 use yara_x::Rules;
 use zip::write::SimpleFileOptions;
 
-use crate::frontend::iced::ConfigValue;
+use crate::{backend::config_file::Config, frontend::iced::ConfigValue};
 
 pub fn get_rules(yar_path: PathBuf) -> Result<Rules, String> {
     // setup rules
@@ -173,7 +173,7 @@ pub fn generate_virustotal(file: PathBuf) -> Result<String, String> {
 }
 
 /// updates the global config to what it should be
-pub fn update_config(value: ConfigValue) -> Result<(), String> {
+pub fn update_config(value: ConfigValue) -> Result<Config, String> {
     let mut config = crate::CONFIG
         .lock()
         .map_err(|err| format!("Failed to lock config: {err}"))?;
@@ -186,7 +186,7 @@ pub fn update_config(value: ConfigValue) -> Result<(), String> {
         ConfigValue::Dark(dark) => config.dark_mode = dark,
     }
     config.save()?;
-    Ok(())
+    Ok(config.clone())
 }
 
 static PAGE_HEIGHT: f32 = 297.0;
