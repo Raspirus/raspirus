@@ -7,7 +7,9 @@ use crate::{
         iced::{wrap, Language, LocationSelection, Message, Raspirus},
         theme::{
             button::{
-                button_orange_style, button_primary_style, button_secondary_style, button_select_style, button_selectionlist, button_selectionlist_lang, button_selectionlist_selected_lang, button_transparent_style
+                button_blue_style, button_orange_style, button_primary_style,
+                button_secondary_style, button_select_style, button_selectionlist,
+                button_selectionlist_selected, button_transparent_style,
             },
             selection_list::{selectionlist, selectionlist_lang},
             svg::svg_icon,
@@ -81,8 +83,9 @@ impl Raspirus {
                             .spacing(10)
                             .padding([0, 5]),
                     )
+                    .padding(10)
+                    .style(button_blue_style)
                     .on_press(Message::ToggleLanguageSelection),
-                    //.width(125),
                     // dropdown selection list
                     language_selection,
                     // expanded state
