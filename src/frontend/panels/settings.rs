@@ -107,7 +107,8 @@ impl Raspirus {
                                         }
                                         .style(white_icon_style),
                                     )
-                                    .spacing(10),
+                                    .spacing(10)
+                                    .align_y(iced::Alignment::Center),
                             )
                             .on_press(match update {
                                 UpdateState::Loaded | UpdateState::Updated => Message::UpdateRules,
@@ -301,13 +302,13 @@ impl Raspirus {
                         )
                         .push(iced::widget::horizontal_space())
                         .push(
-                            // TODO: Make this button functional
                             iced::widget::Button::new(
                                 iced::widget::Row::new()
                                     .push(iced::widget::text(t!("set_download_logs_btn")))
                                     .push(svg_icon(crate::DOWNLOAD).style(white_icon_style))
                                     .spacing(10),
                             )
+                            .on_press(Message::DownloadLogs)
                             .padding(10)
                             .style(button_blue_style),
                         )
