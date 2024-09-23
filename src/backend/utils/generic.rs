@@ -182,6 +182,8 @@ pub fn update_config(value: ConfigValue) -> Result<(), String> {
         ConfigValue::MaxMatch(max_matches) => config.max_matches = max_matches,
         ConfigValue::Logging(logging) => config.logging_is_active = logging,
         ConfigValue::MaxThreads(max_threads) => config.max_threads = max_threads,
+        ConfigValue::Language(language) => config.language = language,
+        ConfigValue::Dark(dark) => config.dark_mode = dark,
     }
     config.save()?;
     Ok(())
