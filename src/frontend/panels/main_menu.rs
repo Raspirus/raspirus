@@ -83,8 +83,9 @@ impl Raspirus {
                             .spacing(10)
                             .padding([0, 5]),
                     )
+                    .padding(10)
+                    .style(button_primary_style)
                     .on_press(Message::ToggleLanguageSelection),
-                    //.width(125),
                     // dropdown selection list
                     language_selection,
                     // expanded state
