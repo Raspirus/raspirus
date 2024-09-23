@@ -31,7 +31,7 @@ impl Raspirus {
                         )
                         .on_press(Message::OpenMain)
                         .style(button_primary_style)
-                        .padding(7),
+                        .padding(10),
                     )
                     .push(
                         iced::widget::container(

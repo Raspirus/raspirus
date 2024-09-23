@@ -8,7 +8,10 @@ use crate::{
     frontend::{
         iced::{wrap, Card, Message, Raspirus},
         theme::{
-            button::button_primary_style, icon::white_icon_style, svg::svg_icon, PRIMARY_COLOR,
+            button::{button_blue_style, button_primary_style},
+            icon::white_icon_style,
+            svg::svg_icon,
+            PRIMARY_COLOR,
         },
     },
 };
@@ -33,7 +36,7 @@ impl Raspirus {
                         )
                         .on_press(Message::OpenMain)
                         .style(button_primary_style)
-                        .padding(7),
+                        .padding(10),
                     )
                     .push(
                         iced::widget::container(
@@ -55,7 +58,9 @@ impl Raspirus {
                         iced::widget::Button::new(
                             svg_icon(crate::DOWNLOAD).style(white_icon_style),
                         )
-                        .on_press(Message::DownloadLog { log_path }),
+                        .style(button_blue_style)
+                        .on_press(Message::DownloadLog { log_path })
+                        .padding(10),
                     )
                     .align_y(iced::Alignment::Center),
             )
