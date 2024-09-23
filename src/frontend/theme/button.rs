@@ -255,9 +255,49 @@ pub fn button_selectionlist(theme: &Theme, status: Status) -> button::Style {
     }
 }
 
+pub fn button_selectionlist_lang(theme: &Theme, status: Status) -> button::Style {
+    if let Status::Hovered = status {
+        let mut theme = button_selectionlist_selected_lang(theme, status);
+        theme.text_color.a = 0.75;
+        return theme;
+    }
+    button::Style {
+        background: Some(iced::Background::Color(Color::TRANSPARENT)),
+        text_color: iced::Color::WHITE.scale_alpha(0.25),
+        border: Border {
+            color: Color::TRANSPARENT,
+            width: 0.0,
+            radius: 0.0.into(),
+        },
+        shadow: Shadow {
+            color: Color::TRANSPARENT,
+            offset: DEFAULT_SHADOW_OFFSET,
+            blur_radius: 0.0,
+        },
+    }
+}
+
 pub fn button_selectionlist_selected(_theme: &Theme, _status: Status) -> button::Style {
     button::Style {
         background: Some(iced::Background::Color(Color::TRANSPARENT)),
+        border: Border {
+            color: Color::TRANSPARENT,
+            width: 0.0,
+            radius: 0.0.into(),
+        },
+        shadow: Shadow {
+            color: Color::TRANSPARENT,
+            offset: DEFAULT_SHADOW_OFFSET,
+            blur_radius: 0.0,
+        },
+        ..Default::default()
+    }
+}
+
+pub fn button_selectionlist_selected_lang(_theme: &Theme, _status: Status) -> button::Style {
+    button::Style {
+        background: Some(iced::Background::Color(Color::TRANSPARENT)),
+        text_color: iced::Color::WHITE,
         border: Border {
             color: Color::TRANSPARENT,
             width: 0.0,
