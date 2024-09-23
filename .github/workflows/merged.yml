@@ -152,15 +152,15 @@ jobs:
       - name: Download cross-compiled artifacts
         uses: actions/download-artifact@v4
         with:
-          name: aarch64-cross-compile-artifacts
+          name: arm64-cross-compile-artifacts 
       - name: Download riscv64 cross-compiled artifacts
         uses: actions/download-artifact@v4
         with:
           name: riscv64-cross-compile-artifacts
-      - name: Download armv7 cross-compiled artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: armv7-cross-compile-artifacts
+#      - name: Download armv7 cross-compiled artifacts
+#        uses: actions/download-artifact@v4
+#        with:
+#          name: armv7-cross-compile-artifacts
 
       - name: Create attestation for all builds
         uses: actions/attest-build-provenance@v1
