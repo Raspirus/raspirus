@@ -25,7 +25,7 @@ rust_i18n::i18n!("src/assets/locales", fallback = "en");
 
 /// config
 static CONFIG_FILENAME: &str = "Raspirus.json";
-static CONFIG_VERSION: &str = "5";
+static CONFIG_VERSION: &str = "6";
 
 /// remote params
 static DEFAULT_MIRROR: &str = "https://api.github.com/repos/Raspirus/yara-rules/releases/latest";
