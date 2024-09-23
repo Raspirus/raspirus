@@ -308,6 +308,5 @@ pub fn button_selectionlist_selected_lang(_theme: &Theme, _status: Status) -> bu
             offset: DEFAULT_SHADOW_OFFSET,
             blur_radius: 0.0,
         },
-        ..Default::default()
     }
 }
