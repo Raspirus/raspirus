@@ -149,6 +149,7 @@ impl Raspirus {
                         })
                         .align_x(iced::alignment::Horizontal::Center),
                     )
+                    .padding(7)
                     .on_press(Message::ToggleUSBSelection)
                     .width(iced::Length::FillPortion(4))
                     .style(button_select_style),
@@ -174,6 +175,7 @@ impl Raspirus {
                 .on_press(Message::RequestLocation {
                     selection: LocationSelection::Folder { path: None },
                 })
+                .padding(7)
                 .style(button_select_style),
             ),
             LocationSelection::File { ref path } => center_row.push(
@@ -188,6 +190,7 @@ impl Raspirus {
                 .on_press(Message::RequestLocation {
                     selection: LocationSelection::File { path: None },
                 })
+                .padding(7)
                 .style(button_select_style),
             ),
         };
