@@ -24,6 +24,8 @@ pub struct Config {
     pub mirror: String,
     /// stores the language
     pub language: String,
+    /// dark mode bool
+    pub dark_mode: bool,
     /// various paths in an effort to unify them. are folders expected to be used later
     #[serde(skip)]
     pub paths: Option<Paths>,
@@ -64,6 +66,7 @@ impl Default for Config {
             mirror: crate::DEFAULT_MIRROR.to_owned(),
             paths: None,
             language: rust_i18n::locale().to_string(),
+            dark_mode: false,
         }
     }
 }
