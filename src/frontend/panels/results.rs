@@ -7,7 +7,9 @@ use crate::{
     backend::yara_scanner::{Skipped, TaggedFile},
     frontend::{
         iced::{wrap, Card, Message, Raspirus},
-        theme::{button::button_primary_style, icon::white_icon_style, PRIMARY_COLOR},
+        theme::{
+            button::button_primary_style, icon::white_icon_style, svg::svg_icon, PRIMARY_COLOR,
+        },
     },
 };
 
@@ -24,16 +26,10 @@ impl Raspirus {
                     .push(
                         iced::widget::Button::new(
                             iced::widget::Row::new()
-                                .push(
-                                    iced::widget::svg(iced::widget::svg::Handle::from_memory(
-                                        include_bytes!("../../assets/icons/home.svg").as_slice(),
-                                    ))
-                                    .height(20)
-                                    .width(20)
-                                    .style(white_icon_style),
-                                )
+                                .push(svg_icon(crate::HOME).style(white_icon_style))
                                 .push(iced::widget::container(iced::widget::text(t!("back_btn"))))
-                                .spacing(10),
+                                .spacing(10)
+                                .align_y(iced::Alignment::Center),
                         )
                         .on_press(Message::OpenMain)
                         .style(button_primary_style)
@@ -57,8 +53,7 @@ impl Raspirus {
                     .push(iced::widget::horizontal_space())
                     .push(
                         iced::widget::Button::new(
-                            iced::widget::Text::new(iced_fonts::Bootstrap::Download.to_string())
-                                .font(iced_fonts::BOOTSTRAP_FONT),
+                            svg_icon(crate::DOWNLOAD).style(white_icon_style),
                         )
                         .on_press(Message::DownloadLog { log_path }),
                     )
@@ -105,15 +100,12 @@ impl Raspirus {
                         )))
                         .push(
                             iced::widget::Button::new(
-                                iced::widget::Text::new(
-                                    if expanded {
-                                        iced_fonts::Bootstrap::CaretDownFill
-                                    } else {
-                                        iced_fonts::Bootstrap::CaretLeftFill
-                                    }
-                                    .to_string(),
-                                )
-                                .font(iced_fonts::BOOTSTRAP_FONT),
+                                if expanded {
+                                    svg_icon(crate::CHEVRON_DOWN)
+                                } else {
+                                    svg_icon(crate::CHEVRON_LEFT)
+                                }
+                                .style(white_icon_style),
                             )
                             .on_press(Message::ToggleCard {
                                 card: Card::Tagged { card: tag.clone() },
@@ -121,10 +113,7 @@ impl Raspirus {
                         )
                         .push(
                             iced::widget::Button::new(
-                                iced::widget::Text::new(
-                                    iced_fonts::Bootstrap::BoxArrowUpLeft.to_string(),
-                                )
-                                .font(iced_fonts::BOOTSTRAP_FONT),
+                                svg_icon(crate::ONLINE).style(white_icon_style),
                             )
                             .on_press(Message::GenerateVirustotal { path: tag.path }),
                         )
@@ -169,15 +158,12 @@ impl Raspirus {
                         )
                         .push(
                             iced::widget::Button::new(
-                                iced::widget::Text::new(
-                                    if expanded {
-                                        iced_fonts::Bootstrap::CaretDownFill
-                                    } else {
-                                        iced_fonts::Bootstrap::CaretLeftFill
-                                    }
-                                    .to_string(),
-                                )
-                                .font(iced_fonts::BOOTSTRAP_FONT),
+                                if expanded {
+                                    svg_icon(crate::CHEVRON_DOWN)
+                                } else {
+                                    svg_icon(crate::CHEVRON_LEFT)
+                                }
+                                .style(white_icon_style),
                             )
                             .on_press(Message::ToggleCard {
                                 card: Card::Skipped { card: skip.clone() },

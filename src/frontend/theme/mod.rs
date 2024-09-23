@@ -4,6 +4,7 @@ pub mod button;
 pub mod container;
 pub mod icon;
 pub mod selection_list;
+pub mod svg;
 pub mod toggle;
 
 /// Colors for the Raspirus theme

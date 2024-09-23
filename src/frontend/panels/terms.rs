@@ -2,7 +2,7 @@ use rust_i18n::t;
 
 use crate::frontend::{
     iced::{wrap, Message, Raspirus},
-    theme::{button::button_primary_style, icon::white_icon_style, PRIMARY_COLOR},
+    theme::{button::button_primary_style, icon::white_icon_style, svg::svg_icon, PRIMARY_COLOR},
 };
 
 impl Raspirus {
@@ -13,16 +13,10 @@ impl Raspirus {
                     .push(
                         iced::widget::Button::new(
                             iced::widget::Row::new()
-                                .push(
-                                    iced::widget::svg(iced::widget::svg::Handle::from_memory(
-                                        include_bytes!("../../assets/icons/home.svg").as_slice(),
-                                    ))
-                                    .height(20)
-                                    .width(20)
-                                    .style(white_icon_style),
-                                )
+                                .push(svg_icon(crate::HOME).style(white_icon_style))
+                                .push(iced::widget::container(iced::widget::text(t!("back_btn"))))
                                 .spacing(10)
-                                .push(iced::widget::container(iced::widget::text(t!("back_btn")))),
+                                .align_y(iced::Alignment::Center),
                         )
                         .on_press(Message::OpenMain)
                         .style(button_primary_style)
