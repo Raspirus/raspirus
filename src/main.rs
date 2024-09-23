@@ -73,6 +73,7 @@ static LICENSE: &[u8] = include_bytes!("./assets/icons/license.svg").as_slice();
 static REFRESH: &[u8] = include_bytes!("./assets/icons/refresh.svg").as_slice();
 static SETTINGS: &[u8] = include_bytes!("./assets/icons/settings.svg").as_slice();
 static USER_CODE: &[u8] = include_bytes!("./assets/icons/user-code.svg").as_slice();
+static THEME_TOGGLE: &[u8] = include_bytes!("./assets/icons/theme-toggle.svg").as_slice();
 
 /// flags
 static FLAG_DE: &[u8] = include_bytes!("./assets/flags/de.svg").as_slice();

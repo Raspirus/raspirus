@@ -238,6 +238,40 @@ impl Raspirus {
                 iced::widget::container(
                     iced::widget::Row::new()
                         .push(
+                            svg_plain(crate::THEME_TOGGLE)
+                                .height(64)
+                                .width(64)
+                                .style(settings_icon_style),
+                        )
+                        .push(iced::widget::Space::with_width(10))
+                        .push(
+                            iced::widget::Column::new()
+                                .push(iced::widget::text(t!("set_toggle_theme")).size(20))
+                                .push(iced::widget::Space::with_height(5))
+                                .push(iced::widget::text(t!("set_toggle_theme_desc")).size(14).style(
+                                    |_| iced::widget::text::Style {
+                                        color: Some(GRAY_COLOR),
+                                    },
+                                ))
+                                .width(iced::Length::Fill),
+                        )
+                        .push(iced::widget::horizontal_space())
+                        .push(
+                            iced::widget::Toggler::new(config.dark_mode)
+                                .on_toggle(|_| Message::SwitchTheme)
+                                .width(iced::Length::Shrink)
+                                .size(25)
+                                .style(toggler_style),
+                        )
+                        .align_y(iced::Alignment::Center)
+                        .padding(7),
+                )
+                .style(card_container_style),
+            )
+            .push(
+                iced::widget::container(
+                    iced::widget::Row::new()
+                        .push(
                             svg_plain(crate::CPU)
                                 .height(64)
                                 .width(64)

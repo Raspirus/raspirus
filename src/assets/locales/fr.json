@@ -36,6 +36,8 @@
     "set_threads": "Threads",
     "set_threads_desc": "Nombre de threads à utiliser pour l'analyse en parallèle.",
     "set_threads_desc_rec": "recommandé",
+    "set_toggle_theme": "Basculer le thème",
+    "set_toggle_theme_desc": "Passer du mode clair au mode sombre",
     "terms_part_1": "En utilisant cette application, vous acceptez nos",
     "terms_part_2": "Conditions Générales.",
     "usb_list_not_found": "Aucun périphérique USB monté détecté",

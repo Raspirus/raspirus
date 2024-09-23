@@ -36,6 +36,8 @@
     "set_threads": "Thread",
     "set_threads_desc": "Numero di thread da utilizzare per la scansione in parallelo.",
     "set_threads_desc_rec": "raccomandato",
+    "set_toggle_theme": "Cambia tema",
+    "set_toggle_theme_desc": "Passa tra la modalità chiara e scura",
     "terms_part_1": "Utilizzando questa app, accetti i nostri",
     "terms_part_2": "Termini e Condizioni.",
     "usb_list_not_found": "Nessun dispositivo USB montato rilevato",
