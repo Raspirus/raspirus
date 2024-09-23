@@ -63,21 +63,20 @@ jobs:
       - name: Set environment variables
         run: echo "PKG_CONFIG_SYSROOT_DIR=${{ matrix.sysroot }}" >> $GITHUB_ENV
 
-      - name: Install packager
-        run: cargo install cargo-packager --locked
+      - name: Install deb packager
+        run: cargo install cargo-deb
 
       - name: Package the build
         env:
           PKG_CONFIG_SYSROOT_DIR: ${{ matrix.sysroot }}
         run: |
-            cargo packager --release --verbose --formats "deb" --config "{\"beforePackagingCommand\": \"cargo build --release --target aarch64-unknown-linux-gnu && mv target/aarch64-unknown-linux-gnu/release/raspirus target/raspirus\"}"
-
-      - name: Create output folder
-        run: mkdir -p ./output
+            cargo deb --target=${{ matrix.target }}
 
       - name: List release files
-        run: ls target/
+        run: ls target/${{ matrix.target }}/debian/
 
-      - name: Collect build artifacts
-        id: collect_build_files
-        run: echo "files=./output/raspirus_${{ env.VERSION }}_${{ matrix.arch }}.deb" >> $GITHUB_ENV
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.pkg_arch }}-deb
+          path: target/${{ matrix.target }}/debian/*.deb
