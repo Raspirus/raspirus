@@ -13,20 +13,18 @@ impl Raspirus {
                 .push(
                     iced::widget::Row::new()
                         .push(iced::widget::horizontal_space())
-                        .push(
-                            iced::widget::container::Container::new(
-                                iced::widget::text(t!("scanner_scanning"))
-                                    .size(80)
-                                    .align_x(iced::alignment::Horizontal::Center)
-                                    .font(font::Font {
-                                        weight: iced::font::Weight::Bold,
-                                        ..font::Font::DEFAULT
-                                    })
-                                    .style(|_| iced::widget::text::Style {
-                                        color: Some(SECONDARY_COLOR),
-                                    }),
-                            ),
-                        )
+                        .push(iced::widget::container::Container::new(
+                            iced::widget::text(t!("scanner_scanning"))
+                                .size(80)
+                                .align_x(iced::alignment::Horizontal::Center)
+                                .font(font::Font {
+                                    weight: iced::font::Weight::Bold,
+                                    ..font::Font::DEFAULT
+                                })
+                                .style(|_| iced::widget::text::Style {
+                                    color: Some(SECONDARY_COLOR),
+                                }),
+                        ))
                         .push(iced::widget::horizontal_space())
                         .spacing(5),
                 )
@@ -59,20 +57,18 @@ impl Raspirus {
                 .push(
                     iced::widget::Row::new()
                         .push(iced::widget::horizontal_space())
-                        .push(
-                            iced::widget::container::Container::new(
-                                iced::widget::text(t!("scanner_indexing"))
-                                    .size(80)
-                                    .align_x(iced::alignment::Horizontal::Center)
-                                    .font(font::Font {
-                                        weight: iced::font::Weight::Bold,
-                                        ..font::Font::DEFAULT
-                                    })
-                                    .style(|_| iced::widget::text::Style {
-                                        color: Some(SECONDARY_COLOR),
-                                    }),
-                            ),
-                        )
+                        .push(iced::widget::container::Container::new(
+                            iced::widget::text(t!("scanner_indexing"))
+                                .size(80)
+                                .align_x(iced::alignment::Horizontal::Center)
+                                .font(font::Font {
+                                    weight: iced::font::Weight::Bold,
+                                    ..font::Font::DEFAULT
+                                })
+                                .style(|_| iced::widget::text::Style {
+                                    color: Some(SECONDARY_COLOR),
+                                }),
+                        ))
                         .push(iced::widget::horizontal_space())
                         .spacing(5),
                 )

@@ -8,6 +8,7 @@ use crate::frontend::{
         button::button_primary_style,
         container::card_container_style,
         icon::{info_icon_style, white_icon_style},
+        svg::{svg_icon, svg_plain},
         GRAY_COLOR, PRIMARY_COLOR,
     },
 };
@@ -49,16 +50,10 @@ impl Raspirus {
                     .push(
                         iced::widget::Button::new(
                             iced::widget::Row::new()
-                                .push(
-                                    iced::widget::svg(iced::widget::svg::Handle::from_memory(
-                                        include_bytes!("../../assets/icons/home.svg").as_slice(),
-                                    ))
-                                    .height(20)
-                                    .width(20)
-                                    .style(white_icon_style),
-                                )
+                                .push(svg_icon(crate::HOME).style(white_icon_style))
                                 .push(iced::widget::container(iced::widget::text(t!("back_btn"))))
-                                .spacing(10),
+                                .spacing(10)
+                                .align_y(iced::Alignment::Center),
                         )
                         .on_press(Message::OpenMain)
                         .style(button_primary_style)
@@ -89,62 +84,40 @@ impl Raspirus {
             .push(
                 iced::widget::container(
                     iced::widget::Row::new()
-                        .push(
-                            iced::widget::svg(iced::widget::svg::Handle::from_memory(
-                                include_bytes!("../../assets/logo-vector.svg").as_slice(),
-                            ))
-                            .width(iced::Length::FillPortion(2)),
-                        )
-                        .push(
-                            iced::widget::svg(iced::widget::svg::Handle::from_memory(
-                                include_bytes!("../../assets/usb-vector.svg").as_slice(),
-                            ))
-                            .width(iced::Length::FillPortion(2)),
-                        )
+                        .push(svg_plain(crate::LOGO_VECTOR).width(iced::Length::FillPortion(2)))
+                        .push(svg_plain(crate::USB_VECTOR).width(iced::Length::FillPortion(2)))
                         .padding(20)
                         .align_y(iced::Alignment::Center),
                 )
                 .style(card_container_style),
             )
             .push(Self::info_card(
-                iced::widget::svg(iced::widget::svg::Handle::from_memory(
-                    include_bytes!("../../assets/icons/hexagon-letter-r.svg").as_slice(),
-                )),
+                svg_plain(crate::HEXAGON_LETTER),
                 t!("app_name"),
                 t!("app_title"),
             ))
             .push(Self::info_card(
-                iced::widget::svg(iced::widget::svg::Handle::from_memory(
-                    include_bytes!("../../assets/icons/file-description.svg").as_slice(),
-                )),
+                svg_plain(crate::FILE_DESCRIPTION),
                 t!("description"),
                 t!("description_val"),
             ))
             .push(Self::info_card(
-                iced::widget::svg(iced::widget::svg::Handle::from_memory(
-                    include_bytes!("../../assets/icons/user-code.svg").as_slice(),
-                )),
+                svg_plain(crate::USER_CODE),
                 t!("maintainers"),
                 "Benjamin Demetz, Felix Hell Björn".into(),
             ))
             .push(Self::info_card(
-                iced::widget::svg(iced::widget::svg::Handle::from_memory(
-                    include_bytes!("../../assets/icons/git-commit.svg").as_slice(),
-                )),
+                svg_plain(crate::GIT_COMMIT),
                 t!("version"),
                 env!("CARGO_PKG_VERSION").into(),
             ))
             .push(Self::info_card(
-                iced::widget::svg(iced::widget::svg::Handle::from_memory(
-                    include_bytes!("../../assets/icons/license.svg").as_slice(),
-                )),
+                svg_plain(crate::LICENSE),
                 t!("license"),
                 t!("license_val"),
             ))
             .push(Self::info_card(
-                iced::widget::svg(iced::widget::svg::Handle::from_memory(
-                    include_bytes!("../../assets/icons/globe.svg").as_slice(),
-                )),
+                svg_plain(crate::GLOBE),
                 t!("website"),
                 "https://raspirus.deno.dev".into(),
             ))

@@ -1,35 +1,17 @@
-use iced::Theme;
-use iced_aw::{card::Status, style::selection_list};
+use iced::{Renderer, Theme};
 
-use super::{BLUE_COLOR, ORANGE_COLOR, ORANGE_COLOR_LIGHT};
+use crate::frontend::iced::Message;
 
-pub fn selection_list_style(_theme: &Theme, status: Status) -> selection_list::Style {
-    match status {
-        Status::Active => selection_list::Style {
-            background: iced::Background::Color(ORANGE_COLOR_LIGHT),
-            ..Default::default()
-        },
-        Status::Hovered => selection_list::Style {
-            background: iced::Background::Color(ORANGE_COLOR),
-            ..Default::default()
-        },
-        _ => selection_list::Style {
-            background: iced::Background::Color(ORANGE_COLOR_LIGHT),
-            ..Default::default()
-        },
+use super::container::container_selection_list;
+
+pub fn selectionlist(
+    elements: Vec<iced::Element<'_, Message, Theme, Renderer>>,
+) -> iced::Element<Message> {
+    let mut column = iced::widget::Column::new();
+    for element in elements {
+        column = column.push(element);
     }
-}
-pub fn lang_selection_list_style(_theme: &Theme, status: Status) -> selection_list::Style {
-    match status {
-        Status::Active => selection_list::Style {
-            ..Default::default()
-        },
-        Status::Hovered => selection_list::Style {
-            ..Default::default()
-        },
-        _ => selection_list::Style {
-            background: iced::Background::Color(BLUE_COLOR),
-            ..Default::default()
-        },
-    }
+    iced::widget::Container::new(column.align_x(iced::Alignment::Center).spacing(0))
+        .style(container_selection_list)
+        .into()
 }
