@@ -160,7 +160,7 @@ pub fn button_select_style(theme: &Theme, status: Status) -> button::Style {
                 border: Border {
                     color: BLUE_COLOR_LIGHT,
                     width: DEFAULT_BORDER_WIDTH,
-                    radius: 0.5.into(),
+                    radius: 5.into(),
                 },
                 shadow: Shadow {
                     color: Color::BLACK,
@@ -174,7 +174,7 @@ pub fn button_select_style(theme: &Theme, status: Status) -> button::Style {
                 border: Border {
                     color: BLUE_COLOR_LIGHT,
                     width: DEFAULT_BORDER_WIDTH,
-                    radius: 0.5.into(),
+                    radius: 5.into(),
                 },
                 shadow: Shadow {
                     color: Color::BLACK,
@@ -189,7 +189,7 @@ pub fn button_select_style(theme: &Theme, status: Status) -> button::Style {
             border: Border {
                 color: BLUE_COLOR_DARK,
                 width: DEFAULT_BORDER_WIDTH,
-                radius: 0.5.into(),
+                radius: 5.into(),
             },
             shadow: Shadow {
                 color: Color::BLACK,
