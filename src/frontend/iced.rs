@@ -122,15 +122,11 @@ pub enum Message {
         path: PathBuf,
     },
     UpdateRules,
-    SwitchTheme,
     // update messages
     Open {
         path: PathBuf,
     },
     DownloadLogs,
-    LanguageChanged {
-        language: String,
-    },
     ScannerReady {
         sender: mpsc::Sender<PathBuf>,
     },
@@ -200,7 +196,7 @@ impl Raspirus {
             usb_devices: list_usb_drives().unwrap_or_default(),
             sender: None,
             location_selection: LocationSelection::Usb { usb: usb.clone() },
-            dark_mode: config.dark_mode.clone(),
+            dark_mode: config.dark_mode,
         }
     }
 
@@ -249,35 +245,6 @@ impl Raspirus {
                     }
                 }
                 iced::Task::none()
-            }
-            // update locally selected language
-            Message::LanguageChanged { language } => {
-                // close language dialog
-                let result = if let State::MainMenu {
-                    expanded_location,
-                    expanded_usb,
-                    ..
-                } = &self.state
-                {
-                    self.state = State::MainMenu {
-                        expanded_language: false,
-                        expanded_location: *expanded_location,
-                        expanded_usb: *expanded_usb,
-                    };
-                    update_config(ConfigValue::Language(language.clone()))
-                } else {
-                    Ok(())
-                };
-                rust_i18n::set_locale(&language);
-                iced::Task::perform(async { result }, |result| {
-                    if let Err(message) = result {
-                        Message::Error {
-                            case: ErrorCase::Warning { message },
-                        }
-                    } else {
-                        Message::None
-                    }
-                })
             }
             // show popup for warnings and quit for critical errors
             Message::Error { case } => match case {
@@ -587,12 +554,25 @@ impl Raspirus {
             Message::None => iced::Task::none(),
             // send changed config value to backend
             Message::ConfigChanged { value } => match update_config(value) {
-                Ok(_) => {
-                    self.state = State::Settings {
-                        config: Box::new(
-                            crate::CONFIG.lock().expect("Failed to lock config").clone(),
-                        ),
-                        update: UpdateState::Loaded,
+                Ok(config) => {
+                    self.dark_mode = config.dark_mode;
+                    rust_i18n::set_locale(&config.language);
+                    self.state = if let State::MainMenu {
+                        expanded_location,
+                        expanded_usb,
+                        ..
+                    } = &self.state
+                    {
+                        State::MainMenu {
+                            expanded_language: false,
+                            expanded_location: *expanded_location,
+                            expanded_usb: *expanded_usb,
+                        }
+                    } else {
+                        State::Settings {
+                            config: Box::new(config),
+                            update: UpdateState::Loaded,
+                        }
                     };
                     iced::Task::none()
                 }
@@ -717,23 +697,6 @@ impl Raspirus {
                         case: ErrorCase::Warning { message },
                     },
                 })
-            }
-            Message::SwitchTheme => {
-                self.dark_mode = !self.dark_mode;
-                let dark = self.dark_mode;
-
-                iced::Task::perform(
-                    async move { update_config(ConfigValue::Dark(dark)) },
-                    |result| {
-                        if let Err(message) = result {
-                            Message::Error {
-                                case: ErrorCase::Critical { message },
-                            }
-                        } else {
-                            Message::None
-                        }
-                    },
-                )
             }
         }
     }
