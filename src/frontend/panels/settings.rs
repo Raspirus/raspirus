@@ -122,7 +122,7 @@ impl Raspirus {
                             .style(button_blue_style),
                         )
                         .align_y(iced::Alignment::Center)
-                        .padding(iced::Padding::new(7.0).right),
+                        .padding(iced::Padding::new(10.0).right),
                 )
                 .style(card_container_style),
             )
@@ -158,7 +158,7 @@ impl Raspirus {
                             },
                         ))
                         .align_y(iced::Alignment::Center)
-                        .padding(iced::padding::Padding::new(7.0).right),
+                        .padding(iced::padding::Padding::new(10.0).right),
                 )
                 .style(card_container_style),
             )
@@ -194,7 +194,7 @@ impl Raspirus {
                             },
                         ))
                         .align_y(iced::Alignment::Center)
-                        .padding(iced::padding::Padding::new(7.0).right),
+                        .padding(iced::padding::Padding::new(10.0).right),
                 )
                 .style(card_container_style),
             )
@@ -273,7 +273,7 @@ impl Raspirus {
                             },
                         ))
                         .align_y(iced::Alignment::Center)
-                        .padding(iced::padding::Padding::new(7.0).right),
+                        .padding(iced::padding::Padding::new(10.0).right),
                 )
                 .style(card_container_style),
             )
@@ -313,7 +313,7 @@ impl Raspirus {
                             .style(button_blue_style),
                         )
                         .align_y(iced::Alignment::Center)
-                        .padding(iced::padding::Padding::new(7.0).right),
+                        .padding(iced::padding::Padding::new(10.0).right),
                 )
                 .style(card_container_style),
             )
