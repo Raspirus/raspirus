@@ -4,14 +4,16 @@ use rust_i18n::t;
 use crate::{
     backend::utils::usb_utils::UsbDevice,
     frontend::{
-        iced::{wrap, LocationSelection, Message, Raspirus},
+        iced::{wrap, Language, LocationSelection, Message, Raspirus},
         theme::{
             button::{
                 button_orange_style, button_primary_style, button_secondary_style,
-                button_select_style, button_transparent_style,
+                button_select_style, button_selectionlist, button_selectionlist_selected,
+                button_transparent_style,
             },
-            selection_list::{lang_selection_list_style, selection_list_style},
-            PRIMARY_COLOR,
+            selection_list::selectionlist,
+            svg::svg_icon,
+            PRIMARY_COLOR, SECONDARY_COLOR,
         },
     },
 };
@@ -25,50 +27,89 @@ impl Raspirus {
         selection: LocationSelection,
         usbs: &'a [UsbDevice],
     ) -> iced::Element<Message> {
+        let current_language = match crate::SUPPORTED_LANGUAGES
+            .iter()
+            .find(|language| language.file_name.eq(&rust_i18n::locale().to_string()))
+        {
+            Some(language) => language,
+            None => &Language::new("not_found", "not_found", crate::EXCLAMATION_CIRCLE),
+        };
+        let mut language_list = Vec::new();
+        for language in crate::SUPPORTED_LANGUAGES.iter() {
+            language_list.push(
+                iced::widget::Button::new(
+                    iced::widget::Row::new()
+                        .push(
+                            iced::widget::svg(language.flag.clone())
+                                .height(20)
+                                .width(iced::Length::Shrink),
+                        )
+                        .push(
+                            iced::widget::Text::new(&language.display_name)
+                                .wrapping(iced::widget::text::Wrapping::None),
+                        )
+                        .spacing(10),
+                )
+                .on_press(Message::LanguageChanged {
+                    language: language.file_name.clone(),
+                })
+                .style(if language.file_name.eq(&current_language.file_name) {
+                    button_selectionlist_selected
+                } else {
+                    button_selectionlist
+                })
+                .width(iced::Length::Fill)
+                .into(),
+            )
+        }
+        let language_selection = selectionlist(language_list);
+
         let top_row = iced::widget::Row::new()
             // language selection
-            .push(iced_aw::widgets::DropDown::new(
-                // button to trigger dropdown
-                iced::widget::Row::new().push(
-                    iced::widget::Button::new(iced::widget::Text::new(
-                        rust_i18n::locale().to_string(),
-                    ))
+            .push(
+                iced_aw::widgets::DropDown::new(
+                    // button to trigger dropdown
+                    iced::widget::Button::new(
+                        iced::widget::Row::new()
+                            .push(
+                                iced::widget::svg(current_language.flag.clone())
+                                    .height(20)
+                                    .width(iced::Length::Shrink),
+                            )
+                            .push(
+                                iced::widget::Text::new(current_language.display_name.clone())
+                                    .wrapping(iced::widget::text::Wrapping::None),
+                            )
+                            .spacing(10)
+                            .padding([0, 5]),
+                    )
                     .on_press(Message::ToggleLanguageSelection),
-                ),
-                // dropdown selection list
-                iced_aw::widget::SelectionList::new_with(
-                    &crate::SUPPORTED_LANGUAGES,
-                    |_idx: usize, language: String| {
-                        rust_i18n::set_locale(&language);
-                        Message::LanguageChanged { language }
-                    },
-                    16.0,
-                    5.0,
-                    lang_selection_list_style,
-                    crate::SUPPORTED_LANGUAGES
-                        .iter()
-                        .position(|elem| elem.eq(&rust_i18n::locale().to_string())),
-                    iced_fonts::BOOTSTRAP_FONT,
+                    //.width(125),
+                    // dropdown selection list
+                    language_selection,
+                    // expanded state
+                    expanded_language,
                 )
-                .height(iced::Length::Shrink),
-                // expanded state
-                expanded_language,
-            ))
+                //.width(125)
+                .on_dismiss(Message::ToggleLanguageSelection),
+            )
             // spacer
             .push(iced::widget::horizontal_space())
             // settings button
             .push(
-                iced::widget::button(
+                iced::widget::button::Button::new(
                     iced::widget::Row::new()
                         .push(
-                            iced::widget::text(iced_fonts::Bootstrap::GearFill.to_string())
-                                .font(iced_fonts::BOOTSTRAP_FONT),
+                            svg_icon(crate::SETTINGS).style(|_, _1| iced::widget::svg::Style {
+                                color: Some(SECONDARY_COLOR),
+                            }),
                         )
                         .push(iced::widget::text(t!("settings")).font(font::Font {
                             weight: iced::font::Weight::Bold,
                             ..font::Font::DEFAULT
                         }))
-                        .spacing(10),
+                        .spacing(10)
+                        .align_y(iced::Alignment::Center),
                 )
                 .on_press(Message::OpenSettings)
                 .style(button_secondary_style)
@@ -150,30 +191,51 @@ impl Raspirus {
             ),
         };
 
-        center_row = center_row.push(iced_aw::widgets::DropDown::new(
-            // button to trigger dropdown
-            iced::widget::Row::new().push(
+        let options = crate::TARGET_SELECTIONS
+            .iter()
+            .map(|element| {
                 iced::widget::Button::new(
-                    iced::widget::Text::new(selection.to_string()).font(iced_fonts::BOOTSTRAP_FONT),
+                    iced::widget::svg(iced::widget::svg::Handle::from_memory(element.1))
+                        .width(iced::Length::Shrink)
+                        .opacity(if element.0.eq(&selection) { 1.0 } else { 0.75 }),
                 )
-                .on_press(Message::ToggleLocationSelection)
-                .style(button_orange_style),
-            ),
-            // dropdown selection list
-            iced_aw::widget::SelectionList::new_with(
-                &crate::SELECTION_ICONS,
-                |_idx: usize, selection: LocationSelection| Message::LocationChanged { selection },
-                16.0,
-                5.0,
-                selection_list_style,
-                None,
-                iced_fonts::BOOTSTRAP_FONT,
+                .on_press(Message::LocationChanged {
+                    selection: element.0.clone(),
+                })
+                .style(button_selectionlist)
+                .into()
+            })
+            .collect();
+
+        let type_selection = selectionlist(options);
+        center_row = center_row.push(
+            iced_aw::widgets::DropDown::new(
+                // button to trigger dropdown
+                iced::widget::Row::new().push(
+                    iced::widget::Button::new(
+                        iced::widget::svg(iced::widget::svg::Handle::from_memory(
+                            match selection {
+                                LocationSelection::Usb { .. } => crate::USB,
+                                LocationSelection::Folder { .. } => crate::FOLDER,
+                                LocationSelection::File { .. } => crate::FILE,
+                            },
+                        ))
+                        .width(iced::Length::Shrink),
+                    )
+                    .on_press(Message::ToggleLocationSelection)
+                    .style(button_orange_style),
+                ),
+                // dropdown selection list
+                type_selection,
+                // expanded state
+                expanded_location,
             )
-            .height(iced::Length::Shrink)
-            .width(iced::Length::Shrink),
-            // expanded state
-            expanded_location,
-        ));
+            .on_dismiss(if expanded_location {
+                Message::ToggleLocationSelection
+            } else {
+                Message::None
+            }),
+        );
 
         center_row = center_row.push(Space::with_width(iced::Length::FillPortion(2)));
 

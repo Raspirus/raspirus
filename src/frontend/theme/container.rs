@@ -1,6 +1,9 @@
 use iced::{widget::container, Theme};
 
-use super::{CARD_SHADOW_OFFSET, DEFAULT_BORDER_RADIUS, DEFAULT_BORDER_WIDTH};
+use super::{
+    CARD_SHADOW_OFFSET, DEFAULT_BORDER_RADIUS, DEFAULT_BORDER_WIDTH, DEFAULT_BUTTON_RADIUS,
+    GRAY_COLOR, ORANGE_COLOR_LIGHT,
+};
 
 pub fn card_container_style(theme: &Theme) -> container::Style {
     match theme {
@@ -32,5 +35,16 @@ pub fn card_container_style(theme: &Theme) -> container::Style {
             },
             ..Default::default()
         },
+    }
+}
+
+pub fn container_selection_list(_theme: &Theme) -> container::Style {
+    container::Style {
+        border: iced::Border::default()
+            .rounded(DEFAULT_BUTTON_RADIUS)
+            .color(GRAY_COLOR)
+            .width(1),
+        background: Some(iced::Background::Color(ORANGE_COLOR_LIGHT)),
+        ..Default::default()
     }
 }
