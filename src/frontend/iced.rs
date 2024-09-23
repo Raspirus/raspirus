@@ -1,6 +1,8 @@
 use crate::backend::config_file::Config;
 use crate::backend::downloader;
-use crate::backend::utils::generic::{create_pdf, generate_virustotal, update_config};
+use crate::backend::utils::generic::{
+    create_pdf, download_logs, generate_virustotal, update_config,
+};
 use crate::backend::utils::usb_utils::{list_usb_drives, UsbDevice};
 use crate::backend::yara_scanner::{Skipped, TaggedFile, YaraScanner};
 use crate::CONFIG;
@@ -121,9 +123,10 @@ pub enum Message {
     },
     UpdateRules,
     // update messages
-    Downloaded {
-        pdf_path: PathBuf,
+    Open {
+        path: PathBuf,
     },
+    DownloadLogs,
     LanguageChanged {
         language: String,
     },
@@ -629,7 +632,7 @@ impl Raspirus {
             Message::DownloadLog { log_path } => iced::Task::perform(
                 async move {
                     match create_pdf(log_path) {
-                        Ok(pdf_path) => Message::Downloaded { pdf_path },
+                        Ok(path) => Message::Open { path },
                         Err(message) => Message::Error {
                             case: ErrorCase::Warning { message },
                         },
@@ -637,10 +640,11 @@ impl Raspirus {
                 },
                 |result| result,
             ),
-            // open pdf log
-            Message::Downloaded { pdf_path } => iced::Task::perform(
+            // open a path
+            Message::Open { path } => iced::Task::perform(
                 async {
-                    open::that(pdf_path).map_err(|message| ErrorCase::Warning {
+                    info!("Opening {}...", path.to_string_lossy());
+                    open::that(path).map_err(|message| ErrorCase::Warning {
                         message: message.to_string(),
                     })
                 },
@@ -692,6 +696,14 @@ impl Raspirus {
                         }
                     },
                 )
+            }
+            Message::DownloadLogs => {
+                iced::Task::perform(async { download_logs() }, |result| match result {
+                    Ok(path) => Message::Open { path },
+                    Err(message) => Message::Error {
+                        case: ErrorCase::Warning { message },
+                    },
+                })
             }
         }
     }
