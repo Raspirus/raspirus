@@ -1,11 +1,13 @@
-name: Release Build
+name: Build and Release
+
 on:
   workflow_dispatch:
 
 env:
-  VERSION: 1.2.2
+  VERSION: 1.3.0
 
 jobs:
+  # Release build job
   release:
     permissions: write-all
     strategy:
@@ -35,10 +37,11 @@ jobs:
       - name: Package Binary
         run: cargo packager --release --verbose
 
-      - name: Create attestation
-        uses: actions/attest-build-provenance@v1
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
         with:
-          subject-path: |
+          name: ${{ matrix.platform }}-release-artifacts
+          path: |
             ${{ matrix.platform == 'macos-latest' && 'target/release/Raspirus.app' || '' }}
             ${{ matrix.platform == 'macos-latest' && 'target/release/Raspirus_*_aarch64.dmg' || '' }}
             ${{ matrix.platform == 'macos-13' && 'target/release/Raspirus.app' || '' }}
@@ -48,7 +51,113 @@ jobs:
             ${{ matrix.platform == 'ubuntu-latest' && 'target/release/raspirus_*_x86_64.AppImage' || '' }}
             ${{ matrix.platform == 'windows-latest' && 'target/release/raspirus_*_x64_en-US.msi' || '' }}
             ${{ matrix.platform == 'windows-latest' && 'target/release/raspirus_*_x64-setup.exe' || '' }}
-      
+
+  # Cross-compilation job
+  cross_compile:
+    permissions: write-all
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: aarch64
+            target: aarch64-unknown-linux-gnu
+            apt: gcc-aarch64-linux-gnu
+            sysroot: /usr/aarch64-linux-gnu/
+            pkg_arch: arm64
+          - arch: riscv64
+            target: riscv64gc-unknown-linux-gnu
+            apt: gcc-riscv64-linux-gnu
+            sysroot: /usr/riscv64-linux-gnu/
+            pkg_arch: riscv64
+            # UNSUPPORTED with iced :(
+#          - arch: armv7
+#            target: armv7-unknown-linux-gnueabihf
+#            apt: gcc-arm-linux-gnueabihf
+#            sysroot: /usr/arm-linux-gnueabihf/
+#            pkg_arch: armhf
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Clean install Debian packages
+        run: sudo apt-get clean && sudo apt-get update && sudo apt-get upgrade -y
+
+      - name: Install cross-compile dependencies
+        uses: ryankurte/action-apt@v0.4.1
+        with:
+          arch: ${{ matrix.pkg_arch }}
+          packages: "libssl-dev:${{ matrix.pkg_arch }}"
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            pkg-config \
+            build-essential \
+            curl \
+            libssl-dev \
+            ${{ matrix.apt }}
+
+      - name: Rust setup
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Rust cache
+        uses: swatinem/rust-cache@v2
+
+      - name: Install Rust target
+        run: rustup target add ${{ matrix.target }}
+
+      - name: Set environment variables
+        run: echo "PKG_CONFIG_SYSROOT_DIR=${{ matrix.sysroot }}" >> $GITHUB_ENV
+
+      - name: Install deb packager
+        run: cargo install cargo-deb
+
+      - name: Package the cross-compiled build
+        env:
+          PKG_CONFIG_SYSROOT_DIR: ${{ matrix.sysroot }}
+        run: |
+          cargo deb --target=${{ matrix.target }}
+
+      - name: Upload cross-compile artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.pkg_arch }}-cross-compile-artifacts
+          path: target/${{ matrix.target }}/debian/*.deb
+
+  # Upload to GitHub release job
+  upload_to_release:
+    permissions: write-all
+    runs-on: ubuntu-latest
+    needs: [release, cross_compile]
+    steps:
+      - name: Download release artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+
+      # Command to list all files after artifacts are downloaded
+      - name: List downloaded files
+        run: ls -R ./artifacts
+
+      - name: Create attestation for all builds
+        uses: actions/attest-build-provenance@v1
+        with:
+          subject-path: |
+            artifact/Raspirus.app
+            artifact/PKGBUILD
+            artifact/Raspirus_*_aarch64.dmg
+            artifact/Raspirus_*_x64.dmg
+            artifact/raspirus_*_amd64.deb
+            artifact/raspirus_*_x86_64.AppImage
+            artifact/raspirus_*_x64_en-US.msi
+            artifact/raspirus_*_x64-setup.exe
+            artifact/raspirus_*_arm64.deb
+            artifact/raspirus_*_riscv64.deb
+#            target/armv7-unknown-linux-gnueabihf/debian/*.deb
+
       - name: Release to GitHub
         uses: softprops/action-gh-release@v2
         with:
@@ -56,12 +165,14 @@ jobs:
           generate_release_notes: true
           tag_name: Raspirus v${{ env.VERSION }}
           files: |
-            ${{ matrix.platform == 'macos-latest' && 'target/release/Raspirus.app' || '' }}
-            ${{ matrix.platform == 'macos-latest' && 'target/release/Raspirus_*_aarch64.dmg' || '' }}
-            ${{ matrix.platform == 'macos-13' && 'target/release/Raspirus.app' || '' }}
-            ${{ matrix.platform == 'macos-13' && 'target/release/Raspirus_*_x64.dmg' || '' }}
-            ${{ matrix.platform == 'ubuntu-latest' && 'target/release/PKGBUILD' || '' }}
-            ${{ matrix.platform == 'ubuntu-latest' && 'target/release/raspirus_*_amd64.deb' || '' }}
-            ${{ matrix.platform == 'ubuntu-latest' && 'target/release/raspirus_*_x86_64.AppImage' || '' }}
-            ${{ matrix.platform == 'windows-latest' && 'target/release/raspirus_*_x64_en-US.msi' || '' }}
-            ${{ matrix.platform == 'windows-latest' && 'target/release/raspirus_*_x64-setup.exe' || '' }}
+            artifact/Raspirus.app
+            artifact/PKGBUILD
+            artifact/Raspirus_*_aarch64.dmg
+            artifact/Raspirus_*_x64.dmg
+            artifact/raspirus_*_amd64.deb
+            artifact/raspirus_*_x86_64.AppImage
+            artifact/raspirus_*_x64_en-US.msi
+            artifact/raspirus_*_x64-setup.exe
+            artifact/raspirus_*_arm64.deb
+            artifact/raspirus_*_riscv64.deb
+#            target/armv7-unknown-linux-gnueabihf/debian/*.deb
