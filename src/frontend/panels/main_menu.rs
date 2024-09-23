@@ -7,11 +7,9 @@ use crate::{
         iced::{wrap, Language, LocationSelection, Message, Raspirus},
         theme::{
             button::{
-                button_orange_style, button_primary_style, button_secondary_style,
-                button_select_style, button_selectionlist, button_selectionlist_selected,
-                button_transparent_style,
+                button_orange_style, button_primary_style, button_secondary_style, button_select_style, button_selectionlist, button_selectionlist_lang, button_selectionlist_selected_lang, button_transparent_style
             },
-            selection_list::selectionlist,
+            selection_list::{selectionlist, selectionlist_lang},
             svg::svg_icon,
             PRIMARY_COLOR, SECONDARY_COLOR,
         },
@@ -54,15 +52,15 @@ impl Raspirus {
                     language: language.file_name.clone(),
                 })
                 .style(if language.file_name.eq(&current_language.file_name) {
-                    button_selectionlist_selected
+                    button_selectionlist_selected_lang
                 } else {
-                    button_selectionlist
+                    button_selectionlist_lang
                 })
                 .width(iced::Length::Fill)
                 .into(),
             )
         }
-        let language_selection = selectionlist(language_list);
+        let language_selection = selectionlist_lang(language_list);
 
         let top_row = iced::widget::Row::new()
             // language selection
