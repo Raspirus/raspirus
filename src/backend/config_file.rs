@@ -63,7 +63,7 @@ impl Default for Config {
             max_threads: num_cpus::get(),
             mirror: crate::DEFAULT_MIRROR.to_owned(),
             paths: None,
-            language: "en".to_string(),
+            language: rust_i18n::locale().to_string(),
         }
     }
 }
