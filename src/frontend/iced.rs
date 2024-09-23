@@ -5,7 +5,6 @@ use crate::backend::utils::generic::{
 };
 use crate::backend::utils::usb_utils::{list_usb_drives, UsbDevice};
 use crate::backend::yara_scanner::{Skipped, TaggedFile, YaraScanner};
-use crate::CONFIG;
 use futures::SinkExt;
 use iced::{
     futures::{channel::mpsc, Stream},
@@ -25,6 +24,7 @@ pub struct Raspirus {
     pub usb_devices: Vec<UsbDevice>,
     pub sender: Option<mpsc::Sender<PathBuf>>,
     pub location_selection: LocationSelection,
+    pub dark_mode: bool,
 }
 
 #[derive(Debug)]
@@ -122,6 +122,7 @@ pub enum Message {
         path: PathBuf,
     },
     UpdateRules,
+    SwitchTheme,
     // update messages
     Open {
         path: PathBuf,
@@ -175,6 +176,8 @@ pub enum ConfigValue {
     MaxMatch(usize),
     Logging(bool),
     MaxThreads(usize),
+    Language(String),
+    Dark(bool),
 }
 
 #[derive(Debug, Clone)]
@@ -186,6 +189,7 @@ pub enum Card {
 impl Raspirus {
     fn new() -> Self {
         let usb = list_usb_drives().unwrap_or_default().first().cloned();
+        let config = crate::CONFIG.lock().expect("Failed to lock config").clone();
         Self {
             state: State::MainMenu {
                 expanded_language: false,
@@ -196,6 +200,7 @@ impl Raspirus {
             usb_devices: list_usb_drives().unwrap_or_default(),
             sender: None,
             location_selection: LocationSelection::Usb { usb: usb.clone() },
+            dark_mode: config.dark_mode.clone(),
         }
     }
 
@@ -248,7 +253,7 @@ impl Raspirus {
             // update locally selected language
             Message::LanguageChanged { language } => {
                 // close language dialog
-                if let State::MainMenu {
+                let result = if let State::MainMenu {
                     expanded_location,
                     expanded_usb,
                     ..
@@ -259,12 +264,20 @@ impl Raspirus {
                         expanded_location: *expanded_location,
                         expanded_usb: *expanded_usb,
                     };
-                    let mut config = CONFIG.lock().expect("Failed to lock config");
-                    config.language = language.clone();
-                    config.save().expect("Failed to save config");
-                }
+                    update_config(ConfigValue::Language(language.clone()))
+                } else {
+                    Ok(())
+                };
                 rust_i18n::set_locale(&language);
-                iced::Task::none()
+                iced::Task::perform(async { result }, |result| {
+                    if let Err(message) = result {
+                        Message::Error {
+                            case: ErrorCase::Warning { message },
+                        }
+                    } else {
+                        Message::None
+                    }
+                })
             }
             // show popup for warnings and quit for critical errors
             Message::Error { case } => match case {
@@ -704,6 +717,23 @@ impl Raspirus {
                         case: ErrorCase::Warning { message },
                     },
                 })
+            }
+            Message::SwitchTheme => {
+                self.dark_mode = !self.dark_mode;
+                let dark = self.dark_mode;
+
+                iced::Task::perform(
+                    async move { update_config(ConfigValue::Dark(dark)) },
+                    |result| {
+                        if let Err(message) = result {
+                            Message::Error {
+                                case: ErrorCase::Critical { message },
+                            }
+                        } else {
+                            Message::None
+                        }
+                    },
+                )
             }
         }
     }

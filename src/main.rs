@@ -175,6 +175,13 @@ fn main() -> Result<(), String> {
         .exit_on_close_request(true)
         .window(window_settings)
         .subscription(Raspirus::subscription)
+        .theme(|app| {
+            if app.dark_mode {
+                iced::Theme::Dark
+            } else {
+                iced::Theme::Light
+            }
+        })
         .run()
         .unwrap();
 
