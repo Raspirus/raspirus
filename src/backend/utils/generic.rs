@@ -1,13 +1,15 @@
 use std::{
     fs::{self, File},
-    io::{BufRead, BufReader, BufWriter, Read},
+    io::{BufRead, BufReader, BufWriter, Read, Write},
     path::{Path, PathBuf},
 };
 
+use chrono::Local;
 use log::{debug, info, warn};
 use printpdf::PdfDocument;
 use sha2::{Digest, Sha256};
 use yara_x::Rules;
+use zip::write::SimpleFileOptions;
 
 use crate::frontend::iced::ConfigValue;
 
@@ -292,4 +294,82 @@ pub fn create_pdf(log_file: PathBuf) -> Result<PathBuf, String> {
     ))
     .map_err(|err| format!("Failed to save pdf: {err}"))?;
     Ok(downloads_folder.join(format!("{timestamp}.pdf")))
+}
+
+pub fn download_logs() -> Result<PathBuf, String> {
+    let config = crate::CONFIG
+        .lock()
+        .expect("Failed to lock config")
+        .clone()
+        .paths
+        .ok_or("Paths in config undefined".to_owned())?;
+
+    let output_path = config.downloads.join(format!(
+        "{}-logdump.zip",
+        Local::now().format("%Y_%m_%d_%H_%M_%S")
+    ));
+
+    info!("Downloading logs to {}", output_path.to_string_lossy());
+
+    let options = SimpleFileOptions::default().compression_method(zip::CompressionMethod::Stored);
+
+    let mut zip = zip::ZipWriter::new(File::create(&output_path).unwrap());
+    let current_path = config
+        .logs_app
+        .parent()
+        .ok_or("Failed to get app log path")?;
+
+    zip.add_directory_from_path("app", options)
+        .map_err(|err| format!("Failed to add ./app to zip: {err}"))?;
+
+    debug!("Compressing {}...", current_path.to_string_lossy());
+    for entry in fs::read_dir(current_path)
+        .map_err(|err| format!("Failed to read entries for 'app': {err}"))?
+    {
+        let entry = entry.map_err(|err| format!("Failed to get entry: {err}"))?;
+
+        zip.start_file(
+            format!("app/{}", entry.file_name().to_string_lossy()),
+            options,
+        )
+        .map_err(|err| format!("Failed to start file in zip: {err}"))?;
+        debug!("Compressing app/{}...", entry.file_name().to_string_lossy());
+        zip.write(
+            fs::read_to_string(entry.path())
+                .map_err(|err| format!("Failed to read file to string: {err}"))?
+                .as_bytes(),
+        )
+        .map_err(|err| format!("Failed to write file in zip: {err}"))?;
+    }
+
+    let current_path = config.logs_scan;
+    zip.add_directory_from_path("scan", options)
+        .map_err(|err| format!("Failed to add ./scan to zip: {err}"))?;
+
+    debug!("Compressing {}...", current_path.to_string_lossy());
+    for entry in fs::read_dir(current_path)
+        .map_err(|err| format!("Failed to read entries for 'scan': {err}"))?
+    {
+        let entry = entry.map_err(|err| format!("Failed to get entry: {err}"))?;
+
+        zip.start_file(
+            format!("scan/{}", entry.file_name().to_string_lossy()),
+            options,
+        )
+        .map_err(|err| format!("Failed to start file in zip: {err}"))?;
+        debug!(
+            "Compressing scan/{}...",
+            entry.file_name().to_string_lossy()
+        );
+        zip.write(
+            fs::read_to_string(entry.path())
+                .map_err(|err| format!("Failed to read file to string: {err}"))?
+                .as_bytes(),
+        )
+        .map_err(|err| format!("Failed to write file in zip: {err}"))?;
+    }
+    zip.finish()
+        .map_err(|err| format!("Failed to finish zip file: {err}"))?;
+    info!("Logs have been saved to {}", output_path.to_string_lossy());
+    Ok(output_path)
 }
