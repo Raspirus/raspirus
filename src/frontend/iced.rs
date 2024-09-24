@@ -614,17 +614,20 @@ impl Raspirus {
                 },
             }),
             // open a path
-            Message::Open { path } => iced::Task::done({
-                info!("Opening {}...", path.to_string_lossy());
-                match open::that(path) {
-                    Ok(_) => Message::None,
-                    Err(message) => Message::Error {
-                        case: ErrorCase::Warning {
-                            message: message.to_string(),
+            Message::Open { path } => iced::Task::perform(
+                async {
+                    info!("Opening {}...", path.to_string_lossy());
+                    match open::that(path) {
+                        Ok(_) => Message::None,
+                        Err(message) => Message::Error {
+                            case: ErrorCase::Warning {
+                                message: message.to_string(),
+                            },
                         },
-                    },
-                }
-            }),
+                    }
+                },
+                |result| result,
+            ),
             Message::OpenTerms => {
                 self.state = State::Terms;
                 iced::Task::none()
