@@ -104,7 +104,7 @@ impl Raspirus {
             .push(Self::info_card(
                 svg_plain(crate::USER_CODE),
                 t!("maintainers"),
-                "Benjamin Demetz, Felix Hell Björn".into(),
+                "Benjamin Demetz,  Björn Felix Hell".into(),
             ))
             .push(Self::info_card(
                 svg_plain(crate::GIT_COMMIT),
