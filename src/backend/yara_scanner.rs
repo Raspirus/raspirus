@@ -404,20 +404,25 @@ impl YaraScanner {
         progress_channel: Arc<Mutex<mpsc::Sender<Worker>>>,
     ) -> Result<(), String> {
         let percentage = {
-            let analysed_locked = *pointers
+            // this and the following clippy attribute disable a warning where clippy asks for slower code
+            #[allow(clippy::clone_on_copy)]
+            let analysed_locked = pointers
                 .analysed
                 .lock()
-                .map_err(|err| format!("Failed to lock analysed: {err}"))?;
+                .map_err(|err| format!("Failed to lock analysed: {err}"))?
+                .clone();
             let skipped_locked = pointers
                 .skipped
                 .lock()
                 .map_err(|err| format!("Failed to lock skipped: {err}"))?
                 .clone();
             let scanned = analysed_locked + skipped_locked.len() as u64;
-            let total_locked = *pointers
+            #[allow(clippy::clone_on_copy)]
+            let total_locked = pointers
                 .total
                 .lock()
-                .map_err(|err| format!("Failed to lock total: {err}"))?;
+                .map_err(|err| format!("Failed to lock total: {err}"))?
+                .clone();
             (scanned as f32 / total_locked as f32) * 100.0
         };
 
