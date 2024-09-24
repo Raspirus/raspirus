@@ -201,10 +201,13 @@ impl YaraScanner {
                 descriptions,
                 rule_count,
             };
-            let mut file_log_locked = file_log
-                .lock()
-                .map_err(|err| format!("Failed to lock file logger: {err}"))?;
-            file_log_locked.log(&tagged_file);
+            {
+                let mut file_log_locked = file_log
+                    .lock()
+                    .map_err(|err| format!("Failed to lock file logger: {err}"))?
+                    .clone();
+                file_log_locked.log(&tagged_file);
+            }
             let mut tagged_locked = pointers
                 .tagged
                 .lock()
@@ -375,15 +378,17 @@ impl YaraScanner {
         } else {
             let result = scanner.scan_file(path).map_err(|err| {
                 let reason = format!("Skipping file {}: {err}", path.to_string_lossy());
-                match pointers.skipped.lock() {
-                    Ok(mut skipped_locked) => {
-                        skipped_locked.push(Skipped {
-                            path: path.to_path_buf(),
-                            reason: reason.clone(),
-                        });
-                        reason
+                {
+                    match pointers.skipped.lock() {
+                        Ok(mut skipped_locked) => {
+                            skipped_locked.push(Skipped {
+                                path: path.to_path_buf(),
+                                reason: reason.clone(),
+                            });
+                            reason
+                        }
+                        Err(err) => format!("Failed to lock skipped: {err}"),
                     }
-                    Err(err) => format!("Failed to lock skipped: {err}"),
                 }
             })?;
             Self::evaluate_result(&pointers, file_log, result, path)?;
@@ -394,8 +399,8 @@ impl YaraScanner {
                     .lock()
                     .map_err(|err| format!("Failed to lock analysed: {err}"))?;
                 *analysed_locked += size;
-                // send progress to frontend
             }
+            // send progress to frontend
             Self::progress(&pointers, progress_channel).await?;
         }
         Ok(())
@@ -405,21 +410,23 @@ impl YaraScanner {
         pointers: &PointerCollection,
         progress_channel: Arc<Mutex<mpsc::Sender<Worker>>>,
     ) -> Result<(), String> {
-        let analysed_locked = *pointers
-            .analysed
-            .lock()
-            .map_err(|err| format!("Failed to lock analysed: {err}"))?;
-        let skipped_locked = pointers
-            .skipped
-            .lock()
-            .map_err(|err| format!("Failed to lock skipped: {err}"))?
-            .clone();
-        let scanned = analysed_locked + skipped_locked.len() as u64;
-        let total_locked = *pointers
-            .total
-            .lock()
-            .map_err(|err| format!("Failed to lock total: {err}"))?;
-        let percentage = (scanned as f32 / total_locked as f32) * 100.0;
+        let percentage = {
+            let analysed_locked = *pointers
+                .analysed
+                .lock()
+                .map_err(|err| format!("Failed to lock analysed: {err}"))?;
+            let skipped_locked = pointers
+                .skipped
+                .lock()
+                .map_err(|err| format!("Failed to lock skipped: {err}"))?
+                .clone();
+            let scanned = analysed_locked + skipped_locked.len() as u64;
+            let total_locked = *pointers
+                .total
+                .lock()
+                .map_err(|err| format!("Failed to lock total: {err}"))?;
+            (scanned as f32 / total_locked as f32) * 100.0
+        };
 
         let mut progress_channel_locked = progress_channel
             .lock()

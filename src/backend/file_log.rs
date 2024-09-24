@@ -1,4 +1,4 @@
-use std::{fs::File, io::Write};
+use std::{fs::File, io::Write, sync::Arc};
 
 use log::{debug, error};
 
@@ -10,8 +10,9 @@ use crate::CONFIG;
 
 use super::yara_scanner::TaggedFile;
 
+#[derive(Clone)]
 pub struct FileLog {
-    pub file: File,
+    pub file: Arc<File>,
     pub log_path: PathBuf,
 }
 
@@ -31,7 +32,7 @@ impl FileLog {
     pub fn new() -> Result<Self, String> {
         let values = Self::create_file()?;
         Ok(Self {
-            file: values.0,
+            file: Arc::new(values.0),
             log_path: values.1,
         })
     }
