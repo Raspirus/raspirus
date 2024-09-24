@@ -11,7 +11,7 @@ pub struct Config {
     /// contains the config version
     #[serde(default = "default_config")]
     pub config_version: String,
-    /// Last time and date when the db was successfully updated
+    /// Currently installed version of the rules
     pub rules_version: String,
     /// lower and upper threshhold for flagging
     pub min_matches: usize,
@@ -20,7 +20,7 @@ pub struct Config {
     pub max_threads: usize,
     /// If we should log information to a file
     pub logging_is_active: bool,
-    /// mirror to folder with hashfiles for update
+    /// mirror to folder with github api like json
     pub mirror: String,
     /// stores the language
     pub language: String,
@@ -43,15 +43,6 @@ pub struct Paths {
     pub logs_scan: PathBuf,
     pub logs_app: PathBuf,
     pub downloads: PathBuf,
-}
-
-/// Struct for which fields the frontend has access to
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct ConfigFrontend {
-    pub logging_is_active: Option<bool>,
-    pub scan_dir: Option<bool>,
-    pub min_matches: Option<usize>,
-    pub max_matches: Option<usize>,
 }
 
 impl Default for Config {
@@ -78,8 +69,6 @@ impl Config {
     /// Finds the suitable path for the current system, creates a subfolder for the app and returns
     /// the path as a normal String
     fn set_paths(&mut self) -> Result<(), String> {
-        //let downloads = directories_next::UserDirs::download_dir(&self);
-        //let downloads = dirs::download_dir().unwrap_or(Path::new(".").to_path_buf());
         let downloads = UserDirs::new()
             .ok_or("Could not determine user directories".to_owned())?
             .download_dir()
