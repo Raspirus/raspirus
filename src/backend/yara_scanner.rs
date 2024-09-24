@@ -302,9 +302,8 @@ impl YaraScanner {
                 }
 
                 info!(
-                    "Scanning {}/{} \t archived file {}",
-                    i + 1,
-                    length,
+                    "{:<20} archived file {}",
+                    format!("Scanning {}/{}", i + 1, length),
                     path.to_string_lossy()
                 );
                 let mut content = Vec::new();
