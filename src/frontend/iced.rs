@@ -1,7 +1,7 @@
 use crate::backend::config_file::Config;
 use crate::backend::downloader;
 use crate::backend::utils::generic::{
-    create_pdf, download_logs, generate_virustotal, update_config,
+    create_pdf, download_logs, generate_virustotal, profile_path, update_config,
 };
 use crate::backend::utils::usb_utils::{list_usb_drives, UsbDevice};
 use crate::backend::yara_scanner::{Skipped, TaggedFile, YaraScanner};
@@ -13,10 +13,7 @@ use iced::{
 use log::{debug, error, info, warn};
 use rust_i18n::t;
 use std::borrow::Cow;
-use std::{
-    path::PathBuf,
-    sync::{Arc, Mutex},
-};
+use std::path::PathBuf;
 
 pub struct Raspirus {
     pub state: State,
@@ -99,7 +96,6 @@ impl Language {
 pub enum Worker {
     Ready { sender: mpsc::Sender<PathBuf> },
     Message { message: Message },
-    Error { error: ErrorCase },
 }
 
 #[derive(Debug, Clone)]
@@ -741,27 +737,28 @@ impl Raspirus {
                 let input = receiver.select_next_some().await;
                 info!("Starting scan on {}", input.to_string_lossy());
 
-                // create scanner. if path valid, start scan otherwise abort
-                let mut scanner = match YaraScanner::new().set_path(input) {
-                    Ok(scanner) => scanner,
-                    Err(message) => {
-                        output
-                            .send(Worker::Error {
-                                error: ErrorCase::Warning { message },
-                            })
-                            .await
-                            .expect("Failed to send scanner error to stream");
-                        continue;
-                    }
-                };
+                // create scanner
+                let scanner = YaraScanner::new();
+                let (sender, mut receiver) = mpsc::channel(10);
+                let (total_size, paths) = profile_path(input);
+                let mut scanned_size = 0;
 
-                scanner.progress_sender = Some(Arc::new(Mutex::new(output.clone())));
-                let scanner = Arc::new(scanner);
+                let handle = tokio::task::spawn(async move { scanner.start(sender, paths) });
 
-                let handle = tokio::task::spawn({
-                    let scanner_c = scanner.clone();
-                    async move { scanner_c.start() }
-                });
+                info!("Starting scan of size {total_size}");
+
+                // calculate and forward progress
+                while let Some(value) = receiver.next().await {
+                    scanned_size += value;
+                    debug!("{scanned_size} / {total_size}");
+                    let percentage = (scanned_size as f32 / total_size as f32) * 100.0;
+                    output
+                        .send(Worker::Message {
+                            message: Message::ScanPercentage { percentage },
+                        })
+                        .await
+                        .expect("Failed to send progress to frontend");
+                }
 
                 let result = handle.await.expect("Failed to wait for handle");
 
@@ -795,7 +792,6 @@ impl Raspirus {
         iced::Subscription::run(Self::scan).map(|worker| match worker {
             Worker::Ready { sender } => Message::ScannerReady { sender },
             Worker::Message { message } => message,
-            Worker::Error { error } => Message::Error { case: error },
         })
     }
 }
