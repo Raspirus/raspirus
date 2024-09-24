@@ -2,7 +2,6 @@ use std::{fmt::Display, path::PathBuf};
 
 #[cfg(not(target_os = "windows"))]
 use log::debug;
-use log::info;
 #[cfg(target_os = "windows")]
 use log::warn;
 use serde::{Deserialize, Serialize};
@@ -25,7 +24,7 @@ pub fn list_usb_drives() -> Result<Vec<UsbDevice>, String> {
 
     #[cfg(any(target_os = "linux", target_os = "macos"))]
     {
-        info!("Trying to retrieve USB drives from Unix-like OS");
+        debug!("Trying to retrieve USB drives from Unix-like OS");
 
         let options = lfs_core::ReadOptions::default();
         let mut mounts = lfs_core::read_mounts(&options)
@@ -82,7 +81,7 @@ fn list_usb_windows() -> Result<Vec<UsbDevice>, String> {
     use winapi::um::fileapi::GetDriveTypeW;
     use winapi::um::winbase::DRIVE_REMOVABLE;
 
-    info!("Trying to retrieve USB drives from Windows OS");
+    debug!("Trying to retrieve USB drives from Windows OS");
     let mut usb_drives = Vec::new();
     for letter in 'A'..='Z' {
         // We retrieve all possible information to determine if its a removable USB device

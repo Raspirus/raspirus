@@ -180,7 +180,7 @@ pub enum Card {
 
 impl Raspirus {
     fn new() -> Self {
-        let usb = list_usb_drives().unwrap_or_default().first().cloned();
+        let usb = list_usb_drives().unwrap_or_default();
         let config = crate::CONFIG.lock().expect("Failed to lock config").clone();
         Self {
             state: State::MainMenu {
@@ -188,10 +188,12 @@ impl Raspirus {
                 expanded_location: false,
                 expanded_usb: false,
             },
-            scan_path: usb.as_ref().map(|usb| usb.path.clone()),
-            usb_devices: list_usb_drives().unwrap_or_default(),
+            scan_path: usb.first().map(|usb| usb.path.clone()),
+            usb_devices: usb.clone(),
             sender: None,
-            location_selection: LocationSelection::Usb { usb: usb.clone() },
+            location_selection: LocationSelection::Usb {
+                usb: usb.first().cloned(),
+            },
             dark_mode: config.dark_mode,
         }
     }
@@ -244,17 +246,15 @@ impl Raspirus {
             }
             // show popup for warnings and quit for critical errors
             Message::Error { case } => match case {
-                ErrorCase::Critical { message } => iced::Task::perform(
-                    async move {
-                        error!("{message}");
-                        rfd::MessageDialog::new()
-                            .set_description(&message)
-                            .set_title(t!("error_title"))
-                            .set_level(rfd::MessageLevel::Error)
-                            .show()
-                    },
-                    |_| Message::Shutdown,
-                ),
+                ErrorCase::Critical { message } => iced::Task::done({
+                    error!("{message}");
+                    rfd::MessageDialog::new()
+                        .set_description(&message)
+                        .set_title(t!("error_title"))
+                        .set_level(rfd::MessageLevel::Error)
+                        .show();
+                    Message::Shutdown
+                }),
                 ErrorCase::Warning { message } => {
                     if let State::Scanning {
                         scan_state: ScanState::Indexing,
@@ -267,17 +267,15 @@ impl Raspirus {
                         }
                     }
 
-                    iced::Task::perform(
-                        async move {
-                            warn!("{message}");
-                            rfd::MessageDialog::new()
-                                .set_description(&message)
-                                .set_title(t!("notice_title"))
-                                .set_level(rfd::MessageLevel::Warning)
-                                .show()
-                        },
-                        |_| Message::None,
-                    )
+                    iced::Task::done({
+                        warn!("{message}");
+                        rfd::MessageDialog::new()
+                            .set_description(&message)
+                            .set_title(t!("notice_title"))
+                            .set_level(rfd::MessageLevel::Warning)
+                            .show();
+                        Message::None
+                    })
                 }
             },
             // switch to result page
@@ -431,20 +429,18 @@ impl Raspirus {
                             iced::Task::none()
                         // if does not contain path we open file dialog to pick one
                         } else {
-                            iced::Task::perform(
-                                async {
-                                    rfd::FileDialog::new()
-                                        .set_directory("~")
-                                        .set_title(t!("pick_folder"))
-                                        .pick_folder()
-                                },
-                                |result| match result {
+                            iced::Task::done({
+                                match rfd::FileDialog::new()
+                                    .set_directory("~")
+                                    .set_title(t!("pick_folder"))
+                                    .pick_folder()
+                                {
                                     None => Message::None,
                                     Some(result) => Message::RequestLocation {
                                         selection: LocationSelection::Folder { path: Some(result) },
                                     },
-                                },
-                            )
+                                }
+                            })
                         }
                     }
                     LocationSelection::File { path } => {
@@ -461,20 +457,18 @@ impl Raspirus {
                             iced::Task::none()
                         // if does not contain path we open file dialog to pick one
                         } else {
-                            iced::Task::perform(
-                                async {
-                                    rfd::FileDialog::new()
-                                        .set_directory("~")
-                                        .set_title(t!("pick_file"))
-                                        .pick_file()
-                                },
-                                |result| match result {
+                            iced::Task::done({
+                                match rfd::FileDialog::new()
+                                    .set_directory("~")
+                                    .set_title(t!("pick_file"))
+                                    .pick_file()
+                                {
                                     None => Message::None,
                                     Some(result) => Message::RequestLocation {
                                         selection: LocationSelection::Folder { path: Some(result) },
                                     },
-                                },
-                            )
+                                }
+                            })
                         }
                     }
                 },
@@ -488,31 +482,25 @@ impl Raspirus {
                     expanded_usb,
                 } = &self.state
                 {
-                    if let LocationSelection::Usb { usb } = &self.location_selection {
-                        if usb.is_some() {
-                            self.state = State::MainMenu {
-                                expanded_language: *expanded_language,
-                                expanded_location: *expanded_location,
-                                expanded_usb: !*expanded_usb,
-                            };
-                        } else {
-                            let usbs = list_usb_drives().inspect(|usbs| {
-                                self.usb_devices.clone_from(usbs);
-                            });
-                            let usb = usbs.unwrap_or_default().first().cloned();
-                            self.state = State::MainMenu {
-                                expanded_language: *expanded_language,
-                                expanded_location: *expanded_location,
-                                expanded_usb: !*expanded_usb,
-                            };
-                            self.location_selection = LocationSelection::Usb { usb: usb.clone() };
-                            if let Some(usb) = usb {
-                                self.scan_path = Some(usb.path);
+                    match list_usb_drives() {
+                        Ok(usbs) => {
+                            self.usb_devices = usbs;
+                            if let LocationSelection::Usb { .. } = &self.location_selection {
+                                self.state = State::MainMenu {
+                                    expanded_language: *expanded_language,
+                                    expanded_location: *expanded_location,
+                                    expanded_usb: !*expanded_usb,
+                                };
                             }
+                            iced::Task::none()
                         }
+                        Err(message) => iced::Task::done(Message::Error {
+                            case: ErrorCase::Warning { message },
+                        }),
                     }
+                } else {
+                    iced::Task::none()
                 }
-                iced::Task::none()
             }
             // expand dropdown to choose folder, file or usb
             Message::ToggleLocationSelection => {
@@ -526,26 +514,27 @@ impl Raspirus {
                         expanded_language: *expanded_language,
                         expanded_location: !*expanded_location,
                         expanded_usb: *expanded_usb,
-                    }
+                    };
+                    self.usb_devices = list_usb_drives().unwrap_or_default();
                 }
                 iced::Task::none()
             }
             // generate hash for file and open in preferred browser
-            Message::GenerateVirustotal { path } => iced::Task::perform(
-                async {
-                    open::that(
-                        generate_virustotal(path)
-                            .map_err(|message| ErrorCase::Warning { message })?,
-                    )
-                    .map_err(|message| ErrorCase::Warning {
-                        message: message.to_string(),
-                    })
-                },
-                |result: Result<(), ErrorCase>| match result {
-                    Ok(_) => Message::None,
-                    Err(err) => Message::Error { case: err },
-                },
-            ),
+            Message::GenerateVirustotal { path } => iced::Task::done({
+                match generate_virustotal(path) {
+                    Ok(virus_total) => match open::that(virus_total) {
+                        Ok(_) => Message::None,
+                        Err(message) => Message::Error {
+                            case: ErrorCase::Warning {
+                                message: message.to_string(),
+                            },
+                        },
+                    },
+                    Err(message) => Message::Error {
+                        case: ErrorCase::Warning { message },
+                    },
+                }
+            }),
             // do nothing
             Message::None => iced::Task::none(),
             // send changed config value to backend
@@ -572,7 +561,7 @@ impl Raspirus {
                     };
                     iced::Task::none()
                 }
-                Err(message) => iced::Task::perform(async {}, move |_| Message::Error {
+                Err(message) => iced::Task::done(Message::Error {
                     case: ErrorCase::Critical {
                         message: message.clone(),
                     },
@@ -618,30 +607,24 @@ impl Raspirus {
                 iced::Task::none()
             }
             // start pdf generation
-            Message::DownloadLog { log_path } => iced::Task::perform(
-                async move {
-                    match create_pdf(log_path) {
-                        Ok(path) => Message::Open { path },
-                        Err(message) => Message::Error {
-                            case: ErrorCase::Warning { message },
-                        },
-                    }
+            Message::DownloadLog { log_path } => iced::Task::done(match create_pdf(log_path) {
+                Ok(path) => Message::Open { path },
+                Err(message) => Message::Error {
+                    case: ErrorCase::Warning { message },
                 },
-                |result| result,
-            ),
+            }),
             // open a path
-            Message::Open { path } => iced::Task::perform(
-                async {
-                    info!("Opening {}...", path.to_string_lossy());
-                    open::that(path).map_err(|message| ErrorCase::Warning {
-                        message: message.to_string(),
-                    })
-                },
-                |result: Result<(), ErrorCase>| match result {
+            Message::Open { path } => iced::Task::done({
+                info!("Opening {}...", path.to_string_lossy());
+                match open::that(path) {
                     Ok(_) => Message::None,
-                    Err(err) => Message::Error { case: err },
-                },
-            ),
+                    Err(message) => Message::Error {
+                        case: ErrorCase::Warning {
+                            message: message.to_string(),
+                        },
+                    },
+                }
+            }),
             Message::OpenTerms => {
                 self.state = State::Terms;
                 iced::Task::none()
@@ -686,14 +669,12 @@ impl Raspirus {
                     },
                 )
             }
-            Message::DownloadLogs => {
-                iced::Task::perform(async { download_logs() }, |result| match result {
-                    Ok(path) => Message::Open { path },
-                    Err(message) => Message::Error {
-                        case: ErrorCase::Warning { message },
-                    },
-                })
-            }
+            Message::DownloadLogs => iced::Task::done(match download_logs() {
+                Ok(path) => Message::Open { path },
+                Err(message) => Message::Error {
+                    case: ErrorCase::Warning { message },
+                },
+            }),
         }
     }
 
