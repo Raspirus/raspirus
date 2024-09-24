@@ -145,7 +145,13 @@ impl Raspirus {
                         iced::widget::Text::new({
                             match usb {
                                 Some(usb) => usb.to_string(),
-                                None => t!("usb_list_not_found").to_string(),
+                                None => {
+                                    if self.usb_devices.is_empty() {
+                                        t!("usb_list_not_found").to_string()
+                                    } else {
+                                        t!("usb_not_selected").to_string()
+                                    }
+                                }
                             }
                         })
                         .align_x(iced::alignment::Horizontal::Center),
@@ -202,7 +208,23 @@ impl Raspirus {
                 iced::widget::Button::new(
                     iced::widget::svg(iced::widget::svg::Handle::from_memory(element.1))
                         .width(iced::Length::Shrink)
-                        .opacity(if element.0.eq(&selection) { 1.0 } else { 0.75 }),
+                        .opacity({
+                            if match &selection {
+                                LocationSelection::Usb { .. } => {
+                                    matches!(element.0.clone(), LocationSelection::Usb { .. })
+                                }
+                                LocationSelection::Folder { .. } => {
+                                    matches!(element.0.clone(), LocationSelection::Folder { .. })
+                                }
+                                LocationSelection::File { .. } => {
+                                    matches!(element.0.clone(), LocationSelection::File { .. })
+                                }
+                            } {
+                                1.0
+                            } else {
+                                0.75
+                            }
+                        }),
                 )
                 .on_press(Message::LocationChanged {
                     selection: element.0.clone(),
