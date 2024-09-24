@@ -114,7 +114,7 @@ impl YaraScanner {
         let rules = Arc::new(get_rules(yarac)?);
 
         // setup file log
-        let file_log = Arc::new(Mutex::new(FileLog::new()?));
+        let mut file_log = FileLog::new()?;
 
         let paths = profile_path(path.to_path_buf());
         let paths_count = paths.1.len();
@@ -124,13 +124,11 @@ impl YaraScanner {
             Threadpool::new(CONFIG.lock().expect("Failed to lock config").max_threads);
         for file in paths.1 {
             let pointers_c = pointers.clone();
-            let file_log_c = file_log.clone();
             let progress_c = self.progress_sender.clone().ok_or("Channel not set")?;
             let rules_c = rules.clone();
             threadpool.execute(move || {
                 match futures::executor::block_on(Self::scan_file(
                     file.as_path(),
-                    file_log_c,
                     progress_c,
                     pointers_c,
                     rules_c,
@@ -155,7 +153,11 @@ impl YaraScanner {
             .map_err(|err| format!("Failed to lock skipped: {err}"))?
             .clone();
 
-        let logger = file_log.lock().expect("Failed to lock logger");
+        info!("Writing tagged files to log file...");
+        for tagged in &tagged {
+            file_log.log(tagged);
+        }
+
         info!(
             "Scanned {paths_count} files in {:.2}s",
             std::time::Instant::now()
@@ -163,12 +165,11 @@ impl YaraScanner {
                 .as_secs_f32()
         );
         // return tagged and skipped files aswell as path to the scan log
-        Ok((tagged, skipped, logger.log_path.clone()))
+        Ok((tagged, skipped, file_log.log_path.clone()))
     }
 
     fn evaluate_result(
         pointers: &PointerCollection,
-        file_log: Arc<Mutex<FileLog>>,
         result: ScanResults,
         path: &Path,
     ) -> Result<(), String> {
@@ -201,13 +202,6 @@ impl YaraScanner {
                 descriptions,
                 rule_count,
             };
-            {
-                let mut file_log_locked = file_log
-                    .lock()
-                    .map_err(|err| format!("Failed to lock file logger: {err}"))?
-                    .clone();
-                file_log_locked.log(&tagged_file);
-            }
             let mut tagged_locked = pointers
                 .tagged
                 .lock()
@@ -220,7 +214,6 @@ impl YaraScanner {
     /// thread function to scan a singular file
     async fn scan_file(
         path: &Path,
-        file_log: Arc<Mutex<FileLog>>,
         progress_channel: Arc<Mutex<mpsc::Sender<Worker>>>,
         pointers: PointerCollection,
         rules: Arc<Rules>,
@@ -363,7 +356,7 @@ impl YaraScanner {
                         continue;
                     }
                 };
-                Self::evaluate_result(&pointers, file_log.clone(), result, &path)?;
+                Self::evaluate_result(&pointers, result, &path)?;
                 // update shared variables
                 {
                     let mut analysed_locked = pointers
@@ -391,7 +384,7 @@ impl YaraScanner {
                     }
                 }
             })?;
-            Self::evaluate_result(&pointers, file_log, result, path)?;
+            Self::evaluate_result(&pointers, result, path)?;
             // update shared variables
             {
                 let mut analysed_locked = pointers
