@@ -10,7 +10,6 @@ use crate::CONFIG;
 
 use super::yara_scanner::TaggedFile;
 
-#[derive(Clone)]
 pub struct FileLog {
     pub file: Arc<File>,
     pub log_path: PathBuf,
