@@ -211,13 +211,13 @@ impl Raspirus {
                         .opacity({
                             if match &selection {
                                 LocationSelection::Usb { .. } => {
-                                    matches!(element.0.clone(), LocationSelection::Usb { .. })
+                                    matches!(element.0, LocationSelection::Usb { .. })
                                 }
                                 LocationSelection::Folder { .. } => {
-                                    matches!(element.0.clone(), LocationSelection::Folder { .. })
+                                    matches!(element.0, LocationSelection::Folder { .. })
                                 }
                                 LocationSelection::File { .. } => {
-                                    matches!(element.0.clone(), LocationSelection::File { .. })
+                                    matches!(element.0, LocationSelection::File { .. })
                                 }
                             } {
                                 1.0
