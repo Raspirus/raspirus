@@ -1,14 +1,14 @@
 name: raspirus
-base: core18
-version: 1.2.2
+base: core20
+version: 2.0.0
 summary: A resource- and human-friendly malware scanner
-description: Raspirus is your cost-free, versatile malware scanner. Tailored signature detection, comprehensive file scans, and privacy prioritized for swift, reliable protection.
+description: Raspirus is your cost-free, versatile malware scanner. Tailored rules-based detection, comprehensive file scans, and privacy prioritized for swift, reliable protection.
 grade: stable
 confinement: strict
 architectures:
   - amd64
   - arm64
-  - armhf
+  - riscv64
 
 parts:
   raspirus-amd64:
@@ -20,22 +20,22 @@ parts:
 
   raspirus-arm64:
     plugin: dump
-    source: https://github.com/Raspirus/Raspirus/releases/download/v$SNAPCRAFT_PROJECT_VERSION/raspirus_$SNAPCRAFT_PROJECT_VERSION_arm64.deb
+    source: https://github.com/Raspirus/Raspirus/releases/download/v$SNAPCRAFT_PROJECT_VERSION/raspirus_$SNAPCRAFT_PROJECT_VERSION-1_arm64.deb
     source-type: deb
     organize:
       usr/bin/raspirus: usr/bin/raspirus-arm64
   
-  raspirus-armhf:
+  raspirus-riscv64:
     plugin: dump
-    source: https://github.com/Raspirus/Raspirus/releases/download/v$SNAPCRAFT_PROJECT_VERSION/raspirus_$SNAPCRAFT_PROJECT_VERSION_armhf.deb
+    source: https://github.com/Raspirus/Raspirus/releases/download/v$SNAPCRAFT_PROJECT_VERSION/raspirus_$SNAPCRAFT_PROJECT_VERSION_-1_riscv64.deb
     source-type: deb
     organize:
-      usr/bin/raspirus: usr/bin/raspirus-armhf
+      usr/bin/raspirus: usr/bin/raspirus-riscv64
 
 apps:
   raspirus-amd64:
     command: raspirus-amd64
   raspirus-arm64:
     command: raspirus-arm64
-  raspirus-armhf:
-    command: raspirus-armhf
+  raspirus-riscv64:
+    command: raspirus-riscv64
