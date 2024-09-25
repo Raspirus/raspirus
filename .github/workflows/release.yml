@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
 
 env:
-  VERSION: 1.3.0
+  VERSION: 2.0.0
 
 jobs:
   # Release build job
@@ -137,10 +137,6 @@ jobs:
         with:
           path: artifacts
           merge-multiple: true
-
-      # Command to list all files after artifacts are downloaded
-      - name: List downloaded files
-        run: ls -R ./artifacts
 
       - name: Create attestation for all builds
         uses: actions/attest-build-provenance@v1
