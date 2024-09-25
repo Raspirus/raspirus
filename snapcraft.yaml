@@ -27,7 +27,7 @@ parts:
   
   raspirus-riscv64:
     plugin: dump
-    source: https://github.com/Raspirus/Raspirus/releases/download/v$SNAPCRAFT_PROJECT_VERSION/raspirus_$SNAPCRAFT_PROJECT_VERSION_-1_riscv64.deb
+    source: https://github.com/Raspirus/Raspirus/releases/download/v$SNAPCRAFT_PROJECT_VERSION/raspirus_$SNAPCRAFT_PROJECT_VERSION-1_riscv64.deb
     source-type: deb
     organize:
       usr/bin/raspirus: usr/bin/raspirus-riscv64
