@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
 
 env:
-  VERSION: 2.0.1
+  VERSION: 2.0.0
 
 jobs:
   # Release build job
@@ -111,18 +111,15 @@ jobs:
       - name: Set environment variables
         run: echo "PKG_CONFIG_SYSROOT_DIR=${{ matrix.sysroot }}" >> $GITHUB_ENV
 
-      - name: Install app dependencies
-        run: cargo install cargo-packager --locked
+      - name: Install deb packager
+        run: cargo install cargo-deb
 
-      - name: Package Binary
+      - name: Package the cross-compiled build
         env:
           PKG_CONFIG_SYSROOT_DIR: ${{ matrix.sysroot }}
         run: |
-          cargo packager --release --verbose --config "{\"beforePackagingCommand\": \"cargo build --release --target ${{ matrix.target }}\"}"
+          cargo deb --target=${{ matrix.target }}
 
-      - name: List release
-        run: ls * target/${{ matrix.target }}
-          
       - name: Upload cross-compile artifacts
         uses: actions/upload-artifact@v4
         with:
