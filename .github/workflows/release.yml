@@ -118,7 +118,7 @@ jobs:
         env:
           PKG_CONFIG_SYSROOT_DIR: ${{ matrix.sysroot }}
         run: |
-          cargo packager --release --verbose --config "{\"beforePackagingCommand\": \"cargo build --release --target ${{ matrix.target }}\", \"targetTriple\": \"${{ matrix.target }}\"}"
+          cargo packager --release --verbose --config "{\"beforePackagingCommand\": \"cargo build --release --target ${{ matrix.target }}\"\"}"
 
       - name: List release
         run: ls * target/${{ matrix.target }}
