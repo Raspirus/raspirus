@@ -111,15 +111,18 @@ jobs:
       - name: Set environment variables
         run: echo "PKG_CONFIG_SYSROOT_DIR=${{ matrix.sysroot }}" >> $GITHUB_ENV
 
-      - name: Install deb packager
-        run: cargo install cargo-deb
+      - name: Install app dependencies
+        run: cargo install cargo-packager --locked
 
-      - name: Package the cross-compiled build
+      - name: Package Binary
         env:
           PKG_CONFIG_SYSROOT_DIR: ${{ matrix.sysroot }}
         run: |
-          cargo deb --target=${{ matrix.target }}
+          cargo packager --release --verbose --config "{\"beforePackagingCommand\": \"cargo build --release --target ${{ matrix.target }}\", \"targetTriple\": \"${{ matrix.target }}\"}"
 
+      - name: List release
+        run: ls * target/${{ matrix.target }}
+          
       - name: Upload cross-compile artifacts
         uses: actions/upload-artifact@v4
         with:
