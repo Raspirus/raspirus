@@ -11,8 +11,6 @@ default-run = "raspirus"
 edition = "2021"
 rust-version = "1.81"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 # generic dependencies
 [dependencies]
 threadpool_rs = { git = "https://github.com/GamingGuy003/threadpool_rs.git", features = [
@@ -52,6 +50,12 @@ windows-sys = { version = "0.59.0", features = [
 ] }
 winapi = "0.3.9"
 
+[profile.release]
+opt-level = 3 # Focus on performance
+lto = true
+codegen-units = 1
+strip = true # Removed debugging symbols
+#panic = "abort" # Removes exception tree
 
 [package.metadata.packager]
 product-name = "Raspirus"
