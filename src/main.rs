@@ -187,7 +187,7 @@ fn main() -> Result<(), String> {
             }
         })
         .run()
-        .unwrap();
+        .expect("Failed to run application");
 
     Ok(())
 }
