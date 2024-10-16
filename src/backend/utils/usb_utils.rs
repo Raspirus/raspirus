@@ -3,7 +3,7 @@ use std::{fmt::Display, path::PathBuf};
 #[cfg(not(target_os = "windows"))]
 use log::debug;
 #[cfg(target_os = "windows")]
-use log::{debug, info, warn};
+use log::{debug, info};
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash, Default)]
@@ -72,7 +72,7 @@ pub fn list_usb_drives() -> Result<Vec<UsbDevice>, String> {
 }
 
 // In Windows we need to iterate through all possible mount points and see what type of device is mounted
-#[cfg(windows)]
+//#[cfg(windows)]
 fn list_usb_windows() -> Result<Vec<UsbDevice>, String> {
     use std::ffi::OsStr;
     use std::fs;
@@ -91,7 +91,7 @@ fn list_usb_windows() -> Result<Vec<UsbDevice>, String> {
             Some(drive_name) => drive_name,
             None => continue,
         };
-        let wide_path = drive_path.encode_wide().chain(once(0)).collect::<Vec<_>>();
+        let wide_path = drive_name.encode_wide().chain(once(0)).collect::<Vec<_>>();
         /**{
             Some(drive_path) => drive_path.to_owned(),
             None => {
