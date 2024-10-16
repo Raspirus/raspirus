@@ -72,7 +72,7 @@ pub fn list_usb_drives() -> Result<Vec<UsbDevice>, String> {
 }
 
 // In Windows we need to iterate through all possible mount points and see what type of device is mounted
-//#[cfg(windows)]
+#[cfg(windows)]
 fn list_usb_windows() -> Result<Vec<UsbDevice>, String> {
     use std::ffi::OsStr;
     use std::fs;
@@ -85,33 +85,21 @@ fn list_usb_windows() -> Result<Vec<UsbDevice>, String> {
     let mut usb_drives = Vec::new();
     for letter in 'A'..='Z' {
         // We retrieve all possible information to determine if its a removable USB device
-        let drive_path = letter.clone().to_string() + ":\\";
-        let drive_path = std::path::Path::new(&drive_path);
-        let drive_name = match drive_path.file_name() {
-            Some(drive_name) => drive_name,
-            None => continue,
-        };
-        let wide_path = drive_name.encode_wide().chain(once(0)).collect::<Vec<_>>();
-        /**{
-            Some(drive_path) => drive_path.to_owned(),
-            None => {
-                warn!("Failed to convert path to string: {}", e);
-                continue;
-            }
-        };
+        let drive_path = letter.clone().to_string() + ":\\"; // C:\\
+        let drive_path_os = OsStr::new(std::path::Path::new(&drive_path));
 
-        let wide_path = OsStr::new(&drive_path)
+        let wide_path = drive_path_os
             .encode_wide()
             .chain(once(0))
             .collect::<Vec<_>>();
-            **/
+
         let drive_type = unsafe { GetDriveTypeW(wide_path.as_ptr()) };
 
         if let Ok(metadata) = fs::metadata(drive_path) {
             if metadata.is_dir() && drive_type == DRIVE_REMOVABLE {
                 info!("Found Drive: {}", drive_path);
                 usb_drives.push(UsbDevice {
-                    name: drive_path.to_string() + " " + &drive_name.to_string_lossy(),
+                    name: drive_path.to_string() + " " + &letter.to_string(),
                     path: drive_path.to_string().into(),
                 });
             }
