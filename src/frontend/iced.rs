@@ -431,7 +431,6 @@ impl Raspirus {
                         } else {
                             iced::Task::done({
                                 match rfd::FileDialog::new()
-                                    .set_directory("~")
                                     .set_title(t!("pick_folder"))
                                     .pick_folder()
                                 {
@@ -459,7 +458,6 @@ impl Raspirus {
                         } else {
                             iced::Task::done({
                                 match rfd::FileDialog::new()
-                                    .set_directory("~")
                                     .set_title(t!("pick_file"))
                                     .pick_file()
                                 {
