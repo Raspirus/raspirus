@@ -722,6 +722,19 @@ impl Raspirus {
                 // create scanner
                 let scanner = YaraScanner::new();
                 let (sender, mut receiver) = mpsc::channel(10);
+                if !input.exists() {
+                    output
+                        .send(Worker::Message {
+                            message: Message::Error {
+                                case: ErrorCase::Warning {
+                                    message: "Path no longer valid!".to_owned(),
+                                },
+                            },
+                        })
+                        .await
+                        .expect("Failed to send error to frontend");
+                    continue;
+                }
                 let (total_size, paths) = profile_path(input);
                 let mut scanned_size = 0;
 
