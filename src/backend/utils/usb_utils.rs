@@ -95,7 +95,7 @@ fn list_usb_windows() -> Result<Vec<UsbDevice>, String> {
 
         let drive_type = unsafe { GetDriveTypeW(wide_path.as_ptr()) };
 
-        if let Ok(metadata) = fs::metadata(drive_path) {
+        if let Ok(metadata) = fs::metadata(drive_path.clone()) {
             if metadata.is_dir() && drive_type == DRIVE_REMOVABLE {
                 info!("Found Drive: {}", drive_path);
                 usb_drives.push(UsbDevice {
