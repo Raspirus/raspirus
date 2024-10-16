@@ -315,7 +315,8 @@ pub fn download_logs() -> Result<PathBuf, String> {
 
     let options = SimpleFileOptions::default().compression_method(zip::CompressionMethod::Stored);
 
-    let mut zip = zip::ZipWriter::new(File::create(&output_path).unwrap());
+    let mut zip =
+        zip::ZipWriter::new(File::create(&output_path).expect("Failed to create zip archive"));
     let current_path = config
         .logs_app
         .parent()
