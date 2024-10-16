@@ -73,7 +73,7 @@ impl YaraScanner {
     pub fn start(
         &self,
         channel: mpsc::Sender<u64>,
-        paths: Vec<PathBuf>,
+        mut paths: Vec<PathBuf>,
     ) -> Result<(Vec<TaggedFile>, Vec<Skipped>, PathBuf), String> {
         let start_time = std::time::Instant::now();
 
@@ -98,7 +98,12 @@ impl YaraScanner {
 
         let mut threadpool =
             Threadpool::new(CONFIG.lock().expect("Failed to lock config").max_threads);
-        for file in paths {
+
+        for _ in 0..paths_count {
+            let file = match paths.pop() {
+                Some(path) => path,
+                None => break,
+            };
             let pointers_c = pointers.clone();
             let progress_c = channel.clone();
             let rules_c = rules.clone();
