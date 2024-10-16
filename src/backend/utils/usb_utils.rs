@@ -20,59 +20,56 @@ impl Display for UsbDevice {
 
 // Lists all the attached USBs for various platforms
 pub fn list_usb_drives() -> Result<Vec<UsbDevice>, String> {
-    let mut usb_drives: Vec<UsbDevice> = Vec::new();
-
     #[cfg(any(target_os = "linux", target_os = "macos"))]
-    {
-        debug!("Trying to retrieve USB drives from Unix-like OS");
-
-        let options = lfs_core::ReadOptions::default();
-        let mut mounts = lfs_core::read_mounts(&options)
-            .map_err(|err| format!("Failed to list usb drives: {err}"))?;
-        // filter not ok / non removable drives
-        mounts.retain(|m| {
-            m.stats.is_ok()
-                && match m.disk.clone() {
-                    Some(disk) => disk.removable.unwrap_or_default(),
-                    None => false,
-                }
-        });
-
-        for entry in mounts {
-            usb_drives.push(UsbDevice {
-                name: format!(
-                    "{} ({})",
-                    entry.clone().fs_label.unwrap_or("No Label".to_owned()),
-                    entry
-                        .clone()
-                        .disk
-                        .unwrap_or_else(|| panic!("Broken disk data for usb {entry:?}"))
-                        .name
-                ),
-                path: entry.info.mount_point,
-            });
-        }
-        debug!("Found: {usb_drives:?}")
-    }
-
+    return list_usb_linux();
     #[cfg(target_os = "windows")]
-    {
-        let mut win_usb_drives = list_usb_windows()?;
-        usb_drives.append(&mut win_usb_drives);
-    }
-
+    return list_usb_windows();
     #[cfg(all(
         not(target_os = "windows"),
         not(target_os = "linux"),
         not(target_os = "macos")
     ))]
-    warn!("Not retrieving USBs -> Unsupported OS. Please open an issue on Github");
+    Err("Not retrieving USBs -> Unsupported OS. Please open an issue on Github".to_owned());
+}
 
+#[cfg(any(target_os = "linux", target_os = "macos"))]
+fn list_usb_linux() -> Result<Vec<UsbDevice>, String> {
+    let mut usb_drives: Vec<UsbDevice> = Vec::new();
+
+    debug!("Trying to retrieve USB drives from Unix-like OS");
+
+    let options = lfs_core::ReadOptions::default();
+    let mut mounts = lfs_core::read_mounts(&options)
+        .map_err(|err| format!("Failed to list usb drives: {err}"))?;
+    // filter not ok / non removable drives
+    mounts.retain(|m| {
+        m.stats.is_ok()
+            && match m.disk.clone() {
+                Some(disk) => disk.removable.unwrap_or_default(),
+                None => false,
+            }
+    });
+
+    for entry in mounts {
+        usb_drives.push(UsbDevice {
+            name: format!(
+                "{} ({})",
+                entry.clone().fs_label.unwrap_or("No Label".to_owned()),
+                entry
+                    .clone()
+                    .disk
+                    .unwrap_or_else(|| panic!("Broken disk data for usb {entry:?}"))
+                    .name
+            ),
+            path: entry.info.mount_point,
+        });
+    }
+    debug!("Found: {usb_drives:?}");
     Ok(usb_drives)
 }
 
 // In Windows we need to iterate through all possible mount points and see what type of device is mounted
-#[cfg(windows)]
+#[cfg(target_os = "windows")]
 fn list_usb_windows() -> Result<Vec<UsbDevice>, String> {
     use std::ffi::OsStr;
     use std::fs;
@@ -97,13 +94,14 @@ fn list_usb_windows() -> Result<Vec<UsbDevice>, String> {
 
         if let Ok(metadata) = fs::metadata(drive_path.clone()) {
             if metadata.is_dir() && drive_type == DRIVE_REMOVABLE {
-                info!("Found Drive: {}", drive_path);
+                debug!("Found Drive: {}", drive_path);
                 usb_drives.push(UsbDevice {
-                    name: drive_path.to_string() + " " + &letter.to_string(),
+                    name: &letter.to_string(),
                     path: drive_path.to_string().into(),
                 });
             }
         }
     }
+    debug!("Found: {usb_drives:?}");
     Ok(usb_drives)
 }
