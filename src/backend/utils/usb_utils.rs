@@ -87,16 +87,14 @@ fn list_usb_windows() -> Result<Vec<UsbDevice>, String> {
         // We retrieve all possible information to determine if its a removable USB device
         let drive_path = letter.clone().to_string() + ":\\";
         let drive_path = std::path::Path::new(&drive_path);
-        let drive_name = drive_path
-            .file_name()
-            .ok_or("Could not get file name".to_owned())?;
-        let drive_path = drive_path
-            .to_str()
-            .ok_or("Failed to convert path to string".to_owned());
-        // If the path is not valid we skip it, else we check if its a removable drive
-        let drive_path = match drive_path {
-            Ok(path) => path,
-            Err(e) => {
+        let drive_name = match drive_path.file_name() {
+            Some(drive_name) => drive_name,
+            None => continue,
+        };
+        let wide_path = drive_path.encode_wide().chain(once(0)).collect::<Vec<_>>();
+        /**{
+            Some(drive_path) => drive_path.to_owned(),
+            None => {
                 warn!("Failed to convert path to string: {}", e);
                 continue;
             }
@@ -106,6 +104,7 @@ fn list_usb_windows() -> Result<Vec<UsbDevice>, String> {
             .encode_wide()
             .chain(once(0))
             .collect::<Vec<_>>();
+            **/
         let drive_type = unsafe { GetDriveTypeW(wide_path.as_ptr()) };
 
         if let Ok(metadata) = fs::metadata(drive_path) {
