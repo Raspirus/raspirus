@@ -96,7 +96,7 @@ fn list_usb_windows() -> Result<Vec<UsbDevice>, String> {
             if metadata.is_dir() && drive_type == DRIVE_REMOVABLE {
                 debug!("Found Drive: {}", drive_path);
                 usb_drives.push(UsbDevice {
-                    name: &letter.to_string(),
+                    name: letter.to_string(),
                     path: drive_path.to_string().into(),
                 });
             }
