@@ -4575,7 +4575,7 @@ checksum = "f60fcc7d6849342eff22c4350c8b9a989ee8ceabc4b481253e8946b9fe83d684"
 
 [[package]]
 name = "raspirus"
-version = "2.0.0"
+version = "2.0.1"
 dependencies = [
  "chrono",
  "directories-next",
@@ -4583,7 +4583,6 @@ dependencies = [
  "hex",
  "iced",
  "iced_aw",
- "iced_winit",
  "lazy_static",
  "lfs-core",
  "log",

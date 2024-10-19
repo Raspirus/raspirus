@@ -192,7 +192,7 @@ fn main() -> Result<(), String> {
             let (width, height) = display_size().unwrap();
             let minimum_dimension = width.min(height) as f64;
 
-            let scaling_factor = 1080.0 / minimum_dimension;
+            let scaling_factor = minimum_dimension / 1080.0;
 
             // Ensure the scaling factor is clamped within reasonable bounds (to avoid extremely large or small values)
             let clamped_scaling = scaling_factor.clamp(0.1, 1.0);
