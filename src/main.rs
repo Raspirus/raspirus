@@ -5,7 +5,7 @@ use backend::config_file::Config;
 use frontend::iced::{Language, LocationSelection, Raspirus};
 use iced::Settings;
 use lazy_static::lazy_static;
-use log::{debug, LevelFilter};
+use log::LevelFilter;
 use simplelog::{
     ColorChoice, CombinedLogger, ConfigBuilder, TermLogger, TerminalMode, WriteLogger,
 };
@@ -25,7 +25,7 @@ rust_i18n::i18n!("src/assets/locales", fallback = "en");
 
 /// config
 static CONFIG_FILENAME: &str = "Raspirus.json";
-static CONFIG_VERSION: &str = "6";
+static CONFIG_VERSION: &str = "7";
 
 /// remote params
 static DEFAULT_MIRROR: &str = "https://api.github.com/repos/Raspirus/yara-rules/releases/latest";
@@ -74,6 +74,7 @@ static REFRESH: &[u8] = include_bytes!("./assets/icons/refresh.svg").as_slice();
 static SETTINGS: &[u8] = include_bytes!("./assets/icons/settings.svg").as_slice();
 static USER_CODE: &[u8] = include_bytes!("./assets/icons/user-code.svg").as_slice();
 static THEME_TOGGLE: &[u8] = include_bytes!("./assets/icons/theme-toggle.svg").as_slice();
+static ZOOM: &[u8] = include_bytes!("./assets/icons/zoom.svg").as_slice();
 
 /// flags
 static FLAG_DE: &[u8] = include_bytes!("./assets/flags/de.svg").as_slice();
@@ -129,7 +130,7 @@ fn main() -> Result<(), String> {
 
         #[cfg(not(debug_assertions))]
         let log_config = log_config
-            .add_filter_ignore_str("naga")
+            .add_filter_ignore_str("iced_winit")
             .add_filter_ignore_str("aho_corasick")
             .add_filter_ignore_str("walrus")
             .add_filter_ignore_str("wgpu_hal")
@@ -137,11 +138,11 @@ fn main() -> Result<(), String> {
             .add_filter_ignore_str("sctk");
 
         let log_config = log_config
+            .add_filter_ignore_str("naga")
             .add_filter_ignore_str("iced_wgpu")
             .add_filter_ignore_str("cosmic_text")
             .add_filter_ignore_str("cranelift_codegen")
             .add_filter_ignore_str("wasmtime")
-            .add_filter_ignore_str("iced_winit")
             .add_filter_ignore_str("wgpu_core")
             .add_filter_ignore_str("reqwest");
 
@@ -186,7 +187,11 @@ fn main() -> Result<(), String> {
                 iced::Theme::Light
             }
         })
-        .scale_factor(|_| {
+        .scale_factor(|app| {
+            app.scale as f64 / 100.0
+            /*
+
+            // TODO: We need a way to get the screen size consistently across devices to get proper scaling. for now the user has to set it manually
             // Get the display size (width, height)
             let (width, height) = (1920, 1080);
             let minimum_dimension = width.min(height) as f64;
@@ -198,6 +203,7 @@ fn main() -> Result<(), String> {
             debug!("Scaling factor: {}", clamped_scaling);
 
             clamped_scaling
+            */
         })
         .run()
         .expect("Failed to run application");
