@@ -238,6 +238,40 @@ impl Raspirus {
                 iced::widget::container(
                     iced::widget::Row::new()
                         .push(
+                            svg_plain(crate::ZOOM)
+                                .height(64)
+                                .width(64)
+                                .style(settings_icon_style),
+                        )
+                        .push(iced::widget::Space::with_width(10))
+                        .push(
+                            iced::widget::Column::new()
+                                .push(iced::widget::text(t!("set_scale")).size(20))
+                                .push(iced::widget::Space::with_height(5))
+                                .push(iced::widget::text(t!("set_scale_desc")).size(14).style(
+                                    |_| iced::widget::text::Style {
+                                        color: Some(GRAY_COLOR),
+                                    },
+                                ))
+                                .width(iced::Length::Fill),
+                        )
+                        .push(iced::widget::horizontal_space())
+                        .push(iced_aw::widgets::NumberInput::new(
+                            config.scale,
+                            0..200,
+                            |scale| Message::ConfigChanged {
+                                value: ConfigValue::Scale(scale),
+                            },
+                        ))
+                        .align_y(iced::Alignment::Center)
+                        .padding(iced::padding::Padding::new(10.0).right),
+                )
+                .style(card_container_style),
+            )
+            .push(
+                iced::widget::container(
+                    iced::widget::Row::new()
+                        .push(
                             svg_plain(crate::THEME_TOGGLE)
                                 .height(64)
                                 .width(64)
