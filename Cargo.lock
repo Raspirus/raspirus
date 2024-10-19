@@ -4583,6 +4583,7 @@ dependencies = [
  "hex",
  "iced",
  "iced_aw",
+ "iced_winit",
  "lazy_static",
  "lfs-core",
  "log",
