@@ -6,7 +6,6 @@ use frontend::iced::{Language, LocationSelection, Raspirus};
 use iced::Settings;
 use lazy_static::lazy_static;
 use log::{debug, LevelFilter};
-use rdev::display_size;
 use simplelog::{
     ColorChoice, CombinedLogger, ConfigBuilder, TermLogger, TerminalMode, WriteLogger,
 };
@@ -189,7 +188,7 @@ fn main() -> Result<(), String> {
         })
         .scale_factor(|_| {
             // Get the display size (width, height)
-            let (width, height) = display_size().unwrap();
+            let (width, height) = (1920, 1080);
             let minimum_dimension = width.min(height) as f64;
 
             let scaling_factor = minimum_dimension / 1080.0;
