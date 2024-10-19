@@ -5,7 +5,11 @@
 [![Say Thanks!](https://img.shields.io/badge/Say%20Thanks-!-1EAEDB.svg)](https://saythanks.io/to/Benji377)
 
 # :rocket: Raspirus
-![banner_logo](https://user-images.githubusercontent.com/50681275/223684389-ed0f104f-c183-4223-9723-c268e7cc5268.png)
+<div align="center">
+  <img src="https://raw.githubusercontent.com/Raspirus/media/refs/heads/main/logo/logo-final.svg" alt="Logo" style="width: 45%; max-width: 400px; vertical-align: middle; margin-right: 5%;">
+  <img src="https://raw.githubusercontent.com/Raspirus/media/refs/heads/main/logo/usb-final.svg" alt="USB" style="width: 45%; max-width: 400px; vertical-align: middle;">
+</div>
+
 
 <!-- https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax#alerts -->
 
