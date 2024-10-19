@@ -38,6 +38,7 @@ tokio = "1.40.0"
 rust-i18n = { version = "3.1.2", features = ["log-miss-tr"] }
 rfd = "0.15.0"
 rdev = "0.5.3"
+iced_winit = "0.13.0"
 
 # usb detection on linux
 [target.'cfg(any(target_os = "linux", target_os = "macos"))'.dependencies]
