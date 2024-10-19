@@ -5,12 +5,13 @@ use backend::config_file::Config;
 use frontend::iced::{Language, LocationSelection, Raspirus};
 use iced::Settings;
 use lazy_static::lazy_static;
-use log::LevelFilter;
+use log::{debug, LevelFilter};
 use simplelog::{
     ColorChoice, CombinedLogger, ConfigBuilder, TermLogger, TerminalMode, WriteLogger,
 };
 use std::fs::File;
 use std::sync::Mutex;
+use rdev::display_size;
 
 use chrono::Local;
 use iced::advanced::graphics::image::image_rs::ImageFormat;
@@ -185,6 +186,34 @@ fn main() -> Result<(), String> {
             } else {
                 iced::Theme::Light
             }
+        })
+        .scale_factor(|_| {
+            // Get the display size (width, height)
+            let (width, height) = display_size().unwrap();
+            debug!("Display size: {}x{}", width, height);
+            
+            // Calculate the scaling factor based on the smaller dimension
+            let min_dimension = width.min(height) as f64;
+            
+            let scaling_factor = if min_dimension < 600.0 {
+                // For very small screens (like 480x320), use smaller scaling, e.g., 0.3 or lower
+                0.3
+            } else if min_dimension < 800.0 {
+                // Small screens, but slightly bigger resolutions (e.g., 800x480), might use 0.5
+                0.5
+            } else if min_dimension < 1200.0 {
+                // Medium-sized screens, use 0.75
+                0.75
+            } else {
+                // For larger screens, use the default scaling of 1.0
+                1.0
+            };
+            
+            // Ensure the scaling factor is clamped within reasonable bounds (to avoid extremely large or small values)
+            let clamped_scaling = (scaling_factor as f64).clamp(0.1, 1.0);
+            debug!("Scaling factor: {}", clamped_scaling);
+            
+            clamped_scaling
         })
         .run()
         .expect("Failed to run application");
