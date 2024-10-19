@@ -87,17 +87,18 @@ jobs:
             - name: Install cross-compile dependencies
               uses: ryankurte/action-apt@v0.4.1
               with:
-                  arch: ${{ matrix.pkg_arch }}
-                  packages: "libssl-dev:${{ matrix.pkg_arch }}"
+                arch: ${{ matrix.pkg_arch }}
+                packages: |
+                  libssl-dev:${{ matrix.pkg_arch }}
+                  libx11-dev:${{ matrix.pkg_arch }}
+                  libxi-dev:${{ matrix.pkg_arch }}
+                  libxtst-dev:${{ matrix.pkg_arch }}
 
             - name: Install system dependencies
               run: |
                   sudo apt-get update
                   sudo apt-get install -y \
                     pkg-config \
-                    libx11-dev \
-                    libxi-dev \
-                    libxtst-dev \
                     build-essential \
                     curl \
                     libssl-dev \
