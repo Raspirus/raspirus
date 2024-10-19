@@ -22,6 +22,7 @@ pub struct Raspirus {
     pub sender: Option<mpsc::Sender<PathBuf>>,
     pub location_selection: LocationSelection,
     pub dark_mode: bool,
+    pub scale: usize,
 }
 
 #[derive(Debug)]
@@ -170,6 +171,7 @@ pub enum ConfigValue {
     MaxThreads(usize),
     Language(String),
     Dark(bool),
+    Scale(usize),
 }
 
 #[derive(Debug, Clone)]
@@ -195,6 +197,7 @@ impl Raspirus {
                 usb: usb.first().cloned(),
             },
             dark_mode: config.dark_mode,
+            scale: config.scale,
         }
     }
 
@@ -539,6 +542,7 @@ impl Raspirus {
             Message::ConfigChanged { value } => match update_config(value) {
                 Ok(config) => {
                     self.dark_mode = config.dark_mode;
+                    self.scale = config.scale;
                     rust_i18n::set_locale(&config.language);
                     self.state = if let State::MainMenu {
                         expanded_location,

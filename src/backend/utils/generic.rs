@@ -184,6 +184,7 @@ pub fn update_config(value: ConfigValue) -> Result<Config, String> {
         ConfigValue::MaxThreads(max_threads) => config.max_threads = max_threads,
         ConfigValue::Language(language) => config.language = language,
         ConfigValue::Dark(dark) => config.dark_mode = dark,
+        ConfigValue::Scale(scale) => config.scale = scale,
     }
     config.save()?;
     Ok(config.clone())
