@@ -82,7 +82,7 @@ impl Raspirus {
                                     .wrapping(iced::widget::text::Wrapping::None),
                             )
                             .spacing(10)
-                            .padding([0, 5]),
+                            .padding([0, 10]),
                     )
                     .padding(10)
                     .style(button_blue_style)
