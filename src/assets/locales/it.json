@@ -33,6 +33,8 @@
     "set_max_matches_desc": "Numero massimo di regole YARA che verranno trovate",
     "set_min_matches": "Minimo numero di corrispondenze",
     "set_min_matches_desc": "Numero minimo di regole YARA che devono essere trovate",
+    "set_scale": "Scala",
+    "set_scale_desc": "Regola la scala dell'applicazione",
     "set_threads": "Thread",
     "set_threads_desc": "Numero di thread da utilizzare per la scansione in parallelo.",
     "set_threads_desc_rec": "raccomandato",
