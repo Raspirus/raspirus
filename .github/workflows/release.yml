@@ -24,7 +24,7 @@ jobs:
               if: matrix.platform == 'ubuntu-latest'
               run: |
                   sudo apt-get update
-                  sudo apt-get install -y build-essential curl libssl-dev libx11-dev
+                  sudo apt-get install -y build-essential curl libssl-dev libx11-dev libxi-dev
 
             - name: Rust setup
               uses: dtolnay/rust-toolchain@stable
@@ -96,6 +96,7 @@ jobs:
                   sudo apt-get install -y \
                     pkg-config \
                     libx11-dev \
+                    libxi-dev \
                     build-essential \
                     curl \
                     libssl-dev \
