@@ -188,6 +188,7 @@ fn main() -> Result<(), String> {
             }
         })
         .scale_factor(|app| {
+            dbg!(app.scale);
             app.scale as f64 / 100.0
             /*
 
