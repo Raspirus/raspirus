@@ -3,7 +3,7 @@ use std::{fmt::Display, path::PathBuf};
 #[cfg(not(target_os = "windows"))]
 use log::debug;
 #[cfg(target_os = "windows")]
-use log::{debug, info};
+use log::debug;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash, Default)]
