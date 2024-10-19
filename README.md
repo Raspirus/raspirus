@@ -2,7 +2,6 @@
 [![Test](https://github.com/Raspirus/Raspirus/actions/workflows/testproject.yml/badge.svg)](https://github.com/Raspirus/Raspirus/actions/workflows/testproject.yml)
 ![GitHub downloads](https://img.shields.io/github/downloads/Raspirus/Raspirus/total?label=Downloads)
 [![Gmail](https://img.shields.io/badge/Contact_Us-Gmail-red?style=flat&logo=gmail)](mailto:raspirus.dev@gmail.com)
-[![Say Thanks!](https://img.shields.io/badge/Say%20Thanks-!-1EAEDB.svg)](https://saythanks.io/to/Benji377)
 
 # :rocket: Raspirus
 <div align="center">
