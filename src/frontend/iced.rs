@@ -42,6 +42,7 @@ pub enum State {
     Settings {
         config: Box<Config>,
         update: UpdateState,
+        temp_scale: usize,
     },
     Results {
         // tagged / skipped files and if the file is expanded in the view
@@ -118,7 +119,9 @@ pub enum Message {
     GenerateVirustotal {
         path: PathBuf,
     },
-    ApplyScale,
+    ApplyScale {
+        scale: usize,
+    },
     UpdateRules,
     // update messages
     Open {
@@ -210,6 +213,7 @@ impl Raspirus {
                 self.state = State::Settings {
                     config: Box::new(crate::CONFIG.lock().expect("Failed to lock config").clone()),
                     update: UpdateState::Loaded,
+                    temp_scale: self.scale,
                 };
                 iced::Task::none()
             }
@@ -543,6 +547,7 @@ impl Raspirus {
             Message::ConfigChanged { value } => match update_config(value) {
                 Ok(config) => {
                     self.dark_mode = config.dark_mode;
+                    self.scale = config.scale;
                     rust_i18n::set_locale(&config.language);
                     self.state = if let State::MainMenu {
                         expanded_location,
@@ -559,6 +564,7 @@ impl Raspirus {
                         State::Settings {
                             config: Box::new(config),
                             update: UpdateState::Loaded,
+                            temp_scale: self.scale,
                         }
                     };
                     iced::Task::none()
@@ -569,26 +575,26 @@ impl Raspirus {
                     },
                 }),
             },
-            Message::ApplyScale => iced::Task::done({
-                match crate::CONFIG
-                    .lock()
-                    .map_err(|err| format!("Failed to lock config: {err}"))
-                {
-                    Ok(config) => {
-                        self.scale = config.scale;
-                        Message::None
+            Message::ApplyScale { scale } => {
+                if let State::Settings { config, update, .. } = &self.state {
+                    self.state = State::Settings {
+                        config: config.clone(),
+                        update: update.clone(),
+                        temp_scale: scale,
                     }
-                    Err(message) => Message::Error {
-                        case: ErrorCase::Critical { message },
-                    },
                 }
-            }),
+                iced::Task::none()
+            }
             // start rule update
             Message::UpdateRules => {
-                if let State::Settings { config, .. } = &self.state {
+                if let State::Settings {
+                    config, temp_scale, ..
+                } = &self.state
+                {
                     self.state = State::Settings {
                         config: config.clone(),
                         update: UpdateState::Updating,
+                        temp_scale: *temp_scale,
                     };
                 }
                 iced::Task::perform(
@@ -612,12 +618,13 @@ impl Raspirus {
             }
             // update is finished
             Message::UpdateFinished => {
-                if let State::Settings { .. } = &self.state {
+                if let State::Settings { temp_scale, .. } = &self.state {
                     self.state = State::Settings {
                         config: Box::new(
                             crate::CONFIG.lock().expect("Failed to lock config").clone(),
                         ),
                         update: UpdateState::Updated,
+                        temp_scale: *temp_scale,
                     };
                 }
                 iced::Task::none()
@@ -711,7 +718,11 @@ impl Raspirus {
                 &self.usb_devices,
             ),
             State::Scanning { scan_state, .. } => self.scanning(scan_state.clone()),
-            State::Settings { config, update } => self.settings(config, update),
+            State::Settings {
+                config,
+                update,
+                temp_scale,
+            } => self.settings(config, update, *temp_scale),
             State::Results {
                 tagged,
                 skipped,

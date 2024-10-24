@@ -16,7 +16,12 @@ use crate::{
 };
 
 impl Raspirus {
-    pub fn settings(&self, config: &Config, update: &UpdateState) -> iced::Element<Message> {
+    pub fn settings(
+        &self,
+        config: &Config,
+        update: &UpdateState,
+        temp_scale: usize,
+    ) -> iced::Element<Message> {
         let cpus = num_cpus::get();
 
         let top_row = iced::widget::Column::new()
@@ -259,13 +264,13 @@ impl Raspirus {
                         .push(iced::widget::horizontal_space())
                         .push(
                             iced::widget::Column::new()
-                                .push(iced::widget::Text::new(format!("{}%", config.scale)))
+                                .push(iced::widget::Text::new(format!("{}%", temp_scale)))
                                 .push(
                                     iced::widget::Slider::new(
                                         25.0..=200.0,
-                                        config.scale as f64,
-                                        |scale| Message::ConfigChanged {
-                                            value: ConfigValue::Scale(scale as usize),
+                                        temp_scale as f64,
+                                        |scale| Message::ApplyScale {
+                                            scale: scale as usize,
                                         },
                                     )
                                     .step(5),
@@ -275,7 +280,9 @@ impl Raspirus {
                         )
                         .push(
                             iced::widget::Button::new(iced::widget::Text::new(t!("apply")))
-                                .on_press(Message::ApplyScale),
+                                .on_press(Message::ConfigChanged {
+                                    value: ConfigValue::Scale(temp_scale),
+                                }),
                         )
                         .spacing(5)
                         .align_y(iced::Alignment::Center)
