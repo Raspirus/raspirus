@@ -118,6 +118,7 @@ pub enum Message {
     GenerateVirustotal {
         path: PathBuf,
     },
+    ApplyScale,
     UpdateRules,
     // update messages
     Open {
@@ -542,7 +543,6 @@ impl Raspirus {
             Message::ConfigChanged { value } => match update_config(value) {
                 Ok(config) => {
                     self.dark_mode = config.dark_mode;
-                    self.scale = config.scale;
                     rust_i18n::set_locale(&config.language);
                     self.state = if let State::MainMenu {
                         expanded_location,
@@ -569,6 +569,20 @@ impl Raspirus {
                     },
                 }),
             },
+            Message::ApplyScale => iced::Task::done({
+                match crate::CONFIG
+                    .lock()
+                    .map_err(|err| format!("Failed to lock config: {err}"))
+                {
+                    Ok(config) => {
+                        self.scale = config.scale;
+                        Message::None
+                    }
+                    Err(message) => Message::Error {
+                        case: ErrorCase::Critical { message },
+                    },
+                }
+            }),
             // start rule update
             Message::UpdateRules => {
                 if let State::Settings { config, .. } = &self.state {
