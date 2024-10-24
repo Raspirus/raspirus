@@ -258,15 +258,25 @@ impl Raspirus {
                         )
                         .push(iced::widget::horizontal_space())
                         .push(
-                            iced::widget::Slider::new(25.0..=200.0, config.scale as f64, |scale| {
-                                println!("{scale}");
-                                Message::ConfigChanged {
-                                    value: ConfigValue::Scale(scale as usize),
-                                }
-                            })
-                            .step(5),
+                            iced::widget::Column::new()
+                                .push(iced::widget::Text::new(format!("{}%", config.scale)))
+                                .push(
+                                    iced::widget::Slider::new(
+                                        25.0..=200.0,
+                                        config.scale as f64,
+                                        |scale| Message::ConfigChanged {
+                                            value: ConfigValue::Scale(scale as usize),
+                                        },
+                                    )
+                                    .step(5),
+                                )
+                                .spacing(5)
+                                .align_x(iced::Alignment::Center),
                         )
-                        .push(iced::widget::Text::new(format!("{}%", self.scale)))
+                        .push(
+                            iced::widget::Button::new(iced::widget::Text::new(t!("apply")))
+                                .on_press(Message::ApplyScale),
+                        )
                         .spacing(5)
                         .align_y(iced::Alignment::Center)
                         .padding(iced::padding::Padding::new(10.0).right),
