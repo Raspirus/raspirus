@@ -21,6 +21,7 @@ impl Raspirus {
         &self,
         tagged: Vec<(TaggedFile, bool)>,
         skipped: Vec<(Skipped, bool)>,
+        total: usize,
         log_path: PathBuf,
     ) -> iced::Element<Message> {
         let top_row = iced::widget::Column::new()
@@ -59,7 +60,12 @@ impl Raspirus {
                             svg_icon(crate::DOWNLOAD).style(white_icon_style),
                         )
                         .style(button_blue_style)
-                        .on_press(Message::DownloadLog { log_path })
+                        .on_press(Message::DownloadLog {
+                            skipped: skipped.clone(),
+                            tagged: tagged.clone(),
+                            total,
+                            log_path,
+                        })
                         .padding(10),
                     )
                     .align_y(iced::Alignment::Center),

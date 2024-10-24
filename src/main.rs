@@ -47,44 +47,44 @@ static LOGGING_FILTER: LevelFilter = LevelFilter::Debug;
 static LOGGING_FILTER: LevelFilter = LevelFilter::Info;
 
 /// icons
-static ONLINE: &[u8] = include_bytes!("./assets/icons/online.svg").as_slice();
-static CHEVRON_DOWN: &[u8] = include_bytes!("./assets/icons/chevron-down.svg").as_slice();
-static CHEVRON_LEFT: &[u8] = include_bytes!("./assets/icons/chevron-left.svg").as_slice();
-static ARROW_BADGE_DOWN: &[u8] = include_bytes!("./assets/icons/arrow-badge-down.svg").as_slice();
-static ARROW_BADGE_UP: &[u8] = include_bytes!("./assets/icons/arrow-badge-up.svg").as_slice();
-static CHECK: &[u8] = include_bytes!("./assets/icons/check.svg").as_slice();
-static CLIPBOARD_DATA: &[u8] = include_bytes!("./assets/icons/clipboard-data.svg").as_slice();
-static CPU: &[u8] = include_bytes!("./assets/icons/cpu.svg").as_slice();
-static DATABASE_IMPORT: &[u8] = include_bytes!("./assets/icons/database-import.svg").as_slice();
-static USB: &[u8] = include_bytes!("./assets/icons/usb.svg").as_slice();
-static HOURGLASS_HIGH: &[u8] = include_bytes!("./assets/icons/hourglass-high.svg").as_slice();
-static DOWNLOAD: &[u8] = include_bytes!("./assets/icons/download.svg").as_slice();
-static EXCLAMATION_CIRCLE: &[u8] =
-    include_bytes!("./assets/icons/exclamation-circle.svg").as_slice();
-static FILE: &[u8] = include_bytes!("./assets/icons/file.svg").as_slice();
-static FILE_DESCRIPTION: &[u8] = include_bytes!("./assets/icons/file-description.svg").as_slice();
-static FILE_DOWNLOAD: &[u8] = include_bytes!("./assets/icons/file-download.svg").as_slice();
-static FOLDER: &[u8] = include_bytes!("./assets/icons/folder.svg").as_slice();
-static GIT_COMMIT: &[u8] = include_bytes!("./assets/icons/git-commit.svg").as_slice();
-static GLOBE: &[u8] = include_bytes!("./assets/icons/globe.svg").as_slice();
-static HEXAGON_LETTER: &[u8] = include_bytes!("./assets/icons/hexagon-letter-r.svg").as_slice();
-static HOME: &[u8] = include_bytes!("./assets/icons/home.svg").as_slice();
-static LICENSE: &[u8] = include_bytes!("./assets/icons/license.svg").as_slice();
-static REFRESH: &[u8] = include_bytes!("./assets/icons/refresh.svg").as_slice();
-static SETTINGS: &[u8] = include_bytes!("./assets/icons/settings.svg").as_slice();
-static USER_CODE: &[u8] = include_bytes!("./assets/icons/user-code.svg").as_slice();
-static THEME_TOGGLE: &[u8] = include_bytes!("./assets/icons/theme-toggle.svg").as_slice();
-static ZOOM: &[u8] = include_bytes!("./assets/icons/zoom.svg").as_slice();
+static ONLINE: &[u8] = include_bytes!("assets/icons/online.svg").as_slice();
+static CHEVRON_DOWN: &[u8] = include_bytes!("assets/icons/chevron-down.svg").as_slice();
+static CHEVRON_LEFT: &[u8] = include_bytes!("assets/icons/chevron-left.svg").as_slice();
+static ARROW_BADGE_DOWN: &[u8] = include_bytes!("assets/icons/arrow-badge-down.svg").as_slice();
+static ARROW_BADGE_UP: &[u8] = include_bytes!("assets/icons/arrow-badge-up.svg").as_slice();
+static CHECK: &[u8] = include_bytes!("assets/icons/check.svg").as_slice();
+static CLIPBOARD_DATA: &[u8] = include_bytes!("assets/icons/clipboard-data.svg").as_slice();
+static CPU: &[u8] = include_bytes!("assets/icons/cpu.svg").as_slice();
+static DATABASE_IMPORT: &[u8] = include_bytes!("assets/icons/database-import.svg").as_slice();
+static USB: &[u8] = include_bytes!("assets/icons/usb.svg").as_slice();
+static HOURGLASS_HIGH: &[u8] = include_bytes!("assets/icons/hourglass-high.svg").as_slice();
+static DOWNLOAD: &[u8] = include_bytes!("assets/icons/download.svg").as_slice();
+static EXCLAMATION_CIRCLE: &[u8] = include_bytes!("assets/icons/exclamation-circle.svg").as_slice();
+static FILE: &[u8] = include_bytes!("assets/icons/file.svg").as_slice();
+static FILE_DESCRIPTION: &[u8] = include_bytes!("assets/icons/file-description.svg").as_slice();
+static FILE_DOWNLOAD: &[u8] = include_bytes!("assets/icons/file-download.svg").as_slice();
+static FOLDER: &[u8] = include_bytes!("assets/icons/folder.svg").as_slice();
+static GIT_COMMIT: &[u8] = include_bytes!("assets/icons/git-commit.svg").as_slice();
+static GLOBE: &[u8] = include_bytes!("assets/icons/globe.svg").as_slice();
+static HEXAGON_LETTER: &[u8] = include_bytes!("assets/icons/hexagon-letter-r.svg").as_slice();
+static HOME: &[u8] = include_bytes!("assets/icons/home.svg").as_slice();
+static LICENSE: &[u8] = include_bytes!("assets/icons/license.svg").as_slice();
+static REFRESH: &[u8] = include_bytes!("assets/icons/refresh.svg").as_slice();
+static SETTINGS: &[u8] = include_bytes!("assets/icons/settings.svg").as_slice();
+static USER_CODE: &[u8] = include_bytes!("assets/icons/user-code.svg").as_slice();
+static THEME_TOGGLE: &[u8] = include_bytes!("assets/icons/theme-toggle.svg").as_slice();
+static ZOOM: &[u8] = include_bytes!("assets/icons/zoom.svg").as_slice();
 
 /// flags
-static FLAG_DE: &[u8] = include_bytes!("./assets/flags/de.svg").as_slice();
-static FLAG_EN: &[u8] = include_bytes!("./assets/flags/en.svg").as_slice();
-static FLAG_IT: &[u8] = include_bytes!("./assets/flags/it.svg").as_slice();
-static FLAG_FR: &[u8] = include_bytes!("./assets/flags/fr.svg").as_slice();
+static FLAG_DE: &[u8] = include_bytes!("assets/flags/de.svg").as_slice();
+static FLAG_EN: &[u8] = include_bytes!("assets/flags/en.svg").as_slice();
+static FLAG_IT: &[u8] = include_bytes!("assets/flags/it.svg").as_slice();
+static FLAG_FR: &[u8] = include_bytes!("assets/flags/fr.svg").as_slice();
 
 /// logo
-static USB_VECTOR: &[u8] = include_bytes!("./assets/usb-vector.svg").as_slice();
-static LOGO_VECTOR: &[u8] = include_bytes!("./assets/logo-vector.svg").as_slice();
+static USB_VECTOR: &[u8] = include_bytes!("assets/usb-vector.svg").as_slice();
+static LOGO_VECTOR: &[u8] = include_bytes!("assets/logo-vector.svg").as_slice();
+static LOGO_VECTOR_STR: &str = include_str!("assets/logo-vector.svg");
 
 lazy_static! {
     /// Create string with current time
