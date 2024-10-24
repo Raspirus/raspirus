@@ -8,7 +8,7 @@ use std::path::PathBuf;
 const PAGE_WIDTH: f32 = 210.0;
 const PAGE_HEIGHT: f32 = 297.0;
 const FONT_SIZE: f32 = 15.0;
-const LINE_HEIGHT: f32 = FONT_SIZE + 2.0;
+const LINE_HEIGHT: f32 = FONT_SIZE + 6.0;
 const LINE_PADDING: f32 = 3.0;
 const LINE_PADDING_SECONDARY: f32 = 50.0;
 const LOGO_SCALE: f32 = 0.2;
@@ -220,7 +220,7 @@ pub fn generate_pdf(
     for tagged_file in &tagged {
         // add initial 'header' for a particular tagged file
         tagged_lines.push(format!(
-            "[{}] {}",
+            "• [{}] {}",
             tagged_file.0.rule_count,
             tagged_file.0.path.to_string_lossy()
         ));
@@ -229,17 +229,19 @@ pub fn generate_pdf(
                 .0
                 .descriptions
                 .iter()
-                .map(|description| description.to_string()),
-        )
+                .map(|description| format!("\t {}", description.to_string())),
+        );
     }
 
     let mut skipped_lines = Vec::new();
     // add skipped files to the total lines
-    skipped_lines.extend(
-        skipped
-            .iter()
-            .map(|skipped| format!("{} {}", skipped.0.path.to_string_lossy(), skipped.0.reason)),
-    );
+    for skipped_file in &skipped {
+        skipped_lines.push(format!(
+            "• {} {}",
+            skipped_file.0.path.to_string_lossy(),
+            skipped_file.0.reason
+        ));
+    }
 
     for line in tagged_lines {
         // if we reach the maximum lines per page we create a new one
@@ -261,7 +263,7 @@ pub fn generate_pdf(
             current_layer.set_font(&font, FONT_SIZE);
 
             current_layer.set_text_cursor(printpdf::Mm(CONTENT_POS_X), printpdf::Mm(CONTENT_POS_Y));
-            current_layer.set_line_height(FONT_SIZE + 2.0);
+            current_layer.set_line_height(LINE_HEIGHT);
         }
 
         // write the current line to pdf
@@ -357,7 +359,7 @@ pub fn generate_pdf(
             current_layer.set_font(&font, FONT_SIZE);
 
             current_layer.set_text_cursor(printpdf::Mm(CONTENT_POS_X), printpdf::Mm(CONTENT_POS_Y));
-            current_layer.set_line_height(FONT_SIZE + 2.0);
+            current_layer.set_line_height(LINE_HEIGHT);
         }
 
         // write the current line to pdf
