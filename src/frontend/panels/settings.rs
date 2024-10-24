@@ -282,7 +282,9 @@ impl Raspirus {
                             iced::widget::Button::new(iced::widget::Text::new(t!("apply")))
                                 .on_press(Message::ConfigChanged {
                                     value: ConfigValue::Scale(temp_scale),
-                                }),
+                                })
+                                .style(button_blue_style)
+                                .padding(10),
                         )
                         .spacing(5)
                         .align_y(iced::Alignment::Center)

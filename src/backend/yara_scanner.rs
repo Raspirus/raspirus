@@ -74,7 +74,7 @@ impl YaraScanner {
         &self,
         channel: mpsc::Sender<u64>,
         mut paths: Vec<PathBuf>,
-    ) -> Result<(Vec<TaggedFile>, Vec<Skipped>, PathBuf), String> {
+    ) -> Result<(Vec<TaggedFile>, Vec<Skipped>, usize, PathBuf), String> {
         let start_time = std::time::Instant::now();
 
         let yarac = CONFIG
@@ -146,7 +146,7 @@ impl YaraScanner {
                 .as_secs_f32()
         );
         // return tagged and skipped files aswell as path to the scan log
-        Ok((tagged, skipped, file_log.log_path.clone()))
+        Ok((tagged, skipped, paths_count, file_log.log_path.clone()))
     }
 
     fn evaluate_result(
