@@ -229,7 +229,7 @@ pub fn generate_pdf(
                 .0
                 .descriptions
                 .iter()
-                .map(|description| format!("\t {}", description.to_string())),
+                .map(|description| format!("\t {}", description)),
         );
     }
 
