@@ -1,6 +1,7 @@
 {
     "app_name": "App-Name",
     "app_title": "Raspirus",
+    "apply": "Anwenden",
     "back_btn": "STARTSEITE",
     "description": "Beschreibung",
     "description_val": "Einfacher YARA-regelbasierter Antivirus mit Fokus auf Ressourcenschonung, einfache Bedienung und Effizienz",
