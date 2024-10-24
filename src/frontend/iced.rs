@@ -1,8 +1,9 @@
 use crate::backend::config_file::Config;
 use crate::backend::downloader;
 use crate::backend::utils::generic::{
-    create_pdf, download_logs, generate_virustotal, profile_path, update_config,
+    download_logs, generate_virustotal, profile_path, update_config,
 };
+use crate::backend::utils::pdf_gen::generate_pdf;
 use crate::backend::utils::usb_utils::{list_usb_drives, UsbDevice};
 use crate::backend::yara_scanner::{Skipped, TaggedFile, YaraScanner};
 use futures::SinkExt;
@@ -48,6 +49,7 @@ pub enum State {
         // tagged / skipped files and if the file is expanded in the view
         tagged: Vec<(TaggedFile, bool)>,
         skipped: Vec<(Skipped, bool)>,
+        total: usize,
         log: PathBuf,
     },
     Information,
@@ -109,6 +111,9 @@ pub enum Message {
     OpenMain,
     // action messages
     DownloadLog {
+        skipped: Vec<(Skipped, bool)>,
+        tagged: Vec<(TaggedFile, bool)>,
+        total: usize,
         log_path: PathBuf,
     },
     Shutdown,
@@ -145,6 +150,7 @@ pub enum Message {
     ScanComplete {
         tagged: Vec<(TaggedFile, bool)>,
         skipped: Vec<(Skipped, bool)>,
+        total: usize,
         log: PathBuf,
     },
     ToggleCard {
@@ -290,11 +296,13 @@ impl Raspirus {
             Message::ScanComplete {
                 tagged,
                 skipped,
+                total,
                 log,
             } => {
                 self.state = State::Results {
                     tagged,
                     skipped,
+                    total,
                     log,
                 };
                 iced::Task::none()
@@ -311,6 +319,7 @@ impl Raspirus {
                 if let State::Results {
                     tagged,
                     skipped,
+                    total,
                     log,
                 } = &self.state
                 {
@@ -327,6 +336,7 @@ impl Raspirus {
                                     }
                                 })
                                 .collect(),
+                            total: *total,
                             log: log.clone(),
                         },
                         Card::Tagged { card } => State::Results {
@@ -341,6 +351,7 @@ impl Raspirus {
                                 })
                                 .collect(),
                             skipped: skipped.to_vec(),
+                            total: *total,
                             log: log.clone(),
                         },
                     }
@@ -549,24 +560,28 @@ impl Raspirus {
                     self.dark_mode = config.dark_mode;
                     self.scale = config.scale;
                     rust_i18n::set_locale(&config.language);
-                    self.state = if let State::MainMenu {
+
+                    if let State::MainMenu {
                         expanded_location,
                         expanded_usb,
                         ..
                     } = &self.state
                     {
-                        State::MainMenu {
+                        self.state = State::MainMenu {
                             expanded_language: false,
                             expanded_location: *expanded_location,
                             expanded_usb: *expanded_usb,
-                        }
-                    } else {
-                        State::Settings {
+                        };
+                    } else if let State::Settings {
+                        update, temp_scale, ..
+                    } = &self.state
+                    {
+                        self.state = State::Settings {
                             config: Box::new(config),
-                            update: UpdateState::Loaded,
-                            temp_scale: self.scale,
-                        }
-                    };
+                            update: update.clone(),
+                            temp_scale: *temp_scale,
+                        };
+                    }
                     iced::Task::none()
                 }
                 Err(message) => iced::Task::done(Message::Error {
@@ -630,7 +645,12 @@ impl Raspirus {
                 iced::Task::none()
             }
             // start pdf generation
-            Message::DownloadLog { log_path } => iced::Task::done(match create_pdf(log_path) {
+            Message::DownloadLog {
+                skipped,
+                tagged,
+                total,
+                log_path,
+            } => iced::Task::done(match generate_pdf(skipped, tagged, total, log_path) {
                 Ok(path) => Message::Open { path },
                 Err(message) => Message::Error {
                     case: ErrorCase::Warning { message },
@@ -726,8 +746,9 @@ impl Raspirus {
             State::Results {
                 tagged,
                 skipped,
+                total,
                 log,
-            } => self.results(tagged.clone(), skipped.clone(), log.clone()),
+            } => self.results(tagged.clone(), skipped.clone(), *total, log.clone()),
             State::Information => self.information(),
             State::Terms => self.terms(),
         }
@@ -798,7 +819,8 @@ impl Raspirus {
                             .iter()
                             .map(|value| (value.clone(), false))
                             .collect(),
-                        log: message.2,
+                        total: message.2,
+                        log: message.3,
                     },
                     Err(message) => Message::Error {
                         case: ErrorCase::Warning { message },
