@@ -35,7 +35,7 @@ static DEFAULT_FILE: &str = "rulepirus.yarac";
 static DEFAULT_MIN_MATCHES: usize = 0;
 static DEFAULT_MAX_MATCHES: usize = 20;
 
-/// should be a gigabyte but who knows, maybe its a terrabyte :3 youll know once your pc explodes
+/// should be a gigabyte but who knows, maybe its a terabyte :3 youll know once your pc explodes
 static MAX_ZIP_FILE_SIZE: u64 = 1073741824;
 
 /// download settings
