@@ -28,6 +28,8 @@ pub struct Config {
     pub dark_mode: bool,
     /// application scale
     pub scale: usize,
+    /// optional license key
+    pub license: Option<String>,
     /// various paths in an effort to unify them. are folders expected to be used later
     #[serde(skip)]
     pub paths: Option<Paths>,
@@ -60,6 +62,7 @@ impl Default for Config {
             paths: None,
             language: rust_i18n::locale().to_string(),
             dark_mode: false,
+            license: None,
             scale: 100,
         }
     }
