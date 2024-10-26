@@ -489,7 +489,9 @@ impl Raspirus {
                 .style(card_container_style),
             )
             .spacing(20);
+
         let content = iced::widget::Scrollable::new(wrap(15, options.into()));
+
         iced::widget::Column::new()
             .push(top_row)
             .push(content)
