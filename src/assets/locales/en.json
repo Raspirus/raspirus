@@ -30,7 +30,7 @@
     "report_no_malware": "No malware",
     "report_no_skipped": "Nothing skipped",
     "scanner_scanning": "Scanning...",
-    "scanner_indexing": "Indexing...",
+    "scanner_prepare": "Preparing...",
     "settings": "Settings",
     "start": "Start",
     "set_download_logs": "Download Logs",

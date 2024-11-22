@@ -66,7 +66,7 @@ pub enum UpdateState {
 #[derive(Debug, Clone)]
 pub enum ScanState {
     Percentage(f32),
-    Indexing,
+    Preparing,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -277,7 +277,7 @@ impl Raspirus {
                 }),
                 ErrorCase::Warning { message } => {
                     if let State::Scanning {
-                        scan_state: ScanState::Indexing,
+                        scan_state: ScanState::Preparing,
                     } = self.state
                     {
                         self.state = State::MainMenu {
@@ -691,7 +691,7 @@ impl Raspirus {
             // send path to subscription worker and start file scan
             Message::StartScan => {
                 self.state = State::Scanning {
-                    scan_state: ScanState::Indexing,
+                    scan_state: ScanState::Preparing,
                 };
                 let path = self.scan_path.clone();
                 let mut sender = self.sender.clone();

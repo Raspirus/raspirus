@@ -28,7 +28,7 @@
     "report_no_malware": "Aucun malware",
     "report_no_skipped": "Rien ignoré",
     "scanner_scanning": "Analyse en cours...",
-    "scanner_indexing": "Indexation en cours...",
+    "scanner_prepare": "En préparation...",
     "settings": "Paramètres",
     "start": "Démarrer",
     "set_download_logs": "Télécharger les journaux",
