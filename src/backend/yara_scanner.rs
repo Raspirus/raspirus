@@ -86,8 +86,10 @@ impl YaraScanner {
             .data
             .join(crate::DEFAULT_FILE);
 
+        info!("Preparing rules. This might take a second...");
         // check if rules load and cache them for threads
         let rules = Arc::new(get_rules(yarac)?);
+        info!("Rules loaded!");
 
         // setup file log with timestamp of scan start
         let mut file_log = FileLog::new()?;
