@@ -53,12 +53,12 @@ impl Raspirus {
                         .spacing(5),
                 )
                 .spacing(5),
-            ScanState::Indexing => iced::widget::Column::new()
+            ScanState::Preparing => iced::widget::Column::new()
                 .push(
                     iced::widget::Row::new()
                         .push(iced::widget::horizontal_space())
                         .push(iced::widget::container::Container::new(
-                            iced::widget::text(t!("scanner_indexing"))
+                            iced::widget::text(t!("scanner_prepare"))
                                 .size(80)
                                 .align_x(iced::alignment::Horizontal::Center)
                                 .font(font::Font {

@@ -28,7 +28,7 @@
     "report_no_malware": "Keine Malware",
     "report_no_skipped": "Nichts übersprungen",
     "scanner_scanning": "Scanne...",
-    "scanner_indexing": "Indiziere...",
+    "scanner_prepare": "Vorbereiten...",
     "settings": "Einstellungen",
     "start": "Start",
     "set_download_logs": "Protokolle herunterladen",
