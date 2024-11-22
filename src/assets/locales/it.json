@@ -28,7 +28,7 @@
     "report_no_malware": "Nessun malware",
     "report_no_skipped": "Niente saltato",
     "scanner_scanning": "Scansione in corso...",
-    "scanner_indexing": "Indicizzazione in corso...",
+    "scanner_prepare": "Preparazione in corso...",
     "settings": "Impostazioni",
     "start": "Avvia",
     "set_download_logs": "Scarica i Log",
