@@ -32,7 +32,6 @@ pub fn profile_path(path: PathBuf) -> (u64, Vec<PathBuf>) {
         // path is file
         match path.metadata() {
             Ok(metadata) => {
-                debug!("Adding {}", path.display());
                 paths.push(path.clone());
                 metadata.len()
             }
@@ -83,7 +82,6 @@ pub fn profile_folder(paths: &mut Vec<PathBuf>, path: PathBuf) -> u64 {
         } else {
             match entry.path().metadata() {
                 Ok(metadata) => {
-                    debug!("Adding {}", path.display());
                     paths.push(entry.path().clone());
                     metadata.len()
                 }
