@@ -5285,18 +5285,18 @@ checksum = "61697e0a1c7e512e84a621326239844a24d8207b4669b41bc18b32ea5cbf988b"
 
 [[package]]
 name = "serde"
-version = "1.0.210"
+version = "1.0.215"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c8e3592472072e6e22e0a54d5904d9febf8508f65fb8552499a1abc7d1078c3a"
+checksum = "6513c1ad0b11a9376da888e3e0baa0077f1aed55c17f50e7b2397136129fb88f"
 dependencies = [
  "serde_derive",
 ]
 
 [[package]]
 name = "serde_derive"
-version = "1.0.210"
+version = "1.0.215"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "243902eda00fad750862fc144cea25caca5e20d615af0a81bee94ca738f1df1f"
+checksum = "ad1e866f866923f252f05c889987993144fb74e722403468a4ebd70c3cd756c0"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -7595,9 +7595,9 @@ checksum = "cfe53a6657fd280eaa890a3bc59152892ffa3e30101319d168b781ed6529b049"
 
 [[package]]
 name = "yara-x"
-version = "0.11.0"
+version = "0.11.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f0b0c51e2294d6ccc5add8edb4135f166b5937c1849198c9f982eb208d03d5e2"
+checksum = "30c1d7713b38bc42e4dee8166c403a056759506853f577800dfbcda54f26a0a9"
 dependencies = [
  "aho-corasick",
  "annotate-snippets",
@@ -7658,9 +7658,9 @@ dependencies = [
 
 [[package]]
 name = "yara-x-macros"
-version = "0.11.0"
+version = "0.11.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "86dfbced6c9b848cd56241e49f3568c386b512f0aa65366019b2503336c0f679"
+checksum = "378b8293d18c90c1dcc155f7f4e30a556802c0111ce3ee0168d819f7fd0645c3"
 dependencies = [
  "darling",
  "proc-macro2",
@@ -7670,9 +7670,9 @@ dependencies = [
 
 [[package]]
 name = "yara-x-parser"
-version = "0.11.0"
+version = "0.11.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b1a988b86b902a74f899fa417b297b171d561be6402ab2d08ccd1ffff18749fe"
+checksum = "63a910117d58a52678d891d6485114a132b7bbd0ce926fa9c8bf9f6cab14c639"
 dependencies = [
  "ascii_tree",
  "bitmask",
@@ -7689,9 +7689,9 @@ dependencies = [
 
 [[package]]
 name = "yara-x-proto"
-version = "0.11.0"
+version = "0.11.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "adcd0e5a8e73434df0170f4d541798e50ac21f87ddc4b6a30d52d3afae33501e"
+checksum = "c2bc2178cfb95e4d5ed06dc7b8fbd2281d4e16dcac82df7e07f5992f0deea8d6"
 dependencies = [
  "protobuf",
  "protobuf-codegen",
