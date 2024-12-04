@@ -140,7 +140,7 @@ jobs:
                   merge-multiple: true
 
             - name: Create attestation for all builds
-              uses: actions/attest-build-provenance@v1
+              uses: actions/attest-build-provenance@v2
               with:
                   subject-path: |
                       artifacts/PKGBUILD
