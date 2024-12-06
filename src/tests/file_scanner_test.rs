@@ -1,11 +1,21 @@
 #[cfg(test)]
 mod tests {
+    use std::path::Path;
+
+    use directories_next::ProjectDirs;
+    use futures::channel::mpsc;
+
+    use crate::backend::{downloader, yara_scanner::YaraScanner};
+
 
     #[test]
     fn test_scan_file_found_none() {
-        use crate::backend::{downloader, yara_scanner::YaraScanner};
-        use iced::futures::channel::mpsc;
-        use std::path::Path;
+        // check if running in valid user env, otherwise abort test
+        if let None = ProjectDirs::from("qual", "org", "app") {
+            eprint!("Could not get user dirs. Is the system setup correctly?");
+            assert!(true);
+            return;
+        }
 
         let runtime = tokio::runtime::Builder::new_current_thread()
             .enable_all()
@@ -31,9 +41,12 @@ mod tests {
 
     #[test]
     fn test_scan_file_found_one() {
-        use crate::backend::{downloader, yara_scanner::YaraScanner};
-        use iced::futures::channel::mpsc;
-        use std::path::Path;
+        // check if running in valid user env, otherwise abort test
+        if let None = ProjectDirs::from("qual", "org", "app") {
+            eprint!("Could not get user dirs. Is the system setup correctly?");
+            assert!(true);
+            return;
+        }
 
         let runtime = tokio::runtime::Builder::new_current_thread()
             .enable_all()
