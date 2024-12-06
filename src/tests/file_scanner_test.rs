@@ -7,7 +7,6 @@ mod tests {
 
     use crate::backend::{downloader, yara_scanner::YaraScanner};
 
-
     #[test]
     fn test_scan_file_found_none() {
         // check if running in valid user env, otherwise abort test
@@ -22,7 +21,18 @@ mod tests {
             .build()
             .unwrap();
         let update = runtime.block_on(downloader::update());
-        dbg!(&update);
+
+        match update {
+            Err(err) => {
+                dbg!(&err);
+                eprintln!(
+                    "Updates could not be fetched. Github API rate limit might have been reached"
+                );
+                assert!(true);
+                return;
+            }
+            _ => {}
+        }
 
         std::fs::write(
             Path::new("./clean"),
@@ -53,7 +63,18 @@ mod tests {
             .build()
             .unwrap();
         let update = runtime.block_on(downloader::update());
-        dbg!(&update);
+
+        match update {
+            Err(err) => {
+                dbg!(&err);
+                eprintln!(
+                    "Updates could not be fetched. Github API rate limit might have been reached"
+                );
+                assert!(true);
+                return;
+            }
+            _ => {}
+        }
 
         std::fs::write(
             Path::new("./tag"),
