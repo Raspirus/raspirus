@@ -21,13 +21,13 @@ use crate::{
 
 impl Raspirus {
     pub fn main_menu<'a>(
-        &'a self,
+        &self,
         expanded_language: bool,
         expanded_location: bool,
         expanded_usb: bool,
         selection: LocationSelection,
         usbs: &'a [UsbDevice],
-    ) -> iced::Element<Message> {
+    ) -> iced::Element<'a, Message> {
         let current_language = match crate::SUPPORTED_LANGUAGES
             .iter()
             .find(|language| language.file_name.eq(&rust_i18n::locale().to_string()))
