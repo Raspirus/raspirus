@@ -54,6 +54,7 @@
     "usb_list_not_found": "No mounted USB devices detected",
     "usb_not_selected": "No USB device selected",
     "update_required_notice": "Update required on first launch. Do you want to do it now?",
+    "update_required_title": "Update notice",
     "updater_description": "Updates the Rules. Currently on:",
     "updater_running": "Already running update!",
     "updater_update": "Update",
