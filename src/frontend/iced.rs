@@ -713,8 +713,8 @@ impl Raspirus {
                                 yes: Box::new(Message::OpenSettings),
                                 no: Box::new(Message::None),
                             },
-                            title: "Update notice".to_owned(),
-                            description: "Please update on first run".to_owned(),
+                            title: t!("update_required_title").to_string(),
+                            description: t!("update_required_notice").to_string(),
                         })
                     } else {
                         iced::Task::none()
