@@ -11,7 +11,7 @@ use iced::{
     futures::{channel::mpsc, Stream},
     stream,
 };
-use log::{debug, error, info, warn};
+use log::{debug, info, warn};
 use rust_i18n::t;
 use std::borrow::Cow;
 use std::path::PathBuf;
@@ -128,7 +128,7 @@ pub enum Message {
         scale: usize,
     },
     UpdateRules,
-    // update messages
+    /// update messages
     Open {
         path: PathBuf,
     },
@@ -136,11 +136,11 @@ pub enum Message {
     ScannerReady {
         sender: mpsc::Sender<PathBuf>,
     },
-    Confirm {
+    /// shows popup dialog and outputs message when confirmed
+    PopUp {
+        severity: Severity,
         title: String,
         description: String,
-        yes: Box<Message>,
-        no: Box<Message>,
     },
     /// contains empty enum if just type changed and enum with content if something has been selected
     LocationChanged {
@@ -171,6 +171,13 @@ pub enum Message {
         case: ErrorCase,
     },
     None,
+}
+
+#[derive(Debug, Clone)]
+pub enum Severity {
+    Confirm { yes: Box<Message>, no: Box<Message> },
+    Warning { confirm: Box<Message> },
+    Error { confirm: Box<Message> },
 }
 
 #[derive(Debug, Clone)]
@@ -267,13 +274,13 @@ impl Raspirus {
             // show popup for warnings and quit for critical errors
             Message::Error { case } => match case {
                 ErrorCase::Critical { message } => iced::Task::done({
-                    error!("{message}");
-                    rfd::MessageDialog::new()
-                        .set_description(&message)
-                        .set_title(t!("error_title"))
-                        .set_level(rfd::MessageLevel::Error)
-                        .show();
-                    Message::Shutdown
+                    Message::PopUp {
+                        severity: Severity::Error {
+                            confirm: Box::new(Message::Shutdown),
+                        },
+                        title: t!("error_title").to_string(),
+                        description: message,
+                    }
                 }),
                 ErrorCase::Warning { message } => {
                     if let State::Scanning {
@@ -289,12 +296,13 @@ impl Raspirus {
 
                     iced::Task::done({
                         warn!("{message}");
-                        rfd::MessageDialog::new()
-                            .set_description(&message)
-                            .set_title(t!("notice_title"))
-                            .set_level(rfd::MessageLevel::Warning)
-                            .show();
-                        Message::None
+                        Message::PopUp {
+                            severity: Severity::Warning {
+                                confirm: Box::new(Message::None),
+                            },
+                            title: t!("notice_title").to_string(),
+                            description: message,
+                        }
                     })
                 }
             },
@@ -732,24 +740,49 @@ impl Raspirus {
                     case: ErrorCase::Warning { message },
                 },
             }),
-            // show confirmation prompt and execute messages given for yes / no
-            Message::Confirm {
+            Message::PopUp {
+                severity,
                 title,
                 description,
-                yes,
-                no,
-            } => iced::Task::done(
-                match rfd::MessageDialog::new()
+            } => iced::Task::done({
+                let dialog = rfd::MessageDialog::new()
                     .set_title(title)
-                    .set_description(description)
-                    .set_buttons(rfd::MessageButtons::YesNo)
-                    .show()
-                {
-                    rfd::MessageDialogResult::Yes => *yes,
-                    rfd::MessageDialogResult::No => *no,
-                    _ => Message::None,
-                },
-            ),
+                    .set_description(description);
+
+                match severity {
+                    Severity::Confirm { yes, no } => {
+                        match dialog
+                            .set_buttons(rfd::MessageButtons::YesNo)
+                            .set_level(rfd::MessageLevel::Info)
+                            .show()
+                        {
+                            rfd::MessageDialogResult::Yes => *yes,
+                            rfd::MessageDialogResult::No => *no,
+                            _ => Message::None,
+                        }
+                    }
+                    Severity::Warning { confirm } => {
+                        match dialog
+                            .set_buttons(rfd::MessageButtons::Ok)
+                            .set_level(rfd::MessageLevel::Warning)
+                            .show()
+                        {
+                            rfd::MessageDialogResult::Ok => *confirm,
+                            _ => Message::None,
+                        }
+                    }
+                    Severity::Error { confirm } => {
+                        match dialog
+                            .set_buttons(rfd::MessageButtons::Ok)
+                            .set_level(rfd::MessageLevel::Error)
+                            .show()
+                        {
+                            rfd::MessageDialogResult::Ok => *confirm,
+                            _ => Message::None,
+                        }
+                    }
+                }
+            }),
         }
     }
 
