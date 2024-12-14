@@ -136,6 +136,12 @@ pub enum Message {
     ScannerReady {
         sender: mpsc::Sender<PathBuf>,
     },
+    Confirm {
+        title: String,
+        description: String,
+        yes: Box<Message>,
+        no: Box<Message>,
+    },
     /// contains empty enum if just type changed and enum with content if something has been selected
     LocationChanged {
         selection: LocationSelection,
@@ -590,6 +596,7 @@ impl Raspirus {
                     },
                 }),
             },
+            // apply scale to current state
             Message::ApplyScale { scale } => {
                 if let State::Settings { config, update, .. } = &self.state {
                     self.state = State::Settings {
@@ -671,14 +678,17 @@ impl Raspirus {
                 },
                 |result| result,
             ),
+            // open terms and conditions
             Message::OpenTerms => {
                 self.state = State::Terms;
                 iced::Task::none()
             }
+            // seubscription job is ready to receive jobs
             Message::ScannerReady { sender } => {
                 self.sender = Some(sender);
                 iced::Task::none()
             }
+            // send path to subscription worker and start file scan
             Message::StartScan => {
                 self.state = State::Scanning {
                     scan_state: ScanState::Preparing,
@@ -715,12 +725,31 @@ impl Raspirus {
                     },
                 )
             }
+            // zip all log files and save them to the downloads folder
             Message::DownloadLogs => iced::Task::done(match download_logs() {
                 Ok(path) => Message::Open { path },
                 Err(message) => Message::Error {
                     case: ErrorCase::Warning { message },
                 },
             }),
+            // show confirmation prompt and execute messages given for yes / no
+            Message::Confirm {
+                title,
+                description,
+                yes,
+                no,
+            } => iced::Task::done(
+                match rfd::MessageDialog::new()
+                    .set_title(title)
+                    .set_description(description)
+                    .set_buttons(rfd::MessageButtons::YesNo)
+                    .show()
+                {
+                    rfd::MessageDialogResult::Yes => *yes,
+                    rfd::MessageDialogResult::No => *no,
+                    _ => Message::None,
+                },
+            ),
         }
     }
 
