@@ -51,6 +51,7 @@
     "terms_part_2": "Conditions Générales.",
     "usb_list_not_found": "Aucun périphérique USB monté détecté",
     "usb_not_selected": "Aucun périphérique USB sélectionné",
+    "update_required_notice": "Mise à jour requise lors du premier lancement. Voulez-vous le faire maintenant?",
     "updater_description": "Met à jour les règles. Version actuelle :",
     "updater_running": "Mise à jour déjà en cours !",
     "updater_update": "Mettre à jour",
