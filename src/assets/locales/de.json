@@ -10,6 +10,8 @@
     "file_selection_not": "Keine Datei ausgewählt",
     "info": "Info",
     "info_title": "Informationen",
+    "key_title": "Lizenz",
+    "key_description": "Aktueller Lizenztyp",
     "license": "Lizenz",
     "license_val": "Open Source GPLv3",
     "maintainers": "Betreuer",
