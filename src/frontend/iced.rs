@@ -707,15 +707,15 @@ impl Raspirus {
                 self.sender = Some(sender);
                 if self.fresh {
                     let config = crate::CONFIG.lock().expect("Failed to lock config").clone();
-                    if config.rules_version == "None".to_owned() {
-                        iced::Task::done(Message::PopUp {
+                    if config.rules_version == *"None" {
+                        iced::Task::perform(async {Message::PopUp {
                             severity: Severity::Confirm {
                                 yes: Box::new(Message::OpenSettings),
                                 no: Box::new(Message::None),
                             },
                             title: t!("update_required_title").to_string(),
                             description: t!("update_required_notice").to_string(),
-                        })
+                        }}, |msg| msg)
                     } else {
                         iced::Task::none()
                     }
