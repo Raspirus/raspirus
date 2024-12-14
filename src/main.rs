@@ -25,7 +25,7 @@ rust_i18n::i18n!("src/assets/locales", fallback = "en");
 
 /// config
 static CONFIG_FILENAME: &str = "Raspirus.json";
-static CONFIG_VERSION: &str = "7";
+static CONFIG_VERSION: &str = "8";
 
 /// remote params
 static DEFAULT_MIRROR: &str = "https://api.github.com/repos/Raspirus/yara-rules/releases/latest";
@@ -75,6 +75,7 @@ static SETTINGS: &[u8] = include_bytes!("assets/icons/settings.svg").as_slice();
 static USER_CODE: &[u8] = include_bytes!("assets/icons/user-code.svg").as_slice();
 static THEME_TOGGLE: &[u8] = include_bytes!("assets/icons/theme-toggle.svg").as_slice();
 static ZOOM: &[u8] = include_bytes!("assets/icons/zoom.svg").as_slice();
+static KEY: &[u8] = include_bytes!("assets/icons/key.svg").as_slice();
 
 /// flags
 static FLAG_DE: &[u8] = include_bytes!("assets/flags/de.svg").as_slice();
@@ -116,6 +117,7 @@ fn main() -> Result<(), String> {
     if CONFIG
         .lock()
         .expect("Failed to lock config")
+        .clone()
         .logging_is_active
     {
         // Logdir for application
@@ -182,30 +184,11 @@ fn main() -> Result<(), String> {
         .subscription(Raspirus::subscription)
         .centered()
         .theme(|app| {
-            if app.dark_mode {
-                iced::Theme::Dark
-            } else {
-                iced::Theme::Light
-            }
+            app.dark_mode
+                .then(|| iced::Theme::Dark)
+                .unwrap_or(iced::Theme::Light)
         })
-        .scale_factor(|app| {
-            app.scale as f64 / 100.0
-            /*
-
-            // TODO: We need a way to get the screen size consistently across devices to get proper scaling. for now the user has to set it manually
-            // Get the display size (width, height)
-            let (width, height) = (1920, 1080);
-            let minimum_dimension = width.min(height) as f64;
-
-            let scaling_factor = minimum_dimension / 1080.0;
-
-            // Ensure the scaling factor is clamped within reasonable bounds (to avoid extremely large or small values)
-            let clamped_scaling = scaling_factor.clamp(0.1, 1.0);
-            debug!("Scaling factor: {}", clamped_scaling);
-
-            clamped_scaling
-            */
-        })
+        .scale_factor(|app| app.scale as f64 / 100.0)
         .run()
         .expect("Failed to run application");
 
