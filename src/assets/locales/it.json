@@ -52,6 +52,7 @@
     "usb_list_not_found": "Nessun dispositivo USB montato rilevato",
     "usb_not_selected": "Nessun dispositivo USB selezionato",
     "update_required_notice": "Aggiornamento richiesto al primo avvio. Vuoi farlo ora?",
+    "update_required_title": "Aggiornamento avviso",
     "updater_description": "Aggiorna le regole. Versione attuale:",
     "updater_running": "Aggiornamento già in esecuzione!",
     "updater_update": "Aggiorna",
