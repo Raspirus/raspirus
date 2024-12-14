@@ -17,12 +17,21 @@ use std::borrow::Cow;
 use std::path::PathBuf;
 
 pub struct Raspirus {
+    /// true until startup process has been completed
+    pub fresh: bool,
+    /// application state
     pub state: State,
+    /// currently selected path for scanning
     pub scan_path: Option<PathBuf>,
+    /// detected usb devices
     pub usb_devices: Vec<UsbDevice>,
+    /// channel to communicate with background worker
     pub sender: Option<mpsc::Sender<PathBuf>>,
+    /// type of location selected
     pub location_selection: LocationSelection,
+    /// dark mod boolean
     pub dark_mode: bool,
+    /// current display scale
     pub scale: usize,
 }
 
@@ -208,6 +217,7 @@ impl Raspirus {
         let usb = list_usb_drives().unwrap_or_default();
         let config = crate::CONFIG.lock().expect("Failed to lock config").clone();
         Self {
+            fresh: true,
             state: State::MainMenu {
                 expanded_language: false,
                 expanded_location: false,
@@ -691,10 +701,27 @@ impl Raspirus {
                 self.state = State::Terms;
                 iced::Task::none()
             }
-            // seubscription job is ready to receive jobs
+            // seubscription job is ready to receive jobs. the application has finished startup.
+            // More startup procedures go here
             Message::ScannerReady { sender } => {
                 self.sender = Some(sender);
-                iced::Task::none()
+                if self.fresh {
+                    let config = crate::CONFIG.lock().expect("Failed to lock config").clone();
+                    if config.rules_version == "None".to_owned() {
+                        iced::Task::done(Message::PopUp {
+                            severity: Severity::Confirm {
+                                yes: Box::new(Message::OpenSettings),
+                                no: Box::new(Message::None),
+                            },
+                            title: "Update notice".to_owned(),
+                            description: "Please update on first run".to_owned(),
+                        })
+                    } else {
+                        iced::Task::none()
+                    }
+                } else {
+                    iced::Task::none()
+                }
             }
             // send path to subscription worker and start file scan
             Message::StartScan => {
