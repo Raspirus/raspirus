@@ -16,6 +16,7 @@ parts:
         source: .
         stage-packages:
             - libssl-dev
+        rust-cargo-parameters: [--no-default-features]
 
 apps:
     raspirus:

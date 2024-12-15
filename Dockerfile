@@ -15,4 +15,4 @@ RUN apt-get update && apt-get install -y pkg-config \
 RUN cargo install cargo-packager --locked
 
 # Package app
-RUN cargo packager --release --verbose
+RUN cargo packager --release --verbose --no-default-features
