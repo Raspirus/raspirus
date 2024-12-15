@@ -4,7 +4,6 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use chrono::Local;
 use log::{debug, info, warn};
 use sha2::{Digest, Sha256};
 use yara_x::Rules;
@@ -189,25 +188,20 @@ pub fn update_config(value: ConfigValue) -> Result<Config, String> {
     Ok(config.clone())
 }
 
-pub fn download_logs() -> Result<PathBuf, String> {
+pub fn download_logs(output_file: PathBuf) -> Result<PathBuf, String> {
     let config = crate::CONFIG
         .lock()
         .expect("Failed to lock config")
         .clone()
         .paths
-        .ok_or("Paths in config undefined".to_owned())?;
+        .ok_or("Paths in config undefined".to_owned())?; 
 
-    let output_path = config.downloads.join(format!(
-        "{}-logdump.zip",
-        Local::now().format("%Y_%m_%d_%H_%M_%S")
-    ));
-
-    info!("Downloading logs to {}", output_path.to_string_lossy());
+    info!("Downloading logs to {}", output_file.to_string_lossy());
 
     let options = SimpleFileOptions::default().compression_method(zip::CompressionMethod::Stored);
 
     let mut zip =
-        zip::ZipWriter::new(File::create(&output_path).expect("Failed to create zip archive"));
+        zip::ZipWriter::new(File::create(&output_file).expect("Failed to create zip archive"));
     let current_path = config
         .logs_app
         .parent()
@@ -264,6 +258,6 @@ pub fn download_logs() -> Result<PathBuf, String> {
     }
     zip.finish()
         .map_err(|err| format!("Failed to finish zip file: {err}"))?;
-    info!("Logs have been saved to {}", output_path.to_string_lossy());
-    Ok(output_path)
+    info!("Logs have been saved to {}", output_file.to_string_lossy());
+    Ok(output_file)
 }
