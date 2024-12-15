@@ -41,7 +41,7 @@ install:
 build:
 	@clear
 	@printf "$(TEXT)>>>> Building release$(RESET)"
-	cargo build --release --verbose
+	cargo build --release --verbose --no-default-features
 	@printf "$(TEXT)>>>> Done!$(RESET)"
 
 test:
