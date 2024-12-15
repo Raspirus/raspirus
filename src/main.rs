@@ -185,9 +185,11 @@ fn main() -> Result<(), String> {
         .subscription(Raspirus::subscription)
         .centered()
         .theme(|app| {
-            app.dark_mode
-                .then(|| iced::Theme::Dark)
-                .unwrap_or(iced::Theme::Light)
+            if app.dark_mode {
+                iced::Theme::Dark
+            } else {
+                iced::Theme::Light
+            }
         })
         .scale_factor(|app| app.scale as f64 / 100.0)
         .run()
