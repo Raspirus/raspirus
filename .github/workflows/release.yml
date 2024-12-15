@@ -36,7 +36,7 @@ jobs:
               run: cargo install cargo-packager --locked
 
             - name: Package Binary
-              run: cargo packager --release --verbose
+              run: cargo packager --release --verbose --no-default-features
 
             - name: Upload build artifacts
               uses: actions/upload-artifact@v4
@@ -119,7 +119,7 @@ jobs:
               env:
                   PKG_CONFIG_SYSROOT_DIR: ${{ matrix.sysroot }}
               run: |
-                  cargo deb --target=${{ matrix.target }}
+                  cargo deb --target=${{ matrix.target }} --no-default-features
 
             - name: Upload cross-compile artifacts
               uses: actions/upload-artifact@v4

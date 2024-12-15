@@ -32,7 +32,7 @@ jobs:
         ls -la $HOME  # Verify the user directories
 
     - name: Build
-      run: cargo build --verbose --release
+      run: cargo build --verbose --release --no-default-features
     
     - name: Run tests
       run: cargo test --verbose --release -- --show-output

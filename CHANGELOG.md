@@ -48,6 +48,7 @@ Our release schedule is designed to balance feature development, stability, and 
 | 2.0.0   | Moved to iced-rs frontend, full Rust support               |
 | 2.0.1   | Fixed a bug with very small screens                        |
 | 2.1.0   | Added PDF generation and minor bug fixes                   |
+| 2.2.0   | Fixed minor issues and added pop-ups                       |
 
 
 Please refer to this change log for details on each version's changes and improvements. We appreciate your feedback and contributions as we continue to enhance our antivirus application to meet your security needs.
