@@ -689,8 +689,8 @@ impl Raspirus {
                     .add_filter(".pdf", &[".pdf"])
                     .set_can_create_directories(true)
                     .save_file()
-                {
-                    match generate_pdf(skipped, tagged, total, timestamp, file) {
+                { 
+                    match generate_pdf(skipped, tagged, total, timestamp, file.with_extension("pdf")) {
                         Ok(path) => Message::Open { path },
                         Err(message) => Message::Error {
                             case: ErrorCase::Warning { message },
@@ -797,7 +797,7 @@ impl Raspirus {
                     .set_can_create_directories(true)
                     .save_file()
                 {
-                    match download_logs(file) {
+                    match download_logs(file.with_extension("zip")) {
                         Ok(path) => Message::Open { path },
                         Err(message) => Message::Error {
                             case: ErrorCase::Warning { message },
