@@ -14,6 +14,7 @@ use iced::{
 use log::{debug, info, warn};
 use rust_i18n::t;
 use std::borrow::Cow;
+use std::ffi::OsStr;
 use std::path::PathBuf;
 
 pub struct Raspirus {
@@ -675,11 +676,33 @@ impl Raspirus {
                 tagged,
                 total,
                 log_path,
-            } => iced::Task::done(match generate_pdf(skipped, tagged, total, log_path) {
-                Ok(path) => Message::Open { path },
-                Err(message) => Message::Error {
-                    case: ErrorCase::Warning { message },
-                },
+            } => iced::Task::done({
+                let file_name = log_path
+                    .file_name()
+                    .unwrap_or(OsStr::new("unnamed.log"))
+                    .to_string_lossy();
+                let timestamp = file_name.trim_end_matches(".log");
+
+                if let Some(file) = rfd::FileDialog::new()
+                    .set_title(t!("save_as"))
+                    .set_file_name(format!("{timestamp}.pdf"))
+                    .add_filter(".pdf", &[".pdf"])
+                    .set_can_create_directories(true)
+                    .save_file()
+                {
+                    match generate_pdf(skipped, tagged, total, timestamp, file) {
+                        Ok(path) => Message::Open { path },
+                        Err(message) => Message::Error {
+                            case: ErrorCase::Warning { message },
+                        },
+                    }
+                } else {
+                    Message::Error {
+                        case: ErrorCase::Warning {
+                            message: t!("no_save_location").to_string(),
+                        },
+                    }
+                }
             }),
             // open a path
             Message::Open { path } => iced::Task::perform(
@@ -708,14 +731,19 @@ impl Raspirus {
                 if self.fresh {
                     let config = crate::CONFIG.lock().expect("Failed to lock config").clone();
                     if config.rules_version == *"None" {
-                        iced::Task::perform(async {Message::PopUp {
-                            severity: Severity::Confirm {
-                                yes: Box::new(Message::OpenSettings),
-                                no: Box::new(Message::None),
+                        iced::Task::perform(
+                            async {
+                                Message::PopUp {
+                                    severity: Severity::Confirm {
+                                        yes: Box::new(Message::OpenSettings),
+                                        no: Box::new(Message::None),
+                                    },
+                                    title: t!("update_required_title").to_string(),
+                                    description: t!("update_required_notice").to_string(),
+                                }
                             },
-                            title: t!("update_required_title").to_string(),
-                            description: t!("update_required_notice").to_string(),
-                        }}, |msg| msg)
+                            |msg| msg,
+                        )
                     } else {
                         iced::Task::none()
                     }
@@ -761,11 +789,27 @@ impl Raspirus {
                 )
             }
             // zip all log files and save them to the downloads folder
-            Message::DownloadLogs => iced::Task::done(match download_logs() {
-                Ok(path) => Message::Open { path },
-                Err(message) => Message::Error {
-                    case: ErrorCase::Warning { message },
-                },
+            Message::DownloadLogs => iced::Task::done({
+                if let Some(file) = rfd::FileDialog::new()
+                    .set_title(t!("save_as"))
+                    .set_file_name("Export.zip")
+                    .add_filter(".zip", &[".zip"])
+                    .set_can_create_directories(true)
+                    .save_file()
+                {
+                    match download_logs(file) {
+                        Ok(path) => Message::Open { path },
+                        Err(message) => Message::Error {
+                            case: ErrorCase::Warning { message },
+                        },
+                    }
+                } else {
+                    Message::Error {
+                        case: ErrorCase::Warning {
+                            message: t!("no_save_location").to_string(),
+                        },
+                    }
+                }
             }),
             Message::PopUp {
                 severity,
