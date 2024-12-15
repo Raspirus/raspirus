@@ -174,6 +174,7 @@ fn main() -> Result<(), String> {
     let mut settings = Settings::default();
     let mut window_settings = iced::window::Settings::default();
     settings.id = Some("raspirus.app".to_owned());
+    settings.default_font = iced::Font::default();
 
     window_settings.icon = icon::from_file_data(ICON_BYTES, Option::from(ImageFormat::Ico)).ok();
 

@@ -1,4 +1,4 @@
-use directories_next::{ProjectDirs, UserDirs};
+use directories_next::{BaseDirs, ProjectDirs};
 use log::info;
 use serde::{Deserialize, Serialize};
 use std::fs::{self, File};
@@ -75,18 +75,18 @@ impl Config {
     /// Finds the suitable path for the current system, creates a subfolder for the app and returns
     /// the path as a normal String
     fn set_paths(&mut self) -> Result<(), String> {
-        let downloads = UserDirs::new()
-            .ok_or("Could not determine user directories".to_owned())?
-            .download_dir()
-            .ok_or("Could not get download dir".to_owned())?
-            .to_path_buf();
-
         #[cfg(not(target_os = "windows"))]
         let dirs = ProjectDirs::from("com", "Raspirus", "Raspirus")
             .ok_or("Failed to get projectdir".to_owned())?;
         #[cfg(target_os = "windows")]
         let dirs = ProjectDirs::from("com", "Raspirus", "")
             .ok_or("Failed to get projectdir".to_owned())?;
+
+        // Trying to determine downloads folder
+        let downloads = BaseDirs::new()
+            .expect("Failed to get user directories")
+            .home_dir()
+            .join("Downloads");
 
         // RoamingData under windows
         let data = dirs.data_dir().to_owned();
