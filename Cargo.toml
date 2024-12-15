@@ -1,6 +1,6 @@
 [package]
 name = "raspirus"
-version = "2.1.0"
+version = "2.2.0"
 description = "A simple hash-based virus-scanner"
 authors = ["Demetz Benjamin, Hell Björn Felix"]
 license-file = "LICENSE"
@@ -28,7 +28,6 @@ sha2 = "0.10.8"
 hex = "0.4.3"
 serde = { version = "1.0.216", features = ["derive"] }
 serde_json = "1.0.133"
-iced = { version = "0.13.1", features = ["tokio", "image", "svg"] }
 iced_aw = "0.11.0"
 futures = "0.3.31"
 open = "5.3.1"
@@ -37,6 +36,7 @@ zip = "2.2.1"
 tokio = "1.42.0"
 rust-i18n = { version = "3.1.2", features = ["log-miss-tr"] }
 rfd = "0.15.1"
+iced = { version = "0.13.1", features = ["tokio", "image", "svg"] }
 
 # usb detection on linux
 [target.'cfg(any(target_os = "linux", target_os = "macos"))'.dependencies]
@@ -49,6 +49,11 @@ windows-sys = { version = "0.59.0", features = [
     "Win32_System_Console",
 ] }
 winapi = "0.3.9"
+
+[features]
+default = ["debug"]
+debug = ["iced/debug"]
+
 
 [profile.release]
 opt-level = 3     # Focus on performance
