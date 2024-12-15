@@ -40,21 +40,9 @@ pub fn generate_pdf(
     skipped: Vec<(Skipped, bool)>,
     tagged: Vec<(TaggedFile, bool)>,
     total: usize,
-    log_file: PathBuf,
+    timestamp: &str,
+    output_file: PathBuf,
 ) -> Result<PathBuf, String> {
-    let file_name = log_file.file_name().unwrap_or_default().to_string_lossy();
-    let timestamp = file_name.trim_end_matches(".log");
-
-    let downloads_folder = crate::CONFIG
-        .lock()
-        .map_err(|err| format!("Failed to lock config: {err}"))?
-        .paths
-        .clone()
-        .ok_or_else(|| "No paths?".to_string())?
-        .downloads;
-
-    let output_file = downloads_folder.join(format!("{timestamp}.pdf"));
-
     let (doc, page1, layer1) = printpdf::PdfDocument::new(
         t!("report_title"),
         printpdf::Mm(PAGE_WIDTH),
@@ -95,8 +83,9 @@ pub fn generate_pdf(
         &font,
     );
 
-    let date_string = NaiveDateTime::parse_from_str(timestamp, "%Y_%m_%d_%H_%M_%S")
-        .map_err(|err| format!("Failed to parse timestamp to time: {err}"))?;
+    // Create date string from file timestamp or set to default
+    let date_string =
+        NaiveDateTime::parse_from_str(timestamp, "%Y_%m_%d_%H_%M_%S").unwrap_or_default();
     let date_string = date_string.format("%Y/%m/%d %H:%M:%S").to_string();
 
     // Add the date to the page

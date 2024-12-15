@@ -1,4 +1,4 @@
-use directories_next::{BaseDirs, ProjectDirs};
+use directories_next::ProjectDirs;
 use log::info;
 use serde::{Deserialize, Serialize};
 use std::fs::{self, File};
@@ -46,7 +46,6 @@ pub struct Paths {
     pub config: PathBuf,
     pub logs_scan: PathBuf,
     pub logs_app: PathBuf,
-    pub downloads: PathBuf,
 }
 
 impl Default for Config {
@@ -82,12 +81,6 @@ impl Config {
         let dirs = ProjectDirs::from("com", "Raspirus", "")
             .ok_or("Failed to get projectdir".to_owned())?;
 
-        // Trying to determine downloads folder
-        let downloads = BaseDirs::new()
-            .expect("Failed to get user directories")
-            .home_dir()
-            .join("Downloads");
-
         // RoamingData under windows
         let data = dirs.data_dir().to_owned();
         let logs = data.to_owned().join("logs");
@@ -115,7 +108,6 @@ impl Config {
             config,
             logs_scan,
             logs_app,
-            downloads,
             temp,
         });
         Ok(())
