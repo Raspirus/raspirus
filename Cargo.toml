@@ -40,7 +40,7 @@ iced = { version = "0.13.1", features = ["tokio", "image", "svg"] }
 
 # usb detection on linux
 [target.'cfg(any(target_os = "linux", target_os = "macos"))'.dependencies]
-lfs-core = "0.11.2"
+lfs-core = "0.12.0"
 
 # windows dependencies
 [target.'cfg(target_os = "windows")'.dependencies]
