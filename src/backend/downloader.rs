@@ -120,7 +120,7 @@ async fn download_file(url: &str, path: &PathBuf) -> Result<(), RemoteError> {
 }
 
 /// updates the currently used yara rules to the latest from the repo
-pub async fn update() -> Result<(), RemoteError> {
+pub async fn update() -> Result<Option<String>, RemoteError> {
     let mut config = CONFIG.lock().expect("Failed to lock config").clone();
 
     let paths = config
@@ -149,7 +149,7 @@ pub async fn update() -> Result<(), RemoteError> {
     }
 
     if !update {
-        return Ok(());
+        return Ok(None);
     }
 
     info!("Starting download...");
@@ -170,7 +170,7 @@ pub async fn update() -> Result<(), RemoteError> {
     config.rules_version = new_version;
     config.save().map_err(RemoteError::Other)?;
     info!("Updated to {}", &config.rules_version);
-    Ok(())
+    Ok(Some(config.rules_version))
 }
 
 /// builds the rules and saves them to the data folder. also runs a powershell script to exlcude

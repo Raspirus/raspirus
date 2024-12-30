@@ -172,7 +172,9 @@ pub enum Message {
     ToggleCard {
         card: Card,
     },
-    UpdateFinished,
+    UpdateFinished {
+        version: Option<String>,
+    },
     // data messages
     ScanPercentage {
         percentage: f32,
@@ -185,6 +187,7 @@ pub enum Message {
 
 #[derive(Debug, Clone)]
 pub enum Severity {
+    Ok { ok: Box<Message> },
     Confirm { yes: Box<Message>, no: Box<Message> },
     Warning { confirm: Box<Message> },
     Error { confirm: Box<Message> },
@@ -641,7 +644,7 @@ impl Raspirus {
                 iced::Task::perform(
                     async move {
                         match downloader::update().await {
-                            Ok(_) => Message::UpdateFinished,
+                            Ok(version) => Message::UpdateFinished { version },
                             Err(err) => match err {
                                 downloader::RemoteError::Offline => Message::Error {
                                     case: ErrorCase::Warning {
@@ -658,7 +661,7 @@ impl Raspirus {
                 )
             }
             // update is finished
-            Message::UpdateFinished => {
+            Message::UpdateFinished { version } => {
                 if let State::Settings { temp_scale, .. } = &self.state {
                     self.state = State::Settings {
                         config: Box::new(
@@ -668,7 +671,16 @@ impl Raspirus {
                         temp_scale: *temp_scale,
                     };
                 }
-                iced::Task::none()
+                iced::Task::done(Message::PopUp {
+                    severity: Severity::Ok {
+                        ok: Box::new(Message::None),
+                    },
+                    title: t!("updater_updated").to_string(),
+                    description: match version {
+                        Some(version) => format!("{} {version}", t!("updater_updated_to")).to_string(),
+                        None => t!("updater_up_to_date").to_string(),
+                    },
+                })
             }
             // start pdf generation
             Message::DownloadLog {
@@ -689,8 +701,14 @@ impl Raspirus {
                     .add_filter(".pdf", &[".pdf"])
                     .set_can_create_directories(true)
                     .save_file()
-                { 
-                    match generate_pdf(skipped, tagged, total, timestamp, file.with_extension("pdf")) {
+                {
+                    match generate_pdf(
+                        skipped,
+                        tagged,
+                        total,
+                        timestamp,
+                        file.with_extension("pdf"),
+                    ) {
                         Ok(path) => Message::Open { path },
                         Err(message) => Message::Error {
                             case: ErrorCase::Warning { message },
@@ -821,6 +839,19 @@ impl Raspirus {
                     .set_description(description);
 
                 match severity {
+                    Severity::Ok { ok } => {
+                        match dialog
+                            .set_buttons(rfd::MessageButtons::Ok)
+                            .set_level(rfd::MessageLevel::Info)
+                            .show()
+                        {
+                            rfd::MessageDialogResult::Ok => *ok,
+                            val => {
+                                warn!("Received invalid return from dialog: {val:?}");
+                                Message::None
+                            }
+                        }
+                    }
                     Severity::Confirm { yes, no } => {
                         match dialog
                             .set_buttons(rfd::MessageButtons::YesNo)
@@ -829,7 +860,10 @@ impl Raspirus {
                         {
                             rfd::MessageDialogResult::Yes => *yes,
                             rfd::MessageDialogResult::No => *no,
-                            _ => Message::None,
+                            val => {
+                                warn!("Received invalid return from dialog: {val:?}");
+                                Message::None
+                            }
                         }
                     }
                     Severity::Warning { confirm } => {
@@ -839,7 +873,10 @@ impl Raspirus {
                             .show()
                         {
                             rfd::MessageDialogResult::Ok => *confirm,
-                            _ => Message::None,
+                            val => {
+                                warn!("Received invalid return from dialog: {val:?}");
+                                Message::None
+                            }
                         }
                     }
                     Severity::Error { confirm } => {
@@ -849,7 +886,10 @@ impl Raspirus {
                             .show()
                         {
                             rfd::MessageDialogResult::Ok => *confirm,
-                            _ => Message::None,
+                            val => {
+                                warn!("Received invalid return from dialog: {val:?}");
+                                Message::None
+                            }
                         }
                     }
                 }

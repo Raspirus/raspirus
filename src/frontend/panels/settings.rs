@@ -412,7 +412,62 @@ impl Raspirus {
                         .padding(iced::padding::Padding::new(10.0).right),
                 )
                 .style(card_container_style),
-            ) 
+            )
+            .push(
+                iced::widget::container(
+                    iced::widget::Row::new()
+                        .push(
+                            svg_plain(crate::KEY)
+                                .height(64)
+                                .width(64)
+                                .style(settings_icon_style),
+                        )
+                        .push(iced::widget::Space::with_width(10))
+                        .push(
+                            iced::widget::Column::new()
+                                .push(iced::widget::text(t!("set_license")).size(20))
+                                .push(iced::widget::Space::with_height(5))
+                                .push(
+                                    iced::widget::text(format!(
+                                        "{}: {}",
+                                        t!("set_license_desc"),
+                                        match &config.license {
+                                            Some(_) => t!("set_license_type_enterprise"),
+                                            None => t!("set_license_type_personal"),
+                                        }
+                                    ))
+                                    .size(14)
+                                    .style(|_| {
+                                        iced::widget::text::Style {
+                                            color: Some(GRAY_COLOR),
+                                        }
+                                    }),
+                                )
+                                .width(iced::Length::Fill),
+                        )
+                        .push(iced::widget::horizontal_space())
+                        .push(
+                            iced::widget::Button::new(
+                                iced::widget::Row::new()
+                                    .push(iced::widget::text(t!("set_license_button")))
+                                    .push(svg_icon(crate::KEY).style(white_icon_style))
+                                    .spacing(10),
+                            )
+                            .on_press(Message::PopUp {
+                                severity: crate::frontend::iced::Severity::Ok {
+                                    ok: Box::new(Message::None),
+                                },
+                                title: "Not yet implemented".to_string(),
+                                description: "Not yet implemented".to_string(),
+                            })
+                            .padding(10)
+                            .style(button_blue_style),
+                        )
+                        .align_y(iced::Alignment::Center)
+                        .padding(iced::padding::Padding::new(10.0).right),
+                )
+                .style(card_container_style),
+            )
             .spacing(20);
 
         let content = iced::widget::Scrollable::new(wrap(15, options.into()));
