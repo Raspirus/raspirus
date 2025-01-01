@@ -67,6 +67,7 @@ If you find value in this project, consider sponsoring it through [GitHub Sponso
   <tbody>
     <tr>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/tuchaVshortah"><img src="https://avatars.githubusercontent.com/u/71591558?v=4" width="100px;" alt="Profile picture"/><br /><sub><b>Nurkanat Baysenkul</b></sub></a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/dylanchxx"><img src="https://avatars.githubusercontent.com/u/127700913?v=4" width="100px;" alt="Profile picture"/><br /><sub><b>Dylanchxx</b></sub></a></td>
     </tr>
   </tbody>
 </table>
