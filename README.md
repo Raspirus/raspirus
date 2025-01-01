@@ -72,7 +72,7 @@ If you find value in this project, consider sponsoring it through [GitHub Sponso
   </tbody>
 </table>
 
-Check out all the contributors on [our Documentation](https://raspirus.github.io/docs/stars/)
+Check out all the contributors on [our Website](https://raspirus.deno.dev/)
 
 ## Star History
 
