@@ -24,9 +24,22 @@ jobs:
         run: |
           $UpdateOutput = .\update.ps1
           $NupkgPath = (($UpdateOutput.Result | Where-Object {$_ -like '*.nupkg''*'}) -split "'")[1]
+
+          if (-not $NupkgPath) {
+              Write-Output "Warning: No .nupkg file path found in update script output."
+          }
+
           Write-Output "NupkgPath=$($NupkgPath)" >> $Env:GITHUB_OUTPUT
           $UpdateStatus = if ($UpdateOutput.Result -match 'No new version found') {'No Update'} else {'Update Available'}
           Write-Output "UpdateStatus=$($UpdateStatus)" >> $Env:GITHUB_OUTPUT
+
+      - name: Debug update outputs
+        run: |
+          Write-Output "NupkgPath from outputs: ${{ steps.update.outputs.NupkgPath }}"
+          Write-Output "UpdateStatus from outputs: ${{ steps.update.outputs.UpdateStatus }}"
+          if (-not "${{ steps.update.outputs.NupkgPath }}") {
+              Write-Output "Debug: NupkgPath is empty. Investigate the update script output and extraction logic."
+          }
 
       - name: Test install
         run: Test-Package -Install -Nu ${{ steps.update.outputs.NupkgPath }}
