@@ -1,6 +1,6 @@
 ﻿$ErrorActionPreference = 'Stop'
 $toolsDir   = "$(Split-Path -parent $MyInvocation.MyCommand.Definition)"
-$url64      = 'https://github.com/Raspirus/raspirus/releases/download/v2.1.0/raspirus_2.1.0_x64_en-US.msi'
+$url64      = 'https://github.com/Raspirus/raspirus/releases/download/v2.0.0/raspirus_2.0.0_x64_en-US.msi'
 
 $packageArgs = @{
   packageName   = $env:ChocolateyPackageName
