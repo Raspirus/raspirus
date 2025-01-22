@@ -19,24 +19,6 @@ jobs:
       - name: Install Chocolatey Automatic Package Updater Module
         run: Install-Module -Name Chocolatey-AU -Force
 
-      - name: Verify working directory and nuspec file
-        run: |
-          $CurrentDir = Get-Location
-          Write-Output "Current working directory: $CurrentDir"
-
-          # Path simulation based on the script's logic
-          $Path = $CurrentDir.Path
-          $Name = Split-Path -Leaf $Path
-          $NuspecPath = '{0}{2}{1}.nuspec' -f $Path, $Name, [IO.Path]::DirectorySeparatorChar
-          Write-Output "Constructed nuspec path: $NuspecPath"
-
-          # Check if the nuspec file exists
-          if (Test-Path $NuspecPath) {
-            Write-Output "Nuspec file found: $NuspecPath"
-          } else {
-            Write-Error "No nuspec file found at the constructed path: $NuspecPath"
-          }
-
       - name: Run update script
         id: update
         run: |
@@ -48,7 +30,7 @@ jobs:
 
       - name: Test install
         run: Test-Package -Install -Nu ${{ steps.update.outputs.NupkgPath }}
-        if: steps.update.outputs.UpdateStatus == 'Update Available'
+#        if: steps.update.outputs.UpdateStatus == 'Update Available'
 
       - name: Publish to Chocolatey community feed
         run: |
