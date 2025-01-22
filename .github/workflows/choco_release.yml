@@ -42,7 +42,7 @@ jobs:
         if: steps.update.outputs.UpdateStatus == 'Update Available'
 
       - name: Commit Updated nuspec
-        uses: stefanzweifel/git-auto-commit-action@v4
+        uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: Apply Choco package update - Raspirus ${{ steps.update.outputs.newversion }}
           file_pattern: '*.nuspec *.ps1'
