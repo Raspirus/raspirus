@@ -6,6 +6,7 @@ on:
 defaults:
   run:
     shell: pwsh
+    working-directory: packaging/chocolatey
 
 jobs:
   update_choco_auto:
@@ -21,8 +22,6 @@ jobs:
       - name: Run update script
         id: update
         run: |
-          cd packaging/chocolatey
-          ls -ll
           $UpdateOutput = .\update.ps1
           $NupkgPath = (($UpdateOutput.Result | Where-Object {$_ -like '*.nupkg''*'}) -split "'")[1]
           Write-Output "NupkgPath=$($NupkgPath)" >> $Env:GITHUB_OUTPUT
