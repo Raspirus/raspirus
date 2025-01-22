@@ -3,7 +3,7 @@
   <metadata>
     <id>raspirus</id>
     <version>2.1.0</version>
-    <packageSourceUrl>https://github.com/Raspirus/raspirus</packageSourceUrl>
+    <packageSourceUrl>https://github.com/Raspirus/raspirus/chocolatey/raspirus</packageSourceUrl>
     <owners>Raspirus</owners>
     <title>Raspirus</title>
     <authors>Raspirus Team</authors>
