@@ -6,7 +6,7 @@ on:
 defaults:
   run:
     shell: pwsh
-    working-directory: packaging/chocolatey
+    working-directory: chocolatey/raspirus
 
 jobs:
   update_choco_auto:
