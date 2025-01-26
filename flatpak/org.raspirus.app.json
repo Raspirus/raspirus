@@ -31,10 +31,10 @@
             "install -Dm644 ./flatpak/${FLATPAK_ID}.svg -t /app/share/icons/hicolor/scalable/apps/"
         ],
         "sources": [{
-                "type": "dir",
-                "path": "../"
-            },
-            "generated-sources.json"
+                "type": "archive",
+                "url": "https://github.com/Raspirus/raspirus/archive/refs/tags/v2.1.0.tar.gz",
+                "sha256": "518C3A52914CF63787BF48FF4FD1798FF0E894AA26BF14A244E44A2D34B9D6E8"
+            }
         ]
     }]
 }
