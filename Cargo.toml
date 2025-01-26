@@ -64,7 +64,7 @@ strip = true      # Removed debugging symbols
 
 [package.metadata.packager]
 product-name = "Raspirus"
-identifier = "com.raspirus.app"
+identifier = "org.raspirus.app"
 category = "Utility"
 homepage = "https://raspirus.deno.dev"
 icons = ["src/assets/logo.png"]
