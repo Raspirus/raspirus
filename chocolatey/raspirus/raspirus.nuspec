@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd">
   <metadata>
     <id>raspirus</id>
-    <version>2.1.0</version>
+    <version>2.2.0</version>
     <packageSourceUrl>https://github.com/Raspirus/raspirus/chocolatey/raspirus</packageSourceUrl>
     <owners>Raspirus</owners>
     <title>Raspirus</title>
@@ -31,7 +31,7 @@ Welcome to Raspirus, your lightweight rules-based malware scanner. Originally de
 - **Swift and Dependable:** Count on Raspirus for fast and reliable malware detection.
 - **Sleek Modern Interface:** With user-friendliness at its core, Raspirus boasts a beautiful and intuitive UI.
     </description>
-    <releaseNotes>https://github.com/Raspirus/raspirus/releases/tag/v2.1.0</releaseNotes>
+    <releaseNotes>https://github.com/Raspirus/raspirus/releases/tag/v2.2.0</releaseNotes>
   </metadata>
   <files>
     <!-- this section controls what actually gets packaged into the Chocolatey package -->
