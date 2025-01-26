@@ -76,11 +76,6 @@ jobs:
             - name: Checkout code
               uses: actions/checkout@v4
 
-            - name: check apt sources
-              run: |
-                cat config/crosscomp-sources.list
-                cat /etc/apt/sources.list
-
             - name: setup deb822 repos
               run: |
                 cat <<EOF > deb822sources
