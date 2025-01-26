@@ -17,7 +17,7 @@ modules:
     sources:
       - type: file
         url: https://github.com/Raspirus/raspirus/releases/download/v2.1.0/raspirus_2.1.0_amd64.deb
-        sha256: 08305b5521e2cf0622e084f2b8f7f31f8a989fc7f407a7050fa3649facd61469 # This is required if you are using a remote source
+        sha256: f15f0a069dca187837f84f54a0586969848bc730ed880e257cc9ac05eec230ce # This is required if you are using a remote source
         only-arches: [x86_64] #This source is only used on x86_64 Computers
 
     build-commands:
