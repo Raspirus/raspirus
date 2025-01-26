@@ -6,6 +6,5 @@ Exec=raspirus
 Terminal=false
 Type=Application
 Icon=org.raspirus.app
-Categories=Security;Utility;
-Keywords=Rust;Security;Yara;Antivirus;
+Categories=System;Security;
 StartupNotify=true
