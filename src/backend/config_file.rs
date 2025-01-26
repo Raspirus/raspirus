@@ -75,10 +75,10 @@ impl Config {
     /// the path as a normal String
     fn set_paths(&mut self) -> Result<(), String> {
         #[cfg(not(target_os = "windows"))]
-        let dirs = ProjectDirs::from("com", "Raspirus", "Raspirus")
+        let dirs = ProjectDirs::from("org", "raspirus", "app")
             .ok_or("Failed to get projectdir".to_owned())?;
         #[cfg(target_os = "windows")]
-        let dirs = ProjectDirs::from("com", "Raspirus", "")
+        let dirs = ProjectDirs::from("org", "raspirus", "")
             .ok_or("Failed to get projectdir".to_owned())?;
 
         // RoamingData under windows
