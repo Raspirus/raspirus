@@ -1,0 +1,31 @@
+id: org.raspirus.app
+
+runtime: org.gnome.Platform
+runtime-version: '46'
+sdk: org.gnome.Sdk
+
+command: raspirus
+finish-args:
+  - --socket=wayland # Permission needed to show the window
+  - --socket=fallback-x11 # Permission needed to show the window
+  - --device=dri # OpenGL, not necessary for all projects
+  - --share=ipc
+
+modules:
+  - name: binary
+    buildsystem: simple
+    sources:
+      - type: file
+        url: https://github.com/Raspirus/raspirus/releases/download/v2.1.0/raspirus_2.1.0_amd64.deb
+        sha256: 08305b5521e2cf0622e084f2b8f7f31f8a989fc7f407a7050fa3649facd61469 # This is required if you are using a remote source
+        only-arches: [x86_64] #This source is only used on x86_64 Computers
+
+    build-commands:
+      - ar -x *.deb
+      - tar -xf data.tar.gz
+      - 'install -Dm755 usr/bin/raspirus /app/bin/raspirus'
+      - install -Dm644 usr/share/applications/raspirus.desktop /app/share/applications/org.raspirus.app.desktop
+      - install -Dm644 usr/share/icons/hicolor/128x128/apps/raspirus.png /app/share/icons/hicolor/128x128/apps/org.raspirus.app.png
+      - install -Dm644 usr/share/icons/hicolor/32x32/apps/raspirus.png /app/share/icons/hicolor/32x32/apps/org.raspirus.app.png
+      - install -Dm644 usr/share/icons/hicolor/256x256@2/apps/raspirus.png /app/share/icons/hicolor/256x256@2/apps/org.raspirus.app.png
+      - install -Dm644 org.raspirus.app.metainfo.xml /app/share/metainfo/org.raspirus.app.rosary.metainfo.xml
