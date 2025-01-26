@@ -35,7 +35,7 @@
         "sources": [{
                 "type": "archive",
                 "url": "https://github.com/Raspirus/raspirus/archive/refs/tags/v2.1.0.tar.gz",
-                "sha256": "518C3A52914CF63787BF48FF4FD1798FF0E894AA26BF14A244E44A2D34B9D6E8"
+                "sha256": "518c3a52914cf63787bf48ff4fd1798ff0e894aa26bf14a244e44a2d34b9d6e8"
             }
         ]
     }]
