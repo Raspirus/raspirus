@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>org.raspirus.app</id>
+  <developer id="org.raspirus">
+    <name>Raspirus</name>
+  </developer>
+  <launchable type="desktop-id">com.raspirus.app.desktop</launchable>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0-only</project_license>
+  <name>Raspirus</name>
+  <summary>Lightweight, Cross-Platform Malware Scanner</summary>
+  <description>
+    <p>
+        Welcome to Raspirus, your lightweight rules-based malware scanner. 
+        Originally designed to scan attached USB drives using a Raspberry Pi, 
+        Raspirus has evolved into a versatile tool capable of scanning local files and folders as well. 
+        Some of its standout features include:
+    </p>
+    <ul>
+      <li> Works on Windows, macOS, Linux </li>
+      <li> Uses Yara rules to efficiently scan your files </li>
+      <li> No data is collected about you, pure privacy! </li>
+      <li> Feee for single users. Forever open-source </li>
+      <li> Simple to use with minimal design in mind </li>
+      <li> Works offline and only requires internet for updates </li>
+      <li> Lightweight resource usage </li>
+    </ul>
+  </description>
+  <categories>
+    <category>Security</category>
+    <category>Utility</category>
+  </categories>
+  <screenshots>
+    <screenshot type="default">
+      <caption>Main Window</caption>
+      <image>https://github.com/Raspirus/media/raw/main/screenshots/main_dark.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>Info Window</caption>
+      <image>https://github.com/Raspirus/media/raw/main/screenshots/license_dark.png</image>
+    </screenshot>
+  </screenshots>
+  <branding>
+    <color type="primary" scheme_preference="light">#d7105e</color>
+    <color type="primary" scheme_preference="dark">#d7105e</color>
+    <color type="secondary" scheme_preference="light">#01a56d</color>
+    <color type="secondary" scheme_preference="dark">#01a56d</color>
+  </branding>
+  <url type="homepage">https://raspirus.deno.dev</url>
+  <url type="bugtracker">https://github.com/Raspirus/raspirus/issues</url>
+  <url type="faq">https://raspirus.github.io/docs/faq</url>
+  <url type="help">https://raspirus.github.io/docs</url>
+  <url type="donation">https://github.com/sponsors/Raspirus</url>
+  <url type="vcs-browser">https://github.com/Raspirus/raspirus</url>
+  <url type="translate">https://raspirus.github.io/docs/Developers/contributing</url>
+  <url type="contribute">https://raspirus.github.io/docs/Developers/contributing</url>
+  <url type="contact">https://raspirus.github.io/docs/contact</url>
+  <requires>
+    <internet>first-run</internet>
+  </requires>
+  <recommends>
+    <internet>always</internet>
+  </recommends>
+  <supports>
+    <control>keyboard</control>
+    <control>pointing</control>
+    <control>touch</control>
+  </supports>
+  <content_rating type="oars-1.0"/>
+</component>
