@@ -70,16 +70,72 @@ jobs:
                       apt: gcc-riscv64-linux-gnu
                       sysroot: /usr/riscv64-linux-gnu/
                       pkg_arch: riscv64
-                      # UNSUPPORTED with iced :(
-        #          - arch: armv7
-        #            target: armv7-unknown-linux-gnueabihf
-        #            apt: gcc-arm-linux-gnueabihf
-        #            sysroot: /usr/arm-linux-gnueabihf/
-        #            pkg_arch: armhf
+
         runs-on: ubuntu-latest
         steps:
             - name: Checkout code
               uses: actions/checkout@v4
+
+            - name: check apt sources
+              run: |
+                cat config/crosscomp-sources.list
+                cat /etc/apt/sources.list
+
+            - name: setup deb822 repos
+              run: |
+                cat <<EOF > deb822sources
+                Types: deb
+                URIs: http://archive.ubuntu.com/ubuntu/
+                Suites: noble
+                Components: main restricted universe
+                Architectures: amd64
+              
+                Types: deb
+                URIs: http://security.ubuntu.com/ubuntu/
+                Suites: noble-security
+                Components: main restricted universe
+                Architectures: amd64
+              
+                Types: deb
+                URIs: http://archive.ubuntu.com/ubuntu/
+                Suites: noble-updates
+                Components: main restricted universe
+                Architectures: amd64
+              
+                Types: deb
+                URIs: http://azure.ports.ubuntu.com/ubuntu-ports/
+                Suites: noble
+                Components: main restricted multiverse universe
+                Architectures: arm64
+              
+                Types: deb
+                URIs: http://azure.ports.ubuntu.com/ubuntu-ports/
+                Suites: noble-updates
+                Components: main restricted multiverse universe
+                Architectures: arm64
+
+                Types: deb
+                URIs: http://azure.ports.ubuntu.com/ubuntu-ports/
+                Suites: noble
+                Components: main restricted multiverse universe
+                Architectures: riscv64
+              
+                Types: deb
+                URIs: http://azure.ports.ubuntu.com/ubuntu-ports/
+                Suites: noble-updates
+                Components: main restricted multiverse universe
+                Architectures: riscv64
+                EOF
+      
+                  sudo mv deb822sources /etc/apt/sources.list.d/ubuntu.sources
+                else
+                  sudo mv config/crosscomp-sources.list /etc/apt/sources.list
+                fi
+
+            - name: add arm64 and riscv64 architectures
+              run: |
+                sudo dpkg --add-architecture arm64
+                sudo dpkg --add-architecture riscv64
 
             - name: Clean install Debian packages
               run: sudo apt-get clean && sudo apt-get update && sudo apt-get upgrade -y
@@ -152,7 +208,7 @@ jobs:
                       artifacts/raspirus_*_x64-setup.exe
                       artifacts/raspirus_*_arm64.deb
                       artifacts/raspirus_*_riscv64.deb
-            #            target/armv7-unknown-linux-gnueabihf/debian/*.deb
+
             - name: Release to GitHub
               uses: softprops/action-gh-release@v2
               with:
@@ -169,5 +225,3 @@ jobs:
                       artifacts/raspirus_*_x64-setup.exe
                       artifacts/raspirus_*_arm64.deb
                       artifacts/raspirus_*_riscv64.deb
-
-#            target/armv7-unknown-linux-gnueabihf/debian/*.deb
