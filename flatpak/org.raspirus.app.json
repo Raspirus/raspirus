@@ -25,8 +25,8 @@
             }
         },
         "build-commands": [
-            "cargo --offline fetch --manifest-path Cargo.toml --verbose",
-            "cargo --offline build --release --verbose",
+            "cargo fetch --manifest-path Cargo.toml --verbose",
+            "cargo build --release --verbose",
             "install -Dm755 ./target/release/raspirus -t /app/bin/",
             "install -Dm644 ./flatpak/${FLATPAK_ID}.metainfo.xml -t /app/share/metainfo/",
             "install -Dm644 ./flatpak/${FLATPAK_ID}.desktop -t /app/share/applications/",
