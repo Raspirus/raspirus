@@ -121,12 +121,9 @@ jobs:
                 Components: main restricted multiverse universe
                 Architectures: riscv64
                 EOF
-      
-                  sudo mv deb822sources /etc/apt/sources.list.d/ubuntu.sources
-                else
-                  sudo mv config/crosscomp-sources.list /etc/apt/sources.list
-                fi
 
+                sudo mv deb822sources /etc/apt/sources.list.d/ubuntu.sources
+                
             - name: add arm64 and riscv64 architectures
               run: |
                 sudo dpkg --add-architecture arm64
