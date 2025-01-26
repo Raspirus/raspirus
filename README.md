@@ -37,7 +37,6 @@ Getting started with Raspirus is a breeze. Follow these simple steps:
 
 **Alterantives:**
 
-- [Arch AUR](https://aur.archlinux.org/packages/raspirus/)
 - [Snap Store (Linux)](https://snapcraft.io/raspirus/)
 - [SourceForge](https://sourceforge.net/projects/raspirus/files/latest/download)
 - [Chocolatey (Windows)](https://community.chocolatey.org/packages/raspirus/)
