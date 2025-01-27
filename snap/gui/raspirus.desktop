@@ -6,6 +6,6 @@ Exec=raspirus
 Terminal=true
 Type=Application
 Icon=${SNAP}/meta/gui/raspirus.svg
-Categories=Security;Utility;
+Categories=System;Security;
 Keywords=Rust;Security;Yara;Antivirus;
 StartupNotify=true
