@@ -146,7 +146,6 @@ impl Config {
         if !path.exists() {
             tmp.save()?;
         };
-        dbg!(&path);
 
         // now we load the config
         let mut file = File::open(path).map_err(|err| err.to_string())?;
