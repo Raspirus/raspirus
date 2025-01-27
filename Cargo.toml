@@ -1,6 +1,6 @@
 [package]
 name = "raspirus"
-version = "2.2.0"
+version = "2.2.1"
 description = "A simple hash-based virus-scanner"
 authors = ["Demetz Benjamin, Hell Björn Felix"]
 license-file = "LICENSE"
