@@ -75,7 +75,7 @@ impl Config {
     /// the path as a normal String
     fn set_paths(&mut self) -> Result<(), String> {
         #[cfg(not(target_os = "windows"))]
-        let dirs = ProjectDirs::from("org", "raspirus", "app")
+        let dirs = ProjectDirs::from("org", "raspirus", "raspirus")
             .ok_or("Failed to get projectdir".to_owned())?;
         #[cfg(target_os = "windows")]
         let dirs = ProjectDirs::from("org", "raspirus", "")
@@ -146,6 +146,7 @@ impl Config {
         if !path.exists() {
             tmp.save()?;
         };
+        dbg!(&path);
 
         // now we load the config
         let mut file = File::open(path).map_err(|err| err.to_string())?;
