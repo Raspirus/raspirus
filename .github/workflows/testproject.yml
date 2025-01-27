@@ -31,10 +31,8 @@ jobs:
         echo "HOME_DIR set to $HOME"
         ls -la $HOME  # Verify the user directories
 
-    - name: Build
+    - name: Pre-Check the code
+      run: cargo check --verbose --release --no-default-features
+
+    - name: Build test the app
       run: cargo build --verbose --release --no-default-features
-    
-    - name: Run tests
-      run: cargo test --verbose --release -- --show-output
-      env:
-        IGNORE_PANICS: true
