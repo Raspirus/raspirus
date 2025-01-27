@@ -75,7 +75,7 @@ static SETTINGS: &[u8] = include_bytes!("assets/icons/settings.svg").as_slice();
 static USER_CODE: &[u8] = include_bytes!("assets/icons/user-code.svg").as_slice();
 static THEME_TOGGLE: &[u8] = include_bytes!("assets/icons/theme-toggle.svg").as_slice();
 static ZOOM: &[u8] = include_bytes!("assets/icons/zoom.svg").as_slice();
-static KEY: &[u8] = include_bytes!("assets/icons/key.svg").as_slice();
+static _KEY: &[u8] = include_bytes!("assets/icons/key.svg").as_slice();
 
 /// flags
 static FLAG_DE: &[u8] = include_bytes!("assets/flags/de.svg").as_slice();
