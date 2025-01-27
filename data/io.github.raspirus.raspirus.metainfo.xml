@@ -39,11 +39,11 @@
   <launchable type="desktop-id">io.github.raspirus.raspirus.desktop</launchable>
   <screenshots>
     <screenshot type="default">
-      <image>https://github.com/Raspirus/media/raw/main/screenshots/main_dark.png</image>
+      <image>https://raw.githubusercontent.com/Raspirus/media/3287aca4ebf94336186e70d78b122c72b7b77d96/screenshots/main_dark.png</image>
       <caption>Main window</caption>
     </screenshot>
     <screenshot>
-      <image>https://github.com/Raspirus/media/raw/main/screenshots/license_dark.png</image>
+      <image>https://raw.githubusercontent.com/Raspirus/media/3287aca4ebf94336186e70d78b122c72b7b77d96/screenshots/license_dark.png</image>
       <caption>Information window</caption>
     </screenshot>
   </screenshots>
@@ -72,6 +72,7 @@
   </recommends>
   
   <icon type="stock">io.github.raspirus.raspirus</icon>
+  <content_rating type="oars-1.1" />
   
   <categories>
     <category>System</category>
@@ -83,112 +84,10 @@
   </provides>
 
   <releases>
-    <release version="0.1.0" date="2022-09-25">
-      <url type="details">https://github.com/Raspirus/raspirus/releases/tag/v0.1.0</url>
+    <release version="2.2.0" date="2025-01-27">
+      <url type="details">https://github.com/Raspirus/raspirus/releases/tag/v2.2.0</url>
       <description>
-        <p>Initial release with basic folder scanning functionality.</p>
-      </description>
-    </release>
-    <release version="0.1.1" date="2022-12-21">
-      <url type="details">https://github.com/Raspirus/raspirus/releases/tag/v0.1.1</url>
-      <description>
-        <p>BETA: First test build with a GUI.</p>
-      </description>
-    </release>
-    <release version="0.1.2" date="2022-12-22">
-      <url type="details">https://github.com/Raspirus/raspirus/releases/tag/v0.1.2</url>
-      <description>
-        <p>BETA: Enhanced GUI with Icons and expansions.</p>
-      </description>
-    </release>
-    <release version="0.1.3" date="2023-12-23">
-      <url type="details">https://github.com/Raspirus/raspirus/releases/tag/v0.1.3</url>
-      <description>
-        <p>BETA: Expanding functionality and further testing.</p>
-      </description>
-    </release>
-    <release version="0.1.4" date="2022-12-24">
-      <url type="details">https://github.com/Raspirus/raspirus/releases/tag/v0.1.4</url>
-      <description>
-        <p>BETA: Extending the GUI.</p>
-      </description>
-    </release>
-    <release version="0.1.5" date="2023-01-24">
-      <url type="details">https://github.com/Raspirus/raspirus/releases/tag/v0.1.5</url>
-      <description>
-        <p>BETA: Adding settings.</p>
-      </description>
-    </release>
-    <release version="0.1.6" date="2023-05-09">
-      <url type="details">https://github.com/Raspirus/raspirus/releases/tag/v0.1.6</url>
-      <description>
-        <p>BETA: Improved scanning speeds.</p>
-      </description>
-    </release>
-    <release version="0.1.7" date="2023-05-09">
-      <url type="details">https://github.com/Raspirus/raspirus/releases/tag/v0.1.7</url>
-      <description>
-        <p>BETA: Dependency update.</p>
-      </description>
-    </release>
-    <release version="0.1.8" date="2023-05-10">
-      <url type="details">https://github.com/Raspirus/raspirus/releases/tag/v0.1.8</url>
-      <description>
-        <p>BETA: Moving dependabot to renovate.</p>
-      </description>
-    </release>
-    <release version="1.0.0" date="2023-07-01">
-      <url type="details">https://github.com/Raspirus/raspirus/releases/tag/v1.0.0</url>
-      <description>
-        <p>First full release with a working product.</p>
-      </description>
-    </release>
-    <release version="1.1.0" date="2023-09-10">
-      <url type="details">https://github.com/Raspirus/raspirus/releases/tag/v1.1.0</url>
-      <description>
-        <p>Added compressed file scanning functionality.</p>
-      </description>
-    </release>
-    <release version="1.1.1" date="2023-11-13">
-      <url type="details">https://github.com/Raspirus/raspirus/releases/tag/v1.1.1</url>
-      <description>
-        <p>Fixed updating bugs and improved backend syntax.</p>
-      </description>
-    </release>
-    <release version="1.1.2" date="2024-01-26">
-      <url type="details">https://github.com/Raspirus/raspirus/releases/tag/v1.1.2</url>
-      <description>
-        <p>Improved backend and speed overall. Some bug fixes.</p>
-      </description>
-    </release>
-    <release version="1.1.3" date="2024-03-13">
-      <url type="details">https://github.com/Raspirus/raspirus/releases/tag/v1.1.3</url>
-      <description>
-        <p>Improved updater speed and transferred to GitHub signatures.</p>
-      </description>
-    </release>
-    <release version="1.2.0" date="2024-05-19">
-      <url type="details">https://github.com/Raspirus/raspirus/releases/tag/v1.2.0</url>
-      <description>
-        <p>Fixed Bugs and added Patch functionality.</p>
-      </description>
-    </release>
-    <release version="1.2.1" date="2024-06-13">
-      <url type="details">https://github.com/Raspirus/raspirus/releases/tag/v1.2.1</url>
-      <description>
-        <p>Minor bug fixes.</p>
-      </description>
-    </release>
-    <release version="1.2.2" date="2024-09-12">
-      <url type="details">https://github.com/Raspirus/raspirus/releases/tag/v1.2.2</url>
-      <description>
-        <p>Highly experimental build with new Rust toolchain.</p>
-      </description>
-    </release>
-    <release version="2.0.0" date="2024-09-25">
-      <url type="details">https://github.com/Raspirus/raspirus/releases/tag/v2.0.0</url>
-      <description>
-        <p>Moved to iced-rs frontend, full Rust support.</p>
+        <p>Fixed minor issues and added pop-ups.</p>
       </description>
     </release>
     <release version="2.1.0" date="2024-10-24">
@@ -197,10 +96,112 @@
         <p>Added PDF generation and minor bug fixes.</p>
       </description>
     </release>
-    <release version="2.2.0" date="2025-01-27">
-      <url type="details">https://github.com/Raspirus/raspirus/releases/tag/v2.2.0</url>
+    <release version="2.0.0" date="2024-09-25">
+      <url type="details">https://github.com/Raspirus/raspirus/releases/tag/v2.0.0</url>
       <description>
-        <p>Fixed minor issues and added pop-ups.</p>
+        <p>Moved to iced-rs frontend, full Rust support.</p>
+      </description>
+    </release>
+    <release version="1.2.2" date="2024-09-12">
+      <url type="details">https://github.com/Raspirus/raspirus/releases/tag/v1.2.2</url>
+      <description>
+        <p>Highly experimental build with new Rust toolchain.</p>
+      </description>
+    </release>
+    <release version="1.2.1" date="2024-06-13">
+      <url type="details">https://github.com/Raspirus/raspirus/releases/tag/v1.2.1</url>
+      <description>
+        <p>Minor bug fixes.</p>
+      </description>
+    </release>
+    <release version="1.2.0" date="2024-05-19">
+      <url type="details">https://github.com/Raspirus/raspirus/releases/tag/v1.2.0</url>
+      <description>
+        <p>Fixed Bugs and added Patch functionality.</p>
+      </description>
+    </release>
+    <release version="1.1.3" date="2024-03-13">
+      <url type="details">https://github.com/Raspirus/raspirus/releases/tag/v1.1.3</url>
+      <description>
+        <p>Improved updater speed and transferred to GitHub signatures.</p>
+      </description>
+    </release>
+    <release version="1.1.2" date="2024-01-26">
+      <url type="details">https://github.com/Raspirus/raspirus/releases/tag/v1.1.2</url>
+      <description>
+        <p>Improved backend and speed overall. Some bug fixes.</p>
+      </description>
+    </release>
+    <release version="1.1.1" date="2023-11-13">
+      <url type="details">https://github.com/Raspirus/raspirus/releases/tag/v1.1.1</url>
+      <description>
+        <p>Fixed updating bugs and improved backend syntax.</p>
+      </description>
+    </release>
+    <release version="1.1.0" date="2023-09-10">
+      <url type="details">https://github.com/Raspirus/raspirus/releases/tag/v1.1.0</url>
+      <description>
+        <p>Added compressed file scanning functionality.</p>
+      </description>
+    </release>
+    <release version="1.0.0" date="2023-07-01">
+      <url type="details">https://github.com/Raspirus/raspirus/releases/tag/v1.0.0</url>
+      <description>
+        <p>First full release with a working product.</p>
+      </description>
+    </release>
+    <release version="0.1.8" date="2023-05-10">
+      <url type="details">https://github.com/Raspirus/raspirus/releases/tag/v0.1.8</url>
+      <description>
+        <p>BETA: Moving dependabot to renovate.</p>
+      </description>
+    </release>
+    <release version="0.1.7" date="2023-05-09">
+      <url type="details">https://github.com/Raspirus/raspirus/releases/tag/v0.1.7</url>
+      <description>
+        <p>BETA: Dependency update.</p>
+      </description>
+    </release>
+    <release version="0.1.6" date="2023-05-09">
+      <url type="details">https://github.com/Raspirus/raspirus/releases/tag/v0.1.6</url>
+      <description>
+        <p>BETA: Improved scanning speeds.</p>
+      </description>
+    </release>
+    <release version="0.1.5" date="2023-01-24">
+      <url type="details">https://github.com/Raspirus/raspirus/releases/tag/v0.1.5</url>
+      <description>
+        <p>BETA: Adding settings.</p>
+      </description>
+    </release>
+    <release version="0.1.4" date="2022-12-24">
+      <url type="details">https://github.com/Raspirus/raspirus/releases/tag/v0.1.4</url>
+      <description>
+        <p>BETA: Extending the GUI.</p>
+      </description>
+    </release>
+    <release version="0.1.3" date="2023-12-23">
+      <url type="details">https://github.com/Raspirus/raspirus/releases/tag/v0.1.3</url>
+      <description>
+        <p>BETA: Expanding functionality and further testing.</p>
+      </description>
+    </release>
+    <release version="0.1.2" date="2022-12-22">
+      <url type="details">https://github.com/Raspirus/raspirus/releases/tag/v0.1.2</url>
+      <description>
+        <p>BETA: Enhanced GUI with Icons and expansions.</p>
+      </description>
+    </release>
+    <release version="0.1.1" date="2022-12-21">
+      <url type="details">https://github.com/Raspirus/raspirus/releases/tag/v0.1.1</url>
+      <description>
+        <p>BETA: First test build with a GUI.</p>
+      </description>
+    </release>
+    <release version="0.1.0" date="2022-09-25">
+      <url type="details">https://github.com/Raspirus/raspirus/releases/tag/v0.1.0</url>
+      <description>
+        <p>Initial release with basic folder scanning functionality.</p>
       </description>
     </release>
   </releases>
