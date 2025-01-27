@@ -173,7 +173,7 @@ fn main() -> Result<(), String> {
     const ICON_BYTES: &[u8] = include_bytes!("assets/logo.ico");
     let mut settings = Settings::default();
     let mut window_settings = iced::window::Settings::default();
-    settings.id = Some("org.raspirus.app".to_owned());
+    settings.id = Some("io.github.raspirus.raspirus".to_owned());
     settings.default_font = iced::Font::default();
 
     window_settings.icon = icon::from_file_data(ICON_BYTES, Option::from(ImageFormat::Ico)).ok();
