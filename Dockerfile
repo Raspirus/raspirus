@@ -14,4 +14,4 @@ RUN apt-get clean && apt-get update && apt-get upgrade -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Build the release binary
-RUN cargo build --release
+RUN cargo build --release 
