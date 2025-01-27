@@ -133,7 +133,7 @@ jobs:
               run: sudo apt-get clean && sudo apt-get update && sudo apt-get upgrade -y
 
             - name: Install cross-compile dependencies
-              uses: ryankurte/action-apt@v0.4.1
+              uses: ryankurte/action-apt@v0.5.0
               with:
                   arch: ${{ matrix.pkg_arch }}
                   packages: "libssl-dev:${{ matrix.pkg_arch }}"
