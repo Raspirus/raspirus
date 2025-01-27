@@ -5,14 +5,13 @@ COPY . .
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-RUN apt-get clean && apt-get update && apt-get upgrade -y
-RUN apt-get update && apt-get install -y pkg-config \
+# Update and install dependencies
+RUN apt-get clean && apt-get update && apt-get upgrade -y \
+    && apt-get install -y pkg-config \
     build-essential \
     curl \
-    libssl-dev
+    libssl-dev \
+    && rm -rf /var/lib/apt/lists/*
 
-# Install Rust packager
-RUN cargo install cargo-packager --locked
-
-# Package app
-RUN cargo packager --release --verbose
+# Build the release binary
+RUN cargo build --release
