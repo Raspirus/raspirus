@@ -35,4 +35,4 @@ jobs:
       run: cargo check --verbose --release --no-default-features
 
     - name: Build test the app
-      run: cargo build --verbose --release --no-default-features
+      run: cargo test --verbose --release -- --show-output
