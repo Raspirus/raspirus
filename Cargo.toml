@@ -16,8 +16,8 @@ rust-version = "1.81"
 threadpool_rs = { git = "https://github.com/GamingGuy003/threadpool_rs.git", features = [
     "log",
 ] }
-log = "0.4.22"
-reqwest = { version = "0.12.9", features = ["blocking", "json"] }
+log = "0.4.25"
+reqwest = { version = "0.12.12", features = ["blocking", "json"] }
 chrono = "0.4.39"
 directories-next = "2.0.0"
 simplelog = "0.12.2"
@@ -26,16 +26,16 @@ yara-x = "0.12.0"
 num_cpus = "1.16.0"
 sha2 = "0.10.8"
 hex = "0.4.3"
-serde = { version = "1.0.216", features = ["derive"] }
-serde_json = "1.0.133"
+serde = { version = "1.0.217", features = ["derive"] }
+serde_json = "1.0.137"
 iced_aw = "0.11.0"
 futures = "0.3.31"
-open = "5.3.1"
+open = "5.3.2"
 printpdf = { version = "0.7.0", features = ["svg"] }
-zip = "2.2.1"
-tokio = "1.42.0"
+zip = "2.2.2"
+tokio = "1.43.0"
 rust-i18n = { version = "3.1.2", features = ["log-miss-tr"] }
-rfd = "0.15.1"
+rfd = "0.15.2"
 iced = { version = "0.13.1", features = ["tokio", "image", "svg"] }
 
 # usb detection on linux
