@@ -686,11 +686,16 @@ impl Raspirus {
                 if let Some(file) = rfd::FileDialog::new()
                     .set_title(t!("save_as"))
                     .set_file_name(format!("{timestamp}.pdf"))
-                    .add_filter(".pdf", &[".pdf"])
                     .set_can_create_directories(true)
                     .save_file()
-                { 
-                    match generate_pdf(skipped, tagged, total, timestamp, file.with_extension("pdf")) {
+                {
+                    match generate_pdf(
+                        skipped,
+                        tagged,
+                        total,
+                        timestamp,
+                        file.with_extension("pdf"),
+                    ) {
                         Ok(path) => Message::Open { path },
                         Err(message) => Message::Error {
                             case: ErrorCase::Warning { message },
@@ -792,8 +797,7 @@ impl Raspirus {
             Message::DownloadLogs => iced::Task::done({
                 if let Some(file) = rfd::FileDialog::new()
                     .set_title(t!("save_as"))
-                    .set_file_name("Export.zip")
-                    .add_filter(".zip", &[".zip"])
+                    .set_file_name("export.zip")
                     .set_can_create_directories(true)
                     .save_file()
                 {
