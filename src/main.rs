@@ -24,7 +24,7 @@ mod tests;
 rust_i18n::i18n!("src/assets/locales", fallback = "en");
 
 /// config
-static CONFIG_FILENAME: &str = "Raspirus.json";
+static CONFIG_FILENAME: &str = "raspirus.json";
 static CONFIG_VERSION: &str = "8";
 
 /// remote params
