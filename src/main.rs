@@ -2,8 +2,8 @@
 //#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use backend::config_file::Config;
-use frontend::iced::{Language, LocationSelection, Raspirus};
-use iced::Settings;
+//use frontend::iced::{Language, LocationSelection, Raspirus};
+//use iced::Settings;
 use lazy_static::lazy_static;
 use log::LevelFilter;
 use simplelog::{
@@ -13,11 +13,11 @@ use std::fs::File;
 use std::sync::Mutex;
 
 use chrono::Local;
-use iced::advanced::graphics::image::image_rs::ImageFormat;
-use iced::window::icon;
+//use iced::advanced::graphics::image::image_rs::ImageFormat;
+//use iced::window::icon;
 
 mod backend;
-mod frontend;
+//mod frontend;
 mod tests;
 
 // Sets the locale globally
@@ -94,22 +94,23 @@ lazy_static! {
     /// Global config instance
     static ref CONFIG: Mutex<Config> = Mutex::new(Config::new().expect("Failed to load config"));
     /// Supported languages
+    /*
     static ref SUPPORTED_LANGUAGES: Vec<Language> = vec![
         Language::new("de", "Deutsch", FLAG_DE),
         Language::new("en", "English", FLAG_EN),
         Language::new("it", "Italiano", FLAG_IT),
         Language::new("fr", "Français", FLAG_FR)
     ];
-    //
     static ref TARGET_SELECTIONS: Vec<(LocationSelection, &'static [u8])> = vec![
         (LocationSelection::Usb { usb: None }, crate::USB),
         (LocationSelection::Folder { path: None }, crate::FOLDER),
         (LocationSelection::File { path: None }, crate::FILE)
     ];
+    */
     /// Supported archives
     static ref SUPPORTED_ARCHIVES: Vec<String> = vec!["zip".to_owned(), "xz".to_owned(), "zstd".to_owned(), "bzip2".to_owned(), "deflate64".to_owned()];
-    /// Symbols for selection
-    static ref SELECTION_ICONS: Vec<LocationSelection> = vec![LocationSelection::Usb { usb: None }, LocationSelection::Folder { path: None }, LocationSelection::File { path: None }];
+    // /// Symbols for selection
+    // static ref SELECTION_ICONS: Vec<LocationSelection> = vec![LocationSelection::Usb { usb: None }, LocationSelection::Folder { path: None }, LocationSelection::File { path: None }];
 }
 
 fn main() -> Result<(), String> {
@@ -171,29 +172,30 @@ fn main() -> Result<(), String> {
     rust_i18n::set_locale(&CONFIG.lock().expect("Failed to lock config").language);
 
     const ICON_BYTES: &[u8] = include_bytes!("assets/logo.ico");
-    let mut settings = Settings::default();
-    let mut window_settings = iced::window::Settings::default();
-    settings.id = Some("io.github.raspirus.raspirus".to_owned());
-    settings.default_font = iced::Font::default();
+    /*
+        let mut settings = Settings::default();
+        let mut window_settings = iced::window::Settings::default();
+        settings.id = Some("io.github.raspirus.raspirus".to_owned());
+        settings.default_font = iced::Font::default();
 
-    window_settings.icon = icon::from_file_data(ICON_BYTES, Option::from(ImageFormat::Ico)).ok();
+        window_settings.icon = icon::from_file_data(ICON_BYTES, Option::from(ImageFormat::Ico)).ok();
 
-    iced::application("Raspirus", Raspirus::update, Raspirus::view)
-        .settings(settings)
-        .exit_on_close_request(true)
-        .window(window_settings)
-        .subscription(Raspirus::subscription)
-        .centered()
-        .theme(|app| {
-            if app.dark_mode {
-                iced::Theme::Dark
-            } else {
-                iced::Theme::Light
-            }
-        })
-        .scale_factor(|app| app.scale as f64 / 100.0)
-        .run()
-        .expect("Failed to run application");
-
+        iced::application("Raspirus", Raspirus::update, Raspirus::view)
+            .settings(settings)
+            .exit_on_close_request(true)
+            .window(window_settings)
+            .subscription(Raspirus::subscription)
+            .centered()
+            .theme(|app| {
+                if app.dark_mode {
+                    iced::Theme::Dark
+                } else {
+                    iced::Theme::Light
+                }
+            })
+            .scale_factor(|app| app.scale as f64 / 100.0)
+            .run()
+            .expect("Failed to run application");
+    */
     Ok(())
 }
