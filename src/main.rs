@@ -17,7 +17,7 @@ use chrono::Local;
 //use iced::window::icon;
 
 mod backend;
-//mod frontend;
+mod frontend;
 mod tests;
 
 // Sets the locale globally
