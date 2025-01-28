@@ -1,4 +1,4 @@
-use iced::futures::{channel::mpsc, SinkExt};
+//use iced::futures::{channel::mpsc, SinkExt};
 use log::{error, info};
 use serde::{Deserialize, Serialize};
 use std::fs::File;
@@ -72,7 +72,7 @@ impl YaraScanner {
     /// Starts the scanner in the specified location
     pub fn start(
         &self,
-        channel: mpsc::Sender<u64>,
+        //channel: mpsc::Sender<u64>,
         mut paths: Vec<PathBuf>,
     ) -> Result<(Vec<TaggedFile>, Vec<Skipped>, usize, PathBuf), String> {
         let start_time = std::time::Instant::now();
@@ -107,12 +107,12 @@ impl YaraScanner {
                 None => break,
             };
             let pointers_c = pointers.clone();
-            let progress_c = channel.clone();
+            //let progress_c = channel.clone();
             let rules_c = rules.clone();
             threadpool.execute(move || {
                 match futures::executor::block_on(Self::scan_file(
                     file.as_path(),
-                    progress_c,
+                    //progress_c,
                     pointers_c,
                     rules_c,
                 )) {
@@ -199,7 +199,7 @@ impl YaraScanner {
     /// thread function to scan a singular file
     async fn scan_file(
         path: &Path,
-        progress_channel: mpsc::Sender<u64>,
+        //progress_channel: mpsc::Sender<u64>,
         pointers: PointerCollection,
         rules: Arc<Rules>,
     ) -> Result<(), String> {
@@ -215,10 +215,12 @@ impl YaraScanner {
         };
 
         // size of entire file
+        /*
         let size = path
             .metadata()
             .map_err(|err| format!("Failed to fetch file metadata: {err}"))?
             .len();
+*/
 
         if archive {
             // open zip file
@@ -237,7 +239,7 @@ impl YaraScanner {
                         path.to_string_lossy()
                     );
                     // we skip archive entirely since we cannot open it
-                    Self::progress(size, progress_channel).await?;
+                    //Self::progress(size, progress_channel).await?;
                     return Ok(());
                 }
             })) {
@@ -251,7 +253,7 @@ impl YaraScanner {
                         },
                     )?;
                     error!("Could not open archive {}: {err}", path.to_string_lossy());
-                    Self::progress(size, progress_channel).await?;
+                    //Self::progress(size, progress_channel).await?;
                     return Ok(());
                 }
             };
@@ -269,11 +271,11 @@ impl YaraScanner {
                                 reason: format!("Could not get file in zip: {err}"),
                             },
                         )?;
-                        Self::progress(size, progress_channel.clone()).await?;
+                        //Self::progress(size, progress_channel.clone()).await?;
                         continue;
                     }
                 };
-                let size = file.compressed_size();
+                //let size = file.compressed_size();
 
                 let path = path
                     .to_path_buf()
@@ -290,7 +292,7 @@ impl YaraScanner {
                                 reason: "Nested archives unsupported currently".to_owned(),
                             },
                         )?;
-                        Self::progress(size, progress_channel.clone()).await?;
+                        //Self::progress(size, progress_channel.clone()).await?;
                         continue;
                     }
                 }
@@ -304,7 +306,7 @@ impl YaraScanner {
                             reason: "File in zip exceeds size threshhold".to_owned(),
                         },
                     )?;
-                    Self::progress(size, progress_channel.clone()).await?;
+                    //Self::progress(size, progress_channel.clone()).await?;
                     continue;
                 }
 
@@ -324,7 +326,7 @@ impl YaraScanner {
                     Ok(_) => {}
                     Err(reason) => {
                         Self::skip(&pointers.skipped, Skipped { path, reason })?;
-                        Self::progress(size, progress_channel.clone()).await?;
+                        //Self::progress(size, progress_channel.clone()).await?;
                         continue;
                     }
                 };
@@ -336,13 +338,13 @@ impl YaraScanner {
                     Ok(result) => result,
                     Err(reason) => {
                         Self::skip(&pointers.skipped, Skipped { path, reason })?;
-                        Self::progress(size, progress_channel.clone()).await?;
+                        //Self::progress(size, progress_channel.clone()).await?;
                         continue;
                     }
                 };
                 Self::evaluate_result(&pointers, result, &path)?;
                 // send size progress to frontend
-                Self::progress(size, progress_channel.clone()).await?;
+                //Self::progress(size, progress_channel.clone()).await?;
             }
         } else {
             match scanner.scan_file(path) {
@@ -355,13 +357,13 @@ impl YaraScanner {
                             reason: reason.clone(),
                         },
                     )?;
-                    Self::progress(size, progress_channel.clone()).await?;
+                    //Self::progress(size, progress_channel.clone()).await?;
                     return Ok(());
                 }
                 Ok(result) => {
                     Self::evaluate_result(&pointers, result, path)?;
                     // send progress to frontend
-                    Self::progress(size, progress_channel.clone()).await?;
+                    //Self::progress(size, progress_channel.clone()).await?;
                 }
             }
         }
@@ -376,6 +378,7 @@ impl YaraScanner {
         Ok(())
     }
 
+    /*
     async fn progress(size: u64, mut progress_channel: mpsc::Sender<u64>) -> Result<(), String> {
         progress_channel
             .send(size)
@@ -383,4 +386,5 @@ impl YaraScanner {
             .map_err(|err| format!("Failed to send size to frontend: {err}"))?;
         Ok(())
     }
+    */
 }

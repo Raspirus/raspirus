@@ -9,7 +9,9 @@ use sha2::{Digest, Sha256};
 use yara_x::Rules;
 use zip::write::SimpleFileOptions;
 
-use crate::{backend::config_file::Config, frontend::iced::ConfigValue};
+use crate::{backend::config_file::Config,
+//frontend::iced::ConfigValue
+};
 
 pub fn get_rules(yar_path: PathBuf) -> Result<Rules, String> {
     // setup rules
@@ -170,6 +172,7 @@ pub fn generate_virustotal(file: PathBuf) -> Result<String, String> {
     Ok(format!("https://virustotal.com/gui/search/{}", hash))
 }
 
+/*
 /// updates the global config to what it should be
 pub fn update_config(value: ConfigValue) -> Result<Config, String> {
     let mut config = crate::CONFIG
@@ -187,6 +190,7 @@ pub fn update_config(value: ConfigValue) -> Result<Config, String> {
     config.save()?;
     Ok(config.clone())
 }
+*/
 
 pub fn download_logs(output_file: PathBuf) -> Result<PathBuf, String> {
     let config = crate::CONFIG
