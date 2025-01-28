@@ -36,6 +36,7 @@ Getting started with Raspirus is a breeze. Follow these simple steps:
 **Alterantives:**
 
 - [Snap Store (Linux)](https://snapcraft.io/raspirus/)
+- [Flathub (Linux)](https://flathub.org/apps/details/io.github.raspirus.raspirus)
 - [SourceForge](https://sourceforge.net/projects/raspirus/files/latest/download)
 - [Chocolatey (Windows)](https://community.chocolatey.org/packages/raspirus/)
 
