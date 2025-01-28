@@ -2,8 +2,7 @@
 //#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use backend::config_file::Config;
-//use frontend::iced::{Language, LocationSelection, Raspirus};
-//use iced::Settings;
+use gtk::prelude::{ApplicationExt, ApplicationExtManual};
 use lazy_static::lazy_static;
 use log::LevelFilter;
 use simplelog::{
@@ -13,8 +12,6 @@ use std::fs::File;
 use std::sync::Mutex;
 
 use chrono::Local;
-//use iced::advanced::graphics::image::image_rs::ImageFormat;
-//use iced::window::icon;
 
 mod backend;
 mod frontend;
@@ -30,6 +27,9 @@ static CONFIG_VERSION: &str = "8";
 /// remote params
 static DEFAULT_MIRROR: &str = "https://api.github.com/repos/Raspirus/yara-rules/releases/latest";
 static DEFAULT_FILE: &str = "rulepirus.yarac";
+
+/// flatpak specific values
+static APP_ID: &str = "io.github.raspirus.raspirus";
 
 /// default scan params
 static DEFAULT_MIN_MATCHES: usize = 0;
@@ -113,7 +113,7 @@ lazy_static! {
     // static ref SELECTION_ICONS: Vec<LocationSelection> = vec![LocationSelection::Usb { usb: None }, LocationSelection::Folder { path: None }, LocationSelection::File { path: None }];
 }
 
-fn main() -> Result<(), String> {
+fn main() -> Result<gtk::glib::ExitCode, String> {
     // We check if we should log the application messages to a file or not, default is yes. Defined in the Config
     if CONFIG
         .lock()
@@ -171,31 +171,11 @@ fn main() -> Result<(), String> {
 
     rust_i18n::set_locale(&CONFIG.lock().expect("Failed to lock config").language);
 
-    const ICON_BYTES: &[u8] = include_bytes!("assets/logo.ico");
-    /*
-        let mut settings = Settings::default();
-        let mut window_settings = iced::window::Settings::default();
-        settings.id = Some("io.github.raspirus.raspirus".to_owned());
-        settings.default_font = iced::Font::default();
+    let app = gtk::Application::builder()
+        .application_id(APP_ID)
+        .build();
+    
+    app.connect_activate(frontend::window::build);
 
-        window_settings.icon = icon::from_file_data(ICON_BYTES, Option::from(ImageFormat::Ico)).ok();
-
-        iced::application("Raspirus", Raspirus::update, Raspirus::view)
-            .settings(settings)
-            .exit_on_close_request(true)
-            .window(window_settings)
-            .subscription(Raspirus::subscription)
-            .centered()
-            .theme(|app| {
-                if app.dark_mode {
-                    iced::Theme::Dark
-                } else {
-                    iced::Theme::Light
-                }
-            })
-            .scale_factor(|app| app.scale as f64 / 100.0)
-            .run()
-            .expect("Failed to run application");
-    */
-    Ok(())
+    Ok(app.run())
 }
