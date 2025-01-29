@@ -36,16 +36,13 @@ Getting started with Raspirus is a breeze. Follow these simple steps:
 **Alterantives:**
 
 - [Snap Store (Linux)](https://snapcraft.io/raspirus/)
+- [Flathub (Linux)](https://flathub.org/apps/details/io.github.raspirus.raspirus)
 - [SourceForge](https://sourceforge.net/projects/raspirus/files/latest/download)
 - [Chocolatey (Windows)](https://community.chocolatey.org/packages/raspirus/)
 
 ### For Developers
 
 Are you a developer looking to set up Raspirus? We've got you covered. Check out our comprehensive guides for various operating systems in the [Developers section](https://raspirus.github.io/docs/Developers/) on our docs.
-
-## Roadmap and Changelog
-
-You can find the Changelog in the dedicated [CHANGELOG.md file](./CHANGELOG.md). As the Roadmap, we use the built-in GitHub Projects function. You can read about future updates and features [here](https://github.com/orgs/Raspirus/projects/3)
 
 ## Questions?
 
