@@ -1,4 +1,4 @@
-FROM rust:1.84.0-bookworm
+FROM rust:1.84.1-bookworm
 
 WORKDIR /usr/app/raspirus
 COPY . .
