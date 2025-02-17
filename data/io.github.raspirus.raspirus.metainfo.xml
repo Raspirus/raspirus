@@ -78,6 +78,17 @@
     <category>System</category>
     <category>Security</category>
   </categories>
+
+  <keywords>
+    <keyword>malware</keyword>
+    <keyword>scanner</keyword>
+    <keyword>antivirus</keyword>
+    <keyword>security</keyword>
+    <keyword>privacy</keyword>
+    <keyword>yara</keyword>
+    <keyword>lightweight</keyword>
+    <keyword>raspberry</keyword>
+  </keywords>
   
   <provides>
     <binary>raspirus</binary>
