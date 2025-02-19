@@ -7,7 +7,7 @@
   </developer>
   
   <name>Raspirus</name>
-  <summary>Lightweight, Cross-Platform Malware Scanner</summary>
+  <summary>Small Virus Scanner</summary>
   
   <metadata_license>MIT</metadata_license>
   <project_license>GPL-3.0-only</project_license>
@@ -59,8 +59,8 @@
   <url type="contact">https://raspirus.github.io/docs/contact</url>
 
   <branding>
-    <color type="primary" scheme_preference="light">#ffffff</color>
-    <color type="primary" scheme_preference="dark">#000000</color>
+    <color type="primary" scheme_preference="light">#ccccff</color>
+    <color type="primary" scheme_preference="dark">#000033</color>
   </branding>
 
   <requires>
