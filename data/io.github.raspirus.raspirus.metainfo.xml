@@ -7,7 +7,7 @@
   </developer>
   
   <name>Raspirus</name>
-  <summary>Small Virus Scanner</summary>
+  <summary>Simple virus scanner</summary>
   
   <metadata_license>MIT</metadata_license>
   <project_license>GPL-3.0-only</project_license>
@@ -39,11 +39,11 @@
   <launchable type="desktop-id">io.github.raspirus.raspirus.desktop</launchable>
   <screenshots>
     <screenshot type="default">
-      <image>https://raw.githubusercontent.com/Raspirus/media/3287aca4ebf94336186e70d78b122c72b7b77d96/screenshots/main_dark.png</image>
+      <image>https://raw.githubusercontent.com/Raspirus/media/3287aca4ebf94336186e70d78b122c72b7b77d96/screenshots/main_light.png</image>
       <caption>Main window</caption>
     </screenshot>
     <screenshot>
-      <image>https://raw.githubusercontent.com/Raspirus/media/3287aca4ebf94336186e70d78b122c72b7b77d96/screenshots/license_dark.png</image>
+      <image>https://raw.githubusercontent.com/Raspirus/media/3287aca4ebf94336186e70d78b122c72b7b77d96/screenshots/license_light.png</image>
       <caption>Information window</caption>
     </screenshot>
   </screenshots>
