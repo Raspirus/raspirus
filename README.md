@@ -42,13 +42,13 @@ Getting started with Raspirus is a breeze. Follow these simple steps:
 
 ### For Developers
 
-Are you a developer looking to set up Raspirus? We've got you covered. Check out our comprehensive guides for various operating systems in the [Developers section](https://raspirus.github.io/docs/Developers/) on our docs.
+Are you a developer looking to set up Raspirus? We've got you covered. Check out our comprehensive guides for various operating systems in the [Developers section](https://github.com/Raspirus/raspirus/wiki/Developers) on our docs.
 
 ## Questions?
 
 Got questions about Raspirus? We're here to help!
 
-- Visit our [FAQ section](https://raspirus.github.io/docs/faq) for answers to common queries.
+- Visit our [FAQ section](https://github.com/Raspirus/raspirus/wiki/FAQ) for answers to common queries.
 - Join our thriving community on the [Discord server](https://discord.gg/Vx7fW9PA8B) to engage with fellow users.
 - If you've encountered a bug, browse the GitHub issues to see if it's already reported.
 
