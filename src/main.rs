@@ -113,12 +113,21 @@ lazy_static! {
 }
 
 fn main() -> Result<(), String> {
+    let args = std::env::args().collect::<Vec<String>>();
+    if args.contains(&String::from("--help")) {
+        println!("Valid arguments are '--debug', '--help'");
+        return Ok(());
+    }
+
+    let debug = args.contains(&String::from("--debug"));
+
     // We check if we should log the application messages to a file or not, default is yes. Defined in the Config
     if CONFIG
         .lock()
         .expect("Failed to lock config")
         .clone()
         .logging_is_active
+        || debug
     {
         // Logdir for application
         let log_application = CONFIG
@@ -153,7 +162,11 @@ fn main() -> Result<(), String> {
 
         // Terminal logger is always used if logging so we add it right away
         let mut loggers: Vec<Box<dyn simplelog::SharedLogger>> = vec![TermLogger::new(
-            LOGGING_FILTER,
+            if debug {
+                LevelFilter::Debug
+            } else {
+                LOGGING_FILTER
+            },
             log_config.clone(),
             TerminalMode::Mixed,
             ColorChoice::Auto,
@@ -162,7 +175,15 @@ fn main() -> Result<(), String> {
         // If we are able to create both the file and directory path, we can start the FileLogger
         let log_file = File::create(log_application)
             .map_err(|err| format!("Failed to create application logfile: {err}"))?;
-        loggers.push(WriteLogger::new(LOGGING_FILTER, log_config, log_file));
+        loggers.push(WriteLogger::new(
+            if debug {
+                LevelFilter::Debug
+            } else {
+                LOGGING_FILTER
+            },
+            log_config,
+            log_file,
+        ));
 
         // Start loggers
         CombinedLogger::init(loggers).expect("Failed to initialize CombinedLogger");
