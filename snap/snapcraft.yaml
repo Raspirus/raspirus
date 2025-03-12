@@ -7,7 +7,9 @@ icon: snap/gui/raspirus.svg
 grade: stable
 confinement: strict
 architectures:
-    - build-on: [amd64, arm64, riscv64]
+    - build-on: [amd64]
+    - build-on: [arm64]
+    - build-on: [riscv64]
 
 parts:
     raspirus:
