@@ -2,7 +2,7 @@
 //#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use backend::config_file::Config;
-use gtk::prelude::{ApplicationExt, ApplicationExtManual};
+use relm4::gtk::prelude::{ApplicationExt, ApplicationExtManual};
 use lazy_static::lazy_static;
 use log::LevelFilter;
 use simplelog::{
