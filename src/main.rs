@@ -2,9 +2,9 @@
 //#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use backend::config_file::Config;
-use relm4::gtk::prelude::{ApplicationExt, ApplicationExtManual};
 use lazy_static::lazy_static;
 use log::LevelFilter;
+use relm4::RelmApp;
 use simplelog::{
     ColorChoice, CombinedLogger, ConfigBuilder, TermLogger, TerminalMode, WriteLogger,
 };
@@ -113,7 +113,7 @@ lazy_static! {
     // static ref SELECTION_ICONS: Vec<LocationSelection> = vec![LocationSelection::Usb { usb: None }, LocationSelection::Folder { path: None }, LocationSelection::File { path: None }];
 }
 
-fn main() -> Result<gtk::glib::ExitCode, String> {
+fn main() -> Result<(), String> {
     // We check if we should log the application messages to a file or not, default is yes. Defined in the Config
     if CONFIG
         .lock()
@@ -171,11 +171,7 @@ fn main() -> Result<gtk::glib::ExitCode, String> {
 
     rust_i18n::set_locale(&CONFIG.lock().expect("Failed to lock config").language);
 
-    let app = gtk::Application::builder()
-        .application_id(APP_ID)
-        .build();
-    
-    app.connect_activate(frontend::window::build);
-
-    Ok(app.run())
+    let app = RelmApp::new("raspirus.app");
+    app.run::<frontend::main::model::AppModel>(0);
+    Ok(())
 }
