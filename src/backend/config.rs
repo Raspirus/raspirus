@@ -10,14 +10,22 @@ use super::log::LogLevel;
 #[serde(default)]
 /// Holds the config values for the application
 pub struct Config {
+    /// Holds the config version. If there is a mismatch, the config will be reset to default
     pub config_version: usize,
+    /// Remote mirror with git api structure for fetching yara rules
     pub remote_url: String,
+    /// Minimum matches for a file to get flagged
     pub min_matches: usize,
+    /// Maximum matches after which a file stops gaining additional flags. 0 to disable
     pub max_matches: usize,
+    /// Threads used for parallel scanning
     pub max_threads: usize,
+    /// Loglevel used for logging
     pub logging: LogLevel,
+    /// Language used to display text
     pub language: String,
     #[serde(skip)]
+    /// Paths holding various paths needed for ordinary execution
     pub paths: Option<Paths>,
 }
 
@@ -51,6 +59,7 @@ pub struct Paths {
 }
 
 impl Paths {
+    /// Creates a new instance of Paths
     pub fn identify() -> Result<Self, String> {
         #[cfg(not(target_os = "windows"))]
         let dirs = ProjectDirs::from("org", "raspirus", "raspirus")
@@ -59,18 +68,19 @@ impl Paths {
         let dirs = ProjectDirs::from("org", "raspirus", "")
             .ok_or("Failed to get projectdir".to_owned())?;
 
-        // Data folders
+        // data folders
         let data = dirs.data_dir().to_owned();
         let logs = data.to_owned().join("logs");
         let temp = dirs.cache_dir().to_path_buf();
 
-        // Log folders
+        // log folders
         let logs_scan = logs.join("scan");
         let mut logs_app = logs.join("application");
 
-        // Config folder location
+        // config folder location
         let config = dirs.config_dir().to_owned();
 
+        // create necessary folders
         fs::create_dir_all(&data).map_err(|err| format!("Failed to create data dir: {err:?}"))?;
         fs::create_dir_all(&logs_scan)
             .map_err(|err| format!("Failed to create scan log dir: {err:?}"))?;
@@ -104,9 +114,10 @@ impl Config {
 
     /// Creates new config struct, populated with defaults values
     pub fn new() -> Result<Self, String> {
-        let mut config = Config::default();
-        config.paths = Some(Paths::identify()?);
-        Ok(config)
+        Ok(Config {
+            paths: Some(Paths::identify()?),
+            ..Config::default()
+        })
     }
 
     /// Try to modify config with loaded values; This can also be used to populate the default
