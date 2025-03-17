@@ -122,7 +122,7 @@ impl Config {
 
     /// Try to modify config with loaded values; This can also be used to populate the default
     /// config struct
-    pub fn load(&self) -> Result<Config, String> {
+    pub fn load(&mut self) -> Result<(), String> {
         // if config folder does not exist, create it
         let paths = self.get_paths()?;
         let config_folder_path = paths.config.clone();
@@ -147,9 +147,11 @@ impl Config {
             }
         };
 
+        // serialize config from loaded string
         let mut config = serde_json::from_str::<Config>(&config_string)
             .map_err(|err| format!("Failed to deserialize config: {err:?}"))?;
-        // check if loaded config version equals current version, otherwise load default
+        
+        // check if loaded config version equals current version, otherwise revert to default
         if config.config_version != crate::globals::CONFIG_VERSION {
             warn!(
                 "Config version did not match ({} != {}). Restoring defaults...",
@@ -157,10 +159,21 @@ impl Config {
                 crate::globals::CONFIG_VERSION
             );
             config = Config::default();
+            config.paths = Some(paths);
+            config.save()?;
+        } else {
+            config.paths = Some(paths);
         }
-        config.paths = Some(paths);
 
-        Ok(config)
+        self.config_version = config.config_version;
+        self.min_matches = config.min_matches;
+        self.max_matches = config.max_matches;
+        self.max_threads = config.max_threads;
+        self.logging = config.logging;
+        self.language = config.language;
+        self.paths = config.paths;
+
+        Ok(())
     }
 
     /// Writes the current config struct to the file system
