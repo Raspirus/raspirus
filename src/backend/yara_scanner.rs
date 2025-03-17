@@ -9,7 +9,7 @@ use std::{
     path::{Path, PathBuf},
     sync::Mutex,
 };
-use threadpool_rs::threadpool::pool::Threadpool;
+use threadpool_rs::Threadpool;
 use yara_x::{Rules, ScanResults, Scanner};
 
 use crate::{backend::utils::generic::get_rules, CONFIG};
