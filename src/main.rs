@@ -1,6 +1,7 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 //#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
-use backend::{config::Config, scanner::Scanner};
+
+use backend::config::Config;
 use error::Error;
 use log::LevelFilter;
 use relm4::RelmApp;
@@ -12,8 +13,27 @@ mod frontend;
 mod globals;
 
 fn main() -> Result<(), Error> {
+    // init timestamp
+    {
+        crate::globals::get_application_log();
+    }
+
+    // init config
+    {
+        let config = crate::globals::get_config();
+        config.lock()?.load()?;
+    }
+
+    {
+        let config = crate::globals::get_config();
+        let timestamp = crate::globals::get_application_log();
+        dbg!(config.lock()?);
+        dbg!(timestamp);
+    }
+
     //let time = chrono::NaiveDateTime::parse_from_str("2024-09-20T19:50:20Z", "%Y-%m-%dT%H:%M:%SZ");
     //dbg!(time);
+    
 
     // capture log level or fall back to info
     let level_filter = std::env::var("RUST_LOG")

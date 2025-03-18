@@ -81,13 +81,9 @@ impl Index {
     }
 }
 
-#[derive(Debug)]
-pub struct Scanner();
+/// Starts the scan with the current indexed files
+pub fn scan(root: PathBuf) -> Result<(), Error> {
+    let indexed = Index::new(root)?;
 
-impl Scanner {
-    pub fn new(root: PathBuf) -> Result<Self, Error> {
-        let indexed = Index::new(root)?;
-        dbg!(indexed.0.len());
-        Ok(Self {})
-    }
+    Ok(())
 }
