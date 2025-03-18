@@ -16,11 +16,13 @@ fn main() -> Result<(), String> {
     //let time = chrono::NaiveDateTime::parse_from_str("2024-09-20T19:50:20Z", "%Y-%m-%dT%H:%M:%SZ");
     //dbg!(time);
 
-    // init logger with possibly inserted loglevel
-    let log_level = std::env::var("RUST_LOG").unwrap_or("Info".to_owned());
-    let level_filter = log_level
+    // capture log level or fall back to info
+    let level_filter = std::env::var("RUST_LOG")
+        .unwrap_or("Info".to_owned())
         .parse::<LevelFilter>()
         .unwrap_or(LevelFilter::Info);
+
+    // init logger with possibly inserted loglevel
     TermLogger::init(
         level_filter,
         Config::default(),
