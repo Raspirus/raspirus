@@ -41,11 +41,3 @@ pub enum Error {
     #[error("Failed to get entries for {0}")]
     IndexEntriesError(String),
 }
-
-/*
-impl From<String> for Error {
-    fn from(value: String) -> Self {
-        Self::Other(value)
-    }
-}
-*/
