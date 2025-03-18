@@ -1,5 +1,7 @@
 use thiserror::Error;
 
+use crate::backend::config::Config;
+
 #[derive(Error, Debug)]
 #[allow(unused)]
 /// Custom error variant
@@ -17,6 +19,9 @@ pub enum Error {
     /// Thrown when the config fails to be built from a string
     #[error("Failed to serialize config: {0}")]
     ConfigSerializationError(serde_json::Error),
+    /// Thrown when config fails to lock
+    #[error("Failed to lock config: {0}")]
+    ConfigLockError(String),
 
     /// File logger IO error
     #[error("Failed to create logfile: {0}")]
@@ -41,3 +46,10 @@ pub enum Error {
     #[error("Failed to get entries for {0}")]
     IndexEntriesError(String),
 }
+
+impl From<std::sync::PoisonError<std::sync::MutexGuard<'_, Config>>> for Error {
+    fn from(value: std::sync::PoisonError<std::sync::MutexGuard<crate::backend::config::Config>>) -> Self {
+        Self::ConfigLockError(value.to_string())
+    }
+}
+

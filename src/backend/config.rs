@@ -96,7 +96,7 @@ impl Paths {
         fs::create_dir_all(&config).map_err(Error::ConfigIOError)?;
 
         // add launch timestamp to app log path
-        logs_app = logs_app.join(crate::globals::APPLICATION_LOG.clone());
+        logs_app = logs_app.join(crate::globals::get_application_log());
 
         Ok(Paths {
             data,
