@@ -29,7 +29,7 @@ fn main() -> Result<(), String> {
     )
     .map_err(|err| format!("Failed to initialize termlogger: {err:?}"))?;
 
-    let scanner = Scanner::new(PathBuf::from("/home/gamingguy003/Games"))?;
+    let scanner = Scanner::new(PathBuf::from("/home/gamingguy003/.cache/"))?;
 
     let app = RelmApp::new("raspirus.app");
     app.run::<frontend::main::model::AppModel>(0);
