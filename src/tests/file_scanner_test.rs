@@ -63,7 +63,7 @@ mod tests {
             .build()
             .unwrap();
         let update = runtime.block_on(downloader::update());
-
+      
         match update {
             Err(err) => {
                 dbg!(&err);
@@ -78,7 +78,7 @@ mod tests {
 
         std::fs::write(
             Path::new("./tag"),
-            "X5O!P%@AP[4\\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*".to_owned(),
+            r"X5O!P%@AP[4\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*".to_owned(),
         )
         .unwrap();
         let channel = mpsc::channel(1);
