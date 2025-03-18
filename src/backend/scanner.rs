@@ -2,13 +2,11 @@ use std::path::{Path, PathBuf};
 
 use log::{trace, warn};
 
-struct Index {
-    pub paths: Vec<PathBuf>,
-}
+struct Index(Vec<PathBuf>);
 
 impl Index {
     fn new(root: PathBuf) -> Result<Self, String> {
-        let mut indexed = Self { paths: Vec::new() };
+        let mut indexed = Self(Vec::new());
         if root.is_dir() {
             indexed.index_folder(&root)?;
         }
@@ -36,7 +34,7 @@ impl Index {
             Err(format!("File {} is a symlink", root.display()))?
         }
 
-        self.paths.push(root.to_path_buf());
+        self.0.push(root.to_path_buf());
         Ok(())
     }
 
@@ -80,12 +78,12 @@ impl Index {
 }
 
 #[derive(Debug)]
-pub struct Scanner {}
+pub struct Scanner();
 
 impl Scanner {
     pub fn new(root: PathBuf) -> Result<Self, String> {
         let indexed = Index::new(root)?;
-        dbg!(indexed.paths.len());
+        dbg!(indexed.0.len());
         Ok(Self {})
     }
 }
