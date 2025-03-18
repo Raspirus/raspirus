@@ -1,1 +1,1 @@
-pub struct Updater {}
+pub struct Updater();
