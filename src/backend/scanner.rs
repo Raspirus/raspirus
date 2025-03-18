@@ -2,12 +2,14 @@ use std::path::{Path, PathBuf};
 
 use log::{trace, warn};
 
+use crate::error::Error;
+
 /// Holds all the paths of files, which are contained in a root path
 struct Index(Vec<PathBuf>);
 
 impl Index {
     /// Creates a new struct which contains every child file of root
-    fn new(root: PathBuf) -> Result<Self, String> {
+    fn new(root: PathBuf) -> Result<Self, Error> {
         let mut indexed = Self(Vec::new());
         if root.is_dir() {
             indexed.index_folder(&root)?;
@@ -21,19 +23,22 @@ impl Index {
     }
 
     /// Tries to add a file path to the path list
-    fn index_file(&mut self, root: &Path) -> Result<(), String> {
+    fn index_file(&mut self, root: &Path) -> Result<(), Error> {
         // checks if file exists
         if !root.exists() {
-            Err(format!("File {} does not exist", root.display()))?
+            Err(Error::IndexFileNotFoundError(root.display().to_string()))?
         }
 
         // checks if permissions suffice, and if file is symlink
         if root
             .metadata()
-            .map_err(|err| format!("Failed to get metadata: {err:?}"))?
+            .map_err(|error| Error::IndexPermissionError {
+                path: root.display().to_string(),
+                error,
+            })?
             .is_symlink()
         {
-            Err(format!("File {} is a symlink", root.display()))?
+            Err(Error::IndexSymlinkError(root.display().to_string()))?
         }
 
         self.0.push(root.to_path_buf());
@@ -41,14 +46,11 @@ impl Index {
     }
 
     /// Tries to add all of a folders subfolders / files to the list of paths
-    fn index_folder(&mut self, root: &Path) -> Result<(), String> {
+    fn index_folder(&mut self, root: &Path) -> Result<(), Error> {
         // go through all children of a folder
-        for entry in std::fs::read_dir(root).map_err(|err| {
-            format!(
-                "Failed to get folder entries for {}: {err:?}",
-                root.display()
-            )
-        })? {
+        for entry in std::fs::read_dir(root)
+            .map_err(|_| Error::IndexEntriesError(root.display().to_string()))?
+        {
             // if we can fetch entry, save its path, otherwise log and skip
             let root = match entry {
                 Ok(entry) => entry,
@@ -83,7 +85,7 @@ impl Index {
 pub struct Scanner();
 
 impl Scanner {
-    pub fn new(root: PathBuf) -> Result<Self, String> {
+    pub fn new(root: PathBuf) -> Result<Self, Error> {
         let indexed = Index::new(root)?;
         dbg!(indexed.0.len());
         Ok(Self {})

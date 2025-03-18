@@ -4,6 +4,8 @@ use directories_next::ProjectDirs;
 use log::{info, warn};
 use serde::{Deserialize, Serialize};
 
+use crate::error::Error;
+
 use super::log::LogLevel;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -60,13 +62,19 @@ pub struct Paths {
 
 impl Paths {
     /// Creates a new instance of Paths
-    pub fn identify() -> Result<Self, String> {
+    pub fn identify() -> Result<Self, Error> {
         #[cfg(not(target_os = "windows"))]
         let dirs = ProjectDirs::from("org", "raspirus", "raspirus")
-            .ok_or("Failed to get projectdir".to_owned())?;
+            .ok_or("Failed to get projectdir".to_owned())
+            .map_err(|err| {
+                Error::ConfigIOError(std::io::Error::new(std::io::ErrorKind::NotFound, err))
+            })?;
         #[cfg(target_os = "windows")]
         let dirs = ProjectDirs::from("org", "raspirus", "")
-            .ok_or("Failed to get projectdir".to_owned())?;
+            .ok_or("Failed to get projectdir".to_owned())
+            .map_err(|err| {
+                Error::ConfigIOError(std::io::Error::new(std::io::ErrorKind::NotFound, err))
+            })?;
 
         // data folders
         let data = dirs.data_dir().to_owned();
@@ -81,14 +89,11 @@ impl Paths {
         let config = dirs.config_dir().to_owned();
 
         // create necessary folders
-        fs::create_dir_all(&data).map_err(|err| format!("Failed to create data dir: {err:?}"))?;
-        fs::create_dir_all(&logs_scan)
-            .map_err(|err| format!("Failed to create scan log dir: {err:?}"))?;
-        fs::create_dir_all(&temp).map_err(|err| format!("Failed to create temp dir: {err:?}"))?;
-        fs::create_dir_all(&logs_app)
-            .map_err(|err| format!("Failed to create application log dir: {err:?}"))?;
-        fs::create_dir_all(&config)
-            .map_err(|err| format!("Failed to create config dir: {err:?}"))?;
+        fs::create_dir_all(&data).map_err(Error::ConfigIOError)?;
+        fs::create_dir_all(&logs_scan).map_err(Error::ConfigIOError)?;
+        fs::create_dir_all(&temp).map_err(Error::ConfigIOError)?;
+        fs::create_dir_all(&logs_app).map_err(Error::ConfigIOError)?;
+        fs::create_dir_all(&config).map_err(Error::ConfigIOError)?;
 
         // add launch timestamp to app log path
         logs_app = logs_app.join(crate::globals::APPLICATION_LOG.clone());
@@ -105,7 +110,7 @@ impl Paths {
 
 impl Config {
     /// Returns either the paths contained in the config, or tries to create a new instance
-    pub fn get_paths(&self) -> Result<Paths, String> {
+    pub fn get_paths(&self) -> Result<Paths, Error> {
         Ok(match &self.paths {
             Some(paths) => paths.clone(),
             None => Paths::identify()?,
@@ -113,7 +118,7 @@ impl Config {
     }
 
     /// Creates new config struct, populated with defaults values
-    pub fn new() -> Result<Self, String> {
+    pub fn new() -> Result<Self, Error> {
         Ok(Config {
             paths: Some(Paths::identify()?),
             ..Config::default()
@@ -122,13 +127,12 @@ impl Config {
 
     /// Try to modify config with loaded values; This can also be used to populate the default
     /// config struct
-    pub fn load(&mut self) -> Result<(), String> {
+    pub fn load(&mut self) -> Result<(), Error> {
         // if config folder does not exist, create it
         let paths = self.get_paths()?;
         let config_folder_path = paths.config.clone();
         if !config_folder_path.exists() {
-            fs::create_dir_all(&config_folder_path)
-                .map_err(|err| format!("Failed to create config folder: {err:?}"))?;
+            fs::create_dir_all(&config_folder_path).map_err(Error::ConfigIOError)?;
         }
 
         // add config file name to config folder path
@@ -142,15 +146,14 @@ impl Config {
                 info!("Could not read config file: {err:?}; Attempting to create one");
                 let default_config = Config::default();
                 default_config.save()?;
-                serde_json::to_string(&default_config)
-                    .map_err(|err| format!("Failed to serialize default config: {err:?}"))?
+                serde_json::to_string(&default_config).map_err(Error::ConfigDeserializationError)?
             }
         };
 
         // serialize config from loaded string
         let mut config = serde_json::from_str::<Config>(&config_string)
-            .map_err(|err| format!("Failed to deserialize config: {err:?}"))?;
-        
+            .map_err(Error::ConfigDeserializationError)?;
+
         // check if loaded config version equals current version, otherwise revert to default
         if config.config_version != crate::globals::CONFIG_VERSION {
             warn!(
@@ -177,16 +180,16 @@ impl Config {
     }
 
     /// Writes the current config struct to the file system
-    pub fn save(&self) -> Result<(), String> {
+    pub fn save(&self) -> Result<(), Error> {
         let paths = self.get_paths()?;
-        let config_string = serde_json::to_string_pretty(&self)
-            .map_err(|err| format!("Failed to serialize config: {err:?}"))?;
+        let config_string =
+            serde_json::to_string_pretty(&self).map_err(Error::ConfigSerializationError)?;
 
         fs::write(
             paths.config.join(crate::globals::CONFIG_FILE_NAME),
             &config_string,
         )
-        .map_err(|err| format!("Failed to write default config to file: {err:?}"))?;
+        .map_err(Error::ConfigIOError)?;
 
         Ok(())
     }
