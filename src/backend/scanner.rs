@@ -1,4 +1,4 @@
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 use log::{trace, warn};
 
@@ -10,7 +10,7 @@ impl Index {
     fn new(root: PathBuf) -> Result<Self, String> {
         let mut indexed = Self { paths: Vec::new() };
         if root.is_dir() {
-            indexed.index_folder(&root);
+            indexed.index_folder(&root)?;
         }
 
         if root.is_file() {
@@ -21,7 +21,7 @@ impl Index {
     }
 
     /// Tries to add a file path to the path list
-    fn index_file(&mut self, root: &PathBuf) -> Result<(), String> {
+    fn index_file(&mut self, root: &Path) -> Result<(), String> {
         // checks if file exists
         if !root.exists() {
             Err(format!("File {} does not exist", root.display()))?
@@ -36,11 +36,12 @@ impl Index {
             Err(format!("File {} is a symlink", root.display()))?
         }
 
-        Ok(self.paths.push(root.to_path_buf()))
+        self.paths.push(root.to_path_buf());
+        Ok(())
     }
 
     /// Tries to add all of a folders subfolders / files to the list of paths
-    fn index_folder(&mut self, root: &PathBuf) -> Result<(), String> {
+    fn index_folder(&mut self, root: &Path) -> Result<(), String> {
         // go through all children of a folder
         for entry in std::fs::read_dir(root).map_err(|err| {
             format!(
@@ -58,7 +59,8 @@ impl Index {
             }
             .path();
 
-            // if entry is file, index it, otherwise index it as folder
+            // if entry is file, index it, otherwise index it as folder, or, if neither applies,
+            // skip
             if root.is_file() {
                 match self.index_file(&root) {
                     Ok(_) => trace!("Indexed {}", root.display()),
