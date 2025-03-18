@@ -37,6 +37,7 @@ rust-i18n = { version = "3.1.2", features = ["log-miss-tr"] }
 rfd = "0.15.2"
 relm4 = "0.9.1"
 relm4-components = "0.9.1"
+thiserror = "2.0.12"
 
 # usb detection on linux
 [target.'cfg(any(target_os = "linux", target_os = "macos"))'.dependencies]
