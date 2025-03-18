@@ -24,6 +24,7 @@ impl Log {
         Ok(Self { log_path })
     }
 
+    /// Logs the data of a tagged / skipped file
     pub fn log() -> Result<(), String> {
         todo!()
     }
