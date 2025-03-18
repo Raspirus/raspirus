@@ -1,7 +1,15 @@
 use crate::error::Error;
 
 /// Updates the local rules build if necessary
-pub fn update() -> Result<(), Error> { Ok(()) }
+pub fn update() -> Result<(), Error> {
+    if !check_update()? {
+        return Ok(())
+    }
+
+    download()?;
+    build()?;
+    Ok(())
+}
 
 /// Checks remote if there is a newer version available
 pub fn check_update() -> Result<bool, Error> { Ok(true) }
