@@ -1,18 +1,17 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 //#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
-
-use std::path::PathBuf;
-
-use backend::scanner::{self, Scanner};
+use backend::{config::Config, scanner::Scanner};
+use error::Error;
 use log::LevelFilter;
 use relm4::RelmApp;
-use simplelog::{Config, TermLogger};
+use simplelog::TermLogger;
 
 mod backend;
+mod error;
 mod frontend;
 mod globals;
 
-fn main() -> Result<(), String> {
+fn main() -> Result<(), Error> {
     //let time = chrono::NaiveDateTime::parse_from_str("2024-09-20T19:50:20Z", "%Y-%m-%dT%H:%M:%SZ");
     //dbg!(time);
 
@@ -25,13 +24,15 @@ fn main() -> Result<(), String> {
     // init logger with possibly inserted loglevel
     TermLogger::init(
         level_filter,
-        Config::default(),
+        simplelog::Config::default(),
         simplelog::TerminalMode::Mixed,
         simplelog::ColorChoice::Always,
     )
-    .map_err(|err| format!("Failed to initialize termlogger: {err:?}"))?;
+    .map_err(Error::LogInitError)?;
 
-    let scanner = Scanner::new(PathBuf::from("/home/gamingguy003/.cache/"))?;
+    // let scanner = Scanner::new(PathBuf::from("/home/gamingguy003/Downloads/"))?;
+    let mut config = Config::default();
+    config.load()?;
 
     let app = RelmApp::new("raspirus.app");
     app.run::<frontend::main::model::AppModel>(0);
