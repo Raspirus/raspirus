@@ -2,9 +2,11 @@ use std::path::{Path, PathBuf};
 
 use log::{trace, warn};
 
+/// Holds all the paths of files, which are contained in a root path
 struct Index(Vec<PathBuf>);
 
 impl Index {
+    /// Creates a new struct which contains every child file of root
     fn new(root: PathBuf) -> Result<Self, String> {
         let mut indexed = Self(Vec::new());
         if root.is_dir() {
