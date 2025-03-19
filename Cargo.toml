@@ -30,7 +30,7 @@ serde = { version = "1.0.217", features = ["derive"] }
 serde_json = "1.0.137"
 futures = "0.3.31"
 open = "5.3.2"
-printpdf = { version = "0.7.0", features = ["svg"] }
+printpdf = { version = "0.8.0", features = ["svg"] }
 zip = "2.2.2"
 tokio = "1.43.0"
 rust-i18n = { version = "3.1.2", features = ["log-miss-tr"] }
