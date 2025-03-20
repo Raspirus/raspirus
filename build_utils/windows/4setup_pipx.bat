@@ -1,2 +1,2 @@
-%LOCALAPPDATA%\Microsoft\WindowsApps\python -m pip install --user pipx
-%LOCALAPPDATA%\Microsoft\WindowsApps\python -m pipx ensurepath
+python -m pip install --user pipx
+python -m pipx ensurepath
