@@ -14,7 +14,7 @@ install:
 	start /wait cmd /c "build_utils\windows\4setup_pipx.bat"
 
 	@echo ">>>> Installing gvsbuild"
-	start /wait cmd /c "build_utils\windows\5setup_gvsbuild.bat"
+	start /wait cmd /c "build_utils\windows\5setup_gvsbuild_git.bat"
 
 	@echo ">>>> Building gtk4"
 	start /wait cmd /c "build_utils\windows\6build_gtk.bat"
