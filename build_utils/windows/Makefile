@@ -22,6 +22,9 @@ install:
 	@echo ">>>> Setting up environment variables"
 	start /wait cmd /c "build_utils\windows\7setup_env.bat"
 
+	@echo ">>>> Cleanup"
+	rmdir /s /q "C:\Python313"
+
 	@echo ">>>> Done! You should reopen your terminal for changes to apply"
 
 build:
