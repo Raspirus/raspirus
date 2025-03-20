@@ -1,4 +1,4 @@
-if (-not (Get-Command winget -ErrorAction SilentlyContinue)) {
+if (-not ([System.IO.File]::Exists("%LOCALAPPDATA%\Microsoft\WindowsApps\winget"))) {
 Add-AppxPackage -Path "build_utils\windows\xaml.appx"
 Add-AppxPackage -Path "build_utils\windows\vctools.appx"
 $URL = "https://api.github.com/repos/microsoft/winget-cli/releases/latest"
