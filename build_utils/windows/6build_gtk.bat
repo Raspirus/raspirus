@@ -1,3 +1,2 @@
-::mkdir C:\Python313
-::for /f "delims=" %%i in ('where python') do copy "%%i" "C:\Python313 /Y
+copy %LOCALAPPDATA%\Programs\Python\Python313 C:\Python313
 %USERPROFILE%\.local\bin\gvsbuild build gtk4
