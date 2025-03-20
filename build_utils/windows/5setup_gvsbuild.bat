@@ -1,1 +1,1 @@
-pipx install gvsbuild
+python -m pipx install gvsbuild
