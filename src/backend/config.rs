@@ -67,13 +67,13 @@ impl Paths {
         let dirs = ProjectDirs::from("org", "raspirus", "raspirus")
             .ok_or("Failed to get projectdir".to_owned())
             .map_err(|err| {
-                Error::ConfigIOError(std::io::Error::new(std::io::ErrorKind::NotFound, err))
+                Error::ConfigIO(std::io::Error::new(std::io::ErrorKind::NotFound, err))
             })?;
         #[cfg(target_os = "windows")]
         let dirs = ProjectDirs::from("org", "raspirus", "")
             .ok_or("Failed to get projectdir".to_owned())
             .map_err(|err| {
-                Error::ConfigIOError(std::io::Error::new(std::io::ErrorKind::NotFound, err))
+                Error::ConfigIO(std::io::Error::new(std::io::ErrorKind::NotFound, err))
             })?;
 
         // data folders
@@ -89,11 +89,14 @@ impl Paths {
         let config = dirs.config_dir().to_owned();
 
         // create necessary folders
-        fs::create_dir_all(&data).map_err(Error::ConfigIOError)?;
-        fs::create_dir_all(&logs_scan).map_err(Error::ConfigIOError)?;
-        fs::create_dir_all(&temp).map_err(Error::ConfigIOError)?;
-        fs::create_dir_all(&logs_app).map_err(Error::ConfigIOError)?;
-        fs::create_dir_all(&config).map_err(Error::ConfigIOError)?;
+        fs::create_dir_all(&data).map_err(Error::ConfigIO)?;
+        fs::create_dir_all(data.join("yara_c")).map_err(Error::ConfigIO)?;
+        fs::create_dir_all(&logs_scan).map_err(Error::ConfigIO)?;
+        // remove old cache
+        let _ = fs::remove_dir(&temp);
+        fs::create_dir_all(&temp).map_err(Error::ConfigIO)?;
+        fs::create_dir_all(&logs_app).map_err(Error::ConfigIO)?;
+        fs::create_dir_all(&config).map_err(Error::ConfigIO)?;
 
         // add launch timestamp to app log path
         logs_app = logs_app.join(crate::globals::get_application_log());
@@ -132,7 +135,7 @@ impl Config {
         let paths = self.get_paths()?;
         let config_folder_path = paths.config.clone();
         if !config_folder_path.exists() {
-            fs::create_dir_all(&config_folder_path).map_err(Error::ConfigIOError)?;
+            fs::create_dir_all(&config_folder_path).map_err(Error::ConfigIO)?;
         }
 
         // add config file name to config folder path
@@ -146,13 +149,13 @@ impl Config {
                 info!("Could not read config file: {err:?}; Attempting to create one");
                 let default_config = Config::default();
                 default_config.save()?;
-                serde_json::to_string(&default_config).map_err(Error::ConfigDeserializationError)?
+                serde_json::to_string(&default_config).map_err(Error::ConfigDeserialization)?
             }
         };
 
         // serialize config from loaded string
-        let mut config = serde_json::from_str::<Config>(&config_string)
-            .map_err(Error::ConfigDeserializationError)?;
+        let mut config =
+            serde_json::from_str::<Config>(&config_string).map_err(Error::ConfigDeserialization)?;
 
         // check if loaded config version equals current version, otherwise revert to default
         if config.config_version != crate::globals::CONFIG_VERSION {
@@ -183,13 +186,13 @@ impl Config {
     pub fn save(&self) -> Result<(), Error> {
         let paths = self.get_paths()?;
         let config_string =
-            serde_json::to_string_pretty(&self).map_err(Error::ConfigSerializationError)?;
+            serde_json::to_string_pretty(&self).map_err(Error::ConfigSerialization)?;
 
         fs::write(
             paths.config.join(crate::globals::CONFIG_FILE_NAME),
             &config_string,
         )
-        .map_err(Error::ConfigIOError)?;
+        .map_err(Error::ConfigIO)?;
 
         Ok(())
     }

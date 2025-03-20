@@ -1,5 +1,5 @@
 use serde::{Deserialize, Serialize};
-use std::{path::PathBuf, fs};
+use std::{fs, path::PathBuf};
 
 use crate::error::Error;
 
@@ -8,7 +8,7 @@ pub enum LogLevel {
     Off,
     Info,
     Debug,
-    Trace
+    Trace,
 }
 
 /// A helper used for logging file scan results to a logfile
@@ -21,7 +21,7 @@ impl Log {
     /// already exist
     pub fn new(log_path: PathBuf) -> Result<Self, Error> {
         if !log_path.exists() {
-            fs::create_dir_all(&log_path).map_err(Error::LogIOError)?;
+            fs::create_dir_all(&log_path).map_err(Error::LogIO)?;
         }
         Ok(Self { log_path })
     }

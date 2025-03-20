@@ -1,0 +1,1 @@
+rustup default stable-msvc
