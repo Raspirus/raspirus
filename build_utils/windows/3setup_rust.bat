@@ -1,1 +1,1 @@
-rustup default stable-msvc
+%USERPROFILE%\.cargo\bin\rustup default stable-msvc
