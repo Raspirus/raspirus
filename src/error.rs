@@ -6,6 +6,9 @@ use crate::backend::config::Config;
 #[allow(unused)]
 /// Custom error variant
 pub enum Error {
+    /// Thrown when an invalid argument was supplied
+    #[error("Invalid argument {0}; Try --help")]
+    InvalidArgument(String),
     /// Arbitrary error holding just a string
     #[error("Unclassified error: {0}")]
     Other(String),

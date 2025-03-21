@@ -1,12 +1,11 @@
 use std::{fs, path::PathBuf};
 
+use super::log::LogLevel;
 use directories_next::ProjectDirs;
 use log::{info, warn};
 use serde::{Deserialize, Serialize};
 
-use crate::error::Error;
-
-use super::log::LogLevel;
+type Error = crate::Error;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(default)]

@@ -1,11 +1,14 @@
 use std::sync::{Arc, Mutex, OnceLock};
 
-use crate::backend::{config::Config, log::LogLevel};
+use crate::{
+    backend::{config::Config, log::LogLevel},
+    Error,
+};
 
 // global mutable values
 
 /// Application startup time used for logging. Can be fetched via get_application_log
-pub static APPLICATION_LOG: OnceLock<String> = OnceLock::new();
+static APPLICATION_LOG: OnceLock<String> = OnceLock::new();
 pub fn get_application_log() -> String {
     APPLICATION_LOG
         .get_or_init(|| chrono::Utc::now().format("%Y-%m-%dT:%H:%M:%SZ").to_string())
@@ -13,10 +16,31 @@ pub fn get_application_log() -> String {
 }
 
 /// Shared config file. Can be fetched via get_config
-pub static CONFIG: OnceLock<Arc<Mutex<Config>>> = OnceLock::new();
-pub fn get_config() -> Arc<Mutex<Config>> {
+static CONFIG: OnceLock<Arc<Mutex<Config>>> = OnceLock::new();
+/// Fetch config for writing
+pub fn get_mut_config() -> Arc<Mutex<Config>> {
     CONFIG
         .get_or_init(|| Arc::new(Mutex::new(Config::default())))
+        .clone()
+}
+
+/// Fetch config only for reading
+pub fn get_ro_config() -> Result<Config, Error> {
+    Ok(get_mut_config().lock()?.clone())
+}
+
+static LOGLEVEL: OnceLock<LogLevel> = OnceLock::new();
+/// Fetch loglevel either from cli arg or config
+pub fn get_loglevel() -> LogLevel {
+    LOGLEVEL
+        .get_or_init(|| {
+            // fetch cli argument first, otherwise config
+            if crate::arguments::get_argument(&crate::arguments::Argument::Debug).is_some() {
+                LogLevel::Debug
+            } else {
+                get_ro_config().unwrap_or_default().logging
+            }
+        })
         .clone()
 }
 

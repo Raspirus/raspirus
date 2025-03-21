@@ -1,27 +1,26 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 //#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use std::path::PathBuf;
-
 use backend::config::Config;
-use error::Error;
 use log::LevelFilter;
-use relm4::RelmApp;
 use simplelog::TermLogger;
 
+mod arguments;
 mod backend;
 mod error;
 mod frontend;
 mod globals;
 
+type Error = crate::error::Error;
+
 fn main() -> Result<(), Error> {
     // init global variables
-    crate::globals::get_config().lock()?.load()?;
+    crate::globals::get_mut_config().lock()?.load()?;
     crate::globals::get_application_log();
 
     // capture log level or fall back to info
     let level_filter = std::env::var("RUST_LOG")
-        .unwrap_or("Info".to_owned())
+        .unwrap_or(format!("{:?}", crate::globals::get_loglevel()))
         .parse::<LevelFilter>()
         .unwrap_or(LevelFilter::Info);
 
@@ -34,6 +33,8 @@ fn main() -> Result<(), Error> {
     )
     .map_err(Error::LogInit)?;
 
+    dbg!(crate::globals::get_loglevel());
+
     let rt = tokio::runtime::Builder::new_current_thread()
         .enable_all()
         .build()
@@ -41,13 +42,5 @@ fn main() -> Result<(), Error> {
 
     rt.block_on(crate::backend::updater::update())?;
 
-    // let scanner = Scanner::new(PathBuf::from("/home/gamingguy003/Downloads/"))?;
-    let mut config = Config::default();
-    config.load()?;
-
-    //crate::backend::scanner::start(PathBuf::from("/home/gamingguy003/.cache"))?;
-
-    let app = RelmApp::new("raspirus.app");
-    app.run::<frontend::main::model::AppModel>(0);
     Ok(())
 }

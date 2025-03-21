@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use std::{fs, path::PathBuf};
 
-use crate::error::Error;
+type Error = crate::Error;
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub enum LogLevel {

@@ -3,9 +3,9 @@ use std::{
     sync::{Arc, Mutex},
 };
 
-use crate::error::Error;
 use log::{info, trace, warn};
-use reqwest::header::WARNING;
+
+type Error = crate::Error;
 
 #[derive(Clone)]
 pub enum NotableFile {

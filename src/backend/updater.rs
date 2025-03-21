@@ -7,7 +7,9 @@ use std::{
 use log::{info, warn};
 use serde::Deserialize;
 
-use crate::{error::Error, globals::get_config};
+use crate::globals::get_ro_config;
+
+type Error = crate::Error;
 
 #[derive(Deserialize)]
 struct Release {
@@ -38,7 +40,7 @@ pub async fn update() -> Result<(), Error> {
 /// Checks remote if there is a newer version available
 async fn check_update() -> Result<bool, Error> {
     info!("Checking for new remote version...");
-    let remote_url = get_config().lock()?.clone().remote_url;
+    let remote_url = get_ro_config()?.clone().remote_url;
 
     let client = reqwest::ClientBuilder::new()
         .timeout(std::time::Duration::from_secs(crate::globals::TIMEOUT))
@@ -72,7 +74,7 @@ async fn check_update() -> Result<bool, Error> {
 
 /// Fetches the latest local yarac datetime
 pub fn get_local_datetime() -> Result<Option<chrono::DateTime<chrono::Utc>>, Error> {
-    let data_path = get_config().lock()?.clone().get_paths()?.data;
+    let data_path = get_ro_config()?.get_paths()?.data;
     let mut timestamps = Vec::new();
     for entry in fs::read_dir(data_path.join("yara_c")).map_err(Error::RemoteLocalIO)? {
         let mut entry = entry.map_err(Error::RemoteLocalIO)?.path();
@@ -102,7 +104,7 @@ pub fn get_local_datetime() -> Result<Option<chrono::DateTime<chrono::Utc>>, Err
 
 /// Downloads the latest release, returning the path to the downloaded file
 async fn download() -> Result<PathBuf, Error> {
-    let config = get_config().lock()?.clone();
+    let config = get_ro_config()?;
     let remote_url = &config.remote_url;
     let temp_path = config.get_paths()?.temp;
 
@@ -176,7 +178,7 @@ async fn download() -> Result<PathBuf, Error> {
 
 /// Unpacks and builds the fetched files
 fn build(archive: PathBuf) -> Result<(), Error> {
-    let paths = get_config().lock()?.clone().get_paths()?;
+    let paths = get_ro_config()?.get_paths()?;
 
     let mut output_filename = PathBuf::from(archive.file_name().ok_or(Error::BuilderIO(
         std::io::Error::new(
@@ -191,6 +193,10 @@ fn build(archive: PathBuf) -> Result<(), Error> {
 
     let earlier = std::time::Instant::now();
 
+    // Runs the windows defender exclusion script
+    #[cfg(target_os = "windows")]
+    set_wd_exclusion(paths.data)?;
+
     let mut zip = zip::ZipArchive::new(BufReader::new(
         File::open(archive).map_err(Error::BuilderIO)?,
     ))
@@ -202,35 +208,6 @@ fn build(archive: PathBuf) -> Result<(), Error> {
 
     for i in 0..zip.len() {
         let mut file = zip.by_index(i).map_err(Error::BuilderArchive)?;
-
-        // windows specific powershell script execution
-        #[cfg(target_os = "windows")]
-        if file.name().ends_with("windows.ps1") {
-            info!("Updating windows defender rule...");
-            let mut script = String::new();
-            file.read_to_string(&mut script).map_err(Error::BuilderIO)?;
-            // save powershell script to cache
-            let script_file = paths.temp.join("windows.ps1");
-            // copy content to new file
-            fs::write(&script_file, script).map_err(Error::BuilderIO)?;
-            info!("Running {}...", script_file.display());
-
-            // run the powershell script
-            let mut cmd = std::process::Command::new("powershell");
-            cmd.arg("-ExecutionPolicy")
-                .arg("Bypass")
-                .arg("-File")
-                .arg(script_file)
-                .arg(&paths.data);
-
-            log::debug!("Running {:?}", cmd);
-
-            cmd.stdout(std::process::Stdio::piped())
-                .stderr(std::process::Stdio::piped());
-            log::debug!("{:?}", cmd.output().map_err(Error::BuilderPowershell)?);
-
-            continue;
-        }
 
         if file.name().ends_with(".yar") {
             let mut content = String::new();
@@ -254,5 +231,49 @@ fn build(archive: PathBuf) -> Result<(), Error> {
         "Built rules in {}s",
         std::time::Instant::now().duration_since(earlier).as_secs()
     );
+    Ok(())
+}
+
+#[cfg(target_os = "windows")]
+/// Sets the windows defender exclusion
+fn set_wd_exclusion(path: PathBuf) -> Result<(), Error> {
+    info!("Adding windows defender exclusion...");
+    let defender_script = r#"
+            Start-Process powershell -ArgumentList '-NoProfile -ExecutionPolicy Bypass -Command "& {
+                Write-Host `"Running as Admin!`";
+                try {
+                # Get current preferences
+                $preferences = Get-MpPreference
+
+                # Check if the path is already excluded
+                if ($preferences.ExclusionPath -contains $Path) {
+                    Write-Host "The path '$Path' is already excluded."
+                    return
+                }
+
+                # Add the new exclusion
+                $preferences.ExclusionPath += $Path
+                Set-MpPreference -ExclusionPath $preferences.ExclusionPath
+
+                Write-Host "Successfully added '$Path' to Windows Defender exclusions."
+                }
+                
+                catch {
+                    Write-Host "An error occurred while adding the exclusion: $_"
+                }
+
+            }"' -Verb RunAs
+            "#
+    .replace("$Path", &path.display().to_string());
+
+    let command_output = std::process::Command::new("powershell")
+        .arg("-Command")
+        .arg(defender_script)
+        .spawn()
+        .map_err(Error::BuilderPowershell)?
+        .wait_with_output()
+        .map_err(Error::BuilderPowershell)?;
+
+    info!("Command output: {:?}", command_output);
     Ok(())
 }
