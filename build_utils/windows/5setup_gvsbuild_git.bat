@@ -4,4 +4,4 @@ git clone https://github.com/wingtk/gvsbuild.git
 cd C:\gtk-build\github\gvsbuild
 python -m venv .venv
 .\.venv\Scripts\activate.ps1
-pip install .
+%LOCALAPPDATA%\Programs\Python\Python313\python -m pip install .
