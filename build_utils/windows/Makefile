@@ -29,30 +29,30 @@ install:
 
 build:
 	@echo ">>>> Building release"
-	cargo build --release --verbose --no-default-features
+	%USERPROFILE%\.cargo\bin\cargo build --release --verbose --no-default-features
 	@echo ">>>> Done!"
 
 run:
 	@echo ">>>> Running release"
-	cargo run --release --verbose --no-default-features
+	%USERPROFILE%\.cargo\bin\cargo run --release --verbose --no-default-features
 	@echo ">>>> Done!"
 
 test:
 	@echo ">>>> Executing cargo tests"
-	cargo test
+	%USERPROFILE%\.cargo\bin\cargo test
 	@echo ">>>> Done!"
 
 check:
 	@echo ">>>> Checking codebase"
-	cargo clippy --all-features
+	%USERPROFILE%\.cargo\bin\cargo clippy --all-features
 	@echo ">>>> Done!"
 
 clean:
 	@echo ">>>> Cleaning cwd"
-	cargo clean -v -v
+	%USERPROFILE%\.cargo\bin\cargo clean -v -v
 	@echo ">>>> Done!"
 
 docs:
 	@echo ">>>> Generating docs"
-	cargo doc --no-deps --workspace --open
+	%USERPROFILE%\.cargo\bin\cargo doc --no-deps --workspace --open
 	@echo ">>>> Done!"
