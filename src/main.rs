@@ -35,12 +35,14 @@ fn main() -> Result<(), Error> {
 
     dbg!(crate::globals::get_loglevel());
 
-    let rt = tokio::runtime::Builder::new_current_thread()
-        .enable_all()
-        .build()
-        .unwrap();
+    if crate::arguments::get_argument(&crate::arguments::Argument::Update).is_some() {
+        let rt = tokio::runtime::Builder::new_current_thread()
+            .enable_all()
+            .build()
+            .unwrap();
 
-    rt.block_on(crate::backend::updater::update())?;
+        rt.block_on(crate::backend::updater::update())?;
+    }
 
     Ok(())
 }
