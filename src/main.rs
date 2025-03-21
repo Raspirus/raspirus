@@ -1,8 +1,6 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 //#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use std::path::PathBuf;
-
 use backend::config::Config;
 use error::Error;
 use log::LevelFilter;
@@ -34,12 +32,14 @@ fn main() -> Result<(), Error> {
     )
     .map_err(Error::LogInit)?;
 
+    /*
     let rt = tokio::runtime::Builder::new_current_thread()
         .enable_all()
         .build()
         .unwrap();
 
     rt.block_on(crate::backend::updater::update())?;
+     */
 
     // let scanner = Scanner::new(PathBuf::from("/home/gamingguy003/Downloads/"))?;
     let mut config = Config::default();
