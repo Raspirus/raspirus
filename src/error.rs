@@ -3,7 +3,6 @@ use thiserror::Error;
 use crate::backend::config::Config;
 
 #[derive(Error, Debug)]
-//#[allow(unused)]
 /// Custom error variant
 pub enum Error {
     /// Thrown when an invalid argument was supplied
