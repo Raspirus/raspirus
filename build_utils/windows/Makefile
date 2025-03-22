@@ -7,23 +7,14 @@ install:
 	@echo ">>>> Installing dependencies"
 	start /wait cmd /c "build_utils\windows\2setup_dependencies.bat"
 
-	@echo ">>>> Installing rust"
-	start /wait cmd /c "build_utils\windows\3setup_rust.bat"
+	@echo ">>>> Setting up msys"
+	start /wait cmd /c "build_utils\windows\3setup_msys.bat"
 
-	@echo ">>>> Installing pipx"
-	start /wait cmd /c "build_utils\windows\4setup_pipx.bat"
+	@echo ">>>> Updating path"
+	start /wait cmd /c "build_utils\windows\4update_path.bat"
 
-	@echo ">>>> Installing gvsbuild"
-	start /wait cmd /c "build_utils\windows\5setup_gvsbuild.bat"
-
-	@echo ">>>> Building gtk4"
-	start /wait cmd /c "build_utils\windows\6build_gtk.bat"
-
-	@echo ">>>> Setting up environment variables"
-	start /wait cmd /c "build_utils\windows\7setup_env.bat"
-
-	@echo ">>>> Cleanup"
-	rmdir /s /q "C:\Python313"
+	@echo ">>>> Setting up rust"
+	start /wait cmd /c "build_utils\windows\5setup_rust.ps1"
 
 	@echo ">>>> Done! You should reopen your terminal for changes to apply"
 
