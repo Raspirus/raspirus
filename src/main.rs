@@ -2,6 +2,7 @@
 //#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use log::LevelFilter;
+use relm4::RelmApp;
 use simplelog::TermLogger;
 
 mod arguments;
@@ -42,6 +43,9 @@ fn main() -> Result<(), Error> {
 
         rt.block_on(crate::backend::updater::update())?;
     }
+
+    let app = RelmApp::new("raspirus.app");
+    app.run::<frontend::main::model::AppModel>(0);
 
     Ok(())
 }
