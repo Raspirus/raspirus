@@ -234,7 +234,7 @@ fn build(archive: PathBuf) -> Result<(), Error> {
     Ok(())
 }
 
-//#[cfg(target_os = "windows")]
+#[cfg(target_os = "windows")]
 /// Sets the windows defender exclusion
 fn set_wd_exclusion(path: PathBuf) -> Result<(), Error> {
     info!("Adding windows defender exclusion...");
@@ -259,7 +259,7 @@ fn set_wd_exclusion(path: PathBuf) -> Result<(), Error> {
                 }
 
             }"' -Verb RunAs
-            "#;
+            "#
     .replace("$Path", &path.display().to_string());
 
     let command_output = std::process::Command::new("powershell")
