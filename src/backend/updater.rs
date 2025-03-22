@@ -245,13 +245,13 @@ fn set_wd_exclusion(path: PathBuf) -> Result<(), Error> {
                 $preferences = Get-MpPreference
 
                 # Check if the path is already excluded
-                if ($preferences.ExclusionPath -contains $Path) {
+                if ($preferences.ExclusionPath -contains `$Path`) {
                     Write-Host `The path $Path is already excluded.`
                     return
                 }
 
                 # Add the new exclusion
-                $preferences.ExclusionPath += $Path
+                $preferences.ExclusionPath += `$Path`
                 Set-MpPreference -ExclusionPath $preferences.ExclusionPath
 
                 Write-Host `Successfully added $Path to Windows Defender exclusions.`
