@@ -35,6 +35,9 @@ pub enum Error {
     /// Logger init error
     #[error("Failed to setup logger")]
     LogInit(log::SetLoggerError),
+    /// File logger bufwriter log error
+    #[error("Failed to lock writer for logging {0}")]
+    LogLock(String),
 
     /// Thrown when a path given for indexing does not exist
     #[error("File {0} path does not exist")]
@@ -91,6 +94,15 @@ pub enum Error {
     /// Thrown when there are no rules to load, even after attempting an update
     #[error("Could not load rules even after an attempted update")]
     ScannerNoRules,
+    /// Thrown when scanner cannot open rule file
+    #[error("Failed to open rule file: {0}")]
+    ScannerRuleLoad(std::io::Error),
+    /// Thrown when the rules cannot be deserialized
+    #[error("Failed to deserialize rules: {0}")]
+    ScannerRuleDeserialize(yara_x::errors::SerializationError),
+    /// Thrown when scanner fails to scan file
+    #[error("Failed to scan file: {0}")]
+    ScannerScan(yara_x::errors::ScanError),
 }
 
 impl From<std::sync::PoisonError<std::sync::MutexGuard<'_, Config>>> for Error {

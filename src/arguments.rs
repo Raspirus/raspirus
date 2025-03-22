@@ -8,6 +8,7 @@ pub enum Argument {
     Fullscreen,
     Update,
     Debug,
+    Quiet,
     Scan(Option<String>),
     Json,
     Threads(Option<String>),
@@ -25,6 +26,7 @@ impl From<String> for Argument {
                 "f" | "fullscreen" => Self::Fullscreen,
                 "u" | "update" => Self::Update,
                 "d" | "debug" => Self::Debug,
+                "q" | "quiet" => Self::Quiet,
                 "s" | "scan" => Self::Scan(None),
                 "j" | "json" => Self::Json,
                 "t" | "threads" => Self::Threads(None),
@@ -68,10 +70,7 @@ pub fn get_arguments() -> Vec<Argument> {
 
 /// Gets a specific argument
 pub fn get_argument(search: &Argument) -> Option<Argument> {
-    for arg in get_arguments() {
-        if std::mem::discriminant(search) == std::mem::discriminant(&arg) {
-            return Some(arg);
-        }
-    }
-    None
+    get_arguments()
+        .into_iter()
+        .find(|arg| std::mem::discriminant(search) == std::mem::discriminant(arg))
 }

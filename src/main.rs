@@ -1,11 +1,10 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 //#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+use std::path::PathBuf;
+
 use log::LevelFilter;
-use relm4::{
-    gtk::{prelude::ObjectExt, Settings},
-    RelmApp,
-};
+use relm4::RelmApp;
 use simplelog::TermLogger;
 
 mod arguments;
@@ -27,10 +26,15 @@ fn main() -> Result<(), Error> {
         .parse::<LevelFilter>()
         .unwrap_or(LevelFilter::Info);
 
+    let log_config = simplelog::ConfigBuilder::new()
+        .add_filter_ignore_str("cranelift_codegen")
+        .add_filter_ignore_str("wasmtime")
+        .build();
+
     // init logger with possibly inserted loglevel
     TermLogger::init(
         level_filter,
-        simplelog::Config::default(),
+        log_config,
         simplelog::TerminalMode::Mixed,
         simplelog::ColorChoice::Always,
     )
@@ -38,23 +42,33 @@ fn main() -> Result<(), Error> {
 
     dbg!(crate::globals::get_loglevel());
 
-    if crate::arguments::get_argument(&crate::arguments::Argument::Update).is_some() {
-        let rt = tokio::runtime::Builder::new_current_thread()
-            .enable_all()
-            .build()
-            .unwrap();
+    let rt = tokio::runtime::Builder::new_current_thread()
+        .enable_all()
+        .build()
+        .unwrap();
 
+    if crate::arguments::get_argument(&crate::arguments::Argument::Update).is_some() {
         rt.block_on(crate::backend::updater::update())?;
     }
 
-    println!("{:?}", relm4::gtk::init());
-
-    if let Some(settings) = relm4::gtk::Settings::default() {
-        settings.set_gtk_application_prefer_dark_theme(true);
+    if let Some(arg) = crate::arguments::get_argument(&crate::arguments::Argument::Scan(None)) {
+        match arg {
+            arguments::Argument::Scan(Some(path)) => {
+                rt.block_on(crate::backend::scanner::start(PathBuf::from(path)))?
+            }
+            _ => todo!(),
+        }
     }
 
-    let app = RelmApp::new("raspirus.app");
-    app.run::<frontend::main::model::AppModel>(0);
+    if crate::arguments::get_argument(&crate::arguments::Argument::NoGUI).is_none() {
+        relm4::gtk::init();
 
+        if let Some(settings) = relm4::gtk::Settings::default() {
+            settings.set_gtk_application_prefer_dark_theme(true);
+        }
+
+        let app = RelmApp::new("raspirus.app");
+        app.run::<frontend::main::model::AppModel>(0);
+    }
     Ok(())
 }

@@ -11,7 +11,7 @@ use crate::{
 static APPLICATION_LOG: OnceLock<String> = OnceLock::new();
 pub fn get_application_log() -> String {
     APPLICATION_LOG
-        .get_or_init(|| chrono::Utc::now().format("%Y-%m-%dT:%H:%M:%SZ").to_string())
+        .get_or_init(|| chrono::Utc::now().format("%Y-%m-%dT%H:%M:%SZ").to_string())
         .to_string()
 }
 
@@ -37,6 +37,8 @@ pub fn get_loglevel() -> LogLevel {
             // fetch cli argument first, otherwise config
             if crate::arguments::get_argument(&crate::arguments::Argument::Debug).is_some() {
                 LogLevel::Debug
+            } else if crate::arguments::get_argument(&crate::arguments::Argument::Quiet).is_some() {
+                LogLevel::Off
             } else {
                 get_ro_config().unwrap_or_default().logging
             }
