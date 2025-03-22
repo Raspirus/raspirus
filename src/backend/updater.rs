@@ -271,7 +271,6 @@ fn set_wd_exclusion(path: PathBuf) -> Result<(), Error> {
     let command_output = std::process::Command::new("powershell")
         .arg("-Command")
         .arg(defender_script)
-        .arg("-Path")
         .arg(path.display().to_string())
         .spawn()
         .map_err(Error::BuilderPowershell)?
