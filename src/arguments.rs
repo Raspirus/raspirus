@@ -1,5 +1,7 @@
 use log::debug;
-use std::sync::OnceLock;
+use std::{path::PathBuf, sync::OnceLock};
+
+static ARGUMENTS: OnceLock<Vec<Argument>> = OnceLock::new();
 
 #[derive(Clone, Debug)]
 pub enum Argument {
@@ -9,10 +11,13 @@ pub enum Argument {
     Update,
     Debug,
     Quiet,
-    Scan(Option<String>),
+    Scan(Option<PathBuf>),
     Json,
-    Threads(Option<String>),
-    Invalid(String),
+    Threads(Option<usize>),
+    Invalid(Option<String>),
+    MaxMatches(Option<usize>),
+    MinMatches(Option<usize>),
+    Remote(Option<String>),
 }
 
 impl From<String> for Argument {
@@ -30,17 +35,20 @@ impl From<String> for Argument {
                 "s" | "scan" => Self::Scan(None),
                 "j" | "json" => Self::Json,
                 "t" | "threads" => Self::Threads(None),
-                inv => Self::Invalid(format!("Unrecognized argument {inv}; Try --help or -h")),
+                "x" | "max" => Self::MaxMatches(None),
+                "i" | "min" => Self::MinMatches(None),
+                "r" | "remote" => Self::Remote(None),
+                inv => Self::Invalid(Some(format!(
+                    "Unrecognized argument {inv}; Try --help or -h"
+                ))),
             }
         } else {
-            Self::Invalid(
+            Self::Invalid(Some(
                 "Arguments should start either with --<argname> or -<short argname>".to_owned(),
-            )
+            ))
         }
     }
 }
-
-static ARGUMENTS: OnceLock<Vec<Argument>> = OnceLock::new();
 
 /// Parses the passed arguments and returns an array with them
 pub fn get_arguments() -> Vec<Argument> {
@@ -58,8 +66,19 @@ pub fn get_arguments() -> Vec<Argument> {
                 debug!("Parsing argument {arg}");
                 let parsed = Argument::from(arg);
                 match parsed {
-                    Argument::Scan(_) => all_parsed.push(Argument::Scan(args.pop())),
-                    Argument::Threads(_) => all_parsed.push(Argument::Threads(args.pop())),
+                    Argument::Scan(_) => all_parsed.push(Argument::Scan(
+                        args.pop().and_then(|path| path.parse().ok()),
+                    )),
+                    Argument::Threads(_) => all_parsed.push(Argument::Threads(
+                        args.pop().and_then(|threads| threads.parse().ok()),
+                    )),
+                    Argument::MinMatches(_) => all_parsed.push(Argument::MinMatches(
+                        args.pop().and_then(|matches| matches.parse().ok()),
+                    )),
+                    Argument::MaxMatches(_) => all_parsed.push(Argument::MaxMatches(
+                        args.pop().and_then(|matches| matches.parse().ok()),
+                    )),
+                    Argument::Remote(_) => all_parsed.push(Argument::Remote(args.pop())),
                     parsed => all_parsed.push(parsed),
                 }
             }

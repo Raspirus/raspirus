@@ -3,7 +3,8 @@
 
 use std::path::PathBuf;
 
-use log::LevelFilter;
+use arguments::{get_argument, Argument};
+use log::{error, LevelFilter};
 use relm4::RelmApp;
 use simplelog::TermLogger;
 
@@ -19,6 +20,10 @@ fn main() -> Result<(), Error> {
     // init global variables
     crate::globals::get_mut_config().lock()?.load()?;
     crate::globals::get_application_log();
+
+    if let Some(Argument::Invalid(Some(invalid))) = get_argument(&Argument::Invalid(None)) {
+        error!("Invalid argument: {invalid}");
+    }
 
     // capture log level or fall back to info
     let level_filter = std::env::var("RUST_LOG")
@@ -40,33 +45,20 @@ fn main() -> Result<(), Error> {
     )
     .map_err(Error::LogInit)?;
 
-    dbg!(crate::globals::get_loglevel());
-
     let rt = tokio::runtime::Builder::new_current_thread()
         .enable_all()
         .build()
         .unwrap();
 
-    if crate::arguments::get_argument(&crate::arguments::Argument::Update).is_some() {
+    if get_argument(&Argument::Update).is_some() {
         rt.block_on(crate::backend::updater::update())?;
     }
 
-    if let Some(arg) = crate::arguments::get_argument(&crate::arguments::Argument::Scan(None)) {
-        match arg {
-            arguments::Argument::Scan(Some(path)) => {
-                rt.block_on(crate::backend::scanner::start(PathBuf::from(path)))?
-            }
-            _ => todo!(),
-        }
+    if let Some(Argument::Scan(Some(path))) = get_argument(&Argument::Scan(None)) {
+        rt.block_on(crate::backend::scanner::start(PathBuf::from(path)))?
     }
 
-    if crate::arguments::get_argument(&crate::arguments::Argument::NoGUI).is_none() {
-        relm4::gtk::init();
-
-        if let Some(settings) = relm4::gtk::Settings::default() {
-            settings.set_gtk_application_prefer_dark_theme(true);
-        }
-
+    if get_argument(&Argument::NoGUI).is_none() {
         let app = RelmApp::new("raspirus.app");
         app.run::<frontend::main::model::AppModel>(0);
     }

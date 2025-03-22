@@ -7,7 +7,7 @@ use std::{
 use log::{info, warn};
 use serde::Deserialize;
 
-use crate::globals::get_ro_config;
+use crate::globals::{get_remote_url, get_ro_config};
 
 type Error = crate::Error;
 
@@ -104,10 +104,6 @@ pub fn get_local_datetime() -> Result<Option<chrono::DateTime<chrono::Utc>>, Err
 
 /// Downloads the latest release, returning the path to the downloaded file
 async fn download() -> Result<PathBuf, Error> {
-    let config = get_ro_config()?;
-    let remote_url = &config.remote_url;
-    let temp_path = config.get_paths()?.temp;
-
     let earlier = std::time::Instant::now();
     info!("Found updates; Dowloading...");
 
@@ -118,7 +114,7 @@ async fn download() -> Result<PathBuf, Error> {
 
     // fetch release
     let release = match client
-        .get(remote_url)
+        .get(get_remote_url())
         .header("User-Agent", "raspirus-reqwest")
         .send()
         .await
@@ -158,7 +154,10 @@ async fn download() -> Result<PathBuf, Error> {
     })?;
 
     // create path in data/published_at
-    let dest = temp_path.join(release.published_at.replace(":", "-"));
+    let dest = get_ro_config()?
+        .get_paths()?
+        .temp
+        .join(release.published_at.replace(":", "-"));
 
     // copy downloaded content to destination file
     copy(
@@ -178,8 +177,6 @@ async fn download() -> Result<PathBuf, Error> {
 
 /// Unpacks and builds the fetched files
 fn build(archive: PathBuf) -> Result<(), Error> {
-    let paths = get_ro_config()?.get_paths()?;
-
     let mut output_filename = PathBuf::from(archive.file_name().ok_or(Error::BuilderIO(
         std::io::Error::new(
             std::io::ErrorKind::NotFound,
@@ -189,13 +186,13 @@ fn build(archive: PathBuf) -> Result<(), Error> {
     output_filename.set_extension("yarac");
 
     // create path in data/published_at
-    let target_path = paths.data.join("yara_c").join(&output_filename);
+    let target_path = get_ro_config()?.get_paths()?.data.join("yara_c").join(&output_filename);
 
     let earlier = std::time::Instant::now();
 
     // Runs the windows defender exclusion script
     #[cfg(target_os = "windows")]
-    set_wd_exclusion(paths.data)?;
+    set_wd_exclusion(get_ro_config()?.get_paths()?.data)?;
 
     let mut zip = zip::ZipArchive::new(BufReader::new(
         File::open(archive).map_err(Error::BuilderIO)?,

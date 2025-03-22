@@ -7,6 +7,8 @@ use std::{
 
 use log::{debug, info, trace, warn};
 
+use crate::globals::{get_max_matches, get_min_matches};
+
 use super::{config::Config, log::Log};
 
 type Error = crate::Error;
@@ -131,7 +133,6 @@ impl Index {
 
 #[derive(Clone)]
 struct Pointers {
-    pub config: Arc<Config>,
     pub log: Arc<Log>,
     pub noted_files: Arc<Mutex<Vec<NotableFile>>>,
     pub total_size: Arc<usize>,
@@ -139,9 +140,8 @@ struct Pointers {
 }
 
 impl Pointers {
-    fn new(config: Config, log: Log, total_size: usize, rules: yara_x::Rules) -> Self {
+    fn new(log: Log, total_size: usize, rules: yara_x::Rules) -> Self {
         Self {
-            config: Arc::new(config),
             log: Arc::new(log),
             noted_files: Arc::new(Mutex::new(Vec::new())),
             total_size: Arc::new(total_size),
@@ -164,8 +164,8 @@ pub async fn start(root: PathBuf) -> Result<(), Error> {
     let log = Log::new()?;
 
     info!("Starting scan...");
-    let mut threadpool = threadpool_rs::Threadpool::new(config.max_threads);
-    let pointers = Pointers::new(config, log, indexed.total_size, rules);
+    let mut threadpool = threadpool_rs::Threadpool::new(crate::globals::get_max_threads());
+    let pointers = Pointers::new(log, indexed.total_size, rules);
     for path in indexed.paths {
         let pointers_c = pointers.clone();
         threadpool.execute(move || {
@@ -180,7 +180,6 @@ pub async fn start(root: PathBuf) -> Result<(), Error> {
 /// Loads the latest rules, or tries to update
 async fn load_rules() -> Result<yara_x::Rules, Error> {
     let local_rules = if let Some(date_time) = crate::backend::updater::get_local_datetime()? {
-        dbg!(&date_time);
         date_time
     } else {
         crate::backend::updater::update().await?;
@@ -205,14 +204,23 @@ async fn load_rules() -> Result<yara_x::Rules, Error> {
 fn scan(pointers: Pointers, path: PathBuf) -> Result<(), Error> {
     debug!("Scanning {}...", path.display());
     let mut scanner = yara_x::Scanner::new(&pointers.rules);
-    scanner.max_matches_per_pattern(pointers.config.max_matches);
+    scanner.max_matches_per_pattern(get_max_matches());
 
-    let results = scanner.scan_file(&path).map_err(Error::ScannerScan)?;
-    if results.matching_rules().len() > 0 {
-        dbg!(path);
-        for out in results.module_outputs() {
-            dbg!(out);
+    let results = match scanner.scan_file(&path) {
+        Ok(results) => results,
+        Err(err) => {
+            skip(
+                &pointers,
+                Skip {
+                    path: path.clone(),
+                    reason: err.to_string(),
+                },
+            )?;
+            Err(Error::ScannerScan(err))?
         }
+    };
+    if results.matching_rules().len() > get_min_matches() {
+        pointers.log.log(NotableFile::Flag(Flag { path, rules: Vec::new() }))?;
     }
     Ok(())
 }
@@ -223,6 +231,7 @@ fn skip(pointers: &Pointers, skip: Skip) -> Result<(), Error> {
         .noted_files
         .lock()
         .map_err(|err| Error::ScannerLock(err.to_string()))?
-        .push(NotableFile::Skip(skip));
+        .push(NotableFile::Skip(skip.clone()));
+    pointers.log.log(NotableFile::Skip(skip))?;
     Ok(())
 }
