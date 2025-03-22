@@ -2,7 +2,7 @@
 //#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use log::LevelFilter;
-use relm4::RelmApp;
+use relm4::{gtk::{prelude::ObjectExt, Settings}, RelmApp};
 use simplelog::TermLogger;
 
 mod arguments;
@@ -45,6 +45,11 @@ fn main() -> Result<(), Error> {
     }
 
     let app = RelmApp::new("raspirus.app");
+    if let Some(settings) = Settings::default() {
+        settings.connect_notify_local(Some("gtk-application-prefer-dark-them"), |_settings, _| {
+            println!("Dark mode changed");
+        });
+    }
     app.run::<frontend::main::model::AppModel>(0);
 
     Ok(())
