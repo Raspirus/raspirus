@@ -240,14 +240,13 @@ fn set_wd_exclusion(path: PathBuf) -> Result<(), Error> {
     info!("Adding windows defender exclusion...");
     let defender_script = r#"
             Start-Process powershell -ArgumentList '-NoProfile -ExecutionPolicy Bypass -Command "& {
-                Write-Host `"Running as Admin!`";
                 try {
                 # Get current preferences
                 $preferences = Get-MpPreference
 
                 # Check if the path is already excluded
                 if ($preferences.ExclusionPath -contains $Path) {
-                    Write-Host "The path '$Path' is already excluded."
+                    Write-Host `The path $Path is already excluded.`
                     return
                 }
 
@@ -255,11 +254,11 @@ fn set_wd_exclusion(path: PathBuf) -> Result<(), Error> {
                 $preferences.ExclusionPath += $Path
                 Set-MpPreference -ExclusionPath $preferences.ExclusionPath
 
-                Write-Host "Successfully added '$Path' to Windows Defender exclusions."
+                Write-Host `Successfully added $Path to Windows Defender exclusions.`
                 }
                 
                 catch {
-                    Write-Host "An error occurred while adding the exclusion: $_"
+                    Write-Host `An error occurred while adding the exclusion: $_`
                 }
 
             }"' -Verb RunAs
