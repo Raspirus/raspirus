@@ -245,22 +245,22 @@ fn set_wd_exclusion(path: PathBuf) -> Result<(), Error> {
                 $preferences = Get-MpPreference
 
                 # Check if the path is already excluded
-                if ($preferences.ExclusionPath -contains '$Path') {
+                if ($preferences.ExclusionPath -contains ''$Path'') {
                     return
                 }
 
                 # Add the new exclusion
-                $preferences.ExclusionPath += '$Path'
+                $preferences.ExclusionPath += ''$Path'''
                 Set-MpPreference -ExclusionPath $preferences.ExclusionPath
 
                 Write-Host Successfully added $Path to Windows Defender exclusions
+                
                 } catch {
                     Write-Host An error occurred while adding the exclusion: $_
                 }
 
-            }"' -Verb RunAs
-            "#
-    .replace("$Path", &path.display().to_string());
+            }"' -Verb RunAs"#
+        .replace("$Path", &path.display().to_string());
 
     let command_output = std::process::Command::new("powershell")
         .arg("-Command")
