@@ -25,7 +25,25 @@ fn main() -> Result<(), Error> {
         Err(Error::InvalidArgument(invalid))?
     }
 
-    if let Some(Argument::Help) = get_argument(&Argument::Help) {}
+    if let Some(Argument::Help) = get_argument(&Argument::Help) {
+        println!(
+            "
+The current raspirus cli interface is not yet stable and subject to change
+    --(h)elp\twill give you this information
+    --(n)ogui\twill run exclusively cli arguments
+    --(f)ullscreen\twill launch the app in fullscreen
+    --(u)pdate\twill attempt to update the local rules
+    --(d)ebug\twill print debug output
+    --(q)uiet\twill silence the log messages
+    --(s)can <path>\twill attempt to scan given path
+    --(j)son\twill format the scan output in json for parsing
+    --(t)hreads <number>\twill set the number of scan threads
+    --ma(x) <number>\twill set the number of maximum matches a file will produce
+    --m(i)n <number>\twill set the number of minimum matches a file must produce
+    --(r)emote <url>\twill set the remote mirror updates"
+        );
+        return Ok(());
+    }
 
     // capture log level or fall back to info
     let level_filter = std::env::var("RUST_LOG")
