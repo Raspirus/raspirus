@@ -25,6 +25,8 @@ fn main() -> Result<(), Error> {
         Err(Error::InvalidArgument(invalid))?
     }
 
+    if let Some(Argument::Help) = get_argument(&Argument::Help) {}
+
     // capture log level or fall back to info
     let level_filter = std::env::var("RUST_LOG")
         .unwrap_or(format!("{:?}", crate::globals::get_loglevel()))
