@@ -9,7 +9,7 @@ use log::{debug, info, trace, warn};
 
 use crate::globals::{get_max_matches, get_min_matches};
 
-use super::{config::Config, log::Log};
+use super::log::Log;
 
 type Error = crate::Error;
 
@@ -152,8 +152,6 @@ impl Pointers {
 
 /// Starts the scan with the current indexed files
 pub async fn start(root: PathBuf) -> Result<(), Error> {
-    let config = crate::globals::get_ro_config()?;
-
     info!("Indexing path...");
     let indexed = Index::new(root)?;
 
@@ -220,7 +218,10 @@ fn scan(pointers: Pointers, path: PathBuf) -> Result<(), Error> {
         }
     };
     if results.matching_rules().len() > get_min_matches() {
-        pointers.log.log(NotableFile::Flag(Flag { path, rules: Vec::new() }))?;
+        pointers.log.log(NotableFile::Flag(Flag {
+            path,
+            rules: Vec::new(),
+        }))?;
     }
     Ok(())
 }

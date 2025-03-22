@@ -119,14 +119,6 @@ impl Config {
         })
     }
 
-    /// Creates new config struct, populated with defaults values
-    pub fn new() -> Result<Self, Error> {
-        Ok(Config {
-            paths: Some(Paths::identify()?),
-            ..Config::default()
-        })
-    }
-
     /// Try to modify config with loaded values; This can also be used to populate the default
     /// config struct
     pub fn load(&mut self) -> Result<(), Error> {
