@@ -56,6 +56,6 @@ impl Log {
             .writer
             .lock()
             .map_err(|err| Error::LogLock(err.to_string()))?;
-        writeln!(writer, "{}", file).map_err(Error::LogIO)
+        writeln!(writer, "{}", file).map_err(Error::LogLog)
     }
 }

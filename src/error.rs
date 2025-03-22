@@ -3,15 +3,12 @@ use thiserror::Error;
 use crate::backend::config::Config;
 
 #[derive(Error, Debug)]
-#[allow(unused)]
+//#[allow(unused)]
 /// Custom error variant
 pub enum Error {
     /// Thrown when an invalid argument was supplied
     #[error("Invalid argument {0}; Try --help")]
     InvalidArgument(String),
-    /// Arbitrary error holding just a string
-    #[error("Unclassified error: {0}")]
-    Other(String),
 
     /// Holds all types of errors encountered when interacting with the filesystem via config
     #[error("Filesystem interaction failed: {0}")]

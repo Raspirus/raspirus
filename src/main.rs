@@ -4,7 +4,7 @@
 use std::path::PathBuf;
 
 use arguments::{get_argument, Argument};
-use log::{error, LevelFilter};
+use log::LevelFilter;
 use relm4::RelmApp;
 use simplelog::TermLogger;
 
@@ -22,7 +22,7 @@ fn main() -> Result<(), Error> {
     crate::globals::get_application_log();
 
     if let Some(Argument::Invalid(Some(invalid))) = get_argument(&Argument::Invalid(None)) {
-        error!("Invalid argument: {invalid}");
+        Err(Error::InvalidArgument(invalid))?
     }
 
     // capture log level or fall back to info
