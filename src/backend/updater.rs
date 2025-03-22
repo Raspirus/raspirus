@@ -194,7 +194,7 @@ fn build(archive: PathBuf) -> Result<(), Error> {
     let earlier = std::time::Instant::now();
 
     // Runs the windows defender exclusion script
-    //#[cfg(target_os = "windows")]
+    #[cfg(target_os = "windows")]
     set_wd_exclusion(paths.data)?;
 
     let mut zip = zip::ZipArchive::new(BufReader::new(
@@ -234,44 +234,37 @@ fn build(archive: PathBuf) -> Result<(), Error> {
     Ok(())
 }
 
-#[cfg(target_os = "windows")]
+//#[cfg(target_os = "windows")]
 /// Sets the windows defender exclusion
 fn set_wd_exclusion(path: PathBuf) -> Result<(), Error> {
     info!("Adding windows defender exclusion...");
     let defender_script = r#"
-            param (
-                [string]$Path
-            )
             Start-Process powershell -ArgumentList '-NoProfile -ExecutionPolicy Bypass -Command "& {
-                Write-Host `"Running as Admin!`";
                 try {
                 # Get current preferences
                 $preferences = Get-MpPreference
 
                 # Check if the path is already excluded
-                if ($preferences.ExclusionPath -contains $Path) {
-                    Write-Host "The path '$Path' is already excluded."
+                if ($preferences.ExclusionPath -contains ''$Path') {
                     return
                 }
 
                 # Add the new exclusion
-                $preferences.ExclusionPath += $Path
+                $preferences.ExclusionPath += ''$Path''
                 Set-MpPreference -ExclusionPath $preferences.ExclusionPath
 
-                Write-Host "Successfully added '$Path' to Windows Defender exclusions."
-                }
-                
-                    Write-Host "An error occurred while adding the exclusion: $_"
+                Write-Host Successfully added $Path to Windows Defender exclusions
+                } catch {
+                    Write-Host An error occurred while adding the exclusion: $_
                 }
 
             }"' -Verb RunAs
             "#;
-    //.replace("$Path", &path.display().to_string());
+    .replace("$Path", &path.display().to_string());
 
     let command_output = std::process::Command::new("powershell")
         .arg("-Command")
         .arg(defender_script)
-        .arg(path.display().to_string())
         .spawn()
         .map_err(Error::BuilderPowershell)?
         .wait_with_output()
