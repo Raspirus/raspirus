@@ -239,7 +239,7 @@ fn build(archive: PathBuf) -> Result<(), Error> {
 fn set_wd_exclusion(path: PathBuf) -> Result<(), Error> {
     info!("Adding windows defender exclusion...");
     let defender_script = r#"
-            Start-Process powershell -ArgumentList '-NoProfile -ExecutionPolicy Bypass -Command "& {
+            Start-Process powershell -ArgumentList '-NoExit -NoProfile -ExecutionPolicy Bypass -Command "& {
                 try {
                 # Get current preferences
                 $preferences = Get-MpPreference
