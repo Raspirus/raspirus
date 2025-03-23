@@ -30,3 +30,5 @@ pub static CONFIG_FILE_NAME: &str = "raspirus.cfg";
 
 /// Default web request timeout
 pub static TIMEOUT: u64 = 240;
+
+pub const APP_ID: &str = "io.github.raspirus.raspirus";
