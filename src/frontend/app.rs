@@ -1,13 +1,10 @@
-use relm4::{
-    actions::{RelmAction, RelmActionGroup},
-    gtk, main_application, Component, ComponentParts, ComponentSender, SimpleComponent,
-};
+use relm4::{gtk, main_application, Component, ComponentParts, ComponentSender, RelmWidgetExt, SimpleComponent};
 
 use gtk::prelude::{
-    ApplicationExt, ApplicationWindowExt, GtkWindowExt, OrientableExt, SettingsExt, WidgetExt,
+    ApplicationExt, GtkWindowExt, OrientableExt, WidgetExt,
 };
-use gtk::{gio, glib};
-use crate::globals::APP_ID;
+use gtk::glib;
+use relm4::gtk::prelude::{BoxExt, ButtonExt, PopoverExt};
 
 pub struct AppModel {}
 
@@ -15,10 +12,6 @@ pub struct AppModel {}
 pub enum AppMsg {
     Quit,
 }
-
-relm4::new_action_group!(pub(super) WindowActionGroup, "win");
-relm4::new_stateless_action!(PreferencesAction, WindowActionGroup, "preferences");
-relm4::new_stateless_action!(AboutAction, WindowActionGroup, "about");
 
 
 
@@ -33,15 +26,6 @@ impl SimpleComponent for AppModel {
     /// A data structure that contains the widgets that you will need to update.
     type Widgets = AppWidgets;
 
-    menu! {
-        primary_menu: {
-            section! {
-                "_Preferences" => PreferencesAction,
-                "_About" => AboutAction,
-            }
-        }
-    }
-
     view! {
         main_window = gtk::ApplicationWindow::new(&main_application()) {
             set_visible: true,
@@ -53,21 +37,45 @@ impl SimpleComponent for AppModel {
                 glib::Propagation::Stop
             },
             
-            
-            
             gtk::Box {
                 set_orientation: gtk::Orientation::Vertical,
-
-                gtk::HeaderBar {
-                    pack_end = &gtk::MenuButton {
-                        set_icon_name: "open-menu-symbolic",
-                        set_menu_model: Some(&primary_menu),
-                    }
+                set_vexpand: true,
+                set_margin_all: 5,
+                set_spacing: 5,
+                
+                gtk::Image {
+                    set_from_file: Some("src/assets/logo-vector.svg"),
+                    set_vexpand: true,
+                    set_margin_all: 20,
+                },
+                
+                gtk::Box {
+                    set_orientation: gtk::Orientation::Horizontal,
+                    set_spacing: 5,
+                    set_hexpand: true,
+                    set_halign: gtk::Align::Center,
+                    
+                    gtk::DropDown {
+                        set_hexpand: true
+                        // TODO: Add Items here
+                    },
+                    
+                    gtk::DropDown {
+                        set_hexpand: false,
+                        // TODO: Add items here
+                    },
+                },
+                
+                gtk::Button {
+                    set_label: "START",
+                    set_halign: gtk::Align::Center,
                 },
 
+
                 gtk::Label {
-                    set_label: "Hello world!",
-                    set_vexpand: true,
+                    set_label: "Conditions go here",
+                    set_halign: gtk::Align::Center,
+                    set_hexpand: true,
                 }
             }
         }
@@ -80,29 +88,28 @@ impl SimpleComponent for AppModel {
     ) -> ComponentParts<Self> {
         let model = Self {};
         let widgets = view_output!();
-        let mut actions = RelmActionGroup::<WindowActionGroup>::new();
-
-
-        /*
-                let shortcuts_action = {
-            let shortcuts = widgets.shortcuts.clone();
-            RelmAction::<ShortcutsAction>::new_stateless(move |_| {
-                shortcuts.present();
-            })
-        };
-
-        let about_action = {
-            RelmAction::<AboutAction>::new_stateless(move |_| {
-                AboutDialog::builder().launch(()).detach();
-            })
-        };
-
-        actions.add_action(shortcuts_action);
-        actions.add_action(about_action);
-         */
         
+        // HEADER - TITLEBAR - MENU
+        let menu = gtk::HeaderBar::builder().build();
+        let menu_btn = gtk::MenuButton::builder().build();
+        let menu_box = gtk::Box::builder().spacing(5).build();
+        let menu_popover = gtk::PopoverMenu::builder().build();
 
-        actions.register_for_widget(&widgets.main_window);
+
+        let settings_button = gtk::Button::with_label("Settings");
+        let info_button = gtk::Button::with_label("Info");
+        
+        menu_box.append(&settings_button);
+        menu_box.append(&info_button);
+        menu_box.set_orientation(gtk::Orientation::Vertical);
+        menu_popover.set_child(Some(&menu_box));
+        menu_btn.set_popover(Some(&menu_popover));
+        menu_btn.set_icon_name("open-menu-symbolic");
+        menu.pack_start(&menu_btn);
+        
+        window.set_titlebar(Some(&menu));
+
+
         widgets.load_window_size();
 
         ComponentParts { model, widgets }
@@ -112,6 +119,7 @@ impl SimpleComponent for AppModel {
     fn update(&mut self, message: Self::Input, _sender: relm4::ComponentSender<Self>) {
         match message {
             AppMsg::Quit => main_application().quit(),
+            _ => println!("Command not implemented yet"),
         }
     }
 
