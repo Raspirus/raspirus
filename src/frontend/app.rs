@@ -1,18 +1,22 @@
-use relm4::{gtk, main_application, Component, ComponentParts, ComponentSender, RelmWidgetExt, SimpleComponent};
+use relm4::{gtk, main_application, Component, ComponentController, ComponentParts, ComponentSender, RelmWidgetExt, SimpleComponent};
 
 use gtk::prelude::{
     ApplicationExt, GtkWindowExt, OrientableExt, WidgetExt,
 };
 use gtk::glib;
-use relm4::gtk::prelude::{BoxExt, ButtonExt, PopoverExt};
+use relm4::gtk::glib::clone;
+use relm4::gtk::prelude::{BoxExt, ButtonExt, GtkApplicationExt, PopoverExt};
+use crate::frontend::pages;
 
 pub struct AppModel {}
 
 #[derive(Debug)]
 pub enum AppMsg {
     Quit,
+    OpenSettingsPage,
+    OpenAboutPage,
+    StartScanner,
 }
-
 
 
 #[relm4::component(pub)]
@@ -69,6 +73,7 @@ impl SimpleComponent for AppModel {
                 gtk::Button {
                     set_label: "START",
                     set_halign: gtk::Align::Center,
+                    connect_clicked => AppMsg::StartScanner,
                 },
 
 
@@ -97,7 +102,21 @@ impl SimpleComponent for AppModel {
 
 
         let settings_button = gtk::Button::with_label("Settings");
+        settings_button.connect_clicked(clone!(
+            #[strong]
+            sender,
+            move |_| {
+                sender.input(AppMsg::OpenSettingsPage);
+            }
+        ));
         let info_button = gtk::Button::with_label("Info");
+        info_button.connect_clicked(clone!(
+            #[strong]
+            sender,
+            move |_| {
+                sender.input(AppMsg::OpenAboutPage);
+            }
+        ));
         
         menu_box.append(&settings_button);
         menu_box.append(&info_button);
@@ -116,10 +135,30 @@ impl SimpleComponent for AppModel {
 
     }
 
-    fn update(&mut self, message: Self::Input, _sender: relm4::ComponentSender<Self>) {
+    fn update(&mut self, message: Self::Input, _sender: ComponentSender<Self>) {
         match message {
             AppMsg::Quit => main_application().quit(),
-            _ => println!("Command not implemented yet"),
+            AppMsg::OpenAboutPage => {
+                let app = main_application();
+                let about_page = pages::about::AboutPage::builder();
+                
+                app.add_window(&about_page.root);
+                about_page.launch(()).detach_runtime();
+            },
+            AppMsg::OpenSettingsPage => {
+                let app = main_application();
+                let settings_page = pages::settings::SettingsPage::builder();
+
+                app.add_window(&settings_page.root);
+                settings_page.launch(()).detach_runtime();
+            },
+            AppMsg::StartScanner => {
+                let app = main_application();
+                let scanning_page = pages::scanning::ScanningPage::builder();
+
+                app.add_window(&scanning_page.root);
+                scanning_page.launch(()).detach_runtime();
+            }
         }
     }
 

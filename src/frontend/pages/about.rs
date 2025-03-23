@@ -13,7 +13,7 @@ impl SimpleComponent for AboutPage {
     type Output = ();
     type Init = ();
     type Widgets = AboutPageWidgets;
-    
+
     view! {
         gtk::Window {
             gtk::Label {
