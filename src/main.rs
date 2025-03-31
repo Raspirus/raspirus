@@ -4,36 +4,28 @@
 use backend::config::Config;
 use error::Error;
 use log::LevelFilter;
-use relm4::RelmApp;
+use gtk::prelude::ApplicationExt;
+use gtk::{gio, glib};
+use relm4::{
+    actions::{AccelsPlus, RelmAction, RelmActionGroup},
+    gtk, main_application, RelmApp,
+};
 use simplelog::TermLogger;
+use crate::frontend::app::AppModel;
+use crate::globals::APP_ID;
 
 mod backend;
 mod error;
 mod frontend;
 mod globals;
 
+relm4::new_action_group!(AppActionGroup, "app");
+relm4::new_stateless_action!(QuitAction, AppActionGroup, "quit");
+
 fn main() -> Result<(), Error> {
-    // init timestamp
-    {
-        crate::globals::get_application_log();
-    }
-
-    // init config
-    {
-        let config = crate::globals::get_config();
-        config.lock()?.load()?;
-    }
-
-    {
-        let config = crate::globals::get_config();
-        let timestamp = crate::globals::get_application_log();
-        dbg!(config.lock()?);
-        dbg!(timestamp);
-    }
-
-    //let time = chrono::NaiveDateTime::parse_from_str("2024-09-20T19:50:20Z", "%Y-%m-%dT%H:%M:%SZ");
-    //dbg!(time);
-    
+    // init global variables
+    crate::globals::get_config().lock()?.load()?;
+    crate::globals::get_application_log();
 
     // capture log level or fall back to info
     let level_filter = std::env::var("RUST_LOG")
@@ -48,13 +40,43 @@ fn main() -> Result<(), Error> {
         simplelog::TerminalMode::Mixed,
         simplelog::ColorChoice::Always,
     )
-    .map_err(Error::LogInitError)?;
+    .map_err(Error::LogInit)?;
+
+    /*
+    let rt = tokio::runtime::Builder::new_current_thread()
+        .enable_all()
+        .build()
+        .unwrap();
+
+    rt.block_on(crate::backend::updater::update())?;
+     */
 
     // let scanner = Scanner::new(PathBuf::from("/home/gamingguy003/Downloads/"))?;
     let mut config = Config::default();
     config.load()?;
 
-    let app = RelmApp::new("raspirus.app");
-    app.run::<frontend::main::model::AppModel>(0);
+    //crate::backend::scanner::start(PathBuf::from("/home/gamingguy003/.cache"))?;
+    
+    // GTK MAGIC
+    gtk::init().unwrap();
+    glib::set_application_name(&("RASPIRUS"));
+    gtk::Window::set_default_icon_name(APP_ID);
+    let app = main_application();
+
+    let mut actions = RelmActionGroup::<AppActionGroup>::new();
+
+    let quit_action = {
+        let app = app.clone();
+        RelmAction::<QuitAction>::new_stateless(move |_| {
+            app.quit();
+        })
+    };
+    actions.add_action(quit_action);
+    actions.register_for_main_application();
+
+    app.set_accelerators_for_action::<QuitAction>(&["<Control>q"]);
+
+    let app = RelmApp::from_app(app);
+    app.visible_on_activate(false).run::<AppModel>(());
     Ok(())
 }
