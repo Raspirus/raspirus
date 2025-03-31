@@ -2,7 +2,7 @@
 name = "raspirus"
 version = "3.2.1"
 description = "A simple yara-based virus-scanner"
-authors = ["Demetz Benjamin, Hell Björn Felix"]
+authors = ["Hell Björn Felix"]
 license-file = "LICENSE"
 readme = "README.md"
 repository = "https://github.com/Raspirus/raspirus"
