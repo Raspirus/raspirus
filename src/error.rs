@@ -1,7 +1,5 @@
 use thiserror::Error;
 
-use crate::backend::config::Config;
-
 #[derive(Error, Debug)]
 /// Custom error variant
 pub enum Error {
@@ -96,12 +94,24 @@ pub enum Error {
     /// Thrown when the rules cannot be deserialized
     #[error("Failed to deserialize rules: {0}")]
     ScannerRuleDeserialize(yara_x::errors::SerializationError),
+    /// Thrown when a file has been deleted between getting indexed and scanned
+    #[error("File to be scanned is no longer present: {0}")]
+    ScannerFileNotFound(std::path::PathBuf),
     /// Thrown when scanner fails to scan file
     #[error("Failed to scan file: {0}")]
     ScannerScan(yara_x::errors::ScanError),
+    /// Thrown when the metadata fetch for a file fails
+    #[error("Failed to get metadata for file: {0}")]
+    ScannerIOError(std::io::Error),
+    
+    /// Thrown when the watchdog fails
+    #[error("Watchdog failed to receive update: {0}")]
+    WatchdogRecv(std::sync::mpsc::RecvError),
+    #[error("Failed to send update to watchdog: {0}")]
+    WatchdogSend(String)
 }
 
-impl From<std::sync::PoisonError<std::sync::MutexGuard<'_, Config>>> for Error {
+impl From<std::sync::PoisonError<std::sync::MutexGuard<'_, crate::backend::config::Config>>> for Error {
     fn from(
         value: std::sync::PoisonError<std::sync::MutexGuard<crate::backend::config::Config>>,
     ) -> Self {

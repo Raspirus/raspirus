@@ -1,8 +1,9 @@
 use std::{
+    collections::VecDeque,
     fmt::Display,
     fs::File,
     path::{Path, PathBuf},
-    sync::{Arc, Mutex},
+    sync::{mpsc, Arc, Mutex},
 };
 
 use log::{debug, info, trace, warn};
@@ -137,15 +138,70 @@ struct Pointers {
     pub noted_files: Arc<Mutex<Vec<NotableFile>>>,
     pub total_size: Arc<usize>,
     pub rules: Arc<yara_x::Rules>,
+    pub channel: Arc<mpsc::Sender<Option<Processing>>>,
+}
+
+/// Holds a path to a file and what status it has now entered
+#[derive(Debug, Clone)]
+struct Processing {
+    pub path: PathBuf,
+    pub status: Status,
+}
+
+#[derive(Debug, Clone)]
+enum Status {
+    // if error is encountered while processing file
+    Error(Arc<Error>, Option<usize>),
+    // if file successfully completes scanning
+    Completed(usize),
+    // if file is now being processed
+    Started,
+}
+
+impl Processing {
+    pub fn start(path: &PathBuf) -> Self {
+        Self {
+            path: path.to_owned(),
+            status: Status::Started,
+        }
+    }
+
+    pub fn error(&mut self, error: Error, size: Option<usize>) {
+        self.status = Status::Error(Arc::new(error), size);
+    }
+
+    pub fn completed(&mut self, size: usize) {
+        self.status = Status::Completed(size)
+    }
+}
+
+impl Display for Status {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{}",
+            match &self {
+                Status::Error(error, _) => "[Err]",
+                Status::Completed(_) => "[OK]",
+                Status::Started => "[..]",
+            }
+        )
+    }
 }
 
 impl Pointers {
-    fn new(log: Log, total_size: usize, rules: yara_x::Rules) -> Self {
+    fn new(
+        log: Log,
+        total_size: usize,
+        rules: yara_x::Rules,
+        channel: mpsc::Sender<Option<Processing>>,
+    ) -> Self {
         Self {
             log: Arc::new(log),
             noted_files: Arc::new(Mutex::new(Vec::new())),
             total_size: Arc::new(total_size),
             rules: Arc::new(rules),
+            channel: Arc::new(channel),
         }
     }
 }
@@ -163,7 +219,11 @@ pub async fn start(root: PathBuf) -> Result<(), Error> {
 
     info!("Starting scan...");
     let mut threadpool = threadpool_rs::Threadpool::new(crate::globals::get_max_threads());
-    let pointers = Pointers::new(log, indexed.total_size, rules);
+    let (sender, receiver) = mpsc::channel();
+
+    let pointers = Pointers::new(log, indexed.total_size, rules, sender);
+    let watchdog_handle = std::thread::spawn(move || watchdog(receiver, indexed.total_size));
+
     for path in indexed.paths {
         let pointers_c = pointers.clone();
         threadpool.execute(move || {
@@ -171,6 +231,11 @@ pub async fn start(root: PathBuf) -> Result<(), Error> {
         });
     }
     threadpool.join();
+    pointers
+        .channel
+        .send(None)
+        .map_err(|err| Error::WatchdogSend(err.to_string()))?;
+    watchdog_handle.join().unwrap()?;
 
     Ok(())
 }
@@ -200,10 +265,31 @@ async fn load_rules() -> Result<yara_x::Rules, Error> {
 
 /// Attempts to scan a specific file
 fn scan(pointers: Pointers, path: PathBuf) -> Result<(), Error> {
+    trace!("Notifying watchdog of {} being started", path.display());
+    let mut processing = Processing::start(&path);
+    send_update(&pointers.channel, processing.clone())?;
+
     debug!("Scanning {}...", path.display());
     let mut scanner = yara_x::Scanner::new(&pointers.rules);
     scanner.max_matches_per_pattern(get_max_matches());
 
+    if !path.exists() {
+        processing.error(Error::ScannerFileNotFound(path.clone()), None);
+        send_update(&pointers.channel, processing.clone())?;
+        return Ok(());
+    }
+
+    let size = match path.metadata().map_err(Error::ScannerIOError) {
+        Ok(metadata) => metadata,
+        Err(err) => {
+            processing.error(err, None);
+            send_update(&pointers.channel, processing)?;
+            return Ok(());
+        }
+    }
+    .len() as usize;
+
+    // collect results from yara scanner
     let results = match scanner.scan_file(&path) {
         Ok(results) => results,
         Err(err) => {
@@ -214,15 +300,64 @@ fn scan(pointers: Pointers, path: PathBuf) -> Result<(), Error> {
                     reason: err.to_string(),
                 },
             )?;
-            Err(Error::ScannerScan(err))?
+            processing.error(Error::ScannerScan(err), Some(size));
+            send_update(&pointers.channel, processing)?;
+            return Ok(());
         }
     };
+
+    // check if rule count qualifies to be marked as notable file
     if results.matching_rules().len() > get_min_matches() {
         pointers.log.log(NotableFile::Flag(Flag {
             path,
             rules: Vec::new(),
         }))?;
     }
+
+    processing.completed(size);
+    send_update(&pointers.channel, processing)
+}
+
+fn send_update(
+    sender: &Arc<mpsc::Sender<Option<Processing>>>,
+    processing: Processing,
+) -> Result<(), Error> {
+    sender
+        .send(Some(processing))
+        .map_err(|err| Error::WatchdogSend(err.to_string()))
+}
+
+fn watchdog(receiver: mpsc::Receiver<Option<Processing>>, total_size: usize) -> Result<(), Error> {
+    let display_limit = crate::globals::get_max_threads();
+    let mut scanned_size = 0;
+    let mut running = VecDeque::new();
+    let mut completed = VecDeque::new();
+    while let Some(processing) = receiver.recv().map_err(Error::WatchdogRecv)? {
+        match processing.status {
+            Status::Completed(size) | Status::Error(_, Some(size)) => {
+                // move from running to completed
+                running.retain(|(path, _)| *path != processing.path);
+                completed.push_back((processing.path, processing.status));
+                // trim completed list to have proper length
+                (completed.len() > display_limit).then(|| completed.pop_front());
+                scanned_size += size
+            }
+            Status::Started | Status::Error(_, None) => {
+                running.push_back((processing.path, processing.status))
+            }
+        }
+
+        // print current queue
+        print!("{esc}[2J{esc}[1;1H", esc = 27 as char);
+        println!("{:.2}%", (scanned_size as f64 / total_size as f64) * 100.0);
+        let mut merged = Vec::new();
+        merged.extend(&completed);
+        merged.extend(&running);
+        merged
+            .iter()
+            .for_each(|elem| println!("{} {}", elem.1, elem.0.display()));
+    }
+    debug!("Stopping watchdog");
     Ok(())
 }
 
