@@ -136,7 +136,6 @@ impl Index {
 struct Pointers {
     pub log: Arc<Log>,
     pub noted_files: Arc<Mutex<Vec<NotableFile>>>,
-    pub total_size: Arc<usize>,
     pub rules: Arc<yara_x::Rules>,
     pub channel: Arc<mpsc::Sender<Option<Processing>>>,
 }
@@ -192,14 +191,12 @@ impl Display for Status {
 impl Pointers {
     fn new(
         log: Log,
-        total_size: usize,
         rules: yara_x::Rules,
         channel: mpsc::Sender<Option<Processing>>,
     ) -> Self {
         Self {
             log: Arc::new(log),
             noted_files: Arc::new(Mutex::new(Vec::new())),
-            total_size: Arc::new(total_size),
             rules: Arc::new(rules),
             channel: Arc::new(channel),
         }
@@ -221,7 +218,7 @@ pub async fn start(root: PathBuf) -> Result<(), Error> {
     let mut threadpool = threadpool_rs::Threadpool::new(crate::globals::get_max_threads());
     let (sender, receiver) = mpsc::channel();
 
-    let pointers = Pointers::new(log, indexed.total_size, rules, sender);
+    let pointers = Pointers::new(log, rules, sender);
     let watchdog_handle = std::thread::spawn(move || watchdog(receiver, indexed.total_size));
 
     for path in indexed.paths {
