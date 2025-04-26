@@ -12,6 +12,22 @@
 
 <!-- https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax#alerts -->
 
+## Disclaimer
+
+This branch is currently under development and thus subject to heavy change. Expect nothing to be final. If bugs are found, please still report them as solving them before stabilizing this branch will be beneficial.
+Progress currently:
+- [ ] Rewrite frontend
+    - [ ] Transfer current architecture to gtk
+    - [ ] Implement beta layout
+    - [ ] Stabilize
+- [~] Rewrite backend
+    - [x] Rewrite downloader
+    - [x] Rewrite config handling
+    - [~] Rewrite scanner
+    - [ ] Add CLI functionality
+
+
+
 ## Introduction
 
 **Raspirus: Empowering Your Malware Protection**
