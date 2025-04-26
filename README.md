@@ -12,6 +12,9 @@
 
 <!-- https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax#alerts -->
 
+> [!IMPORTANT]
+> The project is currently facing a major front- and backend rewrite which takes place in the [experimental branch](https://github.com/Raspirus/raspirus/tree/experimental/gtk-backend). Please do not report issues on the main branch, as they will remain until the experimental branch reaches maturity and replaces main.
+
 ## Introduction
 
 **Raspirus: Empowering Your Malware Protection**
