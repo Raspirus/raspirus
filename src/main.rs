@@ -75,7 +75,7 @@ The current raspirus cli interface is not yet stable and subject to change
     }
 
     if let Some(Argument::Scan(Some(path))) = get_argument(&Argument::Scan(None)) {
-        rt.block_on(crate::backend::scanner::start(PathBuf::from(path)))?
+        rt.block_on(crate::backend::scanner::scanner::start(PathBuf::from(path)))?
     }
 
     if get_argument(&Argument::NoGUI).is_none() {

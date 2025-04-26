@@ -1,207 +1,21 @@
 use std::{
     collections::VecDeque,
-    fmt::Display,
     fs::File,
-    path::{Path, PathBuf},
-    sync::{mpsc, Arc, Mutex},
+    path::PathBuf,
+    sync::{mpsc, Arc},
 };
 
 use log::{debug, info, trace, warn};
 
 use crate::globals::{get_max_matches, get_min_matches};
 
-use super::log::Log;
+use super::{
+    index::Index,
+    log::Log,
+    structs::{Flag, NotableFile, Pointers, Processing, Skip, Status},
+};
 
 type Error = crate::Error;
-
-#[derive(Clone)]
-pub enum NotableFile {
-    Skip(Skip),
-    Flag(Flag),
-}
-
-/// Holds a flagged files path and the rules, which flagged it
-#[derive(Clone)]
-pub struct Flag {
-    pub path: PathBuf,
-    pub rules: Vec<String>,
-}
-
-/// Holds a skipped files path and the reason for it to be skipped
-#[derive(Clone)]
-pub struct Skip {
-    pub path: PathBuf,
-    pub reason: String,
-}
-
-impl Display for NotableFile {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            NotableFile::Skip(skip) => {
-                write!(f, "[skipped]\t{}\t{}", skip.path.display(), skip.reason)
-            }
-            NotableFile::Flag(flag) => write!(
-                f,
-                "[flagged]\t{}\t{}",
-                flag.path.display(),
-                flag.rules.join("\t")
-            ),
-        }
-    }
-}
-
-/// Holds all the paths of files, which are contained in a root path
-#[derive(Default)]
-struct Index {
-    /// All paths indexes
-    pub paths: Vec<PathBuf>,
-    /// Total size in bytes
-    pub total_size: usize,
-}
-
-impl Index {
-    /// Creates a new struct which contains every child file of root
-    fn new(root: PathBuf) -> Result<Self, Error> {
-        let mut indexed = Self::default();
-        if root.is_dir() {
-            indexed.index_folder(&root)?;
-        }
-
-        if root.is_file() {
-            indexed.index_file(&root)?;
-        }
-
-        Ok(indexed)
-    }
-
-    /// Tries to add a file path to the path list
-    fn index_file(&mut self, root: &Path) -> Result<(), Error> {
-        // checks if file exists
-        if !root.exists() {
-            Err(Error::IndexFileNotFound(root.display().to_string()))?
-        }
-
-        // checks if permissions suffice, and if file is is_symlink
-        let metadata = root.metadata().map_err(|error| Error::IndexPermission {
-            path: root.display().to_string(),
-            error,
-        })?;
-
-        if metadata.is_symlink() {
-            Err(Error::IndexSymlink(root.display().to_string()))?
-        }
-
-        self.total_size += metadata.len() as usize;
-        self.paths.push(root.to_path_buf());
-        Ok(())
-    }
-
-    /// Tries to add all of a folders subfolders / files to the list of paths
-    fn index_folder(&mut self, root: &Path) -> Result<(), Error> {
-        // go through all children of a folder
-        for entry in
-            std::fs::read_dir(root).map_err(|_| Error::IndexEntries(root.display().to_string()))?
-        {
-            // if we can fetch entry, save its path, otherwise log and skip
-            let root = match entry {
-                Ok(entry) => entry,
-                Err(err) => {
-                    warn!("Failed to get entry: {err:?}; Skipping...");
-                    continue;
-                }
-            }
-            .path();
-
-            // if entry is file, index it, otherwise index it as folder, or, if neither applies,
-            // skip
-            if root.is_file() {
-                match self.index_file(&root) {
-                    Ok(_) => trace!("Indexed {}", root.display()),
-                    Err(err) => warn!("{err}; Skipping..."),
-                }
-            } else if !root.is_symlink() {
-                match self.index_folder(&root) {
-                    Ok(_) => trace!("Indexed {}", root.display()),
-                    Err(err) => warn!("{err}; Skipping..."),
-                }
-            } else {
-                warn!("{} is a symlink; Skipping...", root.display());
-            }
-        }
-        Ok(())
-    }
-}
-
-#[derive(Clone)]
-struct Pointers {
-    pub log: Arc<Log>,
-    pub noted_files: Arc<Mutex<Vec<NotableFile>>>,
-    pub rules: Arc<yara_x::Rules>,
-    pub channel: Arc<mpsc::Sender<Option<Processing>>>,
-}
-
-/// Holds a path to a file and what status it has now entered
-#[derive(Debug, Clone)]
-struct Processing {
-    pub path: PathBuf,
-    pub status: Status,
-}
-
-#[derive(Debug, Clone)]
-enum Status {
-    // if error is encountered while processing file
-    Error(Arc<Error>, Option<usize>),
-    // if file successfully completes scanning
-    Completed(usize),
-    // if file is now being processed
-    Started,
-}
-
-impl Processing {
-    pub fn start(path: &PathBuf) -> Self {
-        Self {
-            path: path.to_owned(),
-            status: Status::Started,
-        }
-    }
-
-    pub fn error(&mut self, error: Error, size: Option<usize>) {
-        self.status = Status::Error(Arc::new(error), size);
-    }
-
-    pub fn completed(&mut self, size: usize) {
-        self.status = Status::Completed(size)
-    }
-}
-
-impl Display for Status {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(
-            f,
-            "{}",
-            match &self {
-                Status::Error(error, _) => "[Err]",
-                Status::Completed(_) => "[OK]",
-                Status::Started => "[..]",
-            }
-        )
-    }
-}
-
-impl Pointers {
-    fn new(
-        log: Log,
-        rules: yara_x::Rules,
-        channel: mpsc::Sender<Option<Processing>>,
-    ) -> Self {
-        Self {
-            log: Arc::new(log),
-            noted_files: Arc::new(Mutex::new(Vec::new())),
-            rules: Arc::new(rules),
-            channel: Arc::new(channel),
-        }
-    }
-}
 
 /// Starts the scan with the current indexed files
 pub async fn start(root: PathBuf) -> Result<(), Error> {

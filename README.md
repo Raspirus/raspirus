@@ -23,6 +23,7 @@ Progress currently:
 - [ ] Rewrite backend (In Progress)
     - [x] Rewrite downloader
     - [x] Rewrite config handling
+    - [ ] Add new logging infrastructure (In Progress)
     - [ ] Rewrite scanner (In Progress)
     - [ ] Add CLI functionality (In Progress)
 

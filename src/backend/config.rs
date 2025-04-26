@@ -1,6 +1,5 @@
 use std::{fs, path::PathBuf};
 
-use super::log::LogLevel;
 use directories_next::ProjectDirs;
 use log::{info, warn};
 use serde::{Deserialize, Serialize};
@@ -108,6 +107,15 @@ impl Paths {
             temp,
         })
     }
+}
+
+/// Defines which loglevel we are running in
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub enum LogLevel {
+    Off,
+    Info,
+    Debug,
+    Trace,
 }
 
 impl Config {

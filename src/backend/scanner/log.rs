@@ -1,4 +1,3 @@
-use serde::{Deserialize, Serialize};
 use std::{
     fs::{self, OpenOptions},
     io::{BufWriter, Write},
@@ -6,17 +5,9 @@ use std::{
     sync::{Arc, Mutex},
 };
 
-use super::scanner::NotableFile;
+use super::structs::NotableFile;
 
 type Error = crate::Error;
-
-#[derive(Debug, Clone, Deserialize, Serialize)]
-pub enum LogLevel {
-    Off,
-    Info,
-    Debug,
-    Trace,
-}
 
 /// A helper used for logging file scan results to a logfile
 pub struct Log {

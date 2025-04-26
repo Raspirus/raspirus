@@ -2,7 +2,7 @@ use std::sync::{Arc, Mutex, OnceLock};
 
 use crate::{
     arguments::{get_argument, Argument},
-    backend::{config::Config, log::LogLevel},
+    backend::config::{Config, LogLevel},
     Error,
 };
 
@@ -89,9 +89,10 @@ pub fn get_loglevel() -> LogLevel {
 
 /// Fetch remote url for udpates from CLI > Config
 pub fn get_remote_url() -> String {
-    REMOTE_URL.get_or_init(|| match get_argument(&Argument::Remote(None)) {
-        Some(Argument::Remote(Some(remote_url))) => remote_url,
-        Some(_) | None => get_ro_config().unwrap_or_default().remote_url
-    })
-    .to_string()
+    REMOTE_URL
+        .get_or_init(|| match get_argument(&Argument::Remote(None)) {
+            Some(Argument::Remote(Some(remote_url))) => remote_url,
+            Some(_) | None => get_ro_config().unwrap_or_default().remote_url,
+        })
+        .to_string()
 }
