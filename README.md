@@ -20,12 +20,17 @@ Progress currently:
     - [ ] Transfer current architecture to gtk
     - [ ] Implement beta layout
     - [ ] Stabilize
-- [~] Rewrite backend
+- [ ] Rewrite backend (In Progress)
     - [x] Rewrite downloader
     - [x] Rewrite config handling
-    - [~] Rewrite scanner
+    - [ ] Rewrite scanner (In Progress)
     - [ ] Add CLI functionality
 
+Plans for this update include:
+- Functional and useful cli only mode for headless users
+- Stable gtk based frontend to avoid issues on non standard systems
+- More reliable and faster backend functionality
+- Better code organization
 
 
 ## Introduction
