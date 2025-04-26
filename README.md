@@ -24,7 +24,7 @@ Progress currently:
     - [x] Rewrite downloader
     - [x] Rewrite config handling
     - [ ] Rewrite scanner (In Progress)
-    - [ ] Add CLI functionality
+    - [ ] Add CLI functionality (In Progress)
 
 Plans for this update include:
 - Functional and useful cli only mode for headless users
