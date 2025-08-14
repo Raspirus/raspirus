@@ -111,11 +111,11 @@ pub enum Error {
     WatchdogSend(String),
 }
 
-impl From<std::sync::PoisonError<std::sync::MutexGuard<'_, crate::config::config::Config>>>
+impl From<std::sync::PoisonError<std::sync::MutexGuard<'_, crate::Config>>>
     for Error
 {
     fn from(
-        value: std::sync::PoisonError<std::sync::MutexGuard<crate::config::config::Config>>,
+        value: std::sync::PoisonError<std::sync::MutexGuard<crate::Config>>,
     ) -> Self {
         Self::ConfigLock(value.to_string())
     }
