@@ -1,5 +1,4 @@
 .idea/
 target/
-Cargo.lock
 *.appx
 *DesktopAppInstaller_Dependencies
