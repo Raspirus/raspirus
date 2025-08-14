@@ -9,7 +9,7 @@ use serde::Deserialize;
 
 use crate::globals::{get_remote_url, get_ro_config};
 
-type Error = crate::error::Error;
+type Error = crate::Error;
 
 #[derive(Deserialize)]
 struct Release {

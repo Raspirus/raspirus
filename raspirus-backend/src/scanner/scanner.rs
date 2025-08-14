@@ -16,7 +16,7 @@ use super::{
     structs::{Flag, NotableFile, Pointers, Processing, Skip, Status},
 };
 
-type Error = crate::error::Error;
+type Error = crate::Error;
 
 /// Starts the scan with the current indexed files
 pub async fn start(root: PathBuf) -> Result<(), Error> {

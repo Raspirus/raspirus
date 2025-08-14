@@ -2,7 +2,7 @@ use std::path::{Path, PathBuf};
 
 use log::{trace, warn};
 
-type Error = crate::error::Error;
+type Error = crate::Error;
 
 /// Holds all the paths of files, which are contained in a root path
 #[derive(Default)]
