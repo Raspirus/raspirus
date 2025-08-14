@@ -1,5 +1,11 @@
+/// All config related functionality
+pub use crate::config::config::{Config, LogLevel};
+/// The crate unified error
+pub use crate::error::Error;
+
+/// Arguments
 pub mod arguments;
-pub mod config;
-pub mod error;
+mod config;
+mod error;
 pub mod globals;
 pub mod scanner;

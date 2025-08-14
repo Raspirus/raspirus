@@ -5,8 +5,8 @@
 
 # :rocket: Raspirus
 <div align="center">
-  <img src="https://raw.githubusercontent.com/Raspirus/media/refs/heads/main/logo/logo-final.svg" alt="Logo" style="width: 45%; max-width: 400px; vertical-align: middle; margin-right: 5%;">
-  <img src="https://raw.githubusercontent.com/Raspirus/media/refs/heads/main/logo/usb-final.svg" alt="USB" style="width: 45%; max-width: 400px; vertical-align: middle;">
+  <img src="https://raw.githubusercontent.com/raspirus/media/refs/heads/main/logo/logo-final.svg" alt="Logo" style="width: 45%; max-width: 400px; vertical-align: middle; margin-right: 5%;">
+  <img src="https://raw.githubusercontent.com/raspirus/media/refs/heads/main/logo/usb-final.svg" alt="USB" style="width: 45%; max-width: 400px; vertical-align: middle;">
 </div>
 
 
@@ -15,17 +15,7 @@
 ## Disclaimer
 
 This branch is currently under development and thus subject to heavy change. Expect nothing to be final. If bugs are found, please still report them as solving them before stabilizing this branch will be beneficial.
-Progress currently:
-- [ ] Rewrite frontend
-    - [ ] Transfer current architecture to gtk
-    - [ ] Implement beta layout
-    - [ ] Stabilize
-- [ ] Rewrite backend (In Progress)
-    - [x] Rewrite downloader
-    - [x] Rewrite config handling
-    - [ ] Add new logging infrastructure (In Progress)
-    - [ ] Rewrite scanner (In Progress)
-    - [ ] Add CLI functionality (In Progress)
+Progress can be inspected here: [Release Roadmap](https://github.com/orgs/Raspirus/projects/7)
 
 Plans for this update include:
 - Functional and useful cli only mode for headless users
@@ -40,11 +30,11 @@ Plans for this update include:
 
 Welcome to Raspirus, your lightweight rules-based malware scanner. Originally designed to scan attached USB drives using a Raspberry Pi, Raspirus has evolved into a versatile tool capable of scanning local files and folders as well. Some of its standout features include:
 
-- ~~**Comprehensive File Scans:** Raspirus can efficiently scan compressed files, ensuring no threat goes undetected~~ (Currently unsupported)
+- ~~**Comprehensive File Scans:** Raspirus can efficiently scan compressed files, ensuring no threat goes undetected~~ (Currently WIP)
 - **Privacy Prioritized:** Offering a privacy-friendly option, Raspirus keeps your personal information secure by simply not touching it
 - **Cross-Platform Convenience:** Enjoy the benefits of Raspirus protection on a variety of operating systems, or compile it yourself on many more
-- **Swift and Dependable:** Count on Raspirus for fast and reliable malware detection
-- **Simple to use UI:** Raspirus boasts a simple to use and easy to understand UI, making usage easy (Also currently unsupported)
+- **Swift and Dependable:** Count on Raspirus for fast and malware detection
+- **Simple to use UI:** Raspirus boasts a simple to use and easy to understand UI, making usage easy (Also currently WIP)
 
 ## Getting Started
 

@@ -2,13 +2,13 @@ use std::sync::{Arc, Mutex, OnceLock};
 
 use crate::{
     arguments::{get_argument, Argument},
-    config::{Config, LogLevel},
+    config::config::{Config, LogLevel},
     error::Error,
 };
 
 /// Application startup time used for logging. Can be fetched via get_application_log
 static APPLICATION_LOG: OnceLock<String> = OnceLock::new();
-pub fn get_application_log() -> String {
+pub fn get_application_log_filename() -> String {
     APPLICATION_LOG
         .get_or_init(|| chrono::Utc::now().format("%Y-%m-%dT%H:%M:%SZ").to_string())
         .to_string()
@@ -31,10 +31,10 @@ pub fn get_ro_config() -> Result<Config, Error> {
 
 // A bunch of default values
 pub static DEFAULT_REMOTE_URL: &str =
-    "https://api.github.com/repos/Raspirus/yara-rules/releases/latest";
+    "https://api.github.com/repos/raspirus/yara-rules/releases/latest";
 pub static DEFAULT_LOG_LEVEL: LogLevel = LogLevel::Debug;
 pub static DEFAULT_LANGUAGE: &str = "en_US";
-pub static CONFIG_VERSION: usize = 0;
+pub static CONFIG_VERSION: usize = 7;
 pub static CONFIG_FILE_NAME: &str = "raspirus.cfg";
 
 /// Default web request timeout
@@ -51,7 +51,7 @@ static REMOTE_URL: OnceLock<String> = OnceLock::new();
 pub fn get_min_matches() -> usize {
     *MIN_MATCHES.get_or_init(|| match get_argument(&Argument::MinMatches(None)) {
         Some(Argument::MinMatches(Some(min_matches))) => min_matches,
-        Some(_) | None => get_ro_config().unwrap_or_default().min_matches,
+        Some(_) | None => get_ro_config().unwrap_or_default().scanner.min_matches,
     })
 }
 
@@ -59,7 +59,7 @@ pub fn get_min_matches() -> usize {
 pub fn get_max_matches() -> usize {
     *MAX_MATCHES.get_or_init(|| match get_argument(&Argument::MaxMatches(None)) {
         Some(Argument::MaxMatches(Some(max_matches))) => max_matches,
-        Some(_) | None => get_ro_config().unwrap_or_default().max_matches,
+        Some(_) | None => get_ro_config().unwrap_or_default().scanner.max_matches,
     })
 }
 
@@ -67,7 +67,7 @@ pub fn get_max_matches() -> usize {
 pub fn get_max_threads() -> usize {
     *MAX_THREADS.get_or_init(|| match get_argument(&Argument::Threads(None)) {
         Some(Argument::Threads(Some(max_threads))) => max_threads,
-        Some(_) | None => get_ro_config().unwrap_or_default().max_threads,
+        Some(_) | None => get_ro_config().unwrap_or_default().scanner.max_threads,
     })
 }
 

@@ -4,23 +4,29 @@ use directories_next::ProjectDirs;
 use log::{info, warn};
 use serde::{Deserialize, Serialize};
 
-type Error = crate::error::Error;
+type Error = crate::Error;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(default)]
-/// Holds the config values for the application
-pub struct Config {
-    /// Holds the config version. If there is a mismatch, the config will be reset to default
-    pub config_version: usize,
-    /// Remote mirror with git api structure for fetching yara rules
-    pub remote_url: String,
+/// Holds the scan specific settings
+pub struct Scanner {
     /// Minimum matches for a file to get flagged
     pub min_matches: usize,
     /// Maximum matches after which a file stops gaining additional flags. 0 to disable
     pub max_matches: usize,
     /// Threads used for parallel scanning
     pub max_threads: usize,
-    /// Loglevel used for logging
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(default)]
+/// Holds the config values for the application
+pub struct Config {
+    pub config_version: usize,
+    pub scanner: Scanner,
+    /// Holds the config version. If there is a mismatch, the config will be reset to default
+    /// Remote mirror with git api structure for fetching yara rules
+    pub remote_url: String,
+    /// Loglevel used for logging application events
     pub logging: LogLevel,
     /// Language used to display text
     pub language: String,
@@ -35,9 +41,11 @@ impl Default for Config {
         Self {
             config_version: crate::globals::CONFIG_VERSION,
             remote_url: crate::globals::DEFAULT_REMOTE_URL.to_owned(),
-            min_matches: 1,
-            max_matches: 0,
-            max_threads: num_cpus::get(),
+            scanner: Scanner {
+                min_matches: 1,
+                max_matches: 0,
+                max_threads: num_cpus::get(),
+            },
             logging: crate::globals::DEFAULT_LOG_LEVEL.clone(),
             language: crate::globals::DEFAULT_LANGUAGE.to_owned(),
             paths: None,
@@ -48,25 +56,29 @@ impl Default for Config {
 #[derive(Debug, Clone)]
 /// Holds paths necessary for application execution
 pub struct Paths {
-    /// %appdata%\Roaming under windows || ~/.local/share under linux
+    /// %appdata%\Roaming\Raspirus under windows || ~/.local/share/raspirus under linux
     pub data: PathBuf,
-    /// %appdata%\Local under windows || ~/.cache under linux
+    /// %appdata%\Local\Raspirus under windows || ~/.cache/raspirus under linux
     pub temp: PathBuf,
-    /// %appdata%\Roaming under windows || ~/.config under linux
+    /// %appdata%\Roaming/Raspirus under windows || ~/.config/raspirus under linux
     pub config: PathBuf,
+    /// %appdata%\Roaming\Raspirus\logs\scan under windows || ~/.local/share/raspirus/logs/scan under linux
     pub logs_scan: PathBuf,
+    /// %appdata%\Roaming\Raspirus\logs\app under windows || ~/.local/share/raspirus/logs/app under linux
     pub logs_app: PathBuf,
 }
 
 impl Paths {
     /// Creates a new instance of Paths
     pub fn identify() -> Result<Self, Error> {
+        // Linux data paths
         #[cfg(not(target_os = "windows"))]
         let dirs = ProjectDirs::from("org", "raspirus", "raspirus")
             .ok_or("Failed to get projectdir".to_owned())
             .map_err(|err| {
                 Error::ConfigIO(std::io::Error::new(std::io::ErrorKind::NotFound, err))
             })?;
+        // Windows data paths
         #[cfg(target_os = "windows")]
         let dirs = ProjectDirs::from("org", "raspirus", "")
             .ok_or("Failed to get projectdir".to_owned())
@@ -77,11 +89,12 @@ impl Paths {
         // data folders
         let data = dirs.data_dir().to_owned();
         let logs = data.to_owned().join("logs");
-        let temp = dirs.cache_dir().to_path_buf();
-
-        // log folders
+        // log folders under data/logs
         let logs_scan = logs.join("scan");
         let mut logs_app = logs.join("application");
+
+        // temporary folder
+        let temp = dirs.cache_dir().to_path_buf();
 
         // config folder location
         let config = dirs.config_dir().to_owned();
@@ -97,7 +110,7 @@ impl Paths {
         fs::create_dir_all(&config).map_err(Error::ConfigIO)?;
 
         // add launch timestamp to app log path
-        logs_app = logs_app.join(crate::globals::get_application_log());
+        logs_app = logs_app.join(crate::globals::get_application_log_filename());
 
         Ok(Paths {
             data,
@@ -171,9 +184,9 @@ impl Config {
         }
 
         self.config_version = config.config_version;
-        self.min_matches = config.min_matches;
-        self.max_matches = config.max_matches;
-        self.max_threads = config.max_threads;
+        self.scanner.min_matches = config.scanner.min_matches;
+        self.scanner.max_matches = config.scanner.max_matches;
+        self.scanner.max_threads = config.scanner.max_threads;
         self.logging = config.logging;
         self.language = config.language;
         self.paths = config.paths;
