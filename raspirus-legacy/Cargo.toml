@@ -1,0 +1,68 @@
+[package]
+name = "raspirus"
+version = "3.2.1"
+description = "A simple yara-based virus-scanner"
+authors = ["Demetz Benjamin, Hell Björn Felix"]
+license-file = "LICENSE"
+readme = "README.md"
+repository = "https://github.com/Raspirus/raspirus"
+homepage = "https://raspirus.deno.dev"
+default-run = "raspirus"
+edition = "2021"
+rust-version = "1.81"
+
+# generic dependencies
+[dependencies]
+threadpool_rs = { git = "https://github.com/GamingGuy003/threadpool_rs.git", features = [
+    "log", 
+] }
+log = "0.4.25"
+reqwest = { version = "0.12.12", features = ["blocking", "json"] }
+chrono = "0.4.39"
+directories-next = "2.0.0"
+simplelog = "0.12.2"
+yara-x = "0.13.0"
+num_cpus = "1.16.0"
+sha2 = "0.10.8"
+hex = "0.4.3"
+serde = { version = "1.0.217", features = ["derive"] }
+serde_json = "1.0.137"
+futures = "0.3.31"
+open = "5.3.2"
+printpdf = { version = "0.7.0", features = ["svg"] }
+zip = "2.2.2"
+tokio = "1.43.0"
+rust-i18n = { version = "3.1.2", features = ["log-miss-tr"] }
+rfd = "0.15.2"
+relm4 = "0.9.1"
+relm4-components = "0.9.1"
+thiserror = "2.0.12"
+
+# usb detection on linux
+[target.'cfg(any(target_os = "linux", target_os = "macos"))'.dependencies]
+lfs-core = "0.12.0"
+
+# windows dependencies
+[target.'cfg(target_os = "windows")'.dependencies]
+windows-sys = { version = "0.59.0", features = [
+    "Win32_Foundation",
+    "Win32_System_Console",
+] }
+winapi = "0.3.9"
+
+[profile.release]
+opt-level = 3     # Focus on performance
+lto = false
+codegen-units = 1
+strip = true      # Removed debugging symbols
+#panic = "abort" # Removes exception tree
+
+[package.metadata.packager]
+product-name = "Raspirus"
+identifier = "io.github.raspirus.raspirus"
+category = "Utility"
+homepage = "https://raspirus.deno.dev"
+icons = ["src/assets/logo.png"]
+licenseFile = "LICENSE"
+formats = ["all"]
+before-packaging-command = "cargo build --release --no-default-features"
