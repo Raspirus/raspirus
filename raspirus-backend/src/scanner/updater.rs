@@ -9,7 +9,7 @@ use serde::Deserialize;
 
 use crate::globals::{get_remote_url, get_ro_config};
 
-type Error = crate::Error;
+type Error = crate::error::Error;
 
 #[derive(Deserialize)]
 struct Release {
@@ -186,7 +186,11 @@ fn build(archive: PathBuf) -> Result<(), Error> {
     output_filename.set_extension("yarac");
 
     // create path in data/published_at
-    let target_path = get_ro_config()?.get_paths()?.data.join("yara_c").join(&output_filename);
+    let target_path = get_ro_config()?
+        .get_paths()?
+        .data
+        .join("yara_c")
+        .join(&output_filename);
 
     let earlier = std::time::Instant::now();
 
@@ -251,7 +255,7 @@ fn set_wd_exclusion(path: PathBuf) -> Result<(), Error> {
                 Set-MpPreference -ExclusionPath $preferences.ExclusionPath
 
                 Write-Host Successfully added $Path to Windows Defender exclusions
-                
+
                 } catch {
                     Write-Host An error occurred while adding the exclusion: $_
                 }

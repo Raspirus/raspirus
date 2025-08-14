@@ -2,8 +2,8 @@ use std::sync::{Arc, Mutex, OnceLock};
 
 use crate::{
     arguments::{get_argument, Argument},
-    backend::config::{Config, LogLevel},
-    Error,
+    config::{Config, LogLevel},
+    error::Error,
 };
 
 /// Application startup time used for logging. Can be fetched via get_application_log

@@ -7,7 +7,7 @@ use std::{
 
 use super::structs::NotableFile;
 
-type Error = crate::Error;
+type Error = crate::error::Error;
 
 /// A helper used for logging file scan results to a logfile
 pub struct Log {

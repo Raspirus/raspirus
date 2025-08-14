@@ -5,6 +5,7 @@ use std::{
     sync::{mpsc, Arc},
 };
 
+use crate::scanner::updater;
 use log::{debug, info, trace, warn};
 
 use crate::globals::{get_max_matches, get_min_matches};
@@ -15,7 +16,7 @@ use super::{
     structs::{Flag, NotableFile, Pointers, Processing, Skip, Status},
 };
 
-type Error = crate::Error;
+type Error = crate::error::Error;
 
 /// Starts the scan with the current indexed files
 pub async fn start(root: PathBuf) -> Result<(), Error> {
@@ -53,11 +54,11 @@ pub async fn start(root: PathBuf) -> Result<(), Error> {
 
 /// Loads the latest rules, or tries to update
 async fn load_rules() -> Result<yara_x::Rules, Error> {
-    let local_rules = if let Some(date_time) = crate::backend::updater::get_local_datetime()? {
+    let local_rules = if let Some(date_time) = updater::get_local_datetime()? {
         date_time
     } else {
-        crate::backend::updater::update().await?;
-        match crate::backend::updater::get_local_datetime()? {
+        updater::update().await?;
+        match updater::get_local_datetime()? {
             Some(datetime) => datetime,
             None => Err(Error::ScannerNoRules)?,
         }

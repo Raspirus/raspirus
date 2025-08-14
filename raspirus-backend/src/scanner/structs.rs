@@ -6,7 +6,7 @@ use std::{
 
 use super::log::Log;
 
-type Error = crate::Error;
+type Error = crate::error::Error;
 
 #[derive(Clone)]
 pub enum NotableFile {

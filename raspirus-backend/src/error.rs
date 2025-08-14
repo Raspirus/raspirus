@@ -103,18 +103,16 @@ pub enum Error {
     /// Thrown when the metadata fetch for a file fails
     #[error("Failed to get metadata for file: {0}")]
     ScannerIOError(std::io::Error),
-    
+
     /// Thrown when the watchdog fails
     #[error("Watchdog failed to receive update: {0}")]
     WatchdogRecv(std::sync::mpsc::RecvError),
     #[error("Failed to send update to watchdog: {0}")]
-    WatchdogSend(String)
+    WatchdogSend(String),
 }
 
-impl From<std::sync::PoisonError<std::sync::MutexGuard<'_, crate::backend::config::Config>>> for Error {
-    fn from(
-        value: std::sync::PoisonError<std::sync::MutexGuard<crate::backend::config::Config>>,
-    ) -> Self {
+impl From<std::sync::PoisonError<std::sync::MutexGuard<'_, crate::config::Config>>> for Error {
+    fn from(value: std::sync::PoisonError<std::sync::MutexGuard<crate::config::Config>>) -> Self {
         Self::ConfigLock(value.to_string())
     }
 }

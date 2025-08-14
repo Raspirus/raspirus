@@ -4,7 +4,7 @@ use directories_next::ProjectDirs;
 use log::{info, warn};
 use serde::{Deserialize, Serialize};
 
-type Error = crate::Error;
+type Error = crate::error::Error;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(default)]

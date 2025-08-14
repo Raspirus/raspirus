@@ -1,3 +1,5 @@
-pub fn add(left: u64, right: u64) -> u64 {
-    left + right
-}
+pub mod arguments;
+pub mod config;
+pub mod error;
+pub mod globals;
+pub mod scanner;

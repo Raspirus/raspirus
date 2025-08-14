@@ -5,3 +5,16 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+directories-next = "2.0.0"
+log = "0.4.27"
+serde = "1.0.219"
+serde_json = "1.0.142"
+num_cpus = "1.17.0"
+thiserror = "2.0.14"
+yara-x = "1.5.0"
+chrono = "0.4.41"
+zip = "4.3.0"
+threadpool_rs = { git = "https://github.com/GamingGuy003/threadpool_rs.git", features = [
+    "log",
+] }
+reqwest = { version = "0.12.23", features = ["blocking", "json"] }

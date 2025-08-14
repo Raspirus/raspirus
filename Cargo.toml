@@ -1,3 +1,3 @@
 [workspace]
 resolver = "3"
-members = [ "raspirus","raspirus-backend", "raspirus-frontend"]
+members = ["raspirus", "raspirus-backend", "raspirus-cli", "raspirus-frontend"]
