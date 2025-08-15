@@ -1,25 +1,43 @@
+use rust_i18n::t;
+
 use log::debug;
 use std::{path::PathBuf, sync::OnceLock};
+
+rust_i18n::i18n!("locales", fallback = "en");
 
 static ARGUMENTS: OnceLock<Vec<Argument>> = OnceLock::new();
 
 #[derive(Clone, Debug)]
 pub enum Argument {
+    /// Help about cli arguments
     Help,
+    /// Does not launcht the GUI
     NoGUI,
+    /// Launches the GUI in fullscreen; Does nothing when NoGUI is set
     Fullscreen,
+    /// Attempts to run an update for the rules
     Update,
+    /// Sets the loglevel to debug, regardless of whats configured in the config
     Debug,
+    /// Silences log output, regardless of whats configured in the config
     Quiet,
+    /// Scans the provided path
     Scan(Option<PathBuf>),
+    /// Outputs the scan results as json for parsing with third party tools
     Json,
+    /// Sets the amount of threads used for scanning
     Threads(Option<usize>),
-    Invalid(Option<String>),
+    /// If an invalid argument has been provided and why
+    Invalid(Option<Cow<'static, str>>),
+    /// Sets the amount of minimum rule matches a file must produce to get flagged
     MaxMatches(Option<usize>),
+    /// Sets the amount of maximum rule matches a file will produce before no more will be produced
     MinMatches(Option<usize>),
+    /// Sets the remote mirror from which the update should be fetched
     Remote(Option<String>),
 }
 
+/// Parse argument from string
 impl From<String> for Argument {
     /// Will remove the leading -- or - from the arguments
     fn from(value: String) -> Self {
@@ -38,14 +56,10 @@ impl From<String> for Argument {
                 "x" | "max" => Self::MaxMatches(None),
                 "i" | "min" => Self::MinMatches(None),
                 "r" | "remote" => Self::Remote(None),
-                inv => Self::Invalid(Some(format!(
-                    "Unrecognized argument {inv}; Try --help or -h"
-                ))),
+                inv => Self::Invalid(Some(t!("ARGUMENTS.INVALID", argument = inv))),
             }
         } else {
-            Self::Invalid(Some(
-                "Arguments should start either with --<argname> or -<short argname>".to_owned(),
-            ))
+            Self::Invalid(Some(t!("ARGUMENTS.NO_DELIMITER")))
         }
     }
 }
@@ -87,7 +101,7 @@ pub fn get_arguments() -> Vec<Argument> {
         .clone()
 }
 
-/// Gets a specific argument
+/// Gets a specific argument if it exists
 pub fn get_argument(search: &Argument) -> Option<Argument> {
     get_arguments()
         .into_iter()

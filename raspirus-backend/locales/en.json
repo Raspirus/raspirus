@@ -1,0 +1,8 @@
+{
+  "_version": 1,
+  "ARGUMENTS": {
+    "HELP": "Argument help text",
+    "INVALID": "Unrecognized argument %{argument}; Try --help or -h",
+    "NO_DELIMITER": "Arguments should start either with --<argname> or -<short argname>"
+  }
+}

@@ -1,7 +1,7 @@
 use std::sync::{Arc, Mutex, OnceLock};
 
 use crate::{
-    arguments::{get_argument, Argument},
+    cli::arguments::{get_argument, Argument},
     config::config::{Config, LogLevel},
 };
 
