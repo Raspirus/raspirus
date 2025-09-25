@@ -7,7 +7,8 @@ fn main() -> Result<(), Error> {
     // init global variables
     raspirus_backend::globals::get_mut_config().lock()?.load()?;
     raspirus_backend::globals::get_application_log_filename();
-    dbg!(raspirus_backend::globals::get_parser()?);
+    let parser = raspirus_backend::globals::get_parser()?;
+    println!("{}", parser.lock().unwrap());
 
     // let cli = CLI::parse_from(matches);
     //     if let Some(Argument::Invalid(Some(invalid))) = get_argument(&Argument::Invalid(None)) {

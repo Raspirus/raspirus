@@ -163,6 +163,80 @@ impl Parser {
 
 impl Display for Parser {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "")
+        // -short --long = command
+        // text = description
+        // [type] = argumenttype
+        let lines_first: Vec<(String, ArgumentValue, String)> = self
+            .defined_arguments
+            .iter()
+            .map(|argument| {
+                (
+                    format!("-{} --{}", argument.index.0, argument.index.1),
+                    argument.value.clone(),
+                    argument.description.clone(),
+                )
+            })
+            .collect();
+
+        // calculate maximum command length to pad command properly to insert value
+        let mut command_max = lines_first
+            .iter()
+            .map(|(command, _, _)| command)
+            .max_by_key(|command| Some(command.len()))
+            .cloned()
+            .unwrap_or_default()
+            .len();
+
+        let lines_second: Vec<(String, String)> = lines_first
+            .iter()
+            .map(|(command, value, description)| {
+                (
+                    if matches!(value, ArgumentValue::None) {
+                        format!("{:<command_max$}", command, command_max = command_max)
+                    } else {
+                        format!(
+                            "{:<command_max$}\t<{}>",
+                            command,
+                            value,
+                            command_max = command_max
+                        )
+                    },
+                    description.clone(),
+                )
+            })
+            .collect();
+
+        command_max = lines_second
+            .iter()
+            .map(|(command, _)| command)
+            .max_by_key(|command| Some(command.len()))
+            .cloned()
+            .unwrap_or_default()
+            .len();
+
+        // merge description and prettified commands
+        let lines_final: Vec<String> = lines_second
+            .iter()
+            .map(|(command, description)| {
+                format!(
+                    "\t{:<command_max$}\t{}",
+                    command,
+                    description,
+                    command_max = command_max
+                )
+            })
+            .collect();
+
+        write!(
+            f,
+            "{} v{} ({})\nrunning\n{} v{} ({})\n\n{}",
+            std::env::var("MAIN_PKG_NAME").unwrap_or_default(),
+            std::env::var("MAIN_PKG_VERSION").unwrap_or_default(),
+            std::env::var("MAIN_PKG_DESCRIPTION").unwrap_or_default(),
+            env!("CARGO_PKG_NAME"),
+            env!("CARGO_PKG_VERSION"),
+            env!("CARGO_PKG_DESCRIPTION"),
+            lines_final.join("\n")
+        )
     }
 }

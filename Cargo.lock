@@ -2299,7 +2299,7 @@ dependencies = [
 
 [[package]]
 name = "raspirus-backend"
-version = "0.1.0"
+version = "3.0.0"
 dependencies = [
  "chrono",
  "directories-next",
@@ -2317,7 +2317,7 @@ dependencies = [
 
 [[package]]
 name = "raspirus-main"
-version = "0.1.0"
+version = "0.9.0"
 dependencies = [
  "log",
  "raspirus-backend",
