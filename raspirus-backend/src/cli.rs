@@ -14,7 +14,16 @@ pub enum ArgumentValue {
 
 impl Display for ArgumentValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{:?}", self)
+        write!(
+            f,
+            "{}",
+            match self {
+                ArgumentValue::None => "None",
+                ArgumentValue::Number(_) => "Number",
+                ArgumentValue::String(_) => "String",
+                ArgumentValue::Boolean(_) => "Boolean",
+            }
+        )
     }
 }
 
@@ -149,5 +158,11 @@ impl Parser {
                         == index.1.clone().and_then(|long| Some(long.into()))
             })
             .map(|argument| argument.value.clone())
+    }
+}
+
+impl Display for Parser {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "")
     }
 }

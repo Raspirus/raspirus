@@ -5,7 +5,7 @@
         "GENERAL": "The Raspirus CLI is not stable and subject to change. Automate with caution",
         "ARGUMENT": {
             "INVALID": "Unrecognized argument %{argument}; Try --help or -h",
-            "INVALID_VALUE": "Value of type %{expected} expected, received \"%{received}\"",
+            "INVALID_VALUE": "Value of type %{expected} expected, received '%{received}'",
             "HELP": "Displays this help text",
             "NOGUI": "Will not show the GUI",
             "FULLSCREEN": "Will try to force the GUI into fullscreen on launch",

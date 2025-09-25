@@ -1,7 +1,7 @@
 /// Migrates between config versions
-pub fn migrate() {
+pub fn _migrate() {
     todo!("Implement config migration");
 }
 
 /// Migrates the config from version 6 to version 7
-fn migrate_6_7() {}
+fn _migrate_6_7() {}
