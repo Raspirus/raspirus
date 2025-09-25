@@ -1,7 +1,10 @@
-use std::sync::{Arc, Mutex, OnceLock};
+use std::{
+    borrow::Cow,
+    sync::{Arc, Mutex, OnceLock},
+};
 
 use crate::{
-    cli::arguments::{get_argument, Argument},
+    cli::{ArgumentValue, Parser},
     config::config::{Config, LogLevel},
 };
 
@@ -17,7 +20,6 @@ pub fn get_application_log_filename() -> String {
 
 /// Shared config file. Can be fetched via get_config
 static CONFIG: OnceLock<Arc<Mutex<Config>>> = OnceLock::new();
-
 /// Fetch config for writing
 pub fn get_mut_config() -> Arc<Mutex<Config>> {
     CONFIG
@@ -28,6 +30,35 @@ pub fn get_mut_config() -> Arc<Mutex<Config>> {
 /// Fetch config only for reading
 pub fn get_ro_config() -> Result<Config, Error> {
     Ok(get_mut_config().lock()?.clone())
+}
+
+/// Holds the CLI parser which also contains all values after .parse() gets called
+static PARSER: OnceLock<Arc<Mutex<Parser>>> = OnceLock::new();
+/// Creates the parser and parses the arguments
+pub fn get_parser() -> Result<Arc<Mutex<Parser>>, Error> {
+    if let Some(parser) = PARSER.get() {
+        return Ok(parser.clone());
+    }
+
+    #[rustfmt::skip]
+    let mut parser = Parser::default()
+        .add_arg('h',        "help",        t!("ARGUMENTS.ARGUMENT.HELP"),        ArgumentValue::None);
+    parser.parse(std::env::args())?;
+    let arc_mut_parser = Arc::new(Mutex::new(parser));
+    let _ = PARSER.set(arc_mut_parser.clone());
+    Ok(arc_mut_parser)
+}
+
+/// Queries the parser for a specific argument. Returns none if argument was not present, otherwise
+/// some with the DEFAULT_LANGUAGE
+pub fn get_argument<T>(index: (Option<char>, Option<T>)) -> Result<Option<ArgumentValue>, Error>
+where
+    T: Into<String> + Clone,
+{
+    Ok(get_parser()?
+        .lock()
+        .map_err(|err| Error::ParserLock(err.to_string()))?
+        .get_argument(index))
 }
 
 // A bunch of default values
@@ -44,56 +75,84 @@ pub static TIMEOUT: u64 = 240;
 // Values changeable from cli arguments, env vars or config
 static MIN_MATCHES: OnceLock<usize> = OnceLock::new();
 static MAX_MATCHES: OnceLock<usize> = OnceLock::new();
-static MAX_THREADS: OnceLock<usize> = OnceLock::new();
+static THREADS: OnceLock<usize> = OnceLock::new();
 static LOGLEVEL: OnceLock<LogLevel> = OnceLock::new();
 static REMOTE_URL: OnceLock<String> = OnceLock::new();
 
 /// Fetches minmatches from CLI > Config
-pub fn get_min_matches() -> usize {
-    *MIN_MATCHES.get_or_init(|| match get_argument(&Argument::MinMatches(None)) {
-        Some(Argument::MinMatches(Some(min_matches))) => min_matches,
-        Some(_) | None => get_ro_config().unwrap_or_default().scanner.min_matches,
-    })
+pub fn get_min_matches() -> Result<usize, Error> {
+    if let Some(min_matches) = MIN_MATCHES.get() {
+        return Ok(*min_matches);
+    }
+
+    let min_matches = match get_argument((Some('i'), Some("min")))? {
+        Some(ArgumentValue::Number(Some(min_matches))) => min_matches,
+        _ => get_ro_config().unwrap_or_default().scanner.min_matches,
+    };
+    let _ = MIN_MATCHES.set(min_matches);
+    Ok(min_matches)
 }
 
 /// Fetches maxmatches from CLI > Config
-pub fn get_max_matches() -> usize {
-    *MAX_MATCHES.get_or_init(|| match get_argument(&Argument::MaxMatches(None)) {
-        Some(Argument::MaxMatches(Some(max_matches))) => max_matches,
-        Some(_) | None => get_ro_config().unwrap_or_default().scanner.max_matches,
-    })
+pub fn get_max_matches() -> Result<usize, Error> {
+    if let Some(max_matches) = MAX_MATCHES.get() {
+        return Ok(*max_matches);
+    }
+
+    let max_matches = match get_argument((Some('x'), Some("max")))? {
+        Some(ArgumentValue::Number(Some(max_matches))) => max_matches,
+        _ => get_ro_config().unwrap_or_default().scanner.max_matches,
+    };
+    let _ = MAX_MATCHES.set(max_matches);
+    Ok(max_matches)
 }
 
 /// Fetches maxthreads from CLI > Config
-pub fn get_max_threads() -> usize {
-    *MAX_THREADS.get_or_init(|| match get_argument(&Argument::Threads(None)) {
-        Some(Argument::Threads(Some(max_threads))) => max_threads,
-        Some(_) | None => get_ro_config().unwrap_or_default().scanner.max_threads,
-    })
+pub fn get_max_threads() -> Result<usize, Error> {
+    if let Some(threads) = THREADS.get() {
+        return Ok(*threads);
+    }
+
+    let threads = match get_argument((Some('t'), Some("threads")))? {
+        Some(ArgumentValue::Number(Some(threads))) => threads,
+        _ => get_ro_config().unwrap_or_default().scanner.max_threads,
+    };
+    let _ = THREADS.set(threads);
+    Ok(threads)
 }
 
 /// Fetch loglevel either from cli arg or config
-pub fn get_loglevel() -> LogLevel {
-    LOGLEVEL
-        .get_or_init(|| {
-            // fetch cli argument first, otherwise config
-            if get_argument(&Argument::Debug).is_some() {
-                LogLevel::Debug
-            } else if get_argument(&Argument::Quiet).is_some() {
-                LogLevel::Off
-            } else {
-                get_ro_config().unwrap_or_default().logging
-            }
-        })
-        .clone()
+pub fn get_loglevel() -> Result<LogLevel, Error> {
+    if let Some(loglevel) = LOGLEVEL.get() {
+        return Ok(loglevel.clone());
+    }
+
+    let loglevel = if get_argument((Some('d'), Some("debug")))?.is_some() {
+        LogLevel::Debug
+    } else if get_argument((Some('q'), Some("quiet")))?.is_some() {
+        LogLevel::Off
+    } else {
+        get_ro_config().unwrap_or_default().logging
+    };
+    let _ = LOGLEVEL.set(loglevel.clone());
+    Ok(loglevel)
 }
 
 /// Fetch remote url for udpates from CLI > Config
-pub fn get_remote_url() -> String {
-    REMOTE_URL
-        .get_or_init(|| match get_argument(&Argument::Remote(None)) {
-            Some(Argument::Remote(Some(remote_url))) => remote_url,
-            Some(_) | None => get_ro_config().unwrap_or_default().remote_url,
-        })
-        .to_string()
+pub fn get_remote_url() -> Result<String, Error> {
+    if let Some(remote_url) = REMOTE_URL.get() {
+        return Ok(remote_url.clone());
+    }
+
+    let remote_url = match get_argument((Some('r'), Some("remote")))? {
+        Some(ArgumentValue::String(Some(remote_url))) => remote_url,
+        _ => get_ro_config().unwrap_or_default().remote_url,
+    };
+    let _ = REMOTE_URL.set(remote_url.clone());
+    Ok(remote_url)
+}
+
+/// Translates a key using the backend translation file
+pub fn translate(key: &str) -> Cow<'_, str> {
+    t!(key)
 }

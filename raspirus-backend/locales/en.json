@@ -1,8 +1,24 @@
 {
-  "_version": 1,
-  "ARGUMENTS": {
-    "HELP": "Argument help text",
-    "INVALID": "Unrecognized argument %{argument}; Try --help or -h",
-    "NO_DELIMITER": "Arguments should start either with --<argname> or -<short argname>"
-  }
+    "_version": 1,
+    "ARGUMENTS": {
+        "NO_DELIMITER": "Arguments should start either with --<argname> or -<short argname>",
+        "GENERAL": "The Raspirus CLI is not stable and subject to change. Automate with caution",
+        "ARGUMENT": {
+            "INVALID": "Unrecognized argument %{argument}; Try --help or -h",
+            "INVALID_VALUE": "Value of type %{expected} expected, received \"%{received}\"",
+            "HELP": "Displays this help text",
+            "NOGUI": "Will not show the GUI",
+            "FULLSCREEN": "Will try to force the GUI into fullscreen on launch",
+            "UPDATE": "Attempts to run an update on the local database",
+            "DEBUG": "Enables debug logs; Will ignore config value",
+            "QUIET": "Will surpress any log messages that are not errors",
+            "SCAN": "Will attempt to run a scan on the given path",
+            "JSON": "Will output the scan result in json format",
+            "THREADS": "Maximum number of concurrent threads used for scanning",
+            "MAX": "Maximum number of matches a file can produce",
+            "MIN": "Minimum number of matches a file needs to get flagged",
+            "REMOTE": "Attempts to use given remote to perform the update"
+        }
+    },
+    "ERROR": {}
 }

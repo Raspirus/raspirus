@@ -1,8 +1,10 @@
 [package]
-name = "raspirus"
+name = "raspirus-main"
 description = "Contains the main Raspirus application bundle"
 version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+log = "0.4.28"
 raspirus-backend = { path = "../raspirus-backend" }
+simplelog = "0.12.2"

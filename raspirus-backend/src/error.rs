@@ -6,6 +6,9 @@ pub enum Error {
     /// Thrown when an invalid argument was supplied
     #[error("Invalid argument {0}; Try --help")]
     InvalidArgument(String),
+    /// Thrown when the parser fails for locking, either when parsing or requesting an argument
+    #[error("Failed to lock parser: {0}")]
+    ParserLock(String),
 
     /// Holds all types of errors encountered when interacting with the filesystem via config
     #[error("Filesystem interaction failed: {0}")]
@@ -111,12 +114,8 @@ pub enum Error {
     WatchdogSend(String),
 }
 
-impl From<std::sync::PoisonError<std::sync::MutexGuard<'_, crate::Config>>>
-    for Error
-{
-    fn from(
-        value: std::sync::PoisonError<std::sync::MutexGuard<crate::Config>>,
-    ) -> Self {
+impl From<std::sync::PoisonError<std::sync::MutexGuard<'_, crate::Config>>> for Error {
+    fn from(value: std::sync::PoisonError<std::sync::MutexGuard<crate::Config>>) -> Self {
         Self::ConfigLock(value.to_string())
     }
 }

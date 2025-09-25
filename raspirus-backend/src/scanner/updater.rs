@@ -114,7 +114,7 @@ async fn download() -> Result<PathBuf, Error> {
 
     // fetch release
     let release = match client
-        .get(get_remote_url())
+        .get(get_remote_url()?)
         .header("User-Agent", "raspirus-reqwest")
         .send()
         .await

@@ -30,7 +30,7 @@ pub async fn start(root: PathBuf) -> Result<(), Error> {
     let log = Log::new()?;
 
     info!("Starting scan...");
-    let mut threadpool = threadpool_rs::Threadpool::new(crate::globals::get_max_threads());
+    let mut threadpool = threadpool_rs::Threadpool::new(crate::globals::get_max_threads()?);
     let (sender, receiver) = mpsc::channel();
 
     let pointers = Pointers::new(log, rules, sender);
@@ -83,7 +83,7 @@ fn scan(pointers: Pointers, path: PathBuf) -> Result<(), Error> {
 
     debug!("Scanning {}...", path.display());
     let mut scanner = yara_x::Scanner::new(&pointers.rules);
-    scanner.max_matches_per_pattern(get_max_matches());
+    scanner.max_matches_per_pattern(get_max_matches()?);
 
     if !path.exists() {
         processing.error(Error::ScannerFileNotFound(path.clone()), None);
@@ -119,7 +119,7 @@ fn scan(pointers: Pointers, path: PathBuf) -> Result<(), Error> {
     };
 
     // check if rule count qualifies to be marked as notable file
-    if results.matching_rules().len() > get_min_matches() {
+    if results.matching_rules().len() > get_min_matches()? {
         pointers.log.log(NotableFile::Flag(Flag {
             path,
             rules: Vec::new(),
@@ -140,7 +140,7 @@ fn send_update(
 }
 
 fn watchdog(receiver: mpsc::Receiver<Option<Processing>>, total_size: usize) -> Result<(), Error> {
-    let display_limit = crate::globals::get_max_threads();
+    let display_limit = crate::globals::get_max_threads()?;
     let mut scanned_size = 0;
     let mut running = VecDeque::new();
     let mut completed = VecDeque::new();
