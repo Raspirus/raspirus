@@ -1,6 +1,6 @@
 [package]
 name = "raspirus-main"
-description = "Contains the main Raspirus application bundle"
+description = "The main Raspirus application bundle; Frontend, CLI tool"
 version = "0.9.0"
 edition = "2024"
 

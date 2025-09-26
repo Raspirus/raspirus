@@ -1,6 +1,6 @@
 [package]
 name = "raspirus-backend"
-description = "Contains backend functionality for the raspirus tool like config handling and pdf handling"
+description = "Backend functionality for the raspirus tool; Scanning, config and pdfs"
 version = "3.0.0"
 edition = "2021"
 

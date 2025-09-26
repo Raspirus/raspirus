@@ -66,10 +66,7 @@ pub fn get_argument<T>(index: (Option<char>, Option<T>)) -> Result<Option<Argume
 where
     T: Into<String> + Clone,
 {
-    Ok(get_parser()?
-        .lock()
-        .map_err(|err| Error::ParserLock(err.to_string()))?
-        .get_argument(index))
+    Ok(get_parser()?.lock()?.get_argument(index))
 }
 
 // A bunch of default values

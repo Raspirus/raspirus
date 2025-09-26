@@ -119,3 +119,9 @@ impl From<std::sync::PoisonError<std::sync::MutexGuard<'_, crate::Config>>> for 
         Self::ConfigLock(value.to_string())
     }
 }
+
+impl From<std::sync::PoisonError<std::sync::MutexGuard<'_, crate::cli::Parser>>> for Error {
+    fn from(value: std::sync::PoisonError<std::sync::MutexGuard<crate::cli::Parser>>) -> Self {
+        Self::ParserLock(value.to_string())
+    }
+}

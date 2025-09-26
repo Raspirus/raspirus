@@ -7,8 +7,15 @@ fn main() -> Result<(), Error> {
     // init global variables
     raspirus_backend::globals::get_mut_config().lock()?.load()?;
     raspirus_backend::globals::get_application_log_filename();
-    let parser = raspirus_backend::globals::get_parser()?;
-    println!("{}", parser.lock().unwrap());
+
+    // fetch arguments
+    let parser = raspirus_backend::globals::get_parser()?.lock()?.clone();
+
+    // handle help command
+    if raspirus_backend::globals::get_argument((Some('h'), Some("help")))?.is_some() {
+        println!("{}", parser);
+        return Ok(());
+    }
 
     // let cli = CLI::parse_from(matches);
     //     if let Some(Argument::Invalid(Some(invalid))) = get_argument(&Argument::Invalid(None)) {
