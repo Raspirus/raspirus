@@ -62,18 +62,18 @@ Raspirus has two main modes: Graphical and CLI. By default, the application will
 
 Here is a full list of the currently offered CLI arguments:
 
-  - *-h / --help*: Shows a list with available arguments and their expected inputs
-  - *-n / --nogui*: Prevents raspiurs from opening the graphical frontend. This will make it only execute the commands passed via the CLI
-  - *-f / --fullscreen*: Attempts to open the graphical frontend in fullscreen mode. This is ideal for scenarios where Raspirus is the main application running on the machine
-  - *-u / --update*: Attempts to fetch an update package from configured remote url
-  - *-d / --debug*: Sets the application to log everything, even if irrelevant for the ordinary user. This will output large amounts of text to the terminal and log files, so use with care on slower machines
-  - *-q / --quiet*: Silences all log output except for error messages
-  - *-s / --scan*: Attempts to run a scan on the specified path
-  - *-j / --json*: Outputs the scan results in json format for easy parsing by other utilities
-  - *-t / --threads*: Sets the parallel threads used for scanning
-  - *-x / --max*: Sets how many matches a file can produce at max, before further matches get ignored
-  - *-i / --min*: Sets how many matches per file are required for it to get flagged
-  - *-r / --remote*: Overrides the remote url set in the config which gets used to fetch updates. Only useful when utilized in combination with --update
+  - `-h / --help`: Shows a list with available arguments and their expected inputs
+  - `-n / --nogui`: Prevents Raspirus from opening the graphical frontend. This will make it only execute the commands passed via the CLI
+  - `-f / --fullscreen`: Attempts to open the graphical frontend in fullscreen mode. This is ideal for scenarios where Raspirus is the main application running on the machine
+  - `-u / --update`: Attempts to fetch an update package from configured remote url
+  - `-d / --debug`: Sets the application to log everything, even if irrelevant for the ordinary user. This will output large amounts of text to the terminal and log files, so use with care on slower machines
+  - `-q / --quiet`: Silences all log output except for error messages
+  - `-s / --scan`: Attempts to run a scan on the specified path
+  - `-j / --json`: Outputs the scan results in json format for easy parsing by other utilities
+  - `-t / --threads`: Sets the parallel threads used for scanning
+  - `-x / --max`: Sets how many matches a file can produce at max, before further matches get ignored
+  - `-i / --min`: Sets how many matches per file are required for it to get flagged
+  - `-r / --remote`: Overrides the remote url set in the config which gets used to fetch updates. Only useful when utilized in combination with --update
 
 ### For Developers
 
