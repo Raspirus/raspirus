@@ -145,15 +145,12 @@ fn main() -> Result<(), Error> {
 
         let app = RelmApp::from_app(app);
         
-        // Handle fullscreen flag if requested
-        if args.fullscreen {
-            // Note: Fullscreen handling would need to be passed to AppModel
-            // For now, we just log it. Full implementation would require
-            // modifying the AppModel to accept this parameter
-            log::info!("Fullscreen mode requested");
-        }
+        // Create initialization data for AppModel
+        let app_init = crate::frontend::app::AppInit {
+            fullscreen: args.fullscreen,
+        };
         
-        app.visible_on_activate(false).run::<AppModel>(());
+        app.visible_on_activate(false).run::<AppModel>(app_init);
     }
     
     Ok(())

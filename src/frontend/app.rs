@@ -8,7 +8,13 @@ use relm4::gtk::glib::clone;
 use relm4::gtk::prelude::{BoxExt, ButtonExt, GtkApplicationExt, PopoverExt};
 use crate::frontend::pages;
 
-pub struct AppModel {}
+pub struct AppModel {
+    fullscreen: bool,
+}
+
+pub struct AppInit {
+    pub fullscreen: bool,
+}
 
 #[derive(Debug)]
 pub enum AppMsg {
@@ -26,7 +32,7 @@ impl SimpleComponent for AppModel {
     /// The type of the messages that this component can send.
     type Output = ();
     /// The type of data with which this component will be initialized.
-    type Init = ();
+    type Init = AppInit;
     /// A data structure that contains the widgets that you will need to update.
     type Widgets = AppWidgets;
 
@@ -87,12 +93,19 @@ impl SimpleComponent for AppModel {
     }
 
     fn init(
-        starter: Self::Init,
+        init_data: Self::Init,
         window: Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
-        let model = Self {};
+        let model = Self {
+            fullscreen: init_data.fullscreen,
+        };
         let widgets = view_output!();
+        
+        // Set fullscreen if requested
+        if model.fullscreen {
+            window.fullscreen();
+        }
         
         // HEADER - TITLEBAR - MENU
         let menu = gtk::HeaderBar::builder().build();
