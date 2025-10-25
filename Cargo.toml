@@ -37,6 +37,7 @@ rfd = "0.15.2"
 relm4 = "0.9.1"
 relm4-components = "0.9.1"
 thiserror = "2.0.12"
+clap = { version = "4.5.23", features = ["derive"] }
 
 # usb detection on linux
 [target.'cfg(any(target_os = "linux", target_os = "macos"))'.dependencies]
