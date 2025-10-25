@@ -6,25 +6,35 @@ use std::{
 use crate::error::Error;
 use log::{info, trace, warn};
 use reqwest::header::WARNING;
+use serde::{Deserialize, Serialize};
 
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub enum NotableFile {
     Skip(Skip),
     Flag(Flag),
 }
 
 /// Holds a flagged files path and the rules, which flagged it
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct Flag {
     pub path: PathBuf,
     pub rules: Arc<()>,
 }
 
 /// Holds a skipped files path and the reason for it to be skipped
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct Skip {
     pub path: PathBuf,
     pub reason: String,
+}
+
+/// Scan results that can be serialized to JSON
+#[derive(Clone, Serialize, Deserialize)]
+pub struct ScanResults {
+    pub scanned_path: PathBuf,
+    pub total_files: usize,
+    pub total_size: usize,
+    pub notable_files: Vec<NotableFile>,
 }
 
 /// Holds all the paths of files, which are contained in a root path
@@ -116,8 +126,10 @@ struct Pointers {
 }
 
 /// Starts the scan with the current indexed files
-pub fn start(root: PathBuf) -> Result<(), Error> {
-    let indexed = Index::new(root)?;
+pub fn start(root: PathBuf) -> Result<ScanResults, Error> {
+    let indexed = Index::new(root.clone())?;
+    let total_files = indexed.paths.len();
+    let total_size = indexed.total_size;
 
     info!("Preparing rules. This might take a second...");
 
@@ -132,7 +144,18 @@ pub fn start(root: PathBuf) -> Result<(), Error> {
     }
     threadpool.join();
 
-    Ok(())
+    let notable_files = pointers
+        .noted_files
+        .lock()
+        .map_err(|err| Error::ScannerLock(err.to_string()))?
+        .clone();
+
+    Ok(ScanResults {
+        scanned_path: root,
+        total_files,
+        total_size,
+        notable_files,
+    })
 }
 
 /*

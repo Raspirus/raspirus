@@ -87,12 +87,18 @@ fn main() -> Result<(), Error> {
         log::info!("Running scan from CLI on: {}", scan_path.display());
         
         match crate::backend::scanner::start(scan_path.clone()) {
-            Ok(_) => {
+            Ok(results) => {
                 if args.json {
-                    // TODO: Output scan results as JSON
-                    println!("{{\"status\": \"completed\", \"path\": \"{}\" }}", scan_path.display());
+                    // Output detailed scan results as JSON
+                    match serde_json::to_string_pretty(&results) {
+                        Ok(json) => println!("{}", json),
+                        Err(e) => eprintln!("{{\"status\": \"error\", \"error\": \"Failed to serialize results: {}\" }}", e),
+                    }
                 } else {
                     log::info!("Scan completed successfully");
+                    log::info!("Total files scanned: {}", results.total_files);
+                    log::info!("Total size: {} bytes", results.total_size);
+                    log::info!("Notable files: {}", results.notable_files.len());
                 }
             },
             Err(e) => {
