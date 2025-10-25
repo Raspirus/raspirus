@@ -11,7 +11,7 @@ use relm4::{
     gtk, main_application, RelmApp,
 };
 use simplelog::TermLogger;
-use crate::frontend::app::AppModel;
+use crate::frontend::app::{AppModel, AppInit};
 use crate::globals::APP_ID;
 
 mod backend;
@@ -146,7 +146,7 @@ fn main() -> Result<(), Error> {
         let app = RelmApp::from_app(app);
         
         // Create initialization data for AppModel
-        let app_init = crate::frontend::app::AppInit {
+        let app_init = AppInit {
             fullscreen: args.fullscreen,
         };
         

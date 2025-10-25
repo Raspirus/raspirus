@@ -43,6 +43,23 @@ Getting started with Raspirus is a breeze. Follow these simple steps:
 - [SourceForge](https://sourceforge.net/projects/raspirus/files/latest/download)
 - [Chocolatey (Windows)](https://community.chocolatey.org/packages/raspirus/)
 
+### CLI Mode
+
+Raspirus now supports a comprehensive command-line interface for automation and scripting! You can:
+- Run scans without the GUI using `--nogui`
+- Update virus definitions from the command line with `--update`
+- Output scan results as JSON with `--json`
+- Control thread usage with `--threads`
+- And much more!
+
+See the [CLI documentation](CLI.md) for detailed usage examples and options.
+
+**Quick example:**
+```bash
+# Scan a folder and output results as JSON
+raspirus --scan /path/to/folder --nogui --json
+```
+
 ### For Developers
 
 Are you a developer looking to set up Raspirus? We've got you covered. Check out our comprehensive guides for various operating systems in the [Developers section](https://github.com/Raspirus/raspirus/wiki/Developers) on our docs.
