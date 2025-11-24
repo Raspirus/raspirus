@@ -5,6 +5,6 @@ pub mod log;
 /// Holds the scanner struct and its functionality
 pub mod scanner;
 /// Holds the structs needed for various functions of the file scanner
-mod structs;
+pub mod structs;
 /// Holds the updater functionality
 pub mod updater;

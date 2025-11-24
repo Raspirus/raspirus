@@ -112,6 +112,13 @@ pub enum Error {
     WatchdogRecv(std::sync::mpsc::RecvError),
     #[error("Failed to send update to watchdog: {0}")]
     WatchdogSend(String),
+    #[error("Watchdog received an invalid initializer")]
+    WatchdogInvalidInitializer,
+    #[error("Watchdog thread failed to join")]
+    WatchdogJoinError,
+
+    #[error("Failed to send command to terminal: {0}")]
+    TerminalIOError(std::io::Error),
 }
 
 impl From<std::sync::PoisonError<std::sync::MutexGuard<'_, crate::Config>>> for Error {

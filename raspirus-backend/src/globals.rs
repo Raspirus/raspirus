@@ -42,18 +42,18 @@ pub fn get_parser() -> Result<Arc<Mutex<Parser>>, Error> {
 
     #[rustfmt::skip]
     let mut parser = Parser::default()
-        .add_arg('h',        "help",        t!("ARGUMENTS.ARGUMENT.HELP"),        ArgumentValue::None)
-        .add_arg('n', "nogui", t!("ARGUMENTS.ARGUMENT.NOGUI"), ArgumentValue::None)
-        .add_arg('f', "fullscreen", t!("ARGUMENTS.ARGUMENT.FULLSCREEN"), ArgumentValue::None)
-        .add_arg('u', "update", t!("ARGUMENTS.ARGUMENT.UPDATE"), ArgumentValue::None)
-        .add_arg('d', "debug", t!("ARGUMENTS.ARGUMENT.DEBUG"), ArgumentValue::None)
-        .add_arg('q', "quiet", t!("ARGUMENTS.ARGUMENT.QUIET"), ArgumentValue::None)
-        .add_arg('s', "scan", t!("ARGUMENTS.ARGUMENT.SCAN"), ArgumentValue::String(None))
-        .add_arg('j', "json", t!("ARGUMENTS.ARGUMENT.JSON"), ArgumentValue::None)
-        .add_arg('t', "threads", t!("ARGUMENTS.ARGUMENT.THREADS"), ArgumentValue::Number(None))
-        .add_arg('x', "max", t!("ARGUMENTS.ARGUMENT.MAX"), ArgumentValue::Number(None))
-        .add_arg('i', "min", t!("ARGUMENTS.ARGUMENT.MIN"), ArgumentValue::Number(None))
-        .add_arg('r', "remote", t!("ARGUMENTS.ARGUMENT.REMOTE"), ArgumentValue::String(None));
+        .add_arg('h', "help",       t!("ARGUMENTS.ARGUMENT.HELP"),      ArgumentValue::None)
+        .add_arg('n', "nogui",      t!("ARGUMENTS.ARGUMENT.NOGUI"),     ArgumentValue::None)
+        .add_arg('f', "fullscreen", t!("ARGUMENTS.ARGUMENT.FULLSCREEN"),ArgumentValue::None)
+        .add_arg('u', "update",     t!("ARGUMENTS.ARGUMENT.UPDATE"),    ArgumentValue::None)
+        .add_arg('d', "debug",      t!("ARGUMENTS.ARGUMENT.DEBUG"),     ArgumentValue::None)
+        .add_arg('q', "quiet",      t!("ARGUMENTS.ARGUMENT.QUIET"),     ArgumentValue::None)
+        .add_arg('s', "scan",       t!("ARGUMENTS.ARGUMENT.SCAN"),      ArgumentValue::String(None))
+        .add_arg('j', "json",       t!("ARGUMENTS.ARGUMENT.JSON"),      ArgumentValue::None)
+        .add_arg('t', "threads",    t!("ARGUMENTS.ARGUMENT.THREADS"),   ArgumentValue::Number(None))
+        .add_arg('x', "max",        t!("ARGUMENTS.ARGUMENT.MAX"),       ArgumentValue::Number(None))
+        .add_arg('i', "min",        t!("ARGUMENTS.ARGUMENT.MIN"),       ArgumentValue::Number(None))
+        .add_arg('r', "remote",     t!("ARGUMENTS.ARGUMENT.REMOTE"),    ArgumentValue::String(None));
     parser.parse(std::env::args())?;
     let arc_mut_parser = Arc::new(Mutex::new(parser));
     let _ = PARSER.set(arc_mut_parser.clone());

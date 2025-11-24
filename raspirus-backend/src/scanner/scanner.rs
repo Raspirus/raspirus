@@ -1,11 +1,13 @@
 use std::{
-    collections::VecDeque,
     fs::File,
     path::PathBuf,
     sync::{mpsc, Arc},
 };
 
-use crate::scanner::updater;
+use crate::scanner::{
+    structs::{MetaMessage, ScannerMessage},
+    updater,
+};
 use log::{debug, info, trace, warn};
 
 use crate::globals::{get_max_matches, get_min_matches};
@@ -13,15 +15,26 @@ use crate::globals::{get_max_matches, get_min_matches};
 use super::{
     index::Index,
     log::Log,
-    structs::{Flag, NotableFile, Pointers, Processing, Skip, Status},
+    structs::{Flag, NotableFile, Pointers, Processing, Skip},
 };
 
 type Error = crate::Error;
 
 /// Starts the scan with the current indexed files
-pub async fn start(root: PathBuf) -> Result<(), Error> {
+pub async fn start(
+    // the root path of which to scan
+    root: PathBuf,
+    // the channel used for communication with the other parts of the tool
+    channel: mpsc::Sender<ScannerMessage>,
+) -> Result<(), Error> {
     info!("Indexing path...");
     let indexed = Index::new(root)?;
+    // send total size to watchdog
+    channel
+        .send(ScannerMessage::Meta(MetaMessage::ScanStart(
+            indexed.total_size,
+        )))
+        .map_err(|err| Error::WatchdogSend(err.to_string()))?;
 
     info!("Preparing rules...");
     let rules = load_rules().await?;
@@ -31,10 +44,8 @@ pub async fn start(root: PathBuf) -> Result<(), Error> {
 
     info!("Starting scan...");
     let mut threadpool = threadpool_rs::Threadpool::new(crate::globals::get_max_threads()?);
-    let (sender, receiver) = mpsc::channel();
 
-    let pointers = Pointers::new(log, rules, sender);
-    let watchdog_handle = std::thread::spawn(move || watchdog(receiver, indexed.total_size));
+    let pointers = Pointers::new(log, rules, channel);
 
     for path in indexed.paths {
         let pointers_c = pointers.clone();
@@ -43,11 +54,12 @@ pub async fn start(root: PathBuf) -> Result<(), Error> {
         });
     }
     threadpool.join();
+
+    // notify watchdog of scan completion
     pointers
         .channel
-        .send(None)
+        .send(ScannerMessage::Meta(MetaMessage::ScanFinish))
         .map_err(|err| Error::WatchdogSend(err.to_string()))?;
-    watchdog_handle.join().unwrap()?;
 
     Ok(())
 }
@@ -57,6 +69,7 @@ async fn load_rules() -> Result<yara_x::Rules, Error> {
     let local_rules = if let Some(date_time) = updater::get_local_datetime()? {
         date_time
     } else {
+        info!("Local rules corrupt or not present; Running update...");
         updater::update().await?;
         match updater::get_local_datetime()? {
             Some(datetime) => datetime,
@@ -72,6 +85,8 @@ async fn load_rules() -> Result<yara_x::Rules, Error> {
 
     debug!("Attempting to load rules at {}", rule_path.display());
     let rule_file = File::open(rule_path).map_err(Error::ScannerRuleLoad)?;
+    #[cfg(debug_assertions)]
+    info!("This is a debug build. Rule processing will be slow!");
     yara_x::Rules::deserialize_from(rule_file).map_err(Error::ScannerRuleDeserialize)
 }
 
@@ -131,14 +146,15 @@ fn scan(pointers: Pointers, path: PathBuf) -> Result<(), Error> {
 }
 
 fn send_update(
-    sender: &Arc<mpsc::Sender<Option<Processing>>>,
+    sender: &Arc<mpsc::Sender<ScannerMessage>>,
     processing: Processing,
 ) -> Result<(), Error> {
     sender
-        .send(Some(processing))
+        .send(ScannerMessage::Processing(processing))
         .map_err(|err| Error::WatchdogSend(err.to_string()))
 }
 
+/*
 fn watchdog(receiver: mpsc::Receiver<Option<Processing>>, total_size: usize) -> Result<(), Error> {
     let display_limit = crate::globals::get_max_threads()?;
     let mut scanned_size = 0;
@@ -172,6 +188,7 @@ fn watchdog(receiver: mpsc::Receiver<Option<Processing>>, total_size: usize) -> 
     debug!("Stopping watchdog");
     Ok(())
 }
+*/
 
 /// Adds a skipped file to the pointer array
 fn skip(pointers: &Pointers, skip: Skip) -> Result<(), Error> {

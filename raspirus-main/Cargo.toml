@@ -5,6 +5,8 @@ version = "0.9.0"
 edition = "2024"
 
 [dependencies]
+crossterm = "0.29.0"
 log = "0.4.28"
 raspirus-backend = { path = "../raspirus-backend" }
 simplelog = "0.12.2"
+tokio = "1.47.1"

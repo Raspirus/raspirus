@@ -40,7 +40,6 @@ pub async fn update() -> Result<(), Error> {
 /// Checks remote if there is a newer version available
 async fn check_update() -> Result<bool, Error> {
     info!("Checking for new remote version...");
-    let remote_url = get_ro_config()?.clone().remote_url;
 
     let client = reqwest::ClientBuilder::new()
         .timeout(std::time::Duration::from_secs(crate::globals::TIMEOUT))
@@ -49,7 +48,7 @@ async fn check_update() -> Result<bool, Error> {
 
     // fetch release json
     let release = match client
-        .get(remote_url)
+        .get(get_remote_url()?)
         .header("User-Agent", "raspirus-reqwest")
         .send()
         .await
@@ -177,6 +176,9 @@ async fn download() -> Result<PathBuf, Error> {
 
 /// Unpacks and builds the fetched files
 fn build(archive: PathBuf) -> Result<(), Error> {
+    #[cfg(debug_assertions)]
+    info!("This is a debug build. Building the rules will take quite long...");
+
     let mut output_filename = PathBuf::from(archive.file_name().ok_or(Error::BuilderIO(
         std::io::Error::new(
             std::io::ErrorKind::NotFound,

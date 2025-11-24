@@ -50,11 +50,11 @@ pub struct Pointers {
     pub log: Arc<Log>,
     pub noted_files: Arc<Mutex<Vec<NotableFile>>>,
     pub rules: Arc<yara_x::Rules>,
-    pub channel: Arc<mpsc::Sender<Option<Processing>>>,
+    pub channel: Arc<mpsc::Sender<ScannerMessage>>,
 }
 
 impl Pointers {
-    pub fn new(log: Log, rules: yara_x::Rules, channel: mpsc::Sender<Option<Processing>>) -> Self {
+    pub fn new(log: Log, rules: yara_x::Rules, channel: mpsc::Sender<ScannerMessage>) -> Self {
         Self {
             log: Arc::new(log),
             noted_files: Arc::new(Mutex::new(Vec::new())),
@@ -71,14 +71,27 @@ pub struct Processing {
     pub status: Status,
 }
 
+/// Generic messages produced by scanner infrastructure
+pub enum MetaMessage {
+    ScanStart(usize),
+    ScanFinish,
+    ScanError(Error),
+}
+
+/// Messages from the scanner giving information about scanner status
+pub enum ScannerMessage {
+    Meta(MetaMessage),
+    Processing(Processing),
+}
+
 /// Status update message sent by scan threads
 #[derive(Debug, Clone)]
 pub enum Status {
-    // if error is encountered while processing file
+    /// error is encountered while processing file
     Error(Arc<Error>, Option<usize>),
-    // if file successfully completes scanning
+    /// file successfully completes scanning
     Completed(usize),
-    // if file is now being processed
+    /// file is now being processed
     Started,
 }
 
