@@ -17,7 +17,8 @@
             "THREADS": "Maximum number of concurrent threads used for scanning",
             "MAX": "Maximum number of matches a file can produce",
             "MIN": "Minimum number of matches a file needs to get flagged",
-            "REMOTE": "Attempts to use given remote to perform the update"
+            "REMOTE": "Attempts to use given remote to perform the update",
+            "THRESHOLD": "Sets the size of archives after which disk will be used instead of RAM. Size is in MB (1GB = 1024MB)"
         }
     },
     "ERROR": {}

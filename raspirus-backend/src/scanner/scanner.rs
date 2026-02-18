@@ -115,6 +115,7 @@ fn scan(pointers: Pointers, path: PathBuf) -> Result<(), Error> {
         }
     }
     .len() as usize;
+    // TODO: figure out if file qualifies for disk_threshold and should be unpacked on disk
 
     // collect results from yara scanner
     let results = match scanner.scan_file(&path) {

@@ -11,7 +11,7 @@ use std::{
 
 use crossterm::{
     ExecutableCommand,
-    cursor::{MoveToColumn, MoveToRow, MoveUp, RestorePosition, SavePosition},
+    cursor::RestorePosition,
     terminal::{Clear, ClearType, size},
 };
 use log::{LevelFilter, error, info};
@@ -98,7 +98,7 @@ pub fn tui_watchdog(channel: mpsc::Receiver<ScannerMessage>) -> Result<(), Error
     // output relevant data
     let mut stdout = std::io::stdout();
     let debounce_duration = Duration::from_millis(100);
-    let mut last_print = Instant::now() - debounce_duration;
+    let last_print = Instant::now() - debounce_duration;
 
     // determine terminal output size
     let (cols, _) = size().unwrap_or((100, 100));

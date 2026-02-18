@@ -53,7 +53,8 @@ pub fn get_parser() -> Result<Arc<Mutex<Parser>>, Error> {
         .add_arg('t', "threads",    t!("ARGUMENTS.ARGUMENT.THREADS"),   ArgumentValue::Number(None))
         .add_arg('x', "max",        t!("ARGUMENTS.ARGUMENT.MAX"),       ArgumentValue::Number(None))
         .add_arg('i', "min",        t!("ARGUMENTS.ARGUMENT.MIN"),       ArgumentValue::Number(None))
-        .add_arg('r', "remote",     t!("ARGUMENTS.ARGUMENT.REMOTE"),    ArgumentValue::String(None));
+        .add_arg('r', "remote",     t!("ARGUMENTS.ARGUMENT.REMOTE"),    ArgumentValue::String(None))
+        .add_arg('o', "threshold", t!("ARGUMENTS.ARGUMENT.THRESHOLD"), ArgumentValue::Number(None));
     parser.parse(std::env::args())?;
     let arc_mut_parser = Arc::new(Mutex::new(parser));
     let _ = PARSER.set(arc_mut_parser.clone());
@@ -74,6 +75,7 @@ pub static DEFAULT_REMOTE_URL: &str =
     "https://api.github.com/repos/raspirus/yara-rules/releases/latest";
 pub static DEFAULT_LOG_LEVEL: LogLevel = LogLevel::Debug;
 pub static DEFAULT_LANGUAGE: &str = "en_US";
+pub static DEFAULT_DISK_THRESHOLD: usize = 4096;
 pub static CONFIG_VERSION: usize = 7;
 pub static CONFIG_FILE_NAME: &str = "raspirus.cfg";
 
@@ -86,6 +88,7 @@ static MAX_MATCHES: OnceLock<usize> = OnceLock::new();
 static THREADS: OnceLock<usize> = OnceLock::new();
 static LOGLEVEL: OnceLock<LogLevel> = OnceLock::new();
 static REMOTE_URL: OnceLock<String> = OnceLock::new();
+static DISK_THRESHOLD: OnceLock<usize> = OnceLock::new();
 
 /// Fetches minmatches from CLI > Config
 pub fn get_min_matches() -> Result<usize, Error> {
@@ -158,6 +161,21 @@ pub fn get_remote_url() -> Result<String, Error> {
     };
     let _ = REMOTE_URL.set(remote_url.clone());
     Ok(remote_url)
+}
+
+/// Fetch disk threshold from CLI > Config
+pub fn get_disk_threshold() -> Result<usize, Error> {
+    if let Some(disk_threshold) = DISK_THRESHOLD.get() {
+        return Ok(*disk_threshold);
+    }
+
+    let disk_threshold = match get_argument((Some('o'), Some("threshold")))? {
+        Some(ArgumentValue::Number(Some(disk_threshold))) => disk_threshold,
+        _ => get_ro_config().unwrap_or_default().disk_threshold,
+    };
+
+    let _ = DISK_THRESHOLD.set(disk_threshold.clone());
+    Ok(disk_threshold)
 }
 
 /// Translates a key using the backend translation file

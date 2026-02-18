@@ -30,6 +30,10 @@ pub struct Config {
     pub logging: LogLevel,
     /// Language used to display text
     pub language: String,
+    /// if set to larger than crate::globals::DEFAULT_DISK_THRESHOLD uses disk to scan large
+    /// zipfiles instead of attempting to load into memory. This is megabytes and set to 4GB by
+    /// default
+    pub disk_threshold: usize,
     #[serde(skip)]
     /// Paths holding various paths needed for ordinary execution
     pub paths: Option<Paths>,
@@ -48,6 +52,7 @@ impl Default for Config {
             },
             logging: crate::globals::DEFAULT_LOG_LEVEL.clone(),
             language: crate::globals::DEFAULT_LANGUAGE.to_owned(),
+            disk_threshold: crate::globals::DEFAULT_DISK_THRESHOLD.clone(),
             paths: None,
         }
     }
