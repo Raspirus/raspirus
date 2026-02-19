@@ -4,6 +4,8 @@ use directories_next::ProjectDirs;
 use log::{info, warn};
 use serde::{Deserialize, Serialize};
 
+use crate::config::migrator;
+
 type Error = crate::Error;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -170,9 +172,10 @@ impl Config {
             }
         };
 
-        // serialize config from loaded string
-        let mut config =
-            serde_json::from_str::<Config>(&config_string).map_err(Error::ConfigDeserialization)?;
+        // serialize config from loaded string. if this fails, migrate string from older config
+        // versions
+        let mut config = serde_json::from_str::<Config>(&config_string)
+            .unwrap_or(migrator::migrate(config_string));
 
         // check if loaded config version equals current version, otherwise revert to default
         if config.config_version != crate::globals::CONFIG_VERSION {
